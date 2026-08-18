@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(git --version)",
+      "Bash(npm ping *)",
+      "Bash(npx --yes create-next-app@latest . --ts --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --use-npm --yes)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git -c user.name=daffa -c user.email=rona.febriana@rsm.id commit -q -m ' *)"
+    ]
+  }
+}
