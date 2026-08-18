@@ -1,0 +1,170 @@
+/*
+ * Wear Label — design tokens (SINGLE SOURCE OF TRUTH)
+ *
+ * Every colour, font, radius, spacing and duration value in the app resolves to
+ * a variable defined here. Components must never hardcode a design value.
+ * Replacing the brand palette = editing this file only.
+ *
+ * Direction: "Nature Distilled" — muted earthy, organic materials, handmade
+ * warmth. Terracotta / sand / warm clay / olive over soft cream.
+ *
+ * Structure:
+ *   :root   — layer 1, raw brand primitives (--wl-*). Never used in JSX.
+ *   @theme  — layer 2, semantic tokens. These become Tailwind utilities
+ *             (bg-canvas, text-ink-muted, font-display, py-section, ...).
+ *
+ * Contrast: every foreground/background pair is verified against WCAG 2.2 AA
+ * (4.5:1 text, 3:1 non-text UI boundaries); ratios are noted inline. If you
+ * change a value, re-verify the pair it belongs to.
+ */
+
+:root {
+  /* === Layer 1 — primitives ============================================ */
+
+  /* Warm neutrals */
+  --wl-cream-50: #fffcf5;
+  --wl-cream-100: #f6f1e7;
+  --wl-cream-200: #efe7d8;
+  --wl-sand-200: #e8dcc4;
+  --wl-sand-300: #d4c4a8;
+  --wl-sand-400: #c9b795;
+
+  /* Earth */
+  --wl-terracotta-400: #c67b5c; /* fill only — 2.9:1 on cream, never text */
+  --wl-terracotta-600: #94492a; /* text-safe terracotta — 5.8:1 cream, 4.8:1 sand */
+  --wl-clay-600: #8f4e1e; /* primary action — 5.7:1 on cream */
+  --wl-clay-700: #7a4218;
+  --wl-clay-800: #663711; /* pressed — white text 9.9:1 */
+  --wl-olive-600: #4f5c2c; /* 6.4:1 on cream */
+  --wl-olive-700: #414c24;
+  --wl-olive-800: #35401d; /* pressed — white text 11.0:1 */
+
+  /* Ink */
+  --wl-ink-900: #2a2118; /* 14.0:1 on cream */
+  --wl-ink-800: #231c14; /* dark band background */
+  --wl-ink-500: #6b5f51; /* 5.5:1 on cream */
+  --wl-ink-300: #8f8474; /* 3.3:1 on cream — control boundaries */
+  --wl-ink-100: #e4dacb; /* decorative hairline only */
+
+  /* Status */
+  --wl-danger-600: #a02a1c;
+  --wl-success-600: #3f6b3a;
+
+  /* === Non-themed design values ======================================== */
+
+  /* Readable measure — 60–75ch desktop, 35–60ch mobile */
+  --measure-narrow: 42ch;
+  --measure: 64ch;
+
+  /* Texture strength (grain overlay, per the style direction) */
+  --grain-opacity: 0.055;
+
+  /* Motion — subtle (3/10). Every transition uses one of these. */
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 380ms;
+  --duration-enter: 600ms;
+
+  /* Sticky header height — drives scroll-padding so anchors and keyboard
+     focus are never parked underneath the header (WCAG 2.2 AA 2.4.11).
+     = py-4 (2rem) + tallest child (min-h-11 = 2.75rem). */
+  --header-height: 4.75rem;
+  /* Extra breathing room above a focused/anchored target. */
+  --scroll-offset: 1.5rem;
+
+  /* Layering scale */
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-overlay: 40;
+  --z-modal: 100;
+
+  /* Organic arch used on editorial imagery */
+  --radius-arch: 14rem 14rem var(--radius-md) var(--radius-md);
+}
+
+@theme {
+  /* === Layer 2 — semantic colour ======================================= */
+
+  /* Surfaces */
+  --color-canvas: var(--wl-cream-100);
+  --color-surface: var(--wl-cream-50);
+  --color-sand: var(--wl-sand-200);
+  --color-sand-strong: var(--wl-sand-300);
+  --color-invert: var(--wl-ink-800);
+  --color-clay-fill: var(--wl-terracotta-400);
+
+  /* Text */
+  --color-ink: var(--wl-ink-900);
+  --color-ink-muted: var(--wl-ink-500);
+  --color-ink-invert: var(--wl-cream-200);
+  --color-ink-invert-muted: var(--wl-sand-300);
+  --color-ink-accent: var(--wl-terracotta-600);
+
+  /* Actions */
+  --color-primary: var(--wl-clay-600);
+  --color-primary-hover: var(--wl-clay-700);
+  --color-primary-active: var(--wl-clay-800);
+  --color-on-primary: #ffffff; /* 6.4:1 on clay */
+  --color-secondary: var(--wl-olive-600);
+  --color-secondary-hover: var(--wl-olive-700);
+  --color-secondary-active: var(--wl-olive-800);
+  --color-on-secondary: #ffffff; /* 7.2:1 on olive */
+
+  /* Lines */
+  --color-hairline: var(--wl-ink-100); /* decorative dividers */
+  --color-line: var(--wl-ink-300); /* control boundaries — 3:1 */
+  --color-focus: var(--wl-clay-600); /* 5.7:1 on cream, 4.7:1 on sand */
+  /* Clay is only 2.6:1 on the dark band — too low for a focus indicator,
+     which needs 3:1 as non-text UI. Dark surfaces switch to sand (9.8:1). */
+  --color-focus-invert: var(--wl-sand-300);
+
+  /* Feedback */
+  --color-danger: var(--wl-danger-600);
+  --color-success: var(--wl-success-600);
+
+  /* === Typography ====================================================== */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-body: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+
+  /* Type scale — 16px base, fluid at the display end */
+  --text-eyebrow: 0.75rem; /* 12px, uppercase + tracked */
+  --text-caption: 0.875rem; /* 14px */
+  --text-body: 1rem; /* 16px — never smaller for body */
+  --text-body-lg: 1.125rem;
+  --text-lead: clamp(1.125rem, 0.4vw + 1rem, 1.375rem);
+  --text-h3: clamp(1.375rem, 0.6vw + 1.2rem, 1.75rem);
+  --text-h2: clamp(1.875rem, 1.6vw + 1.4rem, 2.75rem);
+  --text-h1: clamp(2.5rem, 4.2vw + 1.2rem, 4.75rem);
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.25;
+  --leading-body: 1.6; /* 1.5–1.75 per guideline */
+  --leading-relaxed: 1.75;
+
+  --tracking-eyebrow: 0.16em;
+  --tracking-tight: -0.02em;
+
+  /* === Spacing — spacious rhythm (density 3/10), 4px based ============= */
+  --spacing-section: clamp(4.5rem, 7vw, 8.5rem);
+  --spacing-gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --spacing-block: 2.5rem;
+  --spacing-block-lg: 4rem;
+
+  --container-content: 80rem;
+
+  /* === Radii — organic / varied ======================================== */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.375rem;
+  --radius-pill: 999px;
+
+  /* === Elevation — soft, natural, low-contrast ========================= */
+  --shadow-sm: 0 1px 2px rgb(42 33 24 / 0.05);
+  --shadow-md: 0 6px 18px -8px rgb(42 33 24 / 0.14);
+  --shadow-lg: 0 20px 48px -24px rgb(42 33 24 / 0.22);
+
+  /* === Easing ========================================================== */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-natural: cubic-bezier(0.16, 1, 0.3, 1);
+}
