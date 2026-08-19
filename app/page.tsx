@@ -1,9 +1,6 @@
-import { CategoryMosaic } from "@/components/home/category-mosaic";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { InstagramStrip } from "@/components/home/instagram-strip";
 import { MadeToOrder } from "@/components/home/made-to-order";
-import { PromoBand } from "@/components/home/promo-band";
-import { ServiceBand } from "@/components/home/service-band";
 import { TestimonialWall } from "@/components/home/testimonial-wall";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
@@ -12,21 +9,25 @@ import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { home, ui } from "@/lib/content/site";
-import { getFeaturedProducts, TAGS } from "@/lib/shopify";
+import { getFeaturedProducts } from "@/lib/shopify";
 
 /**
- * Home — the design's sequence, top to bottom: hero, limited-run band, new
- * arrivals, customer voices, category mosaic, service band, made-to-order,
+ * Home, top to bottom: hero, new arrivals, customer voices, made-to-order,
  * Instagram strip.
+ *
+ * Shorter than the design's sequence: the limited-run band, the category mosaic
+ * and the service band were cut from the page. All three components are still in
+ * `components/home/` and their copy is still in `lib/content/site.ts`, so putting
+ * any of them back is an edit to this file alone.
  *
  * Every photograph on the page comes out of the catalogue rather than being art
  * directed separately, so the page cannot drift out of step with what is in stock.
- * The band images are chosen by meaning, not by position: the limited-run band shows
- * a piece actually flagged new, and the mosaic shows the leading piece of each
- * category it links to.
  *
  * Only the hero animates on load. Everything below it reveals on scroll, which is
  * the design system's rule for a page this long.
+ *
+ * Each block below carries its own top spacing (`pt-section` / `mt-section`), so
+ * the vertical rhythm holds whichever of them are present.
  */
 
 const CARD_SIZES = "(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw";
@@ -34,36 +35,9 @@ const CARD_SIZES = "(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw";
 export default async function HomePage() {
   const products = await getFeaturedProducts(11);
 
-  const promoProduct =
-    products.find((product) => product.tags.includes(TAGS.new)) ?? products[0];
-
-  /* One image per mosaic tile, feature first: the leading piece of the category
-     that tile links to, falling back to catalogue order for the tiles that are not
-     a single category. */
-  const mosaicImages = [home.mosaic.feature, ...home.mosaic.tiles].map((tile, index) => {
-    const category = new URLSearchParams(tile.href.split("?")[1] ?? "").get("category");
-
-    const match = category
-      ? products.find((product) => product.productType === category)
-      : undefined;
-
-    return (match ?? products[index % products.length]).featuredImage;
-  });
-
   return (
     <>
       <HeroCarousel slides={home.hero.slides} label={ui.heroLabel} />
-
-      <Reveal>
-        <PromoBand
-          eyebrow={home.promo.eyebrow}
-          heading={home.promo.heading}
-          cta={home.promo.cta}
-          href={home.promo.href}
-          endsAt={home.promo.endsAt}
-          image={promoProduct.featuredImage}
-        />
-      </Reveal>
 
       <section aria-labelledby="arrivals-heading" className="pt-section">
         <Container className="flex flex-col gap-10">
@@ -95,19 +69,6 @@ export default async function HomePage() {
 
       <Reveal>
         <TestimonialWall heading={home.voices.heading} reviews={home.voices.reviews} />
-      </Reveal>
-
-      <Reveal>
-        <CategoryMosaic
-          feature={home.mosaic.feature}
-          tiles={home.mosaic.tiles}
-          images={mosaicImages}
-          label={ui.category}
-        />
-      </Reveal>
-
-      <Reveal>
-        <ServiceBand services={home.services} />
       </Reveal>
 
       <Reveal>

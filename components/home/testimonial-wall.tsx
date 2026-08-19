@@ -1,7 +1,7 @@
 import { Container } from "@/components/ui/container";
 
 /**
- * "From our customers" — the voices wall, between New arrivals and the mosaic.
+ * "From our customers" — the voices wall, between New arrivals and made-to-order.
  *
  * Four vertical tracks on a plane tilted away from the reader, each carrying five
  * reviews twice and travelling exactly one copy per cycle. The motion is pure CSS
