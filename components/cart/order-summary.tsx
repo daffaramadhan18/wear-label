@@ -30,7 +30,7 @@ export function OrderSummary({ cart }: { cart: Cart }) {
       tone="inert"
       origin="top-right"
       intensity={0.7}
-      className="rounded-sm bg-inert p-9"
+      className="rounded-sm bg-inert p-6 md:p-9"
       aria-labelledby="summary-heading"
     >
       <div className="flex flex-col gap-5">

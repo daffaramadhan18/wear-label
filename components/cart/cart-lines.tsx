@@ -86,7 +86,7 @@ export function CartLines({ lines }: { lines: CartLine[] }) {
                   name="quantity"
                   value={line.quantity - 1}
                   disabled={line.quantity <= 1}
-                  className="h-10 w-9 cursor-pointer text-body text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted disabled:cursor-not-allowed disabled:text-on-inert"
+                  className="wl-tap h-10 w-9 cursor-pointer text-body text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted disabled:cursor-not-allowed disabled:text-on-inert"
                 >
                   −<span className="sr-only">{ui.decrease}</span>
                 </button>
@@ -97,7 +97,7 @@ export function CartLines({ lines }: { lines: CartLine[] }) {
                   type="submit"
                   name="quantity"
                   value={line.quantity + 1}
-                  className="h-10 w-9 cursor-pointer text-body text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted"
+                  className="wl-tap h-10 w-9 cursor-pointer text-body text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted"
                 >
                   +<span className="sr-only">{ui.increase}</span>
                 </button>
@@ -117,7 +117,7 @@ export function CartLines({ lines }: { lines: CartLine[] }) {
               <button
                 type="submit"
                 formAction={removeBagLine}
-                className="inline-flex size-9 cursor-pointer items-center justify-center rounded-xs text-ink-muted transition-colors duration-(--duration-base) hover:bg-surface-muted hover:text-ink"
+                className="wl-tap inline-flex size-9 cursor-pointer items-center justify-center rounded-xs text-ink-muted transition-colors duration-(--duration-base) hover:bg-surface-muted hover:text-ink"
               >
                 <CloseIcon className="size-4" />
                 <span className="sr-only">

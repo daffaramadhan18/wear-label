@@ -105,7 +105,7 @@ export function ProductPurchase({
               aria-pressed={value.name === colour}
               title={value.name}
               style={{ backgroundColor: value.swatch }}
-              className={`size-10 cursor-pointer rounded-pill border border-line transition-shadow duration-(--duration-base) disabled:cursor-not-allowed disabled:opacity-40 ${
+              className={`wl-tap size-10 cursor-pointer rounded-pill border border-line transition-shadow duration-(--duration-base) disabled:cursor-not-allowed disabled:opacity-40 ${
                 value.name === colour ? "ring-2 ring-brand ring-offset-2" : "hover:ring-1 hover:ring-line"
               }`}
             >

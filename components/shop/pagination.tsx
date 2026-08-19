@@ -45,7 +45,7 @@ export function Pagination({
                 <Link
                   href={catalogueHref(query, { page: entry })}
                   data-numeric
-                  className="inline-flex size-10 items-center justify-center rounded-xs border border-line text-caption text-ink-muted transition-colors duration-(--duration-base) hover:border-brand hover:text-brand"
+                  className="wl-tap inline-flex size-10 items-center justify-center rounded-xs border border-line text-caption text-ink-muted transition-colors duration-(--duration-base) hover:border-brand hover:text-brand"
                 >
                   {entry}
                 </Link>

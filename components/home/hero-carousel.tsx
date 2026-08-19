@@ -25,6 +25,11 @@ import type { Image } from "@/lib/shopify";
  *     way to stop it, and at a three-second dwell it matters more than it did at
  *     six — the headline and its paragraph are longer than three seconds of
  *     reading for most people.
+ *   - **A touch stops it for good.** There is no hover on a phone, so the pause
+ *     above does not exist there; the first touch anywhere on the band, or any use
+ *     of the arrows or dots, ends the rotation for the rest of the visit. A reader
+ *     who has taken hold of the carousel has said what they want, and a slide that
+ *     slid back out from under a thumb is worse than one that stopped.
  *   - `prefers-reduced-motion` turns rotation off entirely rather than merely
  *     shortening it. An auto-advancing carousel is motion the reader did not ask
  *     for, which is exactly what that setting is about.
@@ -33,6 +38,14 @@ import type { Image } from "@/lib/shopify";
  *
  * One slide renders as a still band with no arrows and no dots — the controls are
  * derived from the slide count, not drawn in.
+ *
+ * **Narrow screens.** The band is 600px at `md` and up, and `70svh` below it (`svh`,
+ * not `vh`, so hiding the browser's URL bar does not resize the hero mid-scroll).
+ * The copy card fills the width there, which the design's controls do not allow for:
+ * arrows parked at the band's left and right edges land on the heading and the CTA.
+ * So below `md` the arrows and the dots gather into one row under the card, and the
+ * wrapper that holds them becomes `display: contents` at `md` — one set of markup,
+ * with each control positioned exactly as the design draws it on a wide screen.
  *
  * The artwork comes from the design's own image slots, exported to `public/home/`
  * and named for the slide they sit on, not for the slot they came from — **the
@@ -48,6 +61,15 @@ import type { Image } from "@/lib/shopify";
 /** Dwell per slide. The design rotates at 6s; three is what this build asked for. */
 const ROTATE_MS = 3000;
 
+/** A hero shot, plus the one thing the band needs to know about it. */
+type HeroImage = Image & {
+  /**
+   * The artwork is an image OF text, so it cannot be cropped. Set here, it is
+   * dropped below `md` and the band's own surface shows instead — see slide 2.
+   */
+  textArt?: boolean;
+};
+
 /**
  * One entry per slide, in slide order. A null url renders the placeholder.
  *
@@ -55,7 +77,7 @@ const ROTATE_MS = 3000;
  * which is what the design does with them too. The cream card sits over the left
  * third, so the crop is what decides how much of a shot survives.
  */
-const HERO_IMAGES: Image[] = [
+const HERO_IMAGES: HeroImage[] = [
   {
     url: "/home/hero-1.webp",
     altText:
@@ -73,9 +95,17 @@ const HERO_IMAGES: Image[] = [
    * page: it ships from Kota Bekasi, while `lib/content/site.ts` says the studio
    * is in Bandung, and the cut-off and complaint windows are delivery terms the
    * catalogue does not otherwise state. Change the card, change the alt with it.
+   *
+   * `textArt` is why it is not shown below `md`. The band is taller than it is
+   * wide there, so `object-cover` keeps under half the card's width — and every
+   * slice of a card that is nothing but full-bleed type is mid-sentence
+   * Indonesian behind the copy panel, which reads as a mistake. The words are all
+   * in the alt text and the slide keeps its own heading and CTA, so nothing is
+   * lost by letting the band's surface show instead of a fragment.
    */
   {
     url: "/home/hero-2.webp",
+    textArt: true,
     altText:
       "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
     width: 1200,
@@ -102,10 +132,13 @@ export function HeroCarousel({
   const reduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  /* Hover-pause has no touch equivalent, so a touch ends the rotation outright
+     rather than pausing it for as long as a finger is down. */
+  const [stopped, setStopped] = useState(false);
   const many = slides.length > 1;
 
   useEffect(() => {
-    if (!many || paused || reduceMotion) return;
+    if (!many || paused || stopped || reduceMotion) return;
 
     const timer = window.setInterval(
       () => setIndex((current) => (current + 1) % slides.length),
@@ -113,19 +146,23 @@ export function HeroCarousel({
     );
 
     return () => window.clearInterval(timer);
-  }, [many, paused, reduceMotion, slides.length]);
+  }, [many, paused, stopped, reduceMotion, slides.length]);
 
-  const go = (next: number) => setIndex((next + slides.length) % slides.length);
+  const go = (next: number) => {
+    setStopped(true);
+    setIndex((next + slides.length) % slides.length);
+  };
 
   return (
     <section
       aria-roledescription="carousel"
       aria-label={label}
-      className="relative h-150 overflow-hidden bg-surface-muted"
+      className="relative h-[70svh] min-h-112 overflow-hidden bg-surface-muted md:h-150"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
+      onTouchStart={() => setStopped(true)}
     >
       {slides.map((slide, slideIndex) => {
         const active = slideIndex === index;
@@ -152,18 +189,31 @@ export function HeroCarousel({
               reduceMotion ? "" : "transition-transform duration-(--duration-lead) ease-entrance"
             }`}
           >
-            <Media
-              image={HERO_IMAGES[slideIndex] ?? { url: null, altText: "", width: 1440, height: 600 }}
-              fill
-              priority={slideIndex === 0}
-              sizes="100vw"
-              label="Hero photo"
-              className="rounded-none"
-            />
+            <div
+              className={`absolute inset-0 ${
+                HERO_IMAGES[slideIndex]?.textArt ? "hidden md:block" : ""
+              }`}
+            >
+              <Media
+                image={
+                  HERO_IMAGES[slideIndex] ?? { url: null, altText: "", width: 1440, height: 600 }
+                }
+                fill
+                priority={slideIndex === 0}
+                sizes="100vw"
+                label="Hero photo"
+                className="rounded-none"
+              />
+            </div>
 
-            <div className="absolute inset-0 flex items-center">
+            {/* The bottom padding is the room the mobile control row sits in; at
+                `md` the arrows move to the sides and the card recentres, and with
+                one slide there is no row to leave room for. */}
+            <div
+              className={`absolute inset-0 flex items-center md:pb-0 ${many ? "pb-16" : ""}`}
+            >
               <Container>
-                <div className="flex max-w-130 flex-col gap-5 bg-canvas/92 p-8 md:px-11 md:py-12">
+                <div className="flex max-w-130 flex-col gap-4 bg-canvas/92 p-6 md:gap-5 md:px-11 md:py-12">
                   <Eyebrow>{slide.eyebrow}</Eyebrow>
                   {/* Every slide carries an h1. Only the active slide is in the
                       accessibility tree, so the page still has exactly one. */}
@@ -182,43 +232,51 @@ export function HeroCarousel({
       })}
 
       {many ? (
-        <>
+        /* One row under the card on a phone; at `md` the wrapper stops being a box
+           at all (`contents`) and its three children take the positions the design
+           draws — arrows against the band's edges, dots along its bottom. */
+        <div className="absolute inset-x-0 bottom-4 z-10 flex items-center justify-center gap-3 md:contents">
           <button
             type="button"
             onClick={() => go(index - 1)}
-            className="absolute left-4 top-1/2 z-10 inline-flex size-13 -translate-y-1/2 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:left-7"
+            className="z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:left-7 md:top-1/2 md:-translate-y-1/2"
           >
             <ChevronLeftIcon className="size-5.5" />
             <span className="sr-only">{ui.previousSlide}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => go(index + 1)}
-            className="absolute right-4 top-1/2 z-10 inline-flex size-13 -translate-y-1/2 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:right-7"
-          >
-            <ChevronRightIcon className="size-5.5" />
-            <span className="sr-only">{ui.nextSlide}</span>
-          </button>
-
-          <div className="absolute inset-x-0 bottom-7 z-10 flex justify-center gap-2.5">
+          <div className="z-10 flex items-center justify-center md:absolute md:inset-x-0 md:bottom-7">
             {slides.map((slide, slideIndex) => (
               <button
                 key={slide.heading}
                 type="button"
                 onClick={() => go(slideIndex)}
                 aria-current={slideIndex === index ? "true" : undefined}
-                className={`h-1 cursor-pointer transition-[width,background-color] duration-(--duration-base) ${
-                  slideIndex === index ? "w-10 bg-brand" : "w-4.5 bg-ink/35 hover:bg-brand/60"
-                }`}
+                /* The bar is the artwork; `.wl-tap` is the 44px target around it,
+                   so the design keeps its 4px rule and a thumb still lands. */
+                className="wl-tap inline-flex h-11 cursor-pointer items-center px-3 md:px-1.25"
               >
+                <span
+                  className={`h-1 transition-[width,background-color] duration-(--duration-base) ${
+                    slideIndex === index ? "w-10 bg-brand" : "w-4.5 bg-ink/35 hover:bg-brand/60"
+                  }`}
+                />
                 <span className="sr-only">
                   {ui.goToSlide} {slideIndex + 1}
                 </span>
               </button>
             ))}
           </div>
-        </>
+
+          <button
+            type="button"
+            onClick={() => go(index + 1)}
+            className="z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:right-7 md:top-1/2 md:-translate-y-1/2"
+          >
+            <ChevronRightIcon className="size-5.5" />
+            <span className="sr-only">{ui.nextSlide}</span>
+          </button>
+        </div>
       ) : null}
     </section>
   );

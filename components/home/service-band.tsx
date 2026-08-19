@@ -30,7 +30,7 @@ export function ServiceBand({ services }: { services: readonly Service[] }) {
             return (
               <li
                 key={service.title}
-                className="flex min-h-45 items-center justify-center gap-4.5 px-4 py-8"
+                className="flex min-h-30 items-center justify-center gap-4.5 px-4 py-6 md:min-h-45 md:py-8"
               >
                 <span className="inline-flex size-13 shrink-0 items-center justify-center rounded-pill bg-inert text-brand">
                   <Mark className="size-7.5" />

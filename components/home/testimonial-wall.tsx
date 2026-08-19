@@ -40,6 +40,12 @@ import { Container } from "@/components/ui/container";
  * `prefers-reduced-motion` does not merely pause this: a stopped wall would hold
  * most of its reviews outside a stage that clips at 560px. It flattens to a plain
  * grid instead — see the note in `globals.css`.
+ *
+ * Below `md` the same thing happens on its side: the plane is ~1300px wide and the
+ * edge fades eat 30% each, so a 375px screen shows about 150px of one card. The
+ * wall lies down into a horizontal snap rail carrying all twenty reviews upright —
+ * again in `globals.css`, which is why the tilt and the fades are both something
+ * CSS can take off from outside this file.
  */
 
 type Review = { user: string; body: string };
@@ -101,11 +107,8 @@ export function TestimonialWall({
       {/* Full-bleed through a normal full-width parent, never `100vw` — that
           includes the scrollbar gutter and puts 8px of horizontal scroll on the
           page. */}
-      <div className="wl-voices-stage relative flex h-140 w-full items-center justify-center overflow-hidden [perspective:2200px]">
-        <div
-          className="wl-voices-plane flex items-start gap-6 [transform-style:preserve-3d]"
-          style={{ transform: "translateZ(-100px) rotateX(11deg) rotateY(-6deg) rotateZ(10deg)" }}
-        >
+      <div className="wl-voices-stage wl-rail relative flex h-140 w-full items-center justify-center overflow-hidden [perspective:2200px]">
+        <div className="wl-voices-plane flex items-start gap-6 [transform-style:preserve-3d]">
           {COLUMNS.map((column, index) => {
             const slice = reviews.slice(index * PER_COLUMN, (index + 1) * PER_COLUMN);
             if (slice.length === 0) return null;
@@ -149,19 +152,19 @@ export function TestimonialWall({
         */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-[42%] bg-linear-to-b from-surface from-[16%] to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 hidden h-[42%] md:block bg-linear-to-b from-surface from-[16%] to-transparent"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[42%] bg-linear-to-t from-surface from-[16%] to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[42%] md:block bg-linear-to-t from-surface from-[16%] to-transparent"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 w-[30%] bg-linear-to-r from-surface from-[24%] to-transparent"
+          className="pointer-events-none absolute inset-y-0 left-0 hidden w-[30%] md:block bg-linear-to-r from-surface from-[24%] to-transparent"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 w-[30%] bg-linear-to-l from-surface from-[24%] to-transparent"
+          className="pointer-events-none absolute inset-y-0 right-0 hidden w-[30%] md:block bg-linear-to-l from-surface from-[24%] to-transparent"
         />
       </div>
     </section>

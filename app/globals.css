@@ -188,17 +188,9 @@
    *
    * The rail scrolls but shows no scrollbar. `overflow-x-auto` is what keeps the
    * strip reachable once `prefers-reduced-motion` stops the animation, so it
-   * cannot become `hidden`; hiding only the scrollbar chrome keeps that fallback
-   * and takes the bar off the design.
+   * cannot become `hidden`; the scrollbar chrome is taken off by `.wl-rail`,
+   * which the strip carries alongside this class.
    */
-  .wl-marquee {
-    scrollbar-width: none;
-  }
-
-  .wl-marquee::-webkit-scrollbar {
-    display: none;
-  }
-
   .wl-marquee-track {
     --marquee-gap: calc(var(--spacing) * 3);
 
@@ -228,7 +220,16 @@
    * The offset is a variable rather than a margin utility because reduced motion
    * has to zero it: a track parked at an offset with the animation stopped would
    * hold its content off the bottom of the stage, where nobody can read it.
+   *
+   * The tilt lives here rather than in the component's `style` for the same
+   * reason: both the reduced-motion fallback and the narrow-screen one have to
+   * take it off, and CSS cannot override an inline transform without
+   * `!important`. The three angles are the design's, measured.
    */
+  .wl-voices-plane {
+    transform: translateZ(-100px) rotateX(11deg) rotateY(-6deg) rotateZ(10deg);
+  }
+
   .wl-voices-track {
     display: flex;
     flex-direction: column;
@@ -251,6 +252,44 @@
 @layer utilities {
   .wl-measure {
     max-width: var(--measure);
+  }
+
+  /*
+   * A 44px hit area on a control that is painted smaller.
+   *
+   * The design draws 32px swatches, 36px steppers and a 4px-tall carousel bar;
+   * the accessibility rule this repo works to is a 44px minimum control. Both
+   * are satisfied by growing the target rather than the artwork — the
+   * pseudo-element is transparent, so nothing on screen moves.
+   *
+   * `width/height: 100%` keeps a control that is ALREADY larger than 44px at its
+   * own size; `min-*` is what lifts the small ones.
+   */
+  .wl-tap {
+    position: relative;
+  }
+
+  .wl-tap::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
+  }
+
+  /* A rail that scrolls without showing a scrollbar. The scrolling itself is
+     never decorative here — it is the fallback that keeps a stopped marquee, and
+     every mobile rail, reachable — so this hides the chrome and nothing else. */
+  .wl-rail {
+    scrollbar-width: none;
+  }
+
+  .wl-rail::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -293,6 +332,62 @@
 
   .wl-voices-plane {
     transform: none;
+  }
+}
+
+/*
+ * The voices wall on a narrow screen — the same flattening as reduced motion,
+ * turned sideways.
+ *
+ * The wall is a ~1300px plane (four 300px cards and their gaps) centred in a
+ * 560px stage behind fades that eat 30% of each edge. On a 375px screen that
+ * leaves about 150px of one card readable, in 560px of vertical space. So below
+ * the `md` breakpoint the tilt comes off, the duplicate copies go, and the four
+ * columns lie down into one horizontal snap rail carrying all twenty reviews
+ * upright at full size.
+ *
+ * Unlayered on purpose, like the reduced-motion block below it: these rules have
+ * to beat Tailwind's utility layer, which is where `h-140`, `overflow-hidden` and
+ * the stage's `justify-center` come from.
+ */
+@media (width < 48rem) {
+  .wl-voices-stage {
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-content: flex-start;
+    perspective: none;
+    scroll-snap-type: x mandatory;
+    /* The rail runs edge to edge; the gutter is padding so the first card is not
+       flush to the screen and the last one can still reach the left edge. */
+    padding-inline: var(--spacing-gutter);
+  }
+
+  .wl-voices-plane {
+    align-items: stretch;
+    transform: none;
+  }
+
+  .wl-voices-track {
+    --voices-offset: 0;
+
+    flex-direction: row;
+    animation: none;
+  }
+
+  /* One copy is enough once nothing is looping, and it is the copy already
+     hidden from assistive tech that goes. */
+  .wl-voices-track > [aria-hidden="true"] {
+    display: none;
+  }
+
+  .wl-voices-track > div {
+    flex-direction: row;
+    padding-bottom: 0;
+  }
+
+  .wl-voices-track figure {
+    scroll-snap-align: start;
   }
 }
 
