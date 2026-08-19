@@ -32,6 +32,7 @@ function product(index: number, soldOut: readonly string[] = []): Product {
     id: `gid://shopify/Product/${index}`,
     handle,
     title: "",
+    material: "",
     description: "",
     productType: CATEGORIES[(index - 1) % CATEGORIES.length],
     featuredImage: { url: null, altText: "", ...PORTRAIT },

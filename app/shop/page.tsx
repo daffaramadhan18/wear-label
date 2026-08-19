@@ -1,5 +1,7 @@
+import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { CatalogueFilters } from "@/components/shop/catalogue-filters";
 import { ProductCard } from "@/components/shop/product-card";
+import { Alert } from "@/components/ui/alert";
 import { Container } from "@/components/ui/container";
 import { PageHeading } from "@/components/ui/section";
 import { shop, ui } from "@/lib/content/site";
@@ -33,24 +35,27 @@ export default async function ShopPage(props: PageProps<"/shop">) {
         <CatalogueFilters facets={facets} query={query} filtered={isFiltered(query)} />
 
         <div>
-          <p className="text-caption text-ink-muted" data-numeric>
+          <p className="text-caption text-ink-subtle" data-numeric>
             {results.length} {ui.results}
           </p>
 
           {results.length === 0 ? (
-            <p className="mt-block text-body-lg text-ink">{ui.noResults}</p>
+            <Alert className="mt-block">{ui.noResults}</Alert>
           ) : (
-            <ul className="mt-block grid gap-block sm:grid-cols-2 xl:grid-cols-3">
+            /* The grid re-staggers on every filter submit, because a `GET`
+               form is a real navigation — the arrival doubles as the feedback
+               that the filter was applied. */
+            <Stagger className="mt-block grid gap-block sm:grid-cols-2 xl:grid-cols-3">
               {results.map((product) => (
-                <li key={product.id}>
+                <StaggerItem key={product.id}>
                   <ProductCard
                     product={product}
                     headingLevel="h2"
                     sizes="(min-width: 1280px) 22vw, (min-width: 640px) 40vw, 90vw"
                   />
-                </li>
+                </StaggerItem>
               ))}
-            </ul>
+            </Stagger>
           )}
         </div>
       </div>

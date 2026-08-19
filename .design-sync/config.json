@@ -1,0 +1,70 @@
+{
+  "projectId": "096a4d56-a7d8-49ce-9d7a-4fe26ac82b54",
+  "shape": "package",
+  "pkg": "wear-label",
+  "globalName": "WearLabel",
+  "buildCmd": "bash .design-sync/prepare.sh",
+  "srcDir": "../../components",
+  "tsconfig": "./tsconfig.bundle.json",
+  "cssEntry": "./styles.css",
+  "tokensGlob": "tokens.css",
+  "extraFonts": [
+    "./fonts/fonts.css"
+  ],
+  "overrides": {
+    "CatalogueFilters": {
+      "cardMode": "column"
+    },
+    "ProductCard": {
+      "cardMode": "column"
+    },
+    "PageHeading": {
+      "cardMode": "column"
+    },
+    "SectionHeading": {
+      "cardMode": "column"
+    },
+    "Copy": {
+      "cardMode": "column"
+    },
+    "Media": {
+      "cardMode": "column"
+    },
+    "Section": {
+      "cardMode": "column"
+    },
+    "Container": {
+      "cardMode": "column"
+    },
+    "SiteHeader": {
+      "cardMode": "column"
+    },
+    "SiteFooter": {
+      "cardMode": "column"
+    },
+    "CardHover": {
+      "cardMode": "column"
+    },
+    "CardMedia": {
+      "cardMode": "column"
+    },
+    "Wordmark": {
+      "cardMode": "column"
+    },
+    "Button": {
+      "cardMode": "column"
+    }
+  },
+  "docsDir": "../../.design-sync/docs",
+  "dtsPropsFor": {
+    "Button": "variant?: \"primary\" | \"outline\" | \"ghost\" | \"link\" | \"checkout\";\nsize?: \"sm\" | \"md\" | \"lg\" | \"full\";\nchildren: React.ReactNode;\ntype?: \"button\" | \"submit\" | \"reset\";\ndisabled?: boolean;\nclassName?: string;",
+    "ButtonLink": "href: string;\nvariant?: \"primary\" | \"outline\" | \"ghost\" | \"link\" | \"checkout\";\nsize?: \"sm\" | \"md\" | \"lg\" | \"full\";\nchildren: React.ReactNode;\nclassName?: string;\ntarget?: string;\nrel?: string;",
+    "Wordmark": "className?: string;\n/** Use the cream artwork, for espresso and taupe surfaces. */\nonDark?: boolean;\n/** Horizontal is the default everywhere; stacked is for narrow or square space. */\nvariant?: \"horizontal\" | \"stacked\";\n/** Rendered height in px; the lockup keeps its ratio. */\nheight?: number;",
+    "Price": "price: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null;\nclassName?: string;",
+    "Media": "image: { url: string | null; altText: string; width: number; height: number };\n/** Responsive sizes string the layout uses; required for real images. */\nsizes: string;\npriority?: boolean;\nclassName?: string;\n/** Caption shown on the placeholder block. */\nlabel?: string;",
+    "ProductCard": "product: {\n  id: string;\n  handle: string;\n  title: string;\n  material: string;\n  description: string;\n  productType: string;\n  featuredImage: { url: string | null; altText: string; width: number; height: number };\n  priceRange: { minVariantPrice: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null };\n  options: { name: string; values: { name: string; available: boolean }[] }[];\n  variants: { id: string; title: string; availableForSale: boolean; price: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null }[];\n  availableForSale: boolean;\n};\nsizes: string;\n/** Set so the card's name never skips a heading level on the page it sits on. */\nheadingLevel?: \"h2\" | \"h3\";",
+    "CatalogueFilters": "facets: { categories: string[]; sizes: string[] };\nquery: {\n  categories: string[];\n  sizes: string[];\n  inStockOnly: boolean;\n  sort: \"featured\" | \"price-asc\" | \"price-desc\";\n};\n/** Whether anything is currently narrowing the catalogue. */\nfiltered: boolean;"
+  },
+  "readmeHeader": ".design-sync/conventions.md",
+  "tokensPkg": "wear-label"
+}

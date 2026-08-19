@@ -1,40 +1,53 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
-type Variant = "primary" | "outline" | "quiet";
-type Size = "md" | "lg";
+type Variant = "primary" | "outline" | "ghost" | "link" | "checkout";
+type Size = "sm" | "md" | "lg" | "full";
 
 /**
- * Shared action styling. Every screen keeps a single `primary` action; other
- * actions use `outline` or `quiet` so the hierarchy stays readable.
+ * Buttons, per the design system's Buttons section.
  *
- * Minimum control height is 44px (comfortably over the 24px WCAG 2.2 target
- * minimum) and `outline` uses `border-line`, which clears 3:1 against the canvas.
- * Every variant has a distinct pressed state as well as hover, so touch users —
- * who never see hover — still get confirmation. Press feedback is a colour
- * change, never a transform, so it cannot shift layout.
+ * Labels are always uppercase at 0.2em tracking, and one primary button per
+ * screen. Hover changes the fill, the pressed state nudges 1px down, and focus
+ * uses the system ring (see globals.css for the contrast note on it).
+ *
+ * `checkout` is the system's espresso full-bleed action; `link` is the underlined
+ * text action ("Size guide") and is the one variant that is not uppercase.
  */
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-active border border-transparent",
+    "bg-brand text-on-brand border border-brand hover:bg-brand-hover hover:border-brand-hover active:translate-y-px",
   outline:
-    "bg-transparent text-ink border border-line hover:bg-sand hover:border-ink active:bg-sand-strong active:border-ink",
-  quiet:
-    "bg-transparent text-ink border border-transparent underline decoration-1 underline-offset-4 decoration-line hover:decoration-ink active:text-ink-accent active:decoration-ink-accent",
+    "bg-transparent text-brand border border-ink-subtle hover:bg-brand hover:border-brand hover:text-on-brand active:translate-y-px",
+  ghost:
+    "bg-transparent text-ink-muted border border-transparent hover:bg-surface-muted active:translate-y-px",
+  link: "bg-transparent text-brand border-0 border-b border-line rounded-none hover:border-brand",
+  checkout:
+    "w-full bg-invert text-ink-invert border border-invert hover:bg-invert-hover hover:border-invert-hover active:translate-y-px",
 };
 
+/** Sizes from the system: small · medium · large, plus the full-width action. */
 const SIZES: Record<Size, string> = {
-  md: "min-h-11 px-5 text-caption",
-  lg: "min-h-13 px-7 text-body",
+  sm: "min-h-11 px-5 text-micro tracking-nav",
+  md: "min-h-11 px-7 text-label tracking-label",
+  lg: "min-h-13 px-11 text-caption tracking-[0.22em]",
+  full: "min-h-13 w-full px-6 text-label tracking-label",
 };
 
-function classes(variant: Variant, size: Size, className: string) {
+/** Only a real `<button>` can be disabled, so links do not carry these. */
+const DISABLED =
+  "disabled:cursor-not-allowed disabled:border-disabled-border disabled:bg-disabled disabled:text-on-disabled disabled:translate-y-0";
+
+function classes(variant: Variant, size: Size, className: string, disableable: boolean) {
+  const isLink = variant === "link";
+
   return [
-    "inline-flex items-center justify-center gap-2 rounded-pill font-medium",
-    "cursor-pointer transition-colors duration-[var(--duration-base)] ease-out",
-    "disabled:cursor-not-allowed disabled:opacity-45",
+    "inline-flex items-center justify-center gap-2",
+    isLink ? "" : "rounded-sm uppercase",
+    isLink ? "px-0.5 py-2 text-caption tracking-[0.04em]" : SIZES[size],
+    "cursor-pointer transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out",
+    disableable ? DISABLED : "",
     VARIANTS[variant],
-    SIZES[size],
     className,
   ].join(" ");
 }
@@ -47,7 +60,7 @@ export function Button({
   ...props
 }: ComponentProps<"button"> & { variant?: Variant; size?: Size; children: ReactNode }) {
   return (
-    <button className={classes(variant, size, className)} {...props}>
+    <button className={classes(variant, size, className, true)} {...props}>
       {children}
     </button>
   );
@@ -62,7 +75,7 @@ export function ButtonLink({
   ...props
 }: ComponentProps<typeof Link> & { variant?: Variant; size?: Size; children: ReactNode }) {
   return (
-    <Link href={href} className={classes(variant, size, className)} {...props}>
+    <Link href={href} className={classes(variant, size, className, false)} {...props}>
       {children}
     </Link>
   );

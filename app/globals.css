@@ -3,13 +3,11 @@
 
 /*
  * Base layer. No design values live here — everything resolves to a token from
- * ./tokens.css. There is no scroll or entrance animation in this build.
+ * ./tokens.css, which is ported from the Wear Label Design System.
  */
 
 @layer base {
   html {
-    /* Smooth in-page anchor scrolling; the data attribute in layout.tsx tells
-       Next 16 to still jump instantly on route change. */
     scroll-behavior: smooth;
 
     /* The header is sticky, so anything scrolled to by an anchor OR by keyboard
@@ -20,7 +18,7 @@
 
   body {
     background-color: var(--color-canvas);
-    color: var(--color-ink);
+    color: var(--color-ink-body);
     font-family: var(--font-body);
     font-size: var(--text-body);
     line-height: var(--leading-body);
@@ -28,18 +26,38 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Display type is Playfair; H3 and below are set in the interface face, per
+     the system's type table. */
   h1,
-  h2,
-  h3 {
+  h2 {
+    color: var(--color-ink);
     font-family: var(--font-display);
     font-weight: 500;
-    letter-spacing: var(--tracking-tight);
-    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-h2);
+    line-height: var(--leading-h2);
     text-wrap: balance;
+  }
+
+  h3 {
+    color: var(--color-ink);
+    font-size: var(--text-h3);
+    font-weight: 500;
+    line-height: var(--leading-h3);
   }
 
   p {
     text-wrap: pretty;
+  }
+
+  /*
+   * Links are taupe with no default rule. The system's underlined treatment — a
+   * sand rule that darkens to taupe on hover — belongs to inline and prose links,
+   * so it is applied where those appear (the `link` button variant, "Clear all")
+   * rather than globally, which would also underline the nav and every card.
+   */
+  a {
+    color: var(--color-brand);
+    text-decoration: none;
   }
 
   /* Prices, counts and any tabular figure must not shift width. */
@@ -47,11 +65,17 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Visible focus everywhere; never removed. */
+  /*
+   * Focus. The system's ring is 2px #C9AF97 at 2px offset, which is only 1.92:1
+   * on cream — under the 3:1 a focus indicator needs. The ring colour is kept and
+   * a 1px brand-taupe edge (5.64:1) is added inside the offset gap, so the
+   * indicator reads as the system's double rule and is actually perceivable.
+   */
   :focus-visible {
     outline: 2px solid var(--color-focus);
-    outline-offset: 3px;
-    border-radius: var(--radius-xs);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 1px var(--color-brand);
+    border-radius: var(--radius-sm);
   }
 
   /* Taps register without the legacy 300ms click delay. */
@@ -63,7 +87,11 @@
     touch-action: manipulation;
   }
 
-  /* Reserve intrinsic ratio so media never causes layout shift. */
+  ::selection {
+    background-color: var(--color-selection);
+    color: var(--color-ink);
+  }
+
   img,
   video,
   svg {
@@ -72,10 +100,10 @@
 }
 
 @layer components {
-  /* Hairline rule used by the footer. */
+  /* Section rule — the heaviest of the three line weights. */
   .wl-rule {
     border: 0;
-    border-top: 1px solid var(--color-hairline);
+    border-top: 1px solid var(--color-rule);
   }
 }
 
@@ -86,8 +114,21 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Smooth scrolling is motion too — jump instead. */
   html {
     scroll-behavior: auto;
+  }
+}
+
+/*
+ * No-script fallback for Motion's scroll reveals.
+ *
+ * A revealed block renders with `opacity: 0` in the server HTML and is animated
+ * to 1 once Motion hydrates. If script never runs, that content would stay
+ * invisible — so with scripting off, every reveal is forced to its final state.
+ */
+@media (scripting: none) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

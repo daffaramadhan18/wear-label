@@ -27,8 +27,9 @@ export const ui = {
   availability: "Availability",
   inStockOnly: "In stock only",
   results: "results",
+  home: "Home",
+  shop: "Shop",
   noResults: "No products match these filters.",
-  backToShop: "Back to shop",
   soldOut: "Sold out",
 } as const;
 

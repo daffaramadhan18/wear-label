@@ -42,7 +42,7 @@ export function Copy({
         <span aria-hidden="true" className="block h-[0.7em] w-12 rounded-xs bg-current opacity-30" />
         <span
           aria-hidden="true"
-          className="font-body text-eyebrow font-normal uppercase tracking-eyebrow opacity-70"
+          className="font-body text-micro font-normal uppercase tracking-nav opacity-70"
         >
           {label}
         </span>
@@ -60,13 +60,13 @@ export function Copy({
         <span
           key={index}
           aria-hidden="true"
-          className="block h-[0.7em] rounded-xs bg-sand"
+          className="block h-[0.7em] rounded-xs bg-surface-muted"
           style={{ width: LINE_WIDTHS[index % LINE_WIDTHS.length] }}
         />
       ))}
       <span
         aria-hidden="true"
-        className="font-body text-eyebrow font-normal uppercase tracking-eyebrow text-ink-muted"
+        className="font-body text-micro font-normal uppercase tracking-nav text-ink-subtle"
       >
         {label}
       </span>

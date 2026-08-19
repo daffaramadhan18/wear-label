@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { Container } from "@/components/ui/container";
 import { Copy } from "@/components/ui/copy";
 import { PageHeading } from "@/components/ui/section";
@@ -21,21 +22,22 @@ export default function AccountPage() {
     <Container className="py-section">
       <PageHeading id="account-heading" heading={account.heading} body={account.body} />
 
-      <div className="mt-block-lg grid gap-block sm:grid-cols-2">
+      <Stagger as="div" className="mt-block-lg grid gap-block sm:grid-cols-2">
         {account.panels.map((panel, index) => (
-          <section
+          <StaggerItem
+            as="section"
             key={index}
-            className="rounded-lg border border-hairline bg-surface p-8"
+            className="rounded-sm border border-border bg-surface p-8"
           >
-            <h2 className="text-h3">
+            <h2 className="font-body text-h3 leading-h3">
               <Copy value={panel.title} label="panel title" />
             </h2>
-            <p className="mt-5 text-caption leading-relaxed text-ink-muted">
+            <p className="mt-5 text-caption leading-snug text-ink-muted">
               <Copy value={panel.body} label="panel body" lines={3} />
             </p>
-          </section>
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
     </Container>
   );
 }

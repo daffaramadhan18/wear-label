@@ -1,58 +1,102 @@
 /*
  * Wear Label — design tokens (SINGLE SOURCE OF TRUTH)
  *
- * Every colour, font, radius, spacing and duration value in the app resolves to a
- * variable defined here. Components never hardcode a design value, so replacing
- * the palette or the type pairing is an edit to this file only.
- *
- * Brand identity is not decided yet. What is here is a deliberately quiet warm
- * neutral set — enough to build structure against, sized to be replaced wholesale.
+ * Ported from the Wear Label Design System (Claude Design project
+ * bf11a0f4-4b1c-400b-802c-b9c9c2d66673, "Wear Label Design System.html"):
+ * colour, type, radius, spacing, shadow and motion values are taken from that
+ * document, not invented here. Components never hardcode a design value.
  *
  * Structure:
- *   :root   — layer 1, raw primitives (--wl-*). Never used in JSX.
+ *   :root   — layer 1, raw brand primitives (--wl-*). Never used in JSX.
  *   @theme  — layer 2, semantic tokens. These become Tailwind utilities
- *             (bg-canvas, text-ink-muted, font-display, py-section, ...).
+ *             (bg-canvas, text-ink-subtle, font-display, py-section, ...).
  *
- * Contrast: every foreground/background pair is verified against WCAG 2.2 AA
- * (4.5:1 text, 3:1 non-text UI boundaries); ratios are noted inline. If you change
- * a value, re-verify the pair it belongs to.
+ * CONTRAST — measured against WCAG 2.2 AA, ratios noted inline. Three pairs the
+ * design system specifies do not clear the threshold. They are implemented as
+ * specified (the brand system is the authority) and listed here so the decision
+ * is visible rather than buried:
+ *
+ *   1. Camel #9C8166 on cream is 3.36:1 — fine for large text and UI, short of
+ *      the 4.5:1 small-text minimum, and the system uses it for 11–12px labels.
+ *      One-line fix if wanted: point --color-ink-subtle at --wl-taupe-700
+ *      (#5F4E3C, 7.30:1).
+ *   2. The focus ring (#C9AF97) is 1.92:1 on cream — well under the 3:1 that a
+ *      focus indicator needs. globals.css keeps the ring colour and adds a
+ *      1px brand-taupe inner edge (5.64:1) so it stays perceivable.
+ *   3. Hairlines (#DFD0C4 on cream 1.38:1, #EDDFD6 on white 1.30:1) are below
+ *      the 3:1 for control boundaries. That near-invisible rule IS the look;
+ *      inputs stay distinguishable by their filled background instead.
+ *
+ * Disabled controls (#B4A493 on #EDE3DA) are exempt from contrast minimums.
  */
 
 :root {
   /* === Layer 1 — primitives ============================================ */
 
-  /* Warm neutrals */
-  --wl-cream-50: #fffcf5;
-  --wl-cream-100: #f6f1e7;
-  --wl-sand-200: #e8dcc4;
-  --wl-sand-300: #d4c4a8;
+  /* Taupe ramp — the spine of the palette */
+  --wl-taupe-100: #f2ece6;
+  --wl-taupe-200: #dfd0c4;
+  --wl-taupe-300: #c9af97;
+  --wl-taupe-500: #9c8166; /* Camel — accents, icons, labels */
+  --wl-taupe-600: #725e4c; /* Label Taupe — primary brand */
+  --wl-taupe-700: #5f4e3c;
+  --wl-taupe-800: #3d3128;
+  --wl-taupe-900: #1e1a16; /* Espresso — primary text */
 
-  /* Earth */
-  --wl-terracotta-600: #94492a; /* text-safe accent — 5.8:1 on cream */
-  --wl-clay-600: #8f4e1e; /* primary action — 5.7:1 on cream */
-  --wl-clay-700: #7a4218;
-  --wl-clay-800: #663711; /* pressed — white text 9.9:1 */
+  --wl-cream: #fbf4ef; /* page background */
+  --wl-white: #ffffff; /* card surface */
 
-  /* Ink */
-  --wl-ink-900: #2a2118; /* 14.0:1 on cream */
-  --wl-ink-500: #6b5f51; /* 5.5:1 on cream */
-  --wl-ink-300: #8f8474; /* 3.3:1 on cream — control boundaries */
-  --wl-ink-100: #e4dacb; /* decorative hairline only */
+  /* Blush ramp — promotional areas, badges, editorial backgrounds */
+  --wl-blush-100: #ffe8dd;
+  --wl-blush-200: #f2d7c6;
+  --wl-blush-300: #ddc2af;
+  --wl-blush-500: #b79b7f;
+  --wl-blush-600: #a58666;
+  --wl-blush-text: #8a5a3c;
+
+  /* Sage ramp — cool counterweight; success states use sage-500 */
+  --wl-sage-200: #c4c5be;
+  --wl-sage-300: #8f948e;
+  --wl-sage-500: #5a605d;
+  --wl-sage-900: #2d2d2c;
+  --wl-sage-surface: #e9ebe7;
+
+  /* Rules — three weights, lightest to heaviest */
+  --wl-rule-inner: #f2ece6;
+  --wl-rule-card: #eddfd6;
+  --wl-rule-section: #e6d7ce;
+
+  /* Rust — error state */
+  --wl-rust-500: #b0654b;
+  --wl-rust-800: #7a4630;
+  --wl-rust-surface: #fff4f0;
+
+  /* Inert fills — disabled controls and unavailable variants */
+  --wl-inert-200: #ede3da;
+  --wl-inert-300: #b4a493;
+  --wl-inert-100: #f7f1ec;
+  --wl-inert-400: #c6b7a7;
 
   /* === Non-themed design values ======================================== */
 
-  /* Readable measure — 60–75ch desktop, 35–60ch mobile */
+  /* Readable measure — 60–75ch desktop */
   --measure: 64ch;
 
-  /* Motion — subtle. Every transition uses one of these. */
-  --duration-fast: 150ms;
-  --duration-base: 220ms;
+  /* Motion — the system transitions colour in 160ms, transform in 120ms. The
+     enter/exit pair below is for anything Motion drives (reveals, disclosures,
+     route changes); exits run at ~65% of the enter duration so dismissing never
+     feels slower than summoning. Mirrored in components/motion/tokens.ts, which
+     is where the JS half of these values lives. */
+  --duration-fast: 120ms;
+  --duration-base: 160ms;
+  --duration-exit: 260ms;
+  --duration-enter: 400ms;
+  --duration-lead: 600ms;
+  --duration-stagger: 45ms;
 
   /* Sticky header height — drives scroll-padding so anchors and keyboard focus
-     are never parked underneath the header (WCAG 2.2 AA 2.4.11).
-     = py-4 (2rem) + tallest child (min-h-11 = 2.75rem). */
-  --header-height: 4.75rem;
-  /* Extra breathing room above a focused/anchored target. */
+     are never parked underneath the header (WCAG 2.2 AA 2.4.11). */
+  --header-height: 5.25rem;
   --scroll-offset: 1.5rem;
 
   /* Layering scale */
@@ -64,64 +108,115 @@
   /* === Layer 2 — semantic colour ======================================= */
 
   /* Surfaces */
-  --color-canvas: var(--wl-cream-100);
-  --color-surface: var(--wl-cream-50);
-  --color-sand: var(--wl-sand-200);
-  --color-sand-strong: var(--wl-sand-300);
+  --color-canvas: var(--wl-cream);
+  --color-surface: var(--wl-white);
+  --color-surface-muted: var(--wl-taupe-100);
+  --color-tone: var(--wl-taupe-300); /* image blocks */
+  --color-invert: var(--wl-taupe-900);
+  --color-invert-hover: var(--wl-taupe-800);
 
   /* Text */
-  --color-ink: var(--wl-ink-900);
-  --color-ink-muted: var(--wl-ink-500);
-  --color-ink-accent: var(--wl-terracotta-600);
+  --color-ink: var(--wl-taupe-900); /* 15.88:1 on cream */
+  --color-ink-body: var(--wl-taupe-800); /* 11.56:1 on cream */
+  --color-ink-muted: var(--wl-taupe-700); /* 7.30:1 on cream */
+  --color-ink-subtle: var(--wl-taupe-500); /* 3.36:1 — labels, see header note */
+  --color-ink-invert: var(--wl-cream); /* 15.88:1 on espresso */
+  --color-ink-invert-muted: var(--wl-taupe-200);
 
-  /* Actions */
-  --color-primary: var(--wl-clay-600);
-  --color-primary-hover: var(--wl-clay-700);
-  --color-primary-active: var(--wl-clay-800);
-  --color-on-primary: #ffffff; /* 6.4:1 on clay */
+  /* Brand action */
+  --color-brand: var(--wl-taupe-600); /* 5.64:1 on cream */
+  --color-brand-hover: var(--wl-taupe-700);
+  --color-on-brand: var(--wl-cream); /* 5.64:1 on brand */
 
-  /* Lines */
-  --color-hairline: var(--wl-ink-100); /* decorative dividers */
-  --color-line: var(--wl-ink-300); /* control boundaries — 3:1 */
-  --color-focus: var(--wl-clay-600); /* 5.7:1 on cream, 4.7:1 on sand */
+  /* Lines — inner divider, card border, section rule, control boundary */
+  --color-hairline: var(--wl-rule-inner);
+  --color-border: var(--wl-rule-card);
+  --color-rule: var(--wl-rule-section);
+  --color-line: var(--wl-taupe-200);
+  --color-focus: var(--wl-taupe-300);
+
+  /* Inert — disabled controls, unavailable variants */
+  --color-disabled: var(--wl-inert-200);
+  --color-on-disabled: var(--wl-inert-300);
+  --color-disabled-border: var(--wl-rule-section);
+  --color-inert: var(--wl-inert-100);
+  --color-on-inert: var(--wl-inert-400);
+  --color-inert-border: var(--wl-inert-200);
+
+  /* Feedback */
+  --color-success-surface: var(--wl-sage-surface);
+  --color-success-line: var(--wl-sage-500);
+  --color-on-success-surface: var(--wl-sage-900); /* 11.49:1 */
+  --color-error: var(--wl-rust-500);
+  --color-error-surface: var(--wl-rust-surface);
+  --color-on-error-surface: var(--wl-rust-800); /* 7.08:1 */
+  --color-info-surface: var(--wl-inert-100);
+  --color-info-line: var(--wl-taupe-500);
+  --color-on-info-surface: var(--wl-taupe-700); /* 7.10:1 */
+  --color-promo-surface: var(--wl-blush-100);
+  --color-on-promo-surface: var(--wl-blush-text); /* 4.94:1 */
+  --color-sage-surface: var(--wl-sage-surface);
+  --color-on-sage-surface: var(--wl-sage-500);
+
+  /* Text selection */
+  --color-selection: var(--wl-blush-200);
 
   /* === Typography ====================================================== */
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
-  --font-body: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Playfair Display carries the editorial voice; Poppins is the interface. */
+  --font-display: var(--font-playfair), Georgia, ui-serif, serif;
+  --font-body: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
 
-  /* Type scale — 16px base, fluid at the display end */
-  --text-eyebrow: 0.75rem; /* 12px, uppercase + tracked */
-  --text-caption: 0.875rem; /* 14px */
-  --text-body: 1rem; /* 16px — never smaller for body */
-  --text-body-lg: 1.125rem;
-  --text-lead: clamp(1.125rem, 0.4vw + 1rem, 1.375rem);
-  --text-h3: clamp(1.375rem, 0.6vw + 1.2rem, 1.75rem);
-  --text-h2: clamp(1.875rem, 1.6vw + 1.4rem, 2.75rem);
-  --text-h1: clamp(2.5rem, 4.2vw + 1.2rem, 4.75rem);
+  /* Scale from the system: Display 64 · H1 44 · H2 30 · H3 20 · Body 16 ·
+     Small 14 · Label 12 · Micro 11. Fluid at the display end only. */
+  --text-display: clamp(2.5rem, 3.6vw + 1.2rem, 4rem);
+  --text-h1: clamp(2rem, 1.8vw + 1.3rem, 2.75rem);
+  --text-h2: clamp(1.5rem, 1vw + 1.1rem, 1.875rem);
+  --text-h3: 1.25rem;
+  --text-card: 1.375rem; /* product name on a card */
+  --text-body: 1rem;
+  --text-small: 0.9375rem; /* 15 — list rows, prices */
+  --text-caption: 0.875rem; /* 14 */
+  --text-label: 0.75rem; /* 12 — button and nav labels */
+  --text-micro: 0.6875rem; /* 11 — field labels, badges */
 
-  --leading-tight: 1.05;
-  --leading-snug: 1.25;
-  --leading-body: 1.6; /* 1.5–1.75 per guideline */
-  --leading-relaxed: 1.75;
+  --leading-display: 1.05;
+  --leading-h1: 1.15;
+  --leading-h2: 1.2;
+  --leading-h3: 1.35;
+  --leading-card: 1.25;
+  --leading-body: 1.75;
+  --leading-snug: 1.6;
 
-  --tracking-eyebrow: 0.16em;
-  --tracking-tight: -0.02em;
+  --tracking-display: -0.02em;
+  --tracking-h2: -0.01em;
+  --tracking-label: 0.2em; /* button labels */
+  --tracking-nav: 0.18em; /* nav, tabs, field labels */
+  --tracking-eyebrow: 0.16em; /* section eyebrows, badges */
+  --tracking-wide: 0.1em; /* variant chips */
 
-  /* === Spacing — spacious rhythm, 4px based ============================ */
-  --spacing-section: clamp(4.5rem, 7vw, 8.5rem);
-  --spacing-gutter: clamp(1.25rem, 4vw, 3.5rem);
-  --spacing-block: 2.5rem;
-  --spacing-block-lg: 4rem;
+  /* === Spacing — 8pt: 8 · 16 · 24 · 32 · 48 · 64, sections 80–96 ======= */
+  --spacing-section: clamp(3.5rem, 6vw, 6rem);
+  --spacing-gutter: clamp(1.5rem, 4vw, 4rem);
+  --spacing-block: 2rem;
+  --spacing-block-lg: 3rem;
 
   --container-content: 80rem;
 
-  /* === Radii =========================================================== */
-  --radius-xs: 0.25rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1.375rem;
+  /* === Radii — corners stay near-square; pills only for badges and chips */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
   --radius-pill: 999px;
 
+  /* === Elevation — always warm-toned, never neutral grey ================ */
+  --shadow-sm: 0 1px 2px rgb(114 94 76 / 0.08);
+  --shadow-md: 0 4px 16px rgb(114 94 76 / 0.12);
+  --shadow-lg: 0 12px 32px rgb(30 26 22 / 0.16);
+
   /* === Easing ========================================================== */
-  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: ease;
+  /* Deceleration arriving, acceleration leaving. The entrance curve is a long
+     expo tail — it settles rather than stops, which suits the editorial pace
+     better than a spring's overshoot. */
+  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 }

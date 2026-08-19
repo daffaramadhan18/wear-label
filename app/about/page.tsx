@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Reveal } from "@/components/motion/reveal";
 import { Container } from "@/components/ui/container";
 import { Copy } from "@/components/ui/copy";
 import { Media } from "@/components/ui/media";
@@ -23,11 +24,15 @@ export default function AboutPage() {
     <Container className="py-section">
       <PageHeading id="about-heading" heading={about.heading} body={about.body} />
 
-      <div className="mt-block-lg">
-        <Media image={ABOUT_IMAGE} sizes="(min-width: 1024px) 80vw, 100vw" label="about image" />
-      </div>
+      <Reveal className="mt-block-lg">
+        <Media
+          image={ABOUT_IMAGE}
+          sizes="(min-width: 1024px) 80vw, 100vw"
+          label="Editorial photo"
+        />
+      </Reveal>
 
-      <div className="mt-block-lg flex flex-col gap-block wl-measure text-body leading-relaxed text-ink-muted">
+      <div className="mt-block-lg flex flex-col gap-block wl-measure text-body leading-body text-ink-body">
         {about.paragraphs.map((paragraph, index) => (
           <p key={index}>
             <Copy value={paragraph} label="paragraph" lines={4} />

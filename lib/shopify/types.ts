@@ -55,6 +55,8 @@ export interface Product {
   handle: string;
   /** Blank until catalogue copy exists. */
   title: string;
+  /** The material line under the name on a card, e.g. "Handwoven linen". */
+  material: string;
   description: string;
   /** Category facet — Shopify's `productType`. */
   productType: string;
