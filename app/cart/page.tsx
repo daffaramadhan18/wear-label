@@ -35,15 +35,30 @@ export default async function CartPage() {
       <h1 className="text-h1 leading-h1">{cartCopy.heading}</h1>
 
       {cart && lines.length > 0 ? (
-        <div className="mt-block-lg grid items-start gap-block-lg lg:grid-cols-[minmax(0,1fr)_24rem]">
-          <div className="flex flex-col gap-8">
+        /*
+         * Three children rather than a summary beside a stacked column, so the
+         * order can differ by width: on a phone the summary follows the lines
+         * directly, ahead of "Continue shopping", which would otherwise put
+         * checkout at the very bottom of a long page. The explicit row and column
+         * placement from `lg` up reproduces the design's two-column layout
+         * exactly.
+         */
+        <div className="mt-block-lg grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-x-12 lg:gap-y-8">
+          <div className="lg:col-start-1 lg:row-start-1">
             <CartLines lines={lines} />
-            <ButtonLink href="/shop" variant="outline" className="self-start">
-              {ui.continueShopping}
-            </ButtonLink>
           </div>
 
-          <OrderSummary cart={cart} />
+          <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <OrderSummary cart={cart} />
+          </div>
+
+          <ButtonLink
+            href="/shop"
+            variant="outline"
+            className="self-start lg:col-start-1 lg:row-start-2"
+          >
+            {ui.continueShopping}
+          </ButtonLink>
         </div>
       ) : (
         <div className="flex flex-col items-center gap-5 py-section text-center">

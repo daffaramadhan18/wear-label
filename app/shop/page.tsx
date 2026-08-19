@@ -35,7 +35,7 @@ export const metadata: Metadata = { title: shop.heading };
 
 const BANNER: Image = { url: null, altText: "", width: 1600, height: 440 };
 
-const CARD_SIZES = "(min-width: 1280px) 22vw, (min-width: 640px) 40vw, 90vw";
+const CARD_SIZES = "(min-width: 1280px) 22vw, (min-width: 640px) 40vw, 45vw";
 
 export default async function ShopPage(props: PageProps<"/shop">) {
   const [searchParams, products] = await Promise.all([props.searchParams, getAllProducts()]);
@@ -79,7 +79,7 @@ export default async function ShopPage(props: PageProps<"/shop">) {
           ) : (
             /* The grid re-staggers on every filter change, because each filter is a
                real navigation — the arrival doubles as the feedback that it applied. */
-            <Stagger className="grid gap-x-7 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+            <Stagger className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-7 sm:gap-y-10 xl:grid-cols-3">
               {items.map((product) => (
                 <StaggerItem key={product.id}>
                   <ProductCard product={product} headingLevel="h2" sizes={CARD_SIZES} />

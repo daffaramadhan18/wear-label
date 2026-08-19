@@ -33,7 +33,7 @@ export function InstagramStrip({
         {heading}
       </h2>
 
-      <div className="wl-marquee overflow-x-auto [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
+      <div className="wl-marquee wl-rail overflow-x-auto [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
         <ul className="wl-marquee-track">
           {run.map((image, index) => (
             <li key={index} className="w-58 shrink-0" aria-hidden={index >= images.length}>

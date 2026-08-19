@@ -23,6 +23,11 @@ import { discountPercent, TAGS, type Product } from "@/lib/shopify";
  * guess a variant; for apparel that is a return, not a conversion. It is labelled
  * as what it does.
  *
+ * The name drops one rung on the system's own scale — H3 20 instead of the card's
+ * 22 — below `sm`, where the catalogue runs two cards to a row and the column is
+ * about 155px wide. A 22px serif wraps to three lines there. Every other use of
+ * the card is one-up at that width and never sees it.
+ *
  * `<CardHover>` supplies the article element and the hover/focus state; the image
  * inside `<CardMedia>` scales with it. That is the only client code in the card
  * besides the save button — everything else stays server-rendered.
@@ -63,11 +68,11 @@ export function ProductCard({
           <SaveButton
             handle={product.handle}
             title={product.title}
-            className="size-9.5 rounded-xs bg-canvas/95 hover:bg-canvas"
+            className="wl-tap size-9.5 rounded-xs bg-canvas/95 hover:bg-canvas"
           />
           <Link
             href={`/shop/${product.handle}#options`}
-            className="inline-flex size-9.5 items-center justify-center rounded-xs bg-brand text-on-brand transition-colors duration-(--duration-base) hover:bg-invert"
+            className="wl-tap inline-flex size-9.5 items-center justify-center rounded-xs bg-brand text-on-brand transition-colors duration-(--duration-base) hover:bg-invert"
           >
             <BagIcon className="size-4.5" />
             <span className="sr-only">
@@ -82,7 +87,7 @@ export function ProductCard({
           <Copy value={product.material} label="material" />
         </p>
 
-        <Heading className="font-display text-card leading-card text-ink">
+        <Heading className="font-display text-h3 leading-h3 text-ink sm:text-card sm:leading-card">
           <Link
             href={`/shop/${product.handle}`}
             className="after:absolute after:inset-0 after:content-[''] hover:text-brand"

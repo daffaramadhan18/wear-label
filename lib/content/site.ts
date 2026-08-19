@@ -361,5 +361,5 @@ export const footer = {
     },
   ],
   socials: [] as { label: string; href: string }[],
-  copyright: "© 2026 Wear Label. Layout structure after the Flatlogic e-commerce template.",
+  copyright: "© 2026 Wear Label.",
 } as const;
