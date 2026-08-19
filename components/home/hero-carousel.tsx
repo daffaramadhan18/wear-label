@@ -47,13 +47,13 @@ import type { Image } from "@/lib/shopify";
  * wrapper that holds them becomes `display: contents` at `md` — one set of markup,
  * with each control positioned exactly as the design draws it on a wide screen.
  *
- * The artwork comes from the design's own image slots, exported to `public/home/`
- * and named for the slide they sit on, not for the slot they came from — **the
- * design's order is deliberately reversed here**. It maps slots by position
- * (`slotId: 'sf-hero-' + (i + 1)`), which puts the order-notes card first; the
- * photograph leads instead. So `hero-1.webp` is the design's `sf-hero-2` and
- * `hero-2.webp` is its `sf-hero-1`. Its state file also holds an unused `sf-hero`
- * from an earlier single-slide version; it is neither of these two.
+ * The artwork comes from the design's own image slots, exported to `public/home/`.
+ * The filenames are historical — each was named for the slide it first sat on, and
+ * those two have since been swapped, so **`hero-2.webp` leads and `hero-1.webp`
+ * follows**. In the design's own terms that is `sf-hero-1` then `sf-hero-2`: the
+ * band now runs them in the order the design maps them (`slotId: 'sf-hero-' + (i +
+ * 1)`), with the order-notes card first. The design's state file also holds an
+ * unused `sf-hero` from an earlier single-slide version; it is neither of these two.
  *
  * A slide with no entry in `HERO_IMAGES` falls back to the labelled placeholder at
  * the band's exact size, so a missing shot never breaks the band.
@@ -65,7 +65,7 @@ const ROTATE_MS = 3000;
 type HeroImage = Image & {
   /**
    * The artwork is an image OF text, so it cannot be cropped. Set here, it is
-   * dropped below `md` and the band's own surface shows instead — see slide 2.
+   * dropped below `md` and the band's own surface shows instead — see slide 1.
    */
   textArt?: boolean;
 };
@@ -78,13 +78,6 @@ type HeroImage = Image & {
  * third, so the crop is what decides how much of a shot survives.
  */
 const HERO_IMAGES: HeroImage[] = [
-  {
-    url: "/home/hero-1.webp",
-    altText:
-      "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall.",
-    width: 1200,
-    height: 675,
-  },
   /*
    * The studio's own order-notes card. It is an image OF text, which is why the
    * alt below carries the whole of that text rather than describing the picture —
@@ -108,6 +101,13 @@ const HERO_IMAGES: HeroImage[] = [
     textArt: true,
     altText:
       "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
+    width: 1200,
+    height: 675,
+  },
+  {
+    url: "/home/hero-1.webp",
+    altText:
+      "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall.",
     width: 1200,
     height: 675,
   },

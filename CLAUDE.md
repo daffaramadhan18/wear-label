@@ -231,10 +231,12 @@ so the hero artwork cannot be fetched that way. `render_preview` serves the proj
 over HTTP and relative subresources resolve against it, which is how
 `public/home/hero-{1,2}.webp` were pulled byte-exact. The design maps slots by
 position (`slotId: 'sf-hero-' + (i + 1)`); an unused `sf-hero` from an earlier
-single-slide version is also in that file and is not one of them. **The two hero
-files are named for the slide they sit on, and that order is the reverse of the
-design's** — the design leads with the order-notes card, this build leads with the
-photograph, so `hero-1.webp` is `sf-hero-2` and `hero-2.webp` is `sf-hero-1`.
+single-slide version is also in that file and is not one of them. **The two filenames no longer
+match the slides they sit on** — they were named for the slides they first sat on
+and the two have since been swapped, so `hero-2.webp` (`sf-hero-1`, the order-notes
+card) leads and `hero-1.webp` (`sf-hero-2`, the photograph) follows. That is the
+design's own order; the slide order lives in `HERO_IMAGES` in
+`components/home/hero-carousel.tsx`, not in the filenames.
 
 The published design system that this repo's components sync *to* is a separate
 project, [`096a4d56-a7d8-49ce-9d7a-4fe26ac82b54`](https://claude.ai/design/p/096a4d56-a7d8-49ce-9d7a-4fe26ac82b54).
