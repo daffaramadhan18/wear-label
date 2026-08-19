@@ -8,10 +8,65 @@ Company profile + product catalogue + commerce storefront for **Wear Label**, a
 fashion/apparel brand in Bandung, Indonesia. Custom Next.js frontend on top of
 Shopify as the commerce engine.
 
-**Status: the storefront is built against fixtures.** Six routes, the design
-system, the catalogue data and the bag all exist. What is missing is a Shopify
-store and a handful of copy decisions — all listed
-under [Still open](#still-open). Nothing in that list may be guessed at; ask.
+**Status: every screen is built, against fixtures.** Six routes, the design system,
+the real catalogue (eleven pieces, real names, materials, prices and photography) and
+the bag all exist and work. Three things are missing, and only three:
+
+1. **A Shopify store.** No credentials, so no GraphQL client — `lib/shopify/` serves
+   typed fixtures behind the exact shapes the Storefront API returns.
+2. **Copy.** Brand voice is unsettled, so `lib/content/site.ts` and the per-product
+   `description` / `care` fields hold `""`, which renders a labelled placeholder at
+   final size rather than filler.
+3. **The decisions under [Still open](#still-open).** Nothing in that list may be
+   guessed at; ask.
+
+Everything else — palette, type, layout, motion, accessibility, the catalogue itself —
+is settled and sourced. If you are about to invent a price, a stock number, a review,
+a category or a shipping rate, stop: that is the one class of change this repo refuses.
+
+## Working agreement
+
+**Finish the job, then land it.** When you are asked to change something, do the work
+and get it into `origin/main` in the same turn. Do not stop to ask whether to commit
+or push, and do not leave the change sitting in the working tree.
+
+The pipeline, in order:
+
+```bash
+# 1. verify first — a broken commit is worse than an unfinished one
+npx tsc --noEmit && npm run lint && npm run build
+
+# 2. stage exactly what you changed, never `git add -A` blind
+git add <the files you touched>
+
+# 3. commit straight onto main — no feature branch
+git commit          # message: what changed and WHY, in the imperative
+
+# 4. push
+git push origin main
+
+# 5. keep the graph current
+graphify update .
+```
+
+The end state after every task, without being asked:
+
+- **No branches.** `git branch` shows `main` and nothing else. Do not create a
+  working branch and do not leave one behind; if you made one, merge it
+  fast-forward and delete it before you finish.
+- **No uncommitted changes.** `git status` is clean, apart from files that are
+  deliberately untracked.
+- **Nothing unpushed.** `git status -sb` shows no `ahead` marker. Confirm with
+  `git ls-remote origin refs/heads/main` if it matters — that reads the remote
+  rather than a stale local ref.
+
+Two things this does **not** license: committing work you have not verified, and
+sweeping unrelated staged files into your commit. Stage by path — a previous session
+may have left something staged that is not yours to land.
+
+Commit messages carry the reasoning, not just the change. Anything decided,
+derived or deliberately not done belongs in the message; the next person's first
+question is always "why is it like this".
 
 ## Architecture
 
@@ -98,7 +153,85 @@ public/home/           Hero artwork, exported from the design's image slots
 .design-sync/          Config for syncing components to claude.ai/design
 ```
 
-Commands: `npm run dev`, `npm run build`, `npm start`, `npm run lint`.
+## Commands and environment
+
+```bash
+npm run dev      # http://localhost:3000
+npm run build    # production build (Turbopack)
+npm start        # serve the build
+npm run lint     # eslint; ds-bundle/ and .ds-sync/ are ignored as generated
+npx tsc --noEmit # types only
+npx next typegen # regenerate PageProps/LayoutProps route types after adding a route
+```
+
+| Variable | Effect when set |
+|---|---|
+| `SHOPIFY_STORE_DOMAIN` | With the token below, flips `lib/shopify/env.ts` to "live". Every read then throws `notImplemented` until the GraphQL client is written — deliberately loud |
+| `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Headless-channel token. Same effect |
+| `NEXT_PUBLIC_SITE_URL` | `metadataBase` for canonical and OG URLs. Falls back to `http://localhost:3000` |
+
+Nothing else is read from the environment. There is no `.env` in the repo and no
+secret in the client bundle: the Storefront token is public by design, and the cart
+cookie is `httpOnly`.
+
+## The data layer
+
+Ten modules, and the boundary between them is the point. `index.ts` is the only
+thing components import for catalogue data; `cart.ts` is imported directly by the
+few server components that need the bag, because it reads a cookie.
+
+| Module | Exports | Notes |
+|---|---|---|
+| `index.ts` | `getAllProducts`, `getFeaturedProducts`, `getProductByHandle`, `getRelatedProducts`, and a re-export of everything below | The barrel. Every read is `async` so the fixtures→GraphQL swap needs no call-site change |
+| `types.ts` | `Product`, `ProductVariant`, `ProductOption`, `ProductOptionValue`, `SelectedOption`, `Money`, `Image`, `CurrencyCode` | Mirrors Storefront API shapes. One deviation: `Image.url` is nullable, for the slots with no photography yet |
+| `fixtures.ts` | `products` | The real catalogue, from the design's `CATALOG`. Deleted when the store goes live |
+| `vocabulary.ts` | `TAGS`, `COLOURWAYS` | The strings the data layer and the UI must agree on. Separate from `catalogue.ts` so `fixtures.ts` can import them without a cycle |
+| `catalogue.ts` | `parseCatalogueQuery`, `catalogueHref`, `toggle`, `filterProducts`, `catalogueFacets`, `paginate`, `discountPercent`, `isFiltered`, `SORT_KEYS`, `SORT_LABELS`, `QUERY_KEYS`, `PER_PAGE` | Filtering, sorting, facets and paging. In memory today, Storefront query arguments later |
+| `cart.ts` | `getCart`, `getCartCount`, `addCartLine`, `setCartLineQuantity`, `removeCartLine`, `Cart`, `CartLine` | Server-only. The bag lives in a cookie until Shopify holds it |
+| `actions.ts` | The Server Functions the forms post to | The only place that writes the cart cookie |
+| `form-state.ts` | `FormNotice`, `NO_NOTICE` | A `"use server"` module may only export async functions, so the type and the constant live outside `actions.ts` |
+| `env.ts` | `isLive`, `notImplemented` | One definition of "live", shared by the catalogue and the bag |
+| `money.ts` | `formatMoney` | `Intl.NumberFormat`, cached per locale+currency. IDR renders `Rp 165.000` |
+
+`QUERY_KEYS` is the URL contract — `category`, `size`, `colour`, `made-to-order`,
+`stock`, `sort`, `page`. `lib/content/site.ts` writes some of those into hrefs by
+hand (`/shop?category=Wide+leg`), so renaming a key breaks copy as well as code. Grep
+before you touch one.
+
+## The catalogue
+
+Eleven pieces, from the design project's `CATALOG` constant. Names, materials,
+prices, the markdowns and the new flags are the client's own data; the photographs
+are the client's own shots, one square `.webp` per piece in `public/products/`, named
+by handle.
+
+| Handle | Name | Material | Price | Was | Flags | Category |
+|---|---|---|---|---|---|---|
+| `basic-linen-cullote` | Basic Linen Culotte | Handwoven linen | Rp 165.000 | | | Culottes |
+| `casual-culotte-zipper` | Casual Culotte Zipper | Washed linen | Rp 165.000 | | | Culottes |
+| `basic-pants` | Basic Pants | Cotton poplin | Rp 165.000 | | | Straight cut |
+| `cerra-loose-pants` | Cerra Loose Pants | Cotton twill | Rp 159.000 | | | Wide leg |
+| `dalia-wide-pants` | Dalia Wide Pants | Tencel | Rp 175.000 | | | Wide leg |
+| `lilo-pants` | Lilo Pants | Viscose blend | Rp 159.200 | Rp 199.000 | New | Wide leg |
+| `milly-stripe-pants` | Milly Stripe Pants | Linen blend | Rp 159.200 | Rp 199.000 | New | Wide leg |
+| `moa-pants` | Moa Pants | Cotton twill | Rp 159.200 | Rp 199.000 | New | Wide leg |
+| `pallo-pants` | Pallo Pants | Pinstripe linen | Rp 159.200 | Rp 199.000 | | Wide leg |
+| `taka-flare-pants` | Taka Flare Pants | Cupro | Rp 199.000 | | | Wide leg |
+| `yora-loose-pants` | Yora Loose Pants | Cotton twill | Rp 165.000 | | | Wide leg |
+
+- **Sizes** XS–XL and **colourways** Cream, Camel, Taupe, Sage, Espresso (hexes in
+  `vocabulary.ts`, taken from the design system's Colourway row) apply to every
+  piece, giving 25 variants each. That matrix is the design's, not an inference from
+  the catalogue.
+- **Stock is not modelled.** Every size and colourway reads as available. The
+  sold-out states are implemented throughout and light up the moment Shopify reports
+  inventory; inventing a sold-out run would be inventing commerce data.
+- **Facets** are category, size, colourway and made-to-order. Counts come from the
+  whole catalogue, never the filtered set — a count that shrinks as you narrow tells
+  you nothing about what the filter would do.
+- **`productType` is derived, and that is documented in the file**: the piece's own
+  name where it states the cut, the garment shot where it does not.
+
 
 ## Conventions
 
@@ -207,6 +340,44 @@ Commands: `npm run dev`, `npm run build`, `npm start`, `npm run lint`.
   sync. **The sync is currently behind the app** — the components added for this
   storefront are not in `SURFACE` and have no previews.
 
+### Performance
+
+The site carries three continuous background loops and a page of scroll reveals. Both
+have already cost a round of visible stutter, and the rules below are what came out of
+fixing it.
+
+- **A continuous loop animates `transform` or `opacity`. Nothing else.** Those two are
+  composited: the texture is rasterised once and the compositor moves it. Every other
+  property — `background-position`, `stroke-dashoffset`, `width`, colour — is
+  re-rasterised on the main thread every frame, and the cost scales with how big the
+  element is on screen. That is why a 36-strand line-art wash was deleted rather than
+  tuned, and why the aurora translates an oversized layer instead of sliding a
+  background.
+- **`background-attachment: fixed` is banned.** It ties a layer's paint to scroll
+  position, and under an ancestor `filter` it does not even resolve against the
+  viewport the way it reads. It was the single worst offender on this site.
+- **Never wrap a 3D scene or a blended layer in something that animates opacity.**
+  `<Reveal>` and `<Stagger>` animate opacity, which makes their wrapper a stacking
+  context. Around the voices wall that flattens `preserve-3d`, so the plane's
+  `translateZ(-100px)` stops holding the cards behind the stage fades and the wall
+  ends in a hard edge; around an `<AuroraBand>` it makes `mix-blend-mode: soft-light`
+  blend against the wrapper instead of the page, which draws a visible rectangle. The
+  voices wall, the made-to-order band and the Instagram strip are therefore
+  deliberately **not** wrapped — see the note in `app/page.tsx`.
+- **Skip what is off screen.** `content-visibility: auto` on the voices stage (md and
+  up, where the tilted 40-card scene exists) means the browser stops rendering it
+  while it is scrolled past. Give anything you add that treatment a correct
+  `contain-intrinsic-size`, or scope it to the breakpoint where its height is known —
+  reserving the wrong height puts a jump in the page.
+- **The mobile layout is the cheap one, on purpose.** Below `md` the voices wall loses
+  its perspective, its plane transform, its animations and half its cards. If
+  something is smooth on a phone and heavy on a laptop, look at what the desktop
+  layout switches back on before blaming the browser.
+- **One known cost is still there.** The aurora's `filter: blur(10px)` sits on the
+  parent while the animated layer is its child, so the blur is recomputed every frame
+  over the whole band. Moving the blur onto the moving layer, or baking a
+  pre-softened gradient, is the next step if a band still costs too much.
+
 ## Design sources
 
 Two files in Claude Design project
@@ -224,6 +395,22 @@ the voices wall. Both are ported, not dropped in: the repo has no `cn()`, no
 `tailwind.config.js` (Tailwind v4 keeps theme in `tokens.css`) and no appetite for a
 second marquee primitive. Read the two READMEs there for the reasoning behind the
 measured values before changing any of them.
+
+### Assets, and how they were pulled
+
+Everything in `public/` came out of the design project byte-exact — nothing was
+redrawn, re-exported or approximated.
+
+| Local | From | Notes |
+|---|---|---|
+| `public/products/*.webp` (11) | `assets/products/` | The catalogue shots. Square, 639–1024px, named by handle |
+| `public/brand/*.png` (7) | `assets/` | `wordmark`, `stacked`, `mark`, each with a cream variant, plus `wordmark-taupe`. 350x100 / 200x140 / 190x180 |
+| `public/home/hero-{1,2}.webp` | the design's `sf-hero-*` image slots | The two hero slides |
+| `app/icon.png`, `app/apple-icon.png` | the monogram | Favicon, per the design system's "monogram for favicons" rule |
+
+The icon set is **not** in `public/`. `components/ui/icons.tsx` carries the path data
+from `assets/icons/*.svg` verbatim — the SVGs were pulled once to diff against it,
+matched exactly, and were then removed rather than shipped twice.
 
 **Binary assets and the 256 KiB read cap.** `read_file` refuses binaries outright and
 truncates text at 256 KiB, and `.image-slots.state.json` is a single 521 KiB line —
