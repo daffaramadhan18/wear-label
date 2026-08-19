@@ -49,3 +49,9 @@ __pycache__/
 /.design-sync/.cache/
 /.design-sync/learnings/
 /.design-sync/node_modules
+
+# graphify — generated knowledge graph, rebuilt with `graphify update .`
+/graphify-out/
+
+# Claude Code machine state
+/.claude/worktrees/
