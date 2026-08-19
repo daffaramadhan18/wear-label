@@ -1,56 +1,79 @@
-import { Collections } from "@/components/home/collections";
-import { FeaturedCollection } from "@/components/home/featured-collection";
-import { Hero } from "@/components/home/hero";
-import { Lookbook } from "@/components/home/lookbook";
-import { Materials } from "@/components/home/materials";
-import { Newsletter } from "@/components/home/newsletter";
-import { Notes } from "@/components/home/notes";
-import { Process } from "@/components/home/process";
-import { Story } from "@/components/home/story";
-import { Values } from "@/components/home/values";
-import { getCollections, getFeaturedProducts, type Image } from "@/lib/shopify";
+import { ButtonLink } from "@/components/ui/button";
+import { Container } from "@/components/ui/container";
+import { Copy } from "@/components/ui/copy";
+import { ArrowRightIcon } from "@/components/ui/icons";
+import { Media } from "@/components/ui/media";
+import { Section, SectionHeading } from "@/components/ui/section";
+import { ProductCard } from "@/components/shop/product-card";
+import { home } from "@/lib/content/site";
+import { getFeaturedProducts, type Image } from "@/lib/shopify";
 
 /**
- * Landing page.
- *
- * Section order follows a storytelling pattern for a brand-led storefront:
- * hook → trust → product → who we are → how it's made → editorial → proof → CTA.
- * Product and collection data comes from `lib/shopify`; nothing here touches the
- * Storefront API directly.
+ * Home — two sections only: a hero and a short strip of products that leads into
+ * `/shop`. Everything else a brand-led landing page usually carries (lookbook,
+ * story, materials, testimonials, newsletter) is deliberately not here.
  */
 
-const HERO_IMAGE: Image = {
-  url: null, // → /home/hero.jpg
-  altText: "Two people in handwoven cotton, photographed in morning light in Bandung",
-  width: 1200,
-  height: 1400,
-};
+const HERO_IMAGE: Image = { url: null, altText: "", width: 1200, height: 1400 };
 
-const STORY_IMAGE: Image = {
-  url: null, // → /home/workshop.jpg
-  altText: "The Wear Label workshop in Bandung, cloth laid out on a cutting table",
-  width: 1200,
-  height: 1500,
-};
+const CARD_SIZES = "(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw";
 
 export default async function HomePage() {
-  const [featured, collections] = await Promise.all([
-    getFeaturedProducts(4),
-    getCollections(3),
-  ]);
+  const featured = await getFeaturedProducts(4);
 
   return (
     <>
-      <Hero image={HERO_IMAGE} />
-      <Values />
-      <FeaturedCollection products={featured} />
-      <Story image={STORY_IMAGE} />
-      <Materials />
-      <Process />
-      <Collections collections={collections} />
-      <Lookbook />
-      <Notes />
-      <Newsletter />
+      <section aria-labelledby="hero-heading" className="bg-canvas">
+        <Container className="py-section">
+          <div className="grid items-center gap-block-lg lg:grid-cols-[1fr_0.9fr]">
+            <div>
+              <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-ink-accent">
+                <Copy value={home.hero.eyebrow} label="eyebrow" className="max-w-40" />
+              </p>
+              <h1 id="hero-heading" className="mt-6 text-h1 leading-tight">
+                <Copy value={home.hero.heading} label="headline" lines={2} />
+              </h1>
+              <p className="mt-7 wl-measure text-lead leading-relaxed text-ink-muted">
+                <Copy value={home.hero.body} label="intro" lines={3} />
+              </p>
+              <div className="mt-block">
+                <ButtonLink href="/shop" size="lg">
+                  <Copy value={home.hero.cta} label="cta" inline />
+                  <ArrowRightIcon className="size-5" />
+                </ButtonLink>
+              </div>
+            </div>
+
+            <Media
+              image={HERO_IMAGE}
+              priority
+              sizes="(min-width: 1024px) 44vw, 100vw"
+              label="hero image"
+            />
+          </div>
+        </Container>
+      </section>
+
+      <Section tone="sand" labelledBy="featured-heading">
+        <SectionHeading
+          id="featured-heading"
+          heading={home.featured.heading}
+          body={home.featured.body}
+          action={
+            <ButtonLink href="/shop" variant="outline">
+              <Copy value={home.featured.cta} label="cta" inline />
+            </ButtonLink>
+          }
+        />
+
+        <ul className="mt-block-lg grid gap-block sm:grid-cols-2 lg:grid-cols-4">
+          {featured.map((product) => (
+            <li key={product.id}>
+              <ProductCard product={product} sizes={CARD_SIZES} />
+            </li>
+          ))}
+        </ul>
+      </Section>
     </>
   );
 }

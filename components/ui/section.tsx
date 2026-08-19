@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Copy } from "./copy";
 import { Container } from "./container";
 
 /**
@@ -13,75 +14,70 @@ export function Section({
   labelledBy,
 }: {
   id?: string;
-  tone?: "canvas" | "surface" | "sand" | "invert";
+  tone?: "canvas" | "sand";
   children: ReactNode;
   className?: string;
   labelledBy?: string;
 }) {
   const tones = {
     canvas: "bg-canvas text-ink",
-    surface: "bg-surface text-ink",
     sand: "bg-sand text-ink",
-    invert: "wl-on-dark bg-invert text-ink-invert",
   } as const;
 
   return (
     <section
       id={id}
       aria-labelledby={labelledBy}
-      className={`relative py-section ${tones[tone]} ${className}`}
+      className={`py-section ${tones[tone]} ${className}`}
     >
       <Container>{children}</Container>
     </section>
   );
 }
 
-/** Heading block shared by every section: eyebrow + h2 + optional lead. */
-export function SectionHeading({
+/** The `h1` block at the top of a page. Text resolves through `<Copy>`. */
+export function PageHeading({
   id,
-  eyebrow,
   heading,
   body,
-  tone = "canvas",
-  align = "start",
+}: {
+  id: string;
+  heading: string;
+  body: string;
+}) {
+  return (
+    <div className="wl-measure">
+      <h1 id={id} className="text-h1 leading-tight">
+        <Copy value={heading} label="page heading" />
+      </h1>
+      <p className="mt-7 text-lead leading-relaxed text-ink-muted">
+        <Copy value={body} label="intro" lines={2} />
+      </p>
+    </div>
+  );
+}
+
+/** The `h2` block at the top of a section, with an optional trailing action. */
+export function SectionHeading({
+  id,
+  heading,
+  body,
   action,
 }: {
   id: string;
-  eyebrow: string;
   heading: string;
-  body?: string;
-  tone?: "canvas" | "invert";
-  align?: "start" | "center";
+  body: string;
   action?: ReactNode;
 }) {
-  const isInvert = tone === "invert";
-
   return (
-    <div
-      className={`flex flex-col gap-6 ${
-        align === "center" ? "items-center text-center" : ""
-      } ${action ? "md:flex-row md:items-end md:justify-between" : ""}`}
-    >
-      <div className={`wl-measure ${align === "center" ? "mx-auto" : ""}`}>
-        <p
-          className={`text-eyebrow font-medium uppercase tracking-eyebrow ${
-            isInvert ? "text-ink-invert-muted" : "text-ink-accent"
-          }`}
-        >
-          {eyebrow}
-        </p>
-        <h2 id={id} className="mt-4 text-h2">
-          {heading}
+    <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="wl-measure">
+        <h2 id={id} className="text-h2">
+          <Copy value={heading} label="heading" />
         </h2>
-        {body ? (
-          <p
-            className={`mt-5 text-lead leading-relaxed ${
-              isInvert ? "text-ink-invert-muted" : "text-ink-muted"
-            }`}
-          >
-            {body}
-          </p>
-        ) : null}
+        <p className="mt-5 text-body-lg leading-relaxed text-ink-muted">
+          <Copy value={body} label="body" lines={2} />
+        </p>
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>

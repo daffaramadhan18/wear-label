@@ -1,26 +1,22 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
-type Variant = "primary" | "secondary" | "outline" | "quiet";
+type Variant = "primary" | "outline" | "quiet";
 type Size = "md" | "lg";
 
 /**
  * Shared action styling. Every screen keeps a single `primary` action; other
  * actions use `outline` or `quiet` so the hierarchy stays readable.
  *
- * Minimum control height is 44px (comfortably over the 24px WCAG 2.2 web target
- * minimum) and the outline variant uses `border-line`, which clears 3:1 against
- * the canvas.
- *
+ * Minimum control height is 44px (comfortably over the 24px WCAG 2.2 target
+ * minimum) and `outline` uses `border-line`, which clears 3:1 against the canvas.
  * Every variant has a distinct pressed state as well as hover, so touch users —
- * who never see hover — still get confirmation that the press landed. The press
- * feedback is a colour change, not a transform, so it cannot shift layout.
+ * who never see hover — still get confirmation. Press feedback is a colour
+ * change, never a transform, so it cannot shift layout.
  */
 const VARIANTS: Record<Variant, string> = {
   primary:
     "bg-primary text-on-primary hover:bg-primary-hover active:bg-primary-active border border-transparent",
-  secondary:
-    "bg-secondary text-on-secondary hover:bg-secondary-hover active:bg-secondary-active border border-transparent",
   outline:
     "bg-transparent text-ink border border-line hover:bg-sand hover:border-ink active:bg-sand-strong active:border-ink",
   quiet:

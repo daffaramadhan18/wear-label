@@ -11,18 +11,22 @@
  *   SHOPIFY_STOREFRONT_ACCESS_TOKEN=...   (public Headless-channel token)
  */
 
-import { collections as collectionFixtures, products as productFixtures } from "./fixtures";
-import type { Collection, Product } from "./types";
+import { products as productFixtures } from "./fixtures";
+import type { Product } from "./types";
 
-export type {
-  Collection,
-  Image,
-  Money,
-  Product,
-  ProductOption,
-  ProductVariant,
-} from "./types";
+export type { Image, Money, Product, ProductOption, ProductVariant } from "./types";
 export { formatMoney } from "./money";
+export {
+  catalogueFacets,
+  filterProducts,
+  isFiltered,
+  parseCatalogueQuery,
+  QUERY_KEYS,
+  SORT_KEYS,
+  SORT_LABELS,
+  type CatalogueQuery,
+  type SortKey,
+} from "./catalogue";
 
 function isLive(): boolean {
   return Boolean(
@@ -54,9 +58,4 @@ export async function getFeaturedProducts(limit = 4): Promise<Product[]> {
 export async function getProductByHandle(handle: string): Promise<Product | null> {
   if (isLive()) notImplemented("getProductByHandle");
   return productFixtures.find((product) => product.handle === handle) ?? null;
-}
-
-export async function getCollections(limit = 3): Promise<Collection[]> {
-  if (isLive()) notImplemented("getCollections");
-  return collectionFixtures.slice(0, limit);
 }

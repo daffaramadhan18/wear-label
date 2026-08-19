@@ -1,15 +1,21 @@
 /**
  * Shopify Storefront API domain types.
  *
- * These deliberately mirror the shapes the Storefront API returns (Money with a
- * string `amount` + `currencyCode`, `priceRange.minVariantPrice`, `handle`
- * instead of slug, ...) so that swapping fixtures for live GraphQL is a change
- * inside `lib/shopify/` and nothing else.
+ * These mirror the shapes the Storefront API returns (`Money` with a string
+ * `amount` + `currencyCode`, `priceRange.minVariantPrice`, `handle` instead of
+ * slug, `productType` for the category facet) so that swapping fixtures for live
+ * GraphQL is a change inside `lib/shopify/` and nothing else.
  *
- * One local deviation: `Image.url` is nullable, because the storefront is being
- * built before real photography exists. A null url renders a token-styled
- * placeholder of the correct aspect ratio (no layout shift). Once photos land in
- * `public/`, set the url in `fixtures.ts` — no component changes.
+ * Two deliberate local deviations, both because the storefront is being built
+ * before the catalogue exists:
+ *
+ *   1. `Image.url` is nullable — a null url renders a labelled placeholder at the
+ *      right aspect ratio, so there is no layout shift once photos land.
+ *   2. Prices are nullable — currency and pricing are not decided yet, and a
+ *      nullable price renders a placeholder instead of inventing a number.
+ *
+ * Both narrow to non-null when real data arrives; components already handle the
+ * non-null case.
  */
 
 export type CurrencyCode = "IDR" | "USD";
@@ -21,6 +27,7 @@ export interface Money {
 
 export interface Image {
   url: string | null;
+  /** Empty until real photography exists; the placeholder is labelled instead. */
   altText: string;
   width: number;
   height: number;
@@ -40,30 +47,20 @@ export interface ProductVariant {
   id: string;
   title: string;
   availableForSale: boolean;
-  price: Money;
+  price: Money | null;
 }
 
 export interface Product {
   id: string;
   handle: string;
+  /** Blank until catalogue copy exists. */
   title: string;
-  /** Short one-line descriptor shown on cards. */
-  subtitle: string;
   description: string;
+  /** Category facet — Shopify's `productType`. */
+  productType: string;
   featuredImage: Image;
-  priceRange: { minVariantPrice: Money };
-  compareAtPrice: Money | null;
+  priceRange: { minVariantPrice: Money | null };
   options: ProductOption[];
   variants: ProductVariant[];
-  tags: string[];
   availableForSale: boolean;
-}
-
-export interface Collection {
-  id: string;
-  handle: string;
-  title: string;
-  description: string;
-  image: Image;
-  productCount: number;
 }

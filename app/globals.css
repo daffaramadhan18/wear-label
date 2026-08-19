@@ -2,14 +2,14 @@
 @import "./tokens.css";
 
 /*
- * Base layer. No design values live here — everything resolves to a token
- * from ./tokens.css.
+ * Base layer. No design values live here — everything resolves to a token from
+ * ./tokens.css. There is no scroll or entrance animation in this build.
  */
 
 @layer base {
   html {
     /* Smooth in-page anchor scrolling; the data attribute in layout.tsx tells
-       Next 16 to still jump instantly on route change (see version-16 docs). */
+       Next 16 to still jump instantly on route change. */
     scroll-behavior: smooth;
 
     /* The header is sticky, so anything scrolled to by an anchor OR by keyboard
@@ -30,8 +30,7 @@
 
   h1,
   h2,
-  h3,
-  h4 {
+  h3 {
     font-family: var(--font-display);
     font-weight: 500;
     letter-spacing: var(--tracking-tight);
@@ -43,7 +42,7 @@
     text-wrap: pretty;
   }
 
-  /* Prices, sizes and any tabular figure must not shift width. */
+  /* Prices, counts and any tabular figure must not shift width. */
   [data-numeric] {
     font-variant-numeric: tabular-nums;
   }
@@ -59,13 +58,9 @@
   a,
   button,
   input,
+  select,
   summary {
     touch-action: manipulation;
-  }
-
-  ::selection {
-    background-color: var(--color-clay-fill);
-    color: var(--color-ink);
   }
 
   /* Reserve intrinsic ratio so media never causes layout shift. */
@@ -77,38 +72,10 @@
 }
 
 @layer components {
-  /* ------------------------------------------------------------------
-   * Texture — a very low-opacity grain overlay, per the style direction.
-   * Purely decorative: pointer-events none, hidden from a11y tree.
-   * ---------------------------------------------------------------- */
-  .wl-grain::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: var(--grain-opacity);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
-    mix-blend-mode: multiply;
-  }
-
-  /* Editorial arch crop used on lookbook / story imagery. */
-  .wl-arch {
-    border-radius: var(--radius-arch);
-  }
-
-  /* Hairline rule that reads as a hand-drawn divider. */
+  /* Hairline rule used by the footer. */
   .wl-rule {
     border: 0;
     border-top: 1px solid var(--color-hairline);
-  }
-
-  /*
-   * Marks a dark band. Re-points the focus indicator at a colour that actually
-   * clears 3:1 against it — the default clay ring is only 2.6:1 on dark and
-   * would be effectively invisible.
-   */
-  .wl-on-dark {
-    --color-focus: var(--color-focus-invert);
   }
 }
 
@@ -116,74 +83,11 @@
   .wl-measure {
     max-width: var(--measure);
   }
-
-  .wl-measure-narrow {
-    max-width: var(--measure-narrow);
-  }
-}
-
-/* ====================================================================
- * Motion — subtle tier (3/10), zero JavaScript.
- *
- * Scroll reveals use CSS scroll-driven animations. Browsers without
- * `animation-timeline: view()` simply render the final state, so content is
- * always visible to users, crawlers and no-JS clients — there is no
- * hidden-by-default state to recover from.
- * ================================================================= */
-
-@keyframes wl-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes wl-rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   /* Smooth scrolling is motion too — jump instead. */
   html {
     scroll-behavior: auto;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  /* One-shot entrance for above-the-fold content. */
-  .wl-rise {
-    animation: wl-rise var(--duration-enter) var(--ease-natural) both;
-  }
-
-  .wl-delay-1 {
-    animation-delay: 80ms;
-  }
-  .wl-delay-2 {
-    animation-delay: 160ms;
-  }
-  .wl-delay-3 {
-    animation-delay: 240ms;
-  }
-  .wl-delay-4 {
-    animation-delay: 320ms;
-  }
-
-  @supports (animation-timeline: view()) {
-    .wl-reveal {
-      animation: wl-reveal linear both;
-      animation-timeline: view();
-      animation-range: entry 4% cover 24%;
-    }
   }
 }

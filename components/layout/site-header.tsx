@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { BagIcon, CloseIcon, MenuIcon } from "@/components/ui/icons";
-import { nav } from "@/lib/content/site";
+import { CloseIcon, MenuIcon, UserIcon } from "@/components/ui/icons";
+import { nav, ui } from "@/lib/content/site";
 import { Wordmark } from "./wordmark";
 
 /**
@@ -14,8 +14,7 @@ import { Wordmark } from "./wordmark";
  * The panel is a disclosure, not a modal: it opens in normal flow underneath the
  * header rather than as an overlay. Escape closes it and focus returns to the
  * toggle. Background scroll is deliberately NOT locked — the panel is part of the
- * page, so locking it would make the lower items unreachable on a short viewport
- * (a landscape phone), and there is no overlay for a lock to protect.
+ * page, so locking it would make the lower items unreachable on a short viewport.
  */
 export function SiteHeader() {
   const pathname = usePathname();
@@ -49,7 +48,10 @@ export function SiteHeader() {
   }
 
   const isCurrent = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
+  const linkClass =
+    "inline-flex min-h-11 items-center text-caption text-ink transition-colors duration-[var(--duration-fast)] hover:text-ink-accent aria-[current=page]:font-medium aria-[current=page]:text-ink-accent aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8";
 
   return (
     <header className="sticky top-0 z-(--z-sticky) border-b border-hairline bg-canvas">
@@ -64,7 +66,7 @@ export function SiteHeader() {
             className="-ml-2 inline-flex size-11 cursor-pointer items-center justify-center rounded-sm text-ink transition-colors duration-[var(--duration-fast)] hover:bg-sand md:hidden"
           >
             {open ? <CloseIcon /> : <MenuIcon />}
-            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+            <span className="sr-only">{open ? ui.closeMenu : ui.openMenu}</span>
           </button>
           <Wordmark />
         </div>
@@ -76,7 +78,7 @@ export function SiteHeader() {
                 <Link
                   href={item.href}
                   aria-current={isCurrent(item.href) ? "page" : undefined}
-                  className="inline-flex min-h-11 items-center text-caption text-ink transition-colors duration-[var(--duration-fast)] hover:text-ink-accent aria-[current=page]:font-medium aria-[current=page]:text-ink-accent aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
+                  className={linkClass}
                 >
                   {item.label}
                 </Link>
@@ -86,11 +88,13 @@ export function SiteHeader() {
         </nav>
 
         <Link
-          href="/cart"
-          className="-mr-2 inline-flex min-h-11 items-center gap-2 rounded-sm px-2 text-caption text-ink transition-colors duration-[var(--duration-fast)] hover:text-ink-accent"
+          href={nav.account.href}
+          aria-current={isCurrent(nav.account.href) ? "page" : undefined}
+          className={`-mr-2 gap-2 rounded-sm px-2 ${linkClass}`}
         >
-          <BagIcon className="size-5" />
-          <span>Cart</span>
+          <UserIcon className="size-5" />
+          <span className="hidden sm:inline">{nav.account.label}</span>
+          <span className="sr-only sm:hidden">{nav.account.label}</span>
         </Link>
       </div>
 
@@ -103,7 +107,7 @@ export function SiteHeader() {
       >
         <nav aria-label="Primary, mobile" className="px-gutter py-4">
           <ul className="flex flex-col">
-            {nav.primary.map((item) => (
+            {[...nav.primary, nav.account].map((item) => (
               <li key={item.href} className="border-b border-hairline last:border-0">
                 <Link
                   href={item.href}

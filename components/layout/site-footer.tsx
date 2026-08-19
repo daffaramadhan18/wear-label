@@ -1,80 +1,42 @@
 import Link from "next/link";
-import { ArrowUpRightIcon } from "@/components/ui/icons";
-import { brand, footerNote, nav } from "@/lib/content/site";
+import { Copy } from "@/components/ui/copy";
+import { footer, nav } from "@/lib/content/site";
 import { Wordmark } from "./wordmark";
 
+/** Minimal footer: mark, the same four destinations as the header, one note. */
 export function SiteFooter() {
   return (
     <footer className="border-t border-hairline bg-canvas">
       <div className="mx-auto max-w-content px-gutter py-block-lg">
-        <div className="grid gap-block md:grid-cols-[1.2fr_2fr]">
-          <div>
+        <div className="flex flex-col gap-block md:flex-row md:items-start md:justify-between">
+          <div className="max-w-sm">
             <Wordmark className="text-h3" />
-            <p className="mt-5 wl-measure-narrow text-caption leading-relaxed text-ink-muted">
-              {brand.shortDescription}
+            <p className="mt-5 text-caption leading-relaxed text-ink-muted">
+              <Copy value={footer.note} label="footer note" lines={2} />
             </p>
-            <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
-              {nav.social.map((item) => (
+          </div>
+
+          <nav aria-label="Footer">
+            <ul className="flex flex-col gap-1">
+              {[...nav.primary, nav.account].map((item) => (
                 <li key={item.href}>
-                  <a
+                  <Link
                     href={item.href}
-                    rel="me noopener noreferrer"
-                    target="_blank"
-                    className="inline-flex min-h-11 items-center gap-1 text-caption text-ink underline decoration-1 underline-offset-4 decoration-line transition-colors duration-[var(--duration-fast)] hover:decoration-ink"
+                    className="inline-flex min-h-9 items-center text-caption text-ink transition-colors duration-[var(--duration-fast)] hover:text-ink-accent"
                   >
                     {item.label}
-                    <ArrowUpRightIcon className="size-4" />
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div className="grid gap-block sm:grid-cols-3">
-            {nav.footer.map((group) => (
-              <nav key={group.title} aria-label={group.title}>
-                <h2 className="font-body text-eyebrow font-medium uppercase tracking-eyebrow text-ink-muted">
-                  {group.title}
-                </h2>
-                <ul className="mt-4 flex flex-col gap-1">
-                  {group.links.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        className="inline-flex min-h-9 items-center text-caption text-ink transition-colors duration-[var(--duration-fast)] hover:text-ink-accent"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            ))}
-          </div>
+          </nav>
         </div>
 
         <hr className="wl-rule my-block" />
 
-        <div className="grid gap-6 text-caption text-ink-muted md:grid-cols-2">
-          <p>{footerNote.shipping}</p>
-          <p className="md:text-right">{footerNote.payment}</p>
-        </div>
-
-        <div className="mt-block flex flex-wrap items-center justify-between gap-x-6 gap-y-3 text-caption text-ink-muted">
-          <p>{footerNote.copyright}</p>
-          <ul className="flex flex-wrap gap-x-5">
-            {nav.legal.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="inline-flex min-h-9 items-center transition-colors duration-[var(--duration-fast)] hover:text-ink"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <p className="max-w-xs text-caption text-ink-muted">
+          <Copy value={footer.copyright} label="copyright" />
+        </p>
       </div>
     </footer>
   );

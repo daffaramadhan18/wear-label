@@ -1,28 +1,25 @@
+import { Copy } from "@/components/ui/copy";
 import { formatMoney, type Money } from "@/lib/shopify";
 
 /**
  * Price display. Tabular figures keep columns of prices from shifting width as
- * digits change, and the strikethrough original is announced as such rather than
- * being communicated by styling alone.
+ * digits change. Pricing and currency are not decided yet, so a null price
+ * renders a placeholder rather than an invented number.
  */
 export function Price({
   price,
-  compareAt = null,
   className = "",
 }: {
-  price: Money;
-  compareAt?: Money | null;
+  price: Money | null;
   className?: string;
 }) {
+  if (!price) {
+    return <Copy value="" label="price" className={`max-w-24 ${className}`} />;
+  }
+
   return (
-    <span className={`inline-flex items-baseline gap-2 ${className}`} data-numeric>
-      <span className={compareAt ? "text-ink-accent" : "text-ink"}>{formatMoney(price)}</span>
-      {compareAt ? (
-        <>
-          <span className="sr-only">, reduced from</span>
-          <s className="text-caption text-ink-muted">{formatMoney(compareAt)}</s>
-        </>
-      ) : null}
+    <span className={className} data-numeric>
+      {formatMoney(price)}
     </span>
   );
 }

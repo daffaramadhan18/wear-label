@@ -12,8 +12,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
       href="/"
       className={`inline-flex items-baseline font-display text-lg leading-none tracking-tight transition-colors duration-[var(--duration-fast)] hover:text-ink-accent ${className}`}
     >
-      <span className="sr-only">{brand.name} — home</span>
-      <span aria-hidden="true">Wear&nbsp;Label</span>
+      {brand.name}
     </Link>
   );
 }
