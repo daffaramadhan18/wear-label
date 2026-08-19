@@ -141,6 +141,14 @@
   --duration-voices-c: 48s;
   --duration-voices-d: 58s;
 
+  /* The floating-paths strands. Four lengths cycled across 36 paths, in the
+     source component's 20–30s band; equal lengths would collapse the bundle into
+     a single wave the way equal voices columns collapse into one block. */
+  --duration-paths-a: 22s;
+  --duration-paths-b: 26s;
+  --duration-paths-c: 29s;
+  --duration-paths-d: 33s;
+
   /* Sticky header height — drives scroll-padding so anchors and keyboard focus
      are never parked underneath the header (WCAG 2.2 AA 2.4.11). */
   --header-height: 5.25rem;
