@@ -64,7 +64,7 @@ Money formatting helpers only.
 
 | Route | What it is |
 |---|---|
-| `/` | Home — hero carousel, limited-run band, new arrivals, category mosaic, service band, made-to-order band, Instagram strip |
+| `/` | Home — hero carousel, limited-run band, new arrivals, customer voices, category mosaic, service band, made-to-order band, Instagram strip |
 | `/shop` | Catalogue — banner, promo bands, filter rail, sort, 3-up grid, paging |
 | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, tabs, related |
 | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
@@ -83,7 +83,8 @@ components/ui/         Primitives — button, badge, alert, media, price, copy,
                        save-button, notice-form
 components/layout/     Announcement bar, header, cart badge, footer, wordmark
 components/home/       Hero carousel, promo band, countdown, category mosaic,
-                       service band, made-to-order, Instagram strip
+                       service band, made-to-order, Instagram strip,
+                       testimonial wall
 components/shop/       Product card, catalogue filters, results toolbar,
                        pagination, shop promos, card hover
 components/product/    Gallery, purchase block, tabs
@@ -93,6 +94,7 @@ lib/content/           Site copy — the single content module
 lib/shopify/           The only place Shopify is touched
 public/brand/          Logotype artwork — wordmark, stacked, monogram
 public/products/       Catalogue photography — eleven square garment shots, real
+public/home/           Hero artwork, exported from the design's image slots
 .design-sync/          Config for syncing components to claude.ai/design
 ```
 
@@ -117,6 +119,11 @@ Commands: `npm run dev`, `npm run build`, `npm start`, `npm run lint`.
   Where a number cannot be known, the UI says where it comes from ("Calculated at
   checkout") or the block hides itself. This is why the design's star rating and
   its "Up to 40% off" tile are absent.
+- **Quoting a customer is not inventing one.** The voices wall carries twenty real
+  Shopee reviews, verbatim, in `home.voices.reviews`. That is why it is allowed
+  where a star rating is not: it reproduces what customers wrote instead of
+  synthesising a score. Never edit, tidy or translate one, and never add a review
+  that did not come from the store.
 
 ### Copy
 
@@ -127,6 +134,9 @@ Commands: `npm run dev`, `npm run build`, `npm start`, `npm run lint`.
   before the copy arrives. Filling the module in is the whole change.
 - **Site language: English.** Single locale, no i18n layer. Amounts are written the
   way `lib/shopify/money.ts` formats them for Indonesia — `Rp 750.000`.
+- **Quoted material keeps its own language.** The customer reviews are Indonesian
+  and stay that way; translating a quotation turns it into a paraphrase. This is
+  the only exception, and it applies to quotations, never to the site's own voice.
 
 ### Rendering
 
@@ -135,7 +145,9 @@ Commands: `npm run dev`, `npm run build`, `npm start`, `npm run lint`.
   the hero carousel, the countdown, the product gallery, the purchase block, the
   product tabs, the card hover, the save button, the notice form, and the four
   motion wrappers. Everything else is server-rendered — including every product
-  card body, the whole filter rail and every row of the bag.
+  card body, the whole filter rail, every row of the bag, and both marquees. The
+  Instagram strip and the voices wall move on CSS animation alone, so neither
+  costs a render or a byte of JavaScript; keep it that way.
 - **The URL is the state.** Catalogue filters are *links* that flip one facet and
   preserve the rest (`catalogueHref` in `lib/shopify/catalogue.ts`); sort is a plain
   `GET` form. No client filtering, no state to keep in step with the URL, and the
@@ -158,12 +170,27 @@ Commands: `npm run dev`, `npm run build`, `npm start`, `npm run lint`.
   must be replaceable in one edit. Motion values are mirrored in
   `components/motion/tokens.ts` because Motion needs numbers, not `var()` strings;
   change one, change the other.
+- **The page is white; cream is a band colour.** `body` resolves to
+  `--color-surface`, matching the design's shell. Cream (`--color-canvas`) is what
+  fills things *on* it — the made-to-order band, the hero panel, every chip, input,
+  stepper and review card. Paint the shell cream and all of those flatten into it.
+- **The aurora is two CSS classes, not a component's inline styles.** `.wl-aurora`
+  in `globals.css` assembles the wash; the stop lists are `--wl-aurora-stops` and
+  `--wl-aurora-stops-invert` in `tokens.css`, so it recolours with the palette.
+  `components/ui/aurora.tsx` only picks a tone, an origin and an intensity. The
+  veil layer MUST be painted in the colour of the surface underneath — a mismatch
+  shows up as a visible rectangle, and that is the bug this effect always has.
 - **Accessibility is part of the design, not a pass afterwards.** Single `h1` per
   page with no skipped levels, 44px minimum control height, visible focus never
   removed, sticky-header scroll padding, and **colour never carries meaning alone** —
   sold out says "Sold out", an applied filter link carries `aria-current`, a toggle
-  carries `aria-pressed`. Three contrast pairs in the brand system fall short of AA;
-  they are implemented as specified and annotated at the top of `tokens.css`.
+  carries `aria-pressed`. Four contrast pairs fall short of AA; they are
+  implemented as specified and annotated at the top of `tokens.css`.
+- **Motion has a readable resting state.** `prefers-reduced-motion` does not merely
+  pause a marquee — it has to leave the content reachable. The Instagram strip keeps
+  a (scrollbar-less) scrollable rail; the voices wall drops its tilt, its offsets and
+  its duplicate copies and becomes a plain grid, because a frozen tilted wall holds
+  most of its reviews outside a stage that clips at 560px.
 - **Checkout is a redirect.** Hand off to `cart.checkoutUrl`. Do not build a custom
   checkout UI (see Platform constraints).
 - **Components sync to claude.ai/design.** The `SURFACE` map in
@@ -183,6 +210,21 @@ both derived from the client's `BRAND GUIDELINE.pdf` and `Katalog Baju` upload:
 - **`Wear Label Storefront.dc.html`** — the four approved screens. Ported into the
   routes and components above; its copy is in `lib/content/site.ts` and its
   catalogue is in `lib/shopify/fixtures.ts`.
+
+Its `handoff/` folder holds developer copies of two components — the aurora band and
+the voices wall. Both are ported, not dropped in: the repo has no `cn()`, no
+`tailwind.config.js` (Tailwind v4 keeps theme in `tokens.css`) and no appetite for a
+second marquee primitive. Read the two READMEs there for the reasoning behind the
+measured values before changing any of them.
+
+**Binary assets and the 256 KiB read cap.** `read_file` refuses binaries outright and
+truncates text at 256 KiB, and `.image-slots.state.json` is a single 521 KiB line —
+so the hero artwork cannot be fetched that way. `render_preview` serves the project
+over HTTP and relative subresources resolve against it, which is how
+`public/home/hero-{1,2}.webp` were pulled byte-exact. The design maps slots by
+position (`slotId: 'sf-hero-' + (i + 1)`), so slide 1 is `sf-hero-1` and slide 2 is
+`sf-hero-2`; an unused `sf-hero` from an earlier single-slide version is also in that
+file and is not one of them.
 
 The published design system that this repo's components sync *to* is a separate
 project, [`096a4d56-a7d8-49ce-9d7a-4fe26ac82b54`](https://claude.ai/design/p/096a4d56-a7d8-49ce-9d7a-4fe26ac82b54).
@@ -215,7 +257,7 @@ Not decided, and not to be filled in by guessing:
 |---|---|
 | Whether customer accounts exist, or guest checkout is enough | `/account` reserves the route with no auth; "Save for later" is `localStorage` only, in `components/ui/save-button.tsx` |
 | Which payment gateway, or whether checkout is real at all | `cart.checkoutUrl` is null; the checkout action is disabled with the reason beside it |
-| Hero and shop-banner photography | Same, declared as `Image` objects with a null url |
+| Shop-banner photography | Declared as an `Image` object with a null url → placeholder. The hero is no longer open: both slides are in `public/home/`, from the design's own slots |
 | Per-product Details and Fabric & care copy | `description` and `care` are `""` in fixtures → placeholders. The design reused one generic paragraph for all eleven pieces; it would state a wrong inseam and a wrong fabric on most of them |
 | About Us, My Account and 404 copy | `""` in `lib/content/site.ts` → placeholders |
 | Whether there is a limited run, and when it ends | `home.promo.endsAt` is `""`, so the countdown hides. The component is real |
@@ -223,7 +265,8 @@ Not decided, and not to be filled in by guessing:
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Entries with no `href` render as plain text, never as a 404 link. Add the href when the page exists |
 | Which pieces are made to order | The catalogue does not say. No product carries the `Made to order` tag in `lib/shopify/fixtures.ts`, so that facet counts zero rather than guessing; the filter row and the mosaic tile are built and wait for the list |
 | Product categories | Shopify product types do not exist yet. `productType` is derived from each piece's name, or from its garment shot where the name is silent — Wide leg 8, Culottes 2, Straight cut 1 |
-| A review system | The design's star rating is deliberately absent — fabricated social proof is the one placeholder that cannot be labelled as one |
+| A review system | The design's star rating is still deliberately absent — a fabricated score is the one placeholder that cannot be labelled as one. Real quotations are a separate matter and are live in the voices wall; there is no feed behind them, so new reviews mean editing `home.voices.reviews` |
+| Whether the studio ships from Bandung or Bekasi | The hero's order-notes card says "Pengiriman dari Kota Bekasi"; `lib/content/site.ts` says the studio is in Bandung. Both are live on the home page. Nothing in the code picks a side |
 | Search | The design's search mark is absent; there is no search |
 | Site domain for canonical URLs and OG | `NEXT_PUBLIC_SITE_URL`, falling back to localhost |
 

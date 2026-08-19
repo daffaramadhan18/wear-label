@@ -84,7 +84,7 @@ export function OrderSummary({ cart }: { cart: Cart }) {
               name="code"
               autoComplete="off"
               placeholder={ui.promoCode}
-              className="min-h-12 min-w-0 flex-1 rounded-sm border border-line bg-canvas px-4 text-small text-ink placeholder:text-ink-subtle focus:border-brand focus:bg-surface"
+              className="min-h-12 min-w-0 flex-1 rounded-sm border border-line bg-canvas px-4 text-small text-ink placeholder:text-ink-subtle focus:border-brand"
             />
             <button
               type="submit"

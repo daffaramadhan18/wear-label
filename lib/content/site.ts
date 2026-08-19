@@ -155,6 +155,48 @@ export const home = {
   },
 
   /**
+   * "From our customers" — the voices wall between New arrivals and the mosaic.
+   *
+   * These are real Shopee reviews, reproduced verbatim from the storefront
+   * design: no rewriting, no tidying of the spelling, no translation. That is the
+   * whole reason this section is allowed to exist where a star rating is not —
+   * it quotes customers rather than manufacturing a score. Long ones are clamped
+   * to six lines by the card, never edited down.
+   *
+   * They are in Indonesian while the rest of the site is English. Quoting a
+   * customer in the language they wrote in is the point; translating them would
+   * make them paraphrases.
+   *
+   * Twenty of them, four columns of five. Change the count and the component
+   * re-slices, but keep it a multiple of four or the last column runs short.
+   */
+  voices: {
+    heading: "From our customers",
+    reviews: [
+      { user: "r*****a", body: "My 2nd and 3rd yora pants.. Bagus cutting dan bahannya.. Super pewe dan ringan.. I know my photos are not doing the pants justice, but trust me, its worth to buy!" },
+      { user: "r*****a", body: "yayy makasii bgtt celananya udah nyampe, pengemasan sm sellernya juga cepet bgtt langsung dikirim. sumph si celananya se pw itu, sebelum2nya kalo beli celana gapernah ga dikecilin(always) kali ini celananya bnr2 fit di aku dan se pw itu celananya kao dipake." },
+      { user: "y*****p", body: "bagusss banget tolong, selama ini susah cari celana ukuran oke, seneng banget nemu brand ini. Bahan jg bagus dan harganya murah. Langsung pengen beli warna lain😍" },
+      { user: "r*****a", body: "warna putih nya bagus ga terlalu nerawang, sehari langsung nyampe pake same day 🥰😍" },
+      { user: "r*****u", body: "WORTH IT BANGET!🥰🥰😍 Mau repurchase lagi nunggu yang warna putih restock, ini bener2 bagus ga panas, aku udah langsung try on jalan-jalan soalnya tadi siang di tempat panas, linennya ga gatel sama sekali, buat ibu hamil 6 bulan muat uk L , bb ku 55,7 kg tinggi 160cm." },
+      { user: "s*****b", body: "keren bgt, UK nya juga pas biasanya kalo dari toko sebelumnya itu terlalu gede kalo ini tuh pas bgt, sukak, next time order lagi!" },
+      { user: "p*****_", body: "packingan bagus aman dan rapih. celananya pas banget size nya, ga kegedean atau kekecilan, bahannya juga adem. adminnya baik responsif, btw maaf ya videonya ini tp paket nyampe dengan selamat dan barangnya bagus" },
+      { user: "r*****u", body: "Bahan linen produk lokal yang bagus! Udh 2x order ~ hamil 8 bulan masi muat dan suka bgt !!! ✨😍❤️ ga sesak sama sekali" },
+      { user: "nadonaddd", body: "Satisfying! Bahannya halus, ringan, lingkar pinggang pas sama panjang ukuran M juga passs buat aku TB 155 / BB 47, plus respon seller oke banget dan bantu bangettt awalnya keabisan choco yg M pas chat seller lgsg dibales dan ternyata masih ada 1! Aaaa pas banget lagi cari celana gini, thanks a lot!" },
+      { user: "ruthfelisa", body: "Bahannya bagus dan cuttingan nya pas, ga yg terlalu lebar. Ini celana ke 2 aku beli di wear label. Biar ga nerawang pakai daleman warna netral atau short pants" },
+      { user: "g*****i", body: "Cakepp bangettt pliss!!! Ga nyesel beli di sini, worth it banget dengan harga segitu, kualitasnya beneran bagus. Sempet ragu karna takut kebesaran dipinggang (BB 38/155), tapi ternyata pas bangettt huhu🥺 senangggg. Pengemasan dan pengirimannya juga cepat sekali. Kmrn checkout, hari ini udah nyampe." },
+      { user: "l*****l", body: "celananya realpict, bagus, panjang pas di aku tb 167 cm, BB 60. puas sih. cuma kalo aku pake agak jdi keliatan gendut hehe. tpi keseluruhan mantap bahannya sesuai deskripsi. penting buat lihat detail produk, sebelum membeli gaiss..❤️❤️" },
+      { user: "k*****_", body: "bagusss bangettt uu😍 realpict, no minus, cuttingnya rapii, packingnya cakep, buat bb/tb 43/162 cocok bgt pake uk M panjang n bagian pinggangnya pas👍 recommended banget sih ini🥰" },
+      { user: "satyairada", body: "Produk ini oke bgt, aku pesen wrna white dan gak nerawang, oke si buat hijabers2 yg pengen pake kulot putih n ga nerawang, kesan hw jg bikin kt terlihat lbh jenjang, good job kak! Produknya oke bgt ❤️" },
+      { user: "d*****a", body: "Aku suka celananya tipis tapi ga nerawang gitu bahannya juga lembut nyaman dipakai beraktifitas seharian bahkan dipake buat liburan pun oke banget sih ini" },
+      { user: "a*****0", body: "Sumpah ini tipe celana yg udh lama aku cari 🥺😢 Akhirnya menemukan merk ini. Mantap banget pokoknya. Suka bgttt 🫰🫰 Admin super ramah, informatif. Celananya oke, panjang nya pas, bahan bagus. Bakalan repurchaseeee😍🥰" },
+      { user: "j*****y", body: "Pertama kali beli dan langsung suka sama produknya wear label❤️ bahannya jatuh dan adem, jahitan super rapih, packingnya jg super rapih per produk pakai kardus sendiri-sendiri👍👍👍" },
+      { user: "tinnayumiko05", body: "Masya Allah ini keren banget...BB aq 57 TB 155 masih muat dong...sebagus itu dan nyaman di pake.next aq mau order lagi ..packing nya juga super rapi banget dan cepet sampai nya ..makasih ya,sumpah gak nyesel beli disini ..🤩🤩🥳" },
+      { user: "y*****1", body: "bagussss bangettt sukaaaa udah repeat order 3x selalu puas beli di wear labell , untuk cewe tinggi kea aku gini ga ngantung sama sekali celana nyaa😭👍 buat tb 165 aman bgtt pake yora loose panta size L😭😍 tcakeuppppp bgtt!!!! bakal order lagii yora loose pants ketagihan bahannya enakk jatuh😍" },
+      { user: "e*****i", body: "Proses packing cepat, packaging juga aman tebal gak worry produk cacat karna pengiriman. Pengiriman juga cepet. Total dah punya 5 koleksi cerra pants ku saking love nya, thankyou" },
+    ],
+  },
+
+  /**
    * The category mosaic — one tall tile and four small ones. Every destination is
    * a real catalogue filter; the design's "Tops" and "Up to 40% off" tiles are
    * not here because neither exists in this catalogue.

@@ -49,7 +49,7 @@ export function ResultsToolbar({
           id="sort"
           name={QUERY_KEYS.sort}
           defaultValue={query.sort}
-          className="min-h-11 cursor-pointer rounded-sm border border-line bg-canvas px-3.5 text-caption text-ink transition-colors duration-(--duration-base) focus:border-brand focus:bg-surface"
+          className="min-h-11 cursor-pointer rounded-sm border border-line bg-canvas px-3.5 text-caption text-ink transition-colors duration-(--duration-base) focus:border-brand"
         >
           {SORT_KEYS.map((key) => (
             <option key={key} value={key}>

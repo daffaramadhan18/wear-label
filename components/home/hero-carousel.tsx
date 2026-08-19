@@ -27,16 +27,49 @@ import type { Image } from "@/lib/shopify";
  * One slide renders as a still band with no arrows and no dots — the controls are
  * derived from the slide count, not drawn in.
  *
- * The photography is not delivered yet, so each slide shows the labelled
- * placeholder at the band's exact size. Add a url to `HERO_IMAGES` (files in
- * `public/home/`) and it becomes the photograph, with no other change.
+ * The artwork comes from the design's own image slots, exported to `public/home/`.
+ * The design maps them by position — `slotId: 'sf-hero-' + (i + 1)` — so slide 1
+ * is `sf-hero-1` and slide 2 is `sf-hero-2`. Its state file also holds an unused
+ * `sf-hero` from an earlier single-slide version; it is not one of these two.
+ *
+ * A slide with no entry in `HERO_IMAGES` falls back to the labelled placeholder at
+ * the band's exact size, so a missing shot never breaks the band.
  */
 const ROTATE_MS = 6000;
 
-/** One entry per slide, in slide order. A missing entry renders the placeholder. */
+/**
+ * One entry per slide, in slide order. A null url renders the placeholder.
+ *
+ * The band is 1440x600 and these are 1200x675, so `Media` crops them to fill —
+ * which is what the design does with them too. The cream card sits over the left
+ * third, so the crop is what decides how much of a shot survives.
+ */
 const HERO_IMAGES: Image[] = [
-  { url: null, altText: "", width: 1440, height: 600 },
-  { url: null, altText: "", width: 1440, height: 600 },
+  /*
+   * Slide 1 is the studio's own order-notes card, as the design has it. It is an
+   * image OF text, which is why the alt below carries the whole of that text
+   * rather than describing the picture — a screen reader gets nothing from the
+   * card itself, and neither does anyone who zooms.
+   *
+   * Two things in it are the studio's to keep true, because they go live with the
+   * page: it ships from Kota Bekasi, while `lib/content/site.ts` says the studio
+   * is in Bandung, and the cut-off and complaint windows are delivery terms the
+   * catalogue does not otherwise state. Change the card, change the alt with it.
+   */
+  {
+    url: "/home/hero-1.webp",
+    altText:
+      "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
+    width: 1200,
+    height: 675,
+  },
+  {
+    url: "/home/hero-2.webp",
+    altText:
+      "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall.",
+    width: 1200,
+    height: 675,
+  },
 ];
 
 interface Slide {

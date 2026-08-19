@@ -27,7 +27,7 @@ export default function AccountPage() {
           <StaggerItem
             as="section"
             key={index}
-            className="rounded-sm border border-border bg-surface p-8"
+            className="rounded-sm border border-border bg-canvas p-8"
           >
             <h2 className="font-body text-h3 leading-h3">
               <Copy value={panel.title} label="panel title" />
