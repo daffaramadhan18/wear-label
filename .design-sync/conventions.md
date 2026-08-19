@@ -27,6 +27,7 @@ a hex value, a px font-size, or a raw Tailwind palette class (`bg-stone-100`,
 | brand action | `bg-brand` `bg-brand-hover` `text-brand` `text-on-brand` |
 | lines | `border-hairline` `border-border` `border-rule` `border-line` `ring-focus` |
 | feedback | `bg-success-surface` `text-on-success-surface` `bg-error-surface` `text-on-error-surface` `text-error` `bg-info-surface` `text-on-info-surface` `bg-promo-surface` `text-on-promo-surface` `bg-sage-surface` `text-on-sage-surface` |
+| markdown | `bg-sale` `text-on-sale` — a marked-down price, never the error ramp by name |
 | inert / disabled | `bg-disabled` `text-on-disabled` `bg-inert` `text-on-inert` `border-inert-border` |
 | type scale | `text-display` `text-h1` `text-h2` `text-h3` `text-card` `text-body` `text-small` `text-caption` `text-label` `text-micro` |
 | line height | `leading-display` `leading-h1` `leading-h2` `leading-h3` `leading-card` `leading-body` `leading-snug` |
@@ -43,11 +44,14 @@ measure.
 
 ## Five rules that are easy to get wrong
 
-1. **Text goes through `<Copy>`.** Brand copy is deliberately unwritten, so every
-   text slot takes `<Copy value={x} label="heading" />`, which renders the string
-   when it exists and a correctly-sized labelled placeholder when it does not.
-   That is what keeps layouts final before copy arrives. Never hardcode marketing
-   copy — invent nothing.
+1. **Text comes from the content module, and empty is a real state.** The
+   storefront's approved copy now lives in the app's `lib/content/site.ts`; the
+   slots still undecided (About Us, My Account, 404, per-product details and
+   fabric care) are `""`. Every such slot takes
+   `<Copy value={x} label="heading" />`, which renders the string when it exists
+   and a correctly-sized labelled placeholder when it does not — that is what
+   keeps layouts final before the remaining copy arrives. Never hardcode
+   marketing copy — invent nothing.
 2. **Pills only for badges and filter chips.** `rounded-pill` belongs to `Badge`
    and chips. Everything else is `rounded-sm` or `rounded-xs`; corners stay
    near-square.
@@ -67,6 +71,12 @@ measure.
 - `components/<group>/<Name>/<Name>.prompt.md` — per-component usage, props and
   gotchas. Read it before using a component; groups are `actions`, `feedback`,
   `icons`, `layout`, `product`, `shop`, `structure`, `typography`.
+
+**This system currently lags the app it came from.** The storefront build added
+components that are not synced yet — the aurora band, breadcrumbs, the hero
+carousel, the bag rows and summary, pagination, the results toolbar, the product
+gallery and purchase block, the save button. Composing a screen here will not
+find them; see `.design-sync/NOTES.md` before assuming a gap is deliberate.
 
 ## Idiomatic screen
 

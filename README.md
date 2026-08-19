@@ -1,10 +1,10 @@
 # Wear Label
 
-Company profile + product catalogue storefront for **Wear Label**. Custom Next.js
-frontend on top of Shopify as the commerce engine.
+Company profile + product catalogue + commerce storefront for **Wear Label**. Custom
+Next.js frontend on top of Shopify as the commerce engine.
 
-See [`CLAUDE.md`](./CLAUDE.md) for the architecture and the responsibility split
-between this repo and Shopify admin.
+See [`CLAUDE.md`](./CLAUDE.md) for the architecture, the responsibility split between
+this repo and Shopify admin, and the list of decisions that are still open.
 
 ```bash
 npm run dev     # http://localhost:3000
@@ -16,63 +16,86 @@ npm run lint
 
 ## Scope
 
-Four pages, nothing else. Everything a brand storefront usually accumulates
-(lookbook, collections, craft/materials pages, testimonials, newsletter,
-announcement bar, cart, legal and help pages) is deliberately absent.
+Six routes, built from the approved storefront design.
 
 | Route | What it is |
 | --- | --- |
-| `/` | Home — hero + four products, leading into the shop |
-| `/shop` | Catalogue with filters (category, size, availability) and sort |
-| `/shop/[handle]` | Product detail — image, name, price, sizes, description |
-| `/about` | About Us — company profile |
+| `/` | Home — hero carousel, limited-run band, new arrivals, category mosaic, service band, made-to-order band, Instagram strip |
+| `/shop` | Catalogue — campaign banner, promo bands, filter rail (category, size, colourway, availability), sort, 3-up grid, paging |
+| `/shop/[handle]` | Product — gallery, size + colourway pickers, quantity, add to bag, Details/Fabric&care/Shipping tabs, related row |
+| `/cart` | Bag — lines with quantity and remove, order summary, hand-off to Shopify checkout |
+| `/about` | About Us — company profile (copy not written) |
 | `/account` | My Account — route + layout only, no auth (see below) |
 
-Plus `app/not-found.tsx` for anything else.
+Plus `app/not-found.tsx` for anything else. Every route renders dynamically, because
+the header reads the bag cookie.
 
-**No cart, no checkout, no add-to-cart.** Cart and checkout belong to Shopify and
-are not part of this build.
+**The bag is real; checkout is Shopify's.** Add to bag, quantity, remove and the
+header count all work. Checkout is a redirect to `cart.checkoutUrl` — a custom
+checkout UI needs Shopify Plus — so the action is visibly disabled with the reason
+beside it until a store is connected.
 
 **No auth on `/account`.** Whether customer accounts are used at all (versus guest
-checkout) is undecided, and customer records live in Shopify either way — so the
-page reserves the route and the layout without committing to an approach.
+checkout) is undecided, and customer records live in Shopify either way — so the page
+reserves the route and the layout without committing to an approach. For the same
+reason "Save for later" is `localStorage` only and never leaves the browser.
 
 ---
 
-## All copy is intentionally empty
+## Where the content comes from
 
-Brand voice, tone, product names and pricing are not decided, so nothing is
-invented in code.
+Two files in Claude Design project `bf11a0f4-4b1c-400b-802c-b9c9c2d66673`, both
+derived from the client's `BRAND GUIDELINE.pdf` and `Katalog Baju` upload:
 
-- **[`lib/content/site.ts`](./lib/content/site.ts)** — every marketing string is
-  `""`. Interface chrome that is not brand copy (*Filters*, *Apply*, *Sort*,
-  *Sold out*, the four nav labels) is spelled out in the `ui` and `nav` exports.
-- **[`lib/shopify/fixtures.ts`](./lib/shopify/fixtures.ts)** — product titles,
-  descriptions, image URLs and prices are empty or null. Only two fields carry
-  values, because the filter UI is unusable without them: `productType`
-  (`Category 1`…, numbered stand-ins) and the `Size` values (XS–XL).
+- **`Wear Label Design System.html`** → `app/tokens.css` and the component vocabulary.
+- **`Wear Label Storefront.dc.html`** → the routes, the copy in
+  [`lib/content/site.ts`](./lib/content/site.ts), and the catalogue in
+  [`lib/shopify/fixtures.ts`](./lib/shopify/fixtures.ts) (11 pieces: names,
+  materials, IDR prices, 20% markdowns, new / made-to-order tags, and 5 sizes ×
+  5 colourways = 25 variants each).
 
-Wherever text belongs, [`components/ui/copy.tsx`](./components/ui/copy.tsx)
-renders a labelled placeholder block sized in `em`, so a heading placeholder is
-heading-sized and a caption placeholder caption-sized. The layout is therefore
-already the final one: **filling in the two files above replaces every block with
-text, with no component change and no layout shift.** Images behave the same way —
-a null `url` renders a labelled box at the real aspect ratio (CLS stays 0).
+### What is still blank, and why
+
+Nothing is invented in code. Where a decision has not been made, the slot is empty
+and renders a labelled placeholder — [`components/ui/copy.tsx`](./components/ui/copy.tsx)
+sizes the block in `em`, so a heading placeholder is heading-sized and a caption
+placeholder caption-sized. **The layout is therefore already the final one:** filling
+in the string replaces the block with text, with no component change and no layout
+shift. Images behave the same way — a null `url` renders a labelled box at the real
+aspect ratio (CLS stays 0).
+
+| Blank | Where |
+| --- | --- |
+| Catalogue photography — 11 `.webp` files | [`public/products/README.md`](./public/products/README.md) lists the filenames and the single flag to flip |
+| Hero and shop-banner photography | `HERO_IMAGES` in `components/home/hero-carousel.tsx`, `BANNER` in `app/shop/page.tsx` |
+| Per-product Details and Fabric & care copy | `description` / `care` in `fixtures.ts`. The design reused one generic paragraph for all eleven pieces; it states a wrong inseam and a wrong fabric on most of them |
+| About Us, My Account and 404 copy | `lib/content/site.ts` |
+| Limited-run end date | `home.promo.endsAt` — empty, so the countdown hides. The component is real |
+| Social handles, and nine unbuilt footer destinations | `footer.socials` and `footer.columns` — an entry with no `href` renders as plain text, never as a 404 link |
+
+Deliberately absent rather than blank: the design's star rating (no review system —
+fabricated social proof is the one placeholder that cannot be labelled as one), its
+search mark (no search), its "Up to 40% off" tile (the catalogue's markdowns are 20%)
+and its shipping selector (Indonesian couriers quote rates inside Shopify's checkout).
 
 ---
 
 ## Data layer
 
-All Shopify access goes through **[`lib/shopify/`](./lib/shopify)**; components
-never call the Storefront API and never import GraphQL documents.
+All Shopify access goes through **[`lib/shopify/`](./lib/shopify)**; components never
+call the Storefront API and never import GraphQL documents.
 
 | File | Role |
 | --- | --- |
-| `index.ts` | The only entry point. `getAllProducts`, `getFeaturedProducts`, `getProductByHandle` |
-| `types.ts` | Storefront API shapes, with nullable image url + price while catalogue data is pending |
+| `index.ts` | Catalogue barrel — `getAllProducts`, `getFeaturedProducts`, `getProductByHandle`, `getRelatedProducts` |
+| `cart.ts` | The bag. Imported directly, not via the barrel: it reads a cookie, so it is server-only |
+| `actions.ts` | `"use server"` — the only thing that writes the bag cookie, plus the discount and newsletter forms |
+| `form-state.ts` | The `FormNotice` shape both sides of the boundary need (a `"use server"` module may only export async functions) |
+| `types.ts` | Storefront API shapes — `Money`, `Image`, `Product`, variants with `selectedOptions`, tags for the merchandising flags |
 | `fixtures.ts` | Typed mock catalogue — deleted when the store goes live |
-| `catalogue.ts` | Filter/sort/facets. In-memory today, Storefront query arguments later |
-| `money.ts` | `Intl` money formatting |
+| `catalogue.ts` | Filter, sort, facets, paging and URL building. In-memory today, Storefront query arguments later |
+| `money.ts` | `Intl` money formatting and the markdown percentage |
+| `env.ts` | What "live" means, and the loud guard for the paths not written yet |
 
 Every function is async, so going live is an environment change:
 
@@ -81,31 +104,39 @@ SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
 SHOPIFY_STOREFRONT_ACCESS_TOKEN=...   # public Headless-channel token
 ```
 
-Until the live client is written, setting those variables throws a clear error
-rather than silently serving mock data from a deployment configured to be real.
+Until the live client is written, setting those variables throws a clear error rather
+than silently serving mock data from a deployment configured to be real.
 
-**Filter state lives entirely in the URL.** `/shop` is a Server Component that
-reads `searchParams`; the filter form is a plain `GET` form with native controls —
-no `"use client"`, no JavaScript, shareable and back-button friendly. The only
-client component in the app is the header's mobile menu disclosure.
+**The bag lives in one cookie.** In production that cookie holds the Shopify `cartId`
+and every function in `cart.ts` becomes a Cart API call. Until then the same cookie
+holds the mock bag itself, which is why the only price arithmetic in the repo is in
+that file — it is precisely the part Shopify's `cart.cost` replaces.
+
+**Filter state lives entirely in the URL.** `/shop` is a Server Component that reads
+`searchParams`. Each filter is a *link* that flips one facet and preserves the rest,
+so filtering needs no JavaScript and no submit step; sort is a plain `GET` form. The
+client islands are the header's mobile disclosure, the hero carousel, the product
+gallery, the purchase block, the product tabs, the save button, the notice forms and
+the motion wrappers — nothing else.
 
 ---
 
 ## Design system
 
-Ported from the **Wear Label Design System** (Claude Design project
-`bf11a0f4-4b1c-400b-802c-b9c9c2d66673`, `Wear Label Design System.html`). Colour,
-type, radius, spacing, shadow and motion values come from that document.
+Ported from the **Wear Label Design System** (`Wear Label Design System.html` in the
+Claude Design project above). Colour, type, radius, spacing, shadow and motion values
+come from that document.
 
-Everything resolves through **[`app/tokens.css`](./app/tokens.css)** — one file,
-two layers:
+Everything resolves through **[`app/tokens.css`](./app/tokens.css)** — one file, two
+layers:
 
-- `:root` holds the brand primitives (`--wl-*`): taupe ramp 100–900, blush ramp,
-  sage ramp, the three rule weights, rust for errors, inert fills for disabled and
-  unavailable states. Never referenced from JSX.
+- `:root` holds the brand primitives (`--wl-*`): taupe ramp 100–900, blush ramp, sage
+  ramp, the three rule weights, rust for errors and markdowns, inert fills for
+  disabled and unavailable states, plus the aurora gradient stops. Never referenced
+  from JSX.
 - `@theme` holds semantic tokens, which Tailwind v4 turns into utilities
-  (`bg-canvas`, `text-ink-subtle`, `font-display`, `text-display`, `tracking-label`,
-  `rounded-sm`, `py-section`).
+  (`bg-canvas`, `text-ink-subtle`, `bg-sale`, `font-display`, `text-display`,
+  `tracking-label`, `rounded-sm`, `py-section`).
 
 | From the system | Here |
 | --- | --- |
@@ -116,11 +147,11 @@ two layers:
 | 8pt spacing, sections 80–96 | `--spacing-*`, `--spacing-section` |
 | Warm-toned shadows, never neutral grey | `--shadow-sm/md/lg` |
 | Buttons: uppercase 0.2em, one primary per screen | [`components/ui/button.tsx`](./components/ui/button.tsx) — `primary`, `outline`, `ghost`, `link`, `checkout` × `sm`/`md`/`lg`/`full` |
-| Badges, alerts, product card, breadcrumb, size chips, filter chips | `components/ui/badge.tsx`, `alert.tsx`, `components/shop/*`, `app/shop/[handle]/page.tsx` |
+| Badges, alerts, product card, breadcrumb, size chips, filter chips | `components/ui/*`, `components/shop/*`, `components/product/*` |
 
 No component contains a hardcoded colour, font, radius, spacing or duration.
 
-### Two things to know
+### Three things to know
 
 **The logotype is artwork, not type.** The system is explicit that the logotype is
 drawn lettering and is never reset in a typeface. All seven files are imported from
@@ -138,6 +169,13 @@ The `-cream` variants are for espresso and taupe surfaces; `onDark` swaps the fi
 rather than filtering the image. `app/icon.png` and `app/apple-icon.png` are the
 monogram composited onto cream `#FBF4EF`, replacing the stock Next.js favicon.
 
+**The aurora is CSS, not a component library.** The design project shipped a React
+aurora in `handoff/`; it is reimplemented as two classes in `globals.css` driven by
+`--aurora-*` tokens, so it recolours with the palette. It runs behind the
+made-to-order band, the bag summary and the footer — never behind photography or the
+logotype. `prefers-reduced-motion` stops it and the Instagram marquee, which is why
+that strip is `overflow-x: auto` rather than `hidden`.
+
 **Three contrast pairs in the system fall short of WCAG 2.2 AA.** They are
 implemented as specified — the brand system is the authority — and annotated at the
 top of `tokens.css`:
@@ -152,20 +190,32 @@ Disabled controls (`#B4A493` on `#EDE3DA`) are exempt from contrast minimums.
 
 Accessibility baseline otherwise: single `h1` per page with no skipped levels, 44px
 minimum control height, visible focus never removed, sticky-header scroll padding so
-focused targets are never obscured, sold-out state stated in words rather than by
-colour alone.
+focused targets are never obscured, real ARIA tabs with arrow-key support, inactive
+carousel slides `inert`, and **colour never carrying meaning alone** — sold out says
+"Sold out", an applied filter link carries `aria-current`, a toggle carries
+`aria-pressed`.
 
 ---
 
 ## Repo layout
 
 ```
-app/               Routes, root layout, tokens.css + globals.css
-components/ui/     Primitives — copy (placeholder), button, badge, alert, media, price, section, container, icons
-components/layout/ Header, footer, wordmark
-components/shop/   Product card, catalogue filters
-lib/content/       Site copy (empty)
-lib/shopify/       The only place Shopify is touched
-public/brand/      Logotype artwork — wordmark, stacked and monogram lockups
-public/            Static assets (home/, products/ — empty until photography exists)
+app/                   Routes, root layout, tokens.css + globals.css
+components/ui/         Primitives — copy (placeholder), button, badge, alert, media,
+                       price, section, container, breadcrumbs, icons, aurora,
+                       save-button, notice-form
+components/layout/     Announcement bar, header, cart badge, footer, wordmark
+components/home/       Hero carousel, promo band, countdown, category mosaic,
+                       service band, made-to-order, Instagram strip
+components/shop/       Product card, catalogue filters, results toolbar, pagination,
+                       shop promos, card hover
+components/product/    Gallery, purchase block, tabs
+components/cart/       Bag lines, order summary
+components/motion/     Reveal, Stagger, page transition, motion tokens
+lib/content/           Site copy — the single content module
+lib/shopify/           The only place Shopify is touched
+public/brand/          Logotype artwork — wordmark, stacked and monogram lockups
+public/products/       Catalogue photography — MISSING, see its README.md
+public/home/           Editorial photography — empty
+.design-sync/          Config for syncing components to claude.ai/design
 ```

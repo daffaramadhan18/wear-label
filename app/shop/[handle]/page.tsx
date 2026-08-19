@@ -1,112 +1,159 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { Reveal } from "@/components/motion/reveal";
+import { ProductGallery } from "@/components/product/product-gallery";
+import { ProductPurchase } from "@/components/product/product-purchase";
+import { ProductTabs } from "@/components/product/product-tabs";
+import { ProductCard } from "@/components/shop/product-card";
+import { Badge } from "@/components/ui/badge";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Container } from "@/components/ui/container";
 import { Copy } from "@/components/ui/copy";
-import { Media } from "@/components/ui/media";
 import { Price } from "@/components/ui/price";
 import { Eyebrow } from "@/components/ui/section";
-import { ui } from "@/lib/content/site";
-import { getAllProducts, getProductByHandle } from "@/lib/shopify";
+import { nav, product as productCopy, ui } from "@/lib/content/site";
+import { addToBag } from "@/lib/shopify/actions";
+import {
+  discountPercent,
+  getAllProducts,
+  getProductByHandle,
+  getRelatedProducts,
+  TAGS,
+} from "@/lib/shopify";
 
 /**
  * Product detail.
  *
- * Presentation only: breadcrumb, image, name, price, the size chips and the
- * description — all styled from the design system's Navigation and Product
- * variants sections. There is deliberately no add-to-bag control: cart and
- * checkout are Shopify's, and the cart UI is not part of this build. The size
- * chips are therefore a list of what exists, not a selector.
+ * Gallery on the left, everything purchasable on the right, then the tabs and the
+ * related row. The right column's order is the design's and it is also the order the
+ * decision gets made in: what it is made of, what it is called, what it costs, then
+ * size, colourway, quantity, add.
+ *
+ * The design's star rating is not here. There is no review system behind it, and four
+ * filled stars with "24 reviews" under them would be a fabricated claim about other
+ * customers — the one kind of placeholder that cannot be labelled as one. When
+ * reviews exist, this is where they go.
  */
 
+const RELATED_SIZES = "(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw";
+
+/**
+ * Prerender the catalogue's product pages. The routes are still rendered
+ * dynamically at request time (the header reads the bag cookie), but generating the
+ * params keeps the handle set in one place and gives Next a complete route manifest.
+ */
 export async function generateStaticParams() {
   const products = await getAllProducts();
-  return products.map((product) => ({ handle: product.handle }));
+  return products.map((entry) => ({ handle: entry.handle }));
+}
+
+export async function generateMetadata(
+  props: PageProps<"/shop/[handle]">,
+): Promise<Metadata> {
+  const { handle } = await props.params;
+  const found = await getProductByHandle(handle);
+
+  if (!found) return {};
+
+  return {
+    title: found.title,
+    description: found.description || found.material || undefined,
+  };
 }
 
 export default async function ProductPage(props: PageProps<"/shop/[handle]">) {
   const { handle } = await props.params;
-  const product = await getProductByHandle(handle);
+  const item = await getProductByHandle(handle);
 
-  if (!product) notFound();
+  if (!item) notFound();
 
-  const sizes = product.options.find((option) => option.name === "Size")?.values ?? [];
+  const related = await getRelatedProducts(handle, 4);
+  const price = item.priceRange.minVariantPrice;
+  const discount = discountPercent(price, item.compareAtPrice);
 
   return (
-    <Container className="py-section">
-      <nav aria-label="Breadcrumb">
-        <ol className="flex flex-wrap items-center gap-2.5 text-caption text-ink-subtle">
-          <li>
-            <Link
-              href="/"
-              className="transition-colors duration-(--duration-base) hover:text-brand"
-            >
-              {ui.home}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li>
-            <Link
-              href="/shop"
-              className="transition-colors duration-(--duration-base) hover:text-brand"
-            >
-              {ui.shop}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li aria-current="page" className="text-ink-body">
-            <Copy value={product.title} label="product name" className="max-w-36" />
-          </li>
-        </ol>
-      </nav>
+    <Container className="pb-section pt-8">
+      <Breadcrumbs
+        trail={[
+          { label: nav.primary[0].label, href: "/" },
+          { label: nav.primary[1].label, href: "/shop" },
+          { label: item.title },
+        ]}
+        className="mb-block"
+      />
 
-      <div className="mt-block grid gap-block-lg lg:grid-cols-2">
-        <Media image={product.featuredImage} priority sizes="(min-width: 1024px) 48vw, 100vw" />
+      <div className="grid gap-block-lg lg:grid-cols-[1.1fr_minmax(0,1fr)] lg:gap-14">
+        <ProductGallery images={item.images} title={item.title} />
 
-        {/* The photograph is the priority image and must paint immediately, so
-            only the detail column is revealed — it arrives beside a picture that
-            is already there. */}
-        <Reveal className="lg:pt-block">
-          <h1 className="text-h1 leading-h1">
-            <Copy value={product.title} label="product name" />
-          </h1>
+        <div className="flex flex-col gap-5.5">
+          <div className="flex flex-col gap-2.5">
+            <Eyebrow className="tracking-label">
+              <Copy value={item.material} label="material" inline />
+            </Eyebrow>
 
-          <p className="mt-3 text-caption text-ink-subtle">
-            <Copy value={product.material} label="material" className="max-w-48" />
-          </p>
+            <h1 className="text-h1 leading-h1">{item.title}</h1>
 
-          <div className="mt-7 text-h3">
-            <Price price={product.priceRange.minVariantPrice} />
-          </div>
-
-          {sizes.length > 0 ? (
-            <div className="mt-block">
-              <h2 className="font-body">
-                <Eyebrow>{ui.size}</Eyebrow>
-              </h2>
-              <ul className="mt-3.5 flex flex-wrap gap-2.5">
-                {sizes.map((size) => (
-                  <li
-                    key={size.name}
-                    className={`inline-flex h-11.5 min-w-[54px] items-center justify-center rounded-sm border px-3.5 text-caption tracking-wide ${
-                      size.available
-                        ? "border-line bg-canvas text-ink-body"
-                        : "border-inert-border bg-inert text-on-inert line-through"
-                    }`}
-                  >
-                    {size.name}
-                    {!size.available ? <span className="sr-only">, {ui.soldOut}</span> : null}
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-1.5 flex flex-wrap items-baseline gap-3.5">
+              <Price price={price} compareAt={item.compareAtPrice} size="display" />
+              {discount !== null ? <Badge tone="sale">−{discount}%</Badge> : null}
+              {item.tags.includes(TAGS.new) ? <Badge tone="invert">{ui.new}</Badge> : null}
+              {!item.availableForSale ? <Badge tone="inert">{ui.soldOut}</Badge> : null}
             </div>
-          ) : null}
-
-          <div className="mt-block wl-measure text-body leading-body text-ink-body">
-            <Copy value={product.description} label="description" lines={4} />
           </div>
-        </Reveal>
+
+          <ProductPurchase product={item} action={addToBag} />
+
+          <ul className="flex flex-col gap-2.5 border-t border-hairline pt-5.5 text-caption leading-snug text-ink-muted">
+            {productCopy.notes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </div>
       </div>
+
+      <Reveal className="mt-block-lg">
+        <ProductTabs
+          tabs={[
+            {
+              id: "details",
+              label: ui.details,
+              body: item.description,
+              placeholder: "product details",
+            },
+            {
+              id: "care",
+              label: ui.fabricAndCare,
+              body: item.care,
+              placeholder: "fabric and care",
+            },
+            {
+              id: "shipping",
+              label: ui.shipping,
+              body: productCopy.shipping,
+              placeholder: "shipping",
+            },
+          ]}
+        />
+      </Reveal>
+
+      {related.length > 0 ? (
+        <section aria-labelledby="related-heading" className="mt-block-lg flex flex-col gap-8">
+          <Reveal>
+            <h2 id="related-heading" className="font-body text-h2 leading-h2">
+              {ui.relatedHeading}
+            </h2>
+          </Reveal>
+
+          <Stagger className="grid gap-x-7 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            {related.map((entry) => (
+              <StaggerItem key={entry.id}>
+                <ProductCard product={entry} sizes={RELATED_SIZES} />
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </section>
+      ) : null}
     </Container>
   );
 }

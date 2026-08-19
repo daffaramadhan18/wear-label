@@ -6,6 +6,10 @@ import type { ReactNode } from "react";
  */
 const TONES = {
   brand: "bg-brand text-on-brand",
+  /** The catalogue's "New" flag — espresso, the quietest way to shout. */
+  invert: "bg-invert text-ink-invert",
+  /** A markdown. Rust, and always beside the two prices, never instead of them. */
+  sale: "bg-sale text-on-sale",
   promo: "bg-promo-surface text-on-promo-surface",
   sage: "bg-sage-surface text-on-sage-surface",
   outline: "border border-line text-ink-subtle",

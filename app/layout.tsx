@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Poppins } from "next/font/google";
+import { Suspense } from "react";
+import { AnnouncementBar } from "@/components/layout/announcement-bar";
+import { CartBadge } from "@/components/layout/cart-badge";
 import { MotionProvider } from "@/components/motion/motion-provider";
 import { PageTransition } from "@/components/motion/page-transition";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -34,10 +37,9 @@ const poppins = Poppins({
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 /**
- * Only the company name is asserted here. Tagline and description are blank in
- * `lib/content/site.ts` and stay out of the metadata until they are written —
- * shipping placeholder text to crawlers and social cards would be worse than
- * shipping nothing.
+ * Title and description come from `lib/content/site.ts` — the storefront design's
+ * own words, not invented here. An empty string there resolves to `undefined`
+ * rather than an empty tag, so a crawler is never handed a blank description.
  */
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -77,7 +79,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {ui.skipToContent}
         </a>
         <MotionProvider>
-          <SiteHeader />
+          <AnnouncementBar />
+          {/*
+            The bag count is the one thing in the header that depends on the
+            request. Passing it in as a node — inside its own Suspense boundary —
+            keeps the cookie read to that subtree, so the header can stay a Client
+            Component for its mobile disclosure and the count still renders on the
+            server. The fallback is nothing at all: an empty bag has no badge, so
+            there is no space to reserve and nothing to shift.
+          */}
+          <SiteHeader
+            cartBadge={
+              <Suspense fallback={null}>
+                <CartBadge />
+              </Suspense>
+            }
+          />
           <main id="main" className="flex-1">
             <PageTransition>{children}</PageTransition>
           </main>

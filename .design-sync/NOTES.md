@@ -61,7 +61,7 @@ unstyled, fontless bundle that still exits 0.
   `^on[A-Z]` is filtered as an event handler, which took `Wordmark`'s `onDark`
   boolean. Domain types (`Product`, `Money`, `Image`, `CatalogueQuery`) live in
   `lib/shopify` and are not re-exported, so they emitted as undefined names.
-  All of this is why `cfg.dtsPropsFor` covers 7 components — do not delete those
+  All of this is why `cfg.dtsPropsFor` covers 8 components — do not delete those
   entries thinking the extractor will now handle them.
 - **Group names: the directory wins over frontmatter.** A doc's
   `category:` only applies when no directory group was derived, so
@@ -87,16 +87,21 @@ Both are wrapped in `.ds-sync/chromium-wrapper.sh`, used via
 after which the wrapper and `pwlibs/` can both be deleted. Both live in the
 gitignored `.ds-sync/`, so a fresh clone or another machine must redo this.
 
-## Preview copy is illustrative, not brand copy
+## Preview copy — now out of date in a specific way
 
-`lib/content/site.ts` is deliberately empty and that is a project decision. The
-authored previews needed *some* text to not read as blank, so they use plainly
-illustrative strings — "Linen shirt", "Shop all", "Featured products", and IDR
-prices — drawn from the repo's own examples where possible (`types.ts` documents
-material as e.g. "Handwoven linen"; `money.ts` documents the `Rp 1.250.000`
-format). **None of it is approved brand copy.** Where a component has a
-placeholder state, the previews show both states side by side, so the empty state
-is visible as the real current behaviour.
+When these previews were authored, `lib/content/site.ts` was deliberately empty,
+so they use plainly illustrative strings — "Linen shirt", "Shop all", "Featured
+products" — chosen from the repo's own examples rather than invented as brand
+voice. **That premise has changed:** the storefront design was imported and the
+content module now carries approved copy, and `fixtures.ts` carries the real
+eleven-piece catalogue with real names, materials and IDR prices.
+
+So on the next authoring pass, replace the illustrative strings with the real
+ones from those two modules — a preview showing "Linen shirt" next to a design
+system whose catalogue says "Basic Linen Culotte" reads as a second, competing
+source of truth. Keep the both-states-side-by-side pattern for the slots that are
+still legitimately empty (About Us, My Account, 404, per-product details and
+fabric care): there the placeholder IS the current behaviour.
 
 ## Re-sync risks — what can silently go stale
 
@@ -109,12 +114,24 @@ is visible as the real current behaviour.
   is gitignored and its generated `index.ts` and declarations embed absolute
   `/home/daffa/wear-label/...` paths. Always regenerate via `prepare.sh` rather
   than copying the directory between machines or clones.
-- **Component scope lives in one place.** The `SURFACE` map in
+- **Component scope lives in one place, and it is behind.** The `SURFACE` map in
   `.design-sync/setup-pkg.mjs` is the only list of what syncs. Adding a component
   to `components/` does **not** add it to the design system — add it to `SURFACE`
   too, or it is silently absent. `components/motion/*` (Reveal, Stagger,
   PageTransition, MotionProvider) is deliberately excluded: scroll- and
   route-triggered animation plumbing that cannot render statically.
+
+  **`SURFACE` still lists exactly the 21 components it listed before the
+  storefront import.** Missing, and each needing a preview as well as a map entry: `Aurora`/`AuroraBand`,
+  `Breadcrumbs`, `SaveButton`, `NoticeForm`, `AnnouncementBar`, `CartBadge`,
+  `HeroCarousel`, `PromoBand`, `Countdown`, `CategoryMosaic`, `ServiceBand`,
+  `MadeToOrder`, `InstagramStrip`, `ResultsToolbar`, `Pagination`, `ShopPromos`,
+  `ProductGallery`, `ProductPurchase`, `ProductTabs`, `CartLines`,
+  `OrderSummary`. Several are `"use client"` with `useActionState` or a Server
+  Function prop, so expect the shims in `setup-pkg.mjs` to need extending before
+  they will bundle — that is the real work in closing this gap, not the map entry.
+  The prop docs in `cfg.dtsPropsFor` for `Price`, `Media`, `ProductCard`,
+  `CatalogueFilters` and `SiteHeader` were refreshed at import time and are current.
 - **The `next` shims drift with Next.** They cover only what these components
   use: `Link`, `Image` (with `fill`), and `usePathname`. A component that starts
   using `useSearchParams` for real behaviour, `next/form`, or image `loader` will

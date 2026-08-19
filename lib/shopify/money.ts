@@ -22,3 +22,18 @@ export function formatMoney({ amount, currencyCode }: Money): string {
 
   return FORMATTERS[key].format(Number(amount));
 }
+
+/**
+ * The markdown depth, as a whole percentage, or null when the piece is not on
+ * sale. Kept here rather than in a badge component: it is arithmetic over two
+ * Money values, and Shopify is the authority on both.
+ */
+export function discountPercent(price: Money | null, compareAt: Money | null): number | null {
+  if (!price || !compareAt) return null;
+
+  const now = Number(price.amount);
+  const was = Number(compareAt.amount);
+  if (!Number.isFinite(now) || !Number.isFinite(was) || was <= now) return null;
+
+  return Math.round((1 - now / was) * 100);
+}
