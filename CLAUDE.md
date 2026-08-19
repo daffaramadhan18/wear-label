@@ -71,8 +71,9 @@ Money formatting helpers only.
 | `/about` | About Us — company profile (copy not written) |
 | `/account` | My Account — route and layout only, no auth (see [Still open](#still-open)) |
 
-Plus `app/not-found.tsx`. Every route renders dynamically, because the header reads
-the bag cookie.
+Plus `app/not-found.tsx` — the same heading-and-button shell as the other copy-only
+routes, over the floating-paths wash. Every route renders dynamically, because the
+header reads the bag cookie.
 
 ## Repo layout
 
@@ -80,7 +81,7 @@ the bag cookie.
 app/                   Routes, root layout, tokens.css + globals.css
 components/ui/         Primitives — button, badge, alert, media, price, copy,
                        section, container, breadcrumbs, icons, aurora,
-                       save-button, notice-form
+                       floating-paths, save-button, notice-form
 components/layout/     Announcement bar, header, cart badge, footer, wordmark
 components/home/       Hero carousel, promo band, countdown, category mosaic,
                        service band, made-to-order, Instagram strip,
@@ -146,8 +147,9 @@ Commands: `npm run dev`, `npm run build`, `npm start`, `npm run lint`.
   product tabs, the card hover, the save button, the notice form, and the four
   motion wrappers. Everything else is server-rendered — including every product
   card body, the whole filter rail, every row of the bag, and both marquees. The
-  Instagram strip and the voices wall move on CSS animation alone, so neither
-  costs a render or a byte of JavaScript; keep it that way.
+  Instagram strip, the voices wall and the 404's floating-paths wash move on CSS
+  animation alone, so none of them costs a render or a byte of JavaScript; keep it
+  that way.
 - **The URL is the state.** Catalogue filters are *links* that flip one facet and
   preserve the rest (`catalogueHref` in `lib/shopify/catalogue.ts`); sort is a plain
   `GET` form. No client filtering, no state to keep in step with the URL, and the
@@ -180,6 +182,13 @@ Commands: `npm run dev`, `npm run build`, `npm start`, `npm run lint`.
   `components/ui/aurora.tsx` only picks a tone, an origin and an intensity. The
   veil layer MUST be painted in the colour of the surface underneath — a mismatch
   shows up as a visible rectangle, and that is the bug this effect always has.
+- **A background loop is CSS, not a client island.** The same split as the aurora
+  applies to `components/ui/floating-paths.tsx`: `.wl-paths` in `globals.css` runs
+  the dash along each strand and `--duration-paths-*` in `tokens.css` sets the loop
+  lengths, so the component stays server-rendered and the wash costs no JavaScript.
+  The source component animated 36 `motion.path` elements with a `Math.random()`
+  duration picked during render — a client island and a hydration mismatch on every
+  strand. It is the background of `app/not-found.tsx`.
 - **Accessibility is part of the design, not a pass afterwards.** Single `h1` per
   page with no skipped levels, 44px minimum control height, visible focus never
   removed, sticky-header scroll padding, and **colour never carries meaning alone** —
