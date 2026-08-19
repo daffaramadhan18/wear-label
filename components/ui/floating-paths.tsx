@@ -115,7 +115,7 @@ export function FloatingPathsBackground({
     <div className={`relative isolate w-full ${className}`}>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
+        className="wl-paths-layer pointer-events-none absolute inset-0"
         style={{ opacity: intensity }}
       >
         <svg

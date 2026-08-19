@@ -81,28 +81,38 @@ export default async function HomePage() {
         </section>
       </FloatingPathsBackground>
 
-      <Reveal>
-        <TestimonialWall heading={home.voices.heading} reviews={home.voices.reviews} />
-      </Reveal>
+      {/*
+        The three blocks below are NOT wrapped in <Reveal>, and that is the fix for
+        two bugs rather than a preference.
 
-      <Reveal>
-        <MadeToOrder
-          id="made-to-order-heading"
-          eyebrow={home.madeToOrder.eyebrow}
-          heading={home.madeToOrder.heading}
-          body={home.madeToOrder.body}
-          cta={home.madeToOrder.cta}
-          href={home.madeToOrder.href}
-          stats={home.madeToOrder.stats}
-        />
-      </Reveal>
+        <Reveal> animates opacity, which makes its wrapper a stacking context and
+        promotes it to its own layer. Around the voices wall that flattens the
+        wall's `preserve-3d` scene: the plane's `translateZ(-100px)` stops pushing
+        the cards behind the stage's fades, so the cards paint over them and the top
+        of the wall ends in a hard edge instead of dissolving into the page. Around
+        an <AuroraBand> it does the same damage to `mix-blend-mode: soft-light`,
+        which then blends against the wrapper instead of the page and shows up as a
+        visible rectangle.
 
-      <Reveal>
-        <InstagramStrip
-          heading={home.instagram.heading}
-          images={products.map((product) => product.featuredImage)}
-        />
-      </Reveal>
+        None of the three needs an entrance anyway — each one is already the only
+        thing moving in its own viewport.
+      */}
+      <TestimonialWall heading={home.voices.heading} reviews={home.voices.reviews} />
+
+      <MadeToOrder
+        id="made-to-order-heading"
+        eyebrow={home.madeToOrder.eyebrow}
+        heading={home.madeToOrder.heading}
+        body={home.madeToOrder.body}
+        cta={home.madeToOrder.cta}
+        href={home.madeToOrder.href}
+        stats={home.madeToOrder.stats}
+      />
+
+      <InstagramStrip
+        heading={home.instagram.heading}
+        images={products.map((product) => product.featuredImage)}
+      />
     </>
   );
 }

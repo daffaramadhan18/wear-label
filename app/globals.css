@@ -145,8 +145,10 @@
     inset: -10px;
     z-index: 0;
     pointer-events: none;
-    will-change: transform;
     filter: blur(10px);
+    /* Bounds the blur's invalidation to this box, and clips the oversized moving
+       layer below. Without it a repaint here dirties the whole band. */
+    contain: paint;
     background-image: var(--aurora-veil-layer), var(--aurora-stops);
     background-size: 300% 200%, 200% 100%;
     background-position: 50% 50%, 50% 50%;
@@ -154,23 +156,63 @@
     mask-image: radial-gradient(ellipse at var(--aurora-origin), #000 10%, transparent 70%);
   }
 
+  /*
+   * The moving half of the wash.
+   *
+   * Two deliberate departures from the source technique, both because it flickered:
+   *
+   * 1. It animated `background-position`. That is a paint property — every frame
+   *    re-rasterised a blurred, soft-light-blended layer on the main thread, which
+   *    on a page carrying two of these (the made-to-order band and the footer) is
+   *    visible as stutter on any scroll. This layer is three tiles wide and
+   *    translates instead: `transform` is composited, so the texture is rasterised
+   *    once and the loop costs nothing per frame.
+   *
+   *    The travel is exactly one veil tile (66.667% of a 300%-wide box = two parent
+   *    widths), which is also two stop tiles, so both layers land on an identical
+   *    frame and the loop is seamless.
+   *
+   * 2. It set `background-attachment: fixed`. With a `filter` on the parent that
+   *    does not resolve against the viewport the way it reads, and it ties this
+   *    layer's paint to scroll position — the other half of the flicker. The tile
+   *    sizes here keep the density the fixed version was aiming at.
+   */
   .wl-aurora::after {
     content: "";
     position: absolute;
-    inset: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 300%;
     background-image: var(--aurora-veil-layer), var(--aurora-stops);
-    background-size: 200% 100%, 100% 100%;
-    background-attachment: fixed;
+    /* One veil tile = two parent widths; one stop tile = one parent width. */
+    background-size: 66.6667% 100%, 33.3333% 100%;
     mix-blend-mode: soft-light;
+    will-change: transform;
     animation: wl-aurora var(--duration-aurora) linear infinite;
   }
 
   @keyframes wl-aurora {
-    from {
-      background-position: 50% 50%, 50% 50%;
-    }
     to {
-      background-position: 350% 50%, 350% 50%;
+      transform: translate3d(-66.6667%, 0, 0);
+    }
+  }
+
+  /*
+   * The voices wall is forty 300x250 cards on a tilted plane with four tracks
+   * animating at once — the most expensive thing on the page. `content-visibility`
+   * lets the browser skip rendering all of it while the section is off-screen, which
+   * on a page this long is most of the time; the animations keep their clock and
+   * simply stop painting. The intrinsic size is the stage's own height (h-140), so
+   * nothing shifts when it comes back into view.
+   */
+  @media (width >= 48rem) {
+    .wl-voices-stage {
+      content-visibility: auto;
+      /* The stage's own height. Scoped to md and up on purpose: below it the wall
+         lies down into a short rail, and reserving 35rem for that would put a jump
+         in the page on the way down. */
+      contain-intrinsic-size: auto 35rem;
     }
   }
 
@@ -265,6 +307,17 @@
    * rather than on a beat of its own. It multiplies the per-path `stroke-opacity`
    * ramp instead of replacing it — two different properties.
    */
+  /*
+   * The wash is the one loop left that repaints rather than composites: a dash
+   * travels along each of the 36 strands, and `stroke-dashoffset` is a paint
+   * property. Skipping it while the band is off-screen is what keeps that off the
+   * scroll budget. It is absolutely positioned, so no intrinsic size is needed —
+   * nothing lays out against it.
+   */
+  .wl-paths-layer {
+    content-visibility: auto;
+  }
+
   .wl-paths path {
     stroke-dasharray: 0.3 0.7;
     animation: wl-paths var(--path-duration) linear var(--path-delay) infinite;
