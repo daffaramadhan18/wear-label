@@ -5,9 +5,11 @@ import type { Image } from "@/lib/shopify";
  * The Instagram strip: one row of square crops, scrolling.
  *
  * The track holds the run twice and travels exactly -50%, so the loop is seamless
- * (`globals.css`). It pauses on hover and on focus, and `prefers-reduced-motion`
- * stops it altogether — which is why the rail is `overflow-x-auto` rather than
- * `hidden`: with the animation off, the strip has to stay reachable by scrolling.
+ * (`globals.css`). It runs continuously — hovering does not stop it — and
+ * `prefers-reduced-motion` stops it altogether, which is why the rail is
+ * `overflow-x-auto` rather than `hidden`: with the animation off, the strip has to
+ * stay reachable by scrolling. The scrollbar itself is hidden, so that fallback
+ * costs the design nothing.
  *
  * The images are the catalogue's own, since the studio's posts are not wired up
  * here. There are no links on them for the same reason — a post needs a permalink,

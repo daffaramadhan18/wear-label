@@ -27,6 +27,11 @@
  *      the 3:1 for control boundaries. That near-invisible rule IS the look;
  *      inputs stay distinguishable by their filled background instead.
  *
+ *   4. The review initial (#725E4C on the #E4D4C6 disc) is 4.25:1 — under the
+ *      4.5:1 for 15px text. It is decorative: the disc restates the first letter
+ *      of the reviewer name printed beside it at 15.88:1, so nothing is carried
+ *      by the disc alone.
+ *
  * Disabled controls (#B4A493 on #EDE3DA) are exempt from contrast minimums.
  */
 
@@ -49,6 +54,7 @@
   /* Blush ramp — promotional areas, badges, editorial backgrounds */
   --wl-blush-100: #ffe8dd;
   --wl-blush-200: #f2d7c6;
+  --wl-blush-250: #e4d4c6; /* Avatar discs in the voices wall */
   --wl-blush-300: #ddc2af;
   --wl-blush-500: #b79b7f;
   --wl-blush-600: #a58666;
@@ -77,6 +83,34 @@
   --wl-inert-100: #f7f1ec;
   --wl-inert-400: #c6b7a7;
 
+  /* === Aurora ==========================================================
+   *
+   * The wash's stop list, one per surface family. Only the stops live here:
+   * the veil layer painted over them takes the colour of whichever surface the
+   * band sits on, which is what makes the effect read as movement in the paper
+   * rather than a coloured light on top of it. `globals.css` assembles both
+   * layers; `components/ui/aurora.tsx` picks the pair.
+   *
+   * The dark list is not the light one dimmed — on espresso the blush stops
+   * disappear, so the footer runs up the taupe ramp instead. Both lists are the
+   * storefront design's, stop for stop. */
+  --wl-aurora-stops: repeating-linear-gradient(
+    100deg,
+    var(--wl-taupe-600) 10%,
+    var(--wl-taupe-300) 15%,
+    var(--wl-blush-200) 20%,
+    var(--wl-blush-300) 25%,
+    var(--wl-taupe-500) 30%
+  );
+  --wl-aurora-stops-invert: repeating-linear-gradient(
+    100deg,
+    var(--wl-taupe-600) 10%,
+    var(--wl-taupe-500) 15%,
+    var(--wl-taupe-300) 20%,
+    var(--wl-blush-500) 25%,
+    var(--wl-taupe-600) 30%
+  );
+
   /* === Non-themed design values ======================================== */
 
   /* Readable measure — 60–75ch desktop */
@@ -93,6 +127,19 @@
   --duration-enter: 400ms;
   --duration-lead: 600ms;
   --duration-stagger: 45ms;
+
+  /* Loop lengths, not transitions, so they sit apart from the pair above. One
+     full pass of a doubled run in each case.
+
+     The four voices columns are deliberately mismatched: equal lengths would
+     lock the columns into step within a few seconds and the wall would read as
+     one sliding block rather than four. */
+  --duration-marquee: 60s;
+  --duration-aurora: 60s;
+  --duration-voices-a: 44s;
+  --duration-voices-b: 54s;
+  --duration-voices-c: 48s;
+  --duration-voices-d: 58s;
 
   /* Sticky header height — drives scroll-padding so anchors and keyboard focus
      are never parked underneath the header (WCAG 2.2 AA 2.4.11). */
@@ -160,6 +207,11 @@
 
   /* Text selection */
   --color-selection: var(--wl-blush-200);
+
+  /* The initial disc on a customer review. Narrow on purpose, like the pair
+     above: it is a surface the palette has exactly one use for. */
+  --color-avatar: var(--wl-blush-250);
+  --color-on-avatar: var(--wl-taupe-600); /* 4.25:1 — see note 4 in the header */
 
   /* === Typography ====================================================== */
   /* Playfair Display carries the editorial voice; Poppins is the interface. */

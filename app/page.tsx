@@ -4,6 +4,7 @@ import { InstagramStrip } from "@/components/home/instagram-strip";
 import { MadeToOrder } from "@/components/home/made-to-order";
 import { PromoBand } from "@/components/home/promo-band";
 import { ServiceBand } from "@/components/home/service-band";
+import { TestimonialWall } from "@/components/home/testimonial-wall";
 import { Reveal } from "@/components/motion/reveal";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { ProductCard } from "@/components/shop/product-card";
@@ -15,7 +16,8 @@ import { getFeaturedProducts, TAGS } from "@/lib/shopify";
 
 /**
  * Home — the design's sequence, top to bottom: hero, limited-run band, new
- * arrivals, category mosaic, service band, made-to-order, Instagram strip.
+ * arrivals, customer voices, category mosaic, service band, made-to-order,
+ * Instagram strip.
  *
  * Every photograph on the page comes out of the catalogue rather than being art
  * directed separately, so the page cannot drift out of step with what is in stock.
@@ -90,6 +92,10 @@ export default async function HomePage() {
           </Reveal>
         </Container>
       </section>
+
+      <Reveal>
+        <TestimonialWall heading={home.voices.heading} reviews={home.voices.reviews} />
+      </Reveal>
 
       <Reveal>
         <CategoryMosaic

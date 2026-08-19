@@ -17,7 +17,14 @@
   }
 
   body {
-    background-color: var(--color-canvas);
+    /*
+     * White, not cream. The design's page shell is #FFFFFF and cream is a band
+     * colour on it — the made-to-order block, the hero panel, every filled chip,
+     * input and stepper. Painting the shell cream instead flattens all of those
+     * into the page, so this one token is what keeps the whole site's figure and
+     * ground the right way round.
+     */
+    background-color: var(--color-surface);
     color: var(--color-ink-body);
     font-family: var(--font-body);
     font-size: var(--text-body);
@@ -105,6 +112,140 @@
     border: 0;
     border-top: 1px solid var(--color-rule);
   }
+
+  /*
+   * The aurora wash.
+   *
+   * Two stacked repeating gradients: a veil in the surface colour over a band of
+   * brand stops. The element itself holds a still frame; the `::after` copy is
+   * the one that travels, blended `soft-light` so the colour moves *through* the
+   * paper instead of sitting on it. `mix-blend-difference` and the `invert` pair
+   * the original component shipped with both turn warm neutrals cyan, which is
+   * why neither is here.
+   *
+   * `--aurora-veil`, `--aurora-stops` and `--aurora-origin` are set per band by
+   * `components/ui/aurora.tsx`. The veil MUST be the colour of the surface the
+   * band sits on; a mismatch shows up as a visible rectangle.
+   *
+   * `background-attachment: fixed` on the moving copy is deliberate — it ties the
+   * wash to the viewport, so two bands on one page never animate in lockstep.
+   */
+  .wl-aurora {
+    --aurora-veil-layer: repeating-linear-gradient(
+      100deg,
+      var(--aurora-veil) 0%,
+      var(--aurora-veil) 7%,
+      transparent 10%,
+      transparent 12%,
+      var(--aurora-veil) 16%
+    );
+
+    position: absolute;
+    /* Bleeds past the band, so the 10px blur never exposes a soft edge. */
+    inset: -10px;
+    z-index: 0;
+    pointer-events: none;
+    will-change: transform;
+    filter: blur(10px);
+    background-image: var(--aurora-veil-layer), var(--aurora-stops);
+    background-size: 300% 200%, 200% 100%;
+    background-position: 50% 50%, 50% 50%;
+    /* Black is an alpha here, not a colour: the mask reads luminance. */
+    mask-image: radial-gradient(ellipse at var(--aurora-origin), #000 10%, transparent 70%);
+  }
+
+  .wl-aurora::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--aurora-veil-layer), var(--aurora-stops);
+    background-size: 200% 100%, 100% 100%;
+    background-attachment: fixed;
+    mix-blend-mode: soft-light;
+    animation: wl-aurora var(--duration-aurora) linear infinite;
+  }
+
+  @keyframes wl-aurora {
+    from {
+      background-position: 50% 50%, 50% 50%;
+    }
+    to {
+      background-position: 350% 50%, 350% 50%;
+    }
+  }
+
+  /*
+   * The Instagram strip's marquee.
+   *
+   * The track carries the run twice, so travelling one run's width lands on an
+   * identical frame and the loop is seamless. That distance is 50% of the track
+   * plus half a gap — the gap between the two runs belongs to neither of them.
+   *
+   * It does NOT pause on hover — the strip is set to run continuously. The
+   * focus-within rule stays: nothing in the strip is focusable today, but the
+   * moment a post gets a permalink it would be, and a track sliding out from
+   * under the caret is a different problem from a track sliding under a pointer.
+   *
+   * The rail scrolls but shows no scrollbar. `overflow-x-auto` is what keeps the
+   * strip reachable once `prefers-reduced-motion` stops the animation, so it
+   * cannot become `hidden`; hiding only the scrollbar chrome keeps that fallback
+   * and takes the bar off the design.
+   */
+  .wl-marquee {
+    scrollbar-width: none;
+  }
+
+  .wl-marquee::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wl-marquee-track {
+    --marquee-gap: calc(var(--spacing) * 3);
+
+    display: flex;
+    gap: var(--marquee-gap);
+    width: max-content;
+    animation: wl-marquee var(--duration-marquee) linear infinite;
+  }
+
+  .wl-marquee:focus-within .wl-marquee-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes wl-marquee {
+    to {
+      transform: translateX(calc(-50% - var(--marquee-gap) / 2));
+    }
+  }
+
+  /*
+   * The customer-voices wall — four vertical tracks on a tilted plane.
+   *
+   * Each track carries its five reviews twice and travels exactly -50%, so the
+   * loop closes on an identical frame. The trailing 24px of padding inside each
+   * copy is what makes -50% land on the gap rather than mid-card.
+   *
+   * The offset is a variable rather than a margin utility because reduced motion
+   * has to zero it: a track parked at an offset with the animation stopped would
+   * hold its content off the bottom of the stage, where nobody can read it.
+   */
+  .wl-voices-track {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--voices-offset);
+    will-change: transform;
+    animation: wl-voices var(--voices-duration) linear infinite;
+  }
+
+  .wl-voices-track[data-reverse] {
+    animation-direction: reverse;
+  }
+
+  @keyframes wl-voices {
+    to {
+      transform: translateY(-50%);
+    }
+  }
 }
 
 @layer utilities {
@@ -116,6 +257,42 @@
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  /* The strip stops entirely; its rail stays scrollable, which is why the
+     wrapper is `overflow-x-auto` rather than `hidden`. */
+  .wl-marquee-track {
+    animation: none;
+  }
+
+  .wl-aurora::after {
+    animation: none;
+  }
+
+  /*
+   * The voices wall stops AND flattens. Stopping alone is not enough here: the
+   * stage clips to 560px and the tilt pushes the far columns out of it, so a
+   * frozen wall would leave most of the reviews unreadable and some of them
+   * entirely off-screen. Without motion it becomes a plain grid of cards — the
+   * duplicate copies are the ones already hidden from assistive tech, so
+   * dropping them removes nothing a reader can reach.
+   */
+  .wl-voices-track {
+    --voices-offset: 0;
+
+    animation: none;
+  }
+
+  .wl-voices-track > [aria-hidden="true"] {
+    display: none;
+  }
+
+  .wl-voices-stage {
+    height: auto;
+  }
+
+  .wl-voices-plane {
+    transform: none;
   }
 }
 

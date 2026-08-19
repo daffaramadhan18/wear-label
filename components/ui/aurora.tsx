@@ -15,10 +15,10 @@ import type { ReactNode } from "react";
  * design system apply to whatever sits on top.
  */
 const TONES = {
-  canvas: { veil: "var(--wl-cream)", stops: "var(--aurora-stops)" },
-  muted: { veil: "var(--wl-taupe-100)", stops: "var(--aurora-stops)" },
-  inert: { veil: "var(--wl-inert-100)", stops: "var(--aurora-stops)" },
-  invert: { veil: "var(--wl-taupe-900)", stops: "var(--aurora-stops-invert)" },
+  canvas: { veil: "var(--wl-cream)", stops: "var(--wl-aurora-stops)" },
+  muted: { veil: "var(--wl-taupe-100)", stops: "var(--wl-aurora-stops)" },
+  inert: { veil: "var(--wl-inert-100)", stops: "var(--wl-aurora-stops)" },
+  invert: { veil: "var(--wl-taupe-900)", stops: "var(--wl-aurora-stops-invert)" },
 } as const;
 
 /** Which corner the wash fades out from. */
