@@ -222,9 +222,11 @@ truncates text at 256 KiB, and `.image-slots.state.json` is a single 521 KiB lin
 so the hero artwork cannot be fetched that way. `render_preview` serves the project
 over HTTP and relative subresources resolve against it, which is how
 `public/home/hero-{1,2}.webp` were pulled byte-exact. The design maps slots by
-position (`slotId: 'sf-hero-' + (i + 1)`), so slide 1 is `sf-hero-1` and slide 2 is
-`sf-hero-2`; an unused `sf-hero` from an earlier single-slide version is also in that
-file and is not one of them.
+position (`slotId: 'sf-hero-' + (i + 1)`); an unused `sf-hero` from an earlier
+single-slide version is also in that file and is not one of them. **The two hero
+files are named for the slide they sit on, and that order is the reverse of the
+design's** — the design leads with the order-notes card, this build leads with the
+photograph, so `hero-1.webp` is `sf-hero-2` and `hero-2.webp` is `sf-hero-1`.
 
 The published design system that this repo's components sync *to* is a separate
 project, [`096a4d56-a7d8-49ce-9d7a-4fe26ac82b54`](https://claude.ai/design/p/096a4d56-a7d8-49ce-9d7a-4fe26ac82b54).

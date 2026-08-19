@@ -14,10 +14,17 @@ import type { Image } from "@/lib/shopify";
  * The hero — the design's 600px band with a cream card over the photograph, and as
  * many slides as `lib/content/site.ts` lists.
  *
+ * Slides travel sideways rather than crossfading: every slide is parked one band
+ * width away on the side it will arrive from, and only the offset changes. The
+ * band already clips, so nothing extra is needed to hide the parked ones.
+ *
  * Rotation rules, in the order they matter:
  *
  *   - It stops on hover and on keyboard focus, so a reader can finish the sentence
- *     they are on and can reach the CTA without it moving.
+ *     they are on and can reach the CTA without it moving. That pause is the only
+ *     way to stop it, and at a three-second dwell it matters more than it did at
+ *     six — the headline and its paragraph are longer than three seconds of
+ *     reading for most people.
  *   - `prefers-reduced-motion` turns rotation off entirely rather than merely
  *     shortening it. An auto-advancing carousel is motion the reader did not ask
  *     for, which is exactly what that setting is about.
@@ -27,15 +34,19 @@ import type { Image } from "@/lib/shopify";
  * One slide renders as a still band with no arrows and no dots — the controls are
  * derived from the slide count, not drawn in.
  *
- * The artwork comes from the design's own image slots, exported to `public/home/`.
- * The design maps them by position — `slotId: 'sf-hero-' + (i + 1)` — so slide 1
- * is `sf-hero-1` and slide 2 is `sf-hero-2`. Its state file also holds an unused
- * `sf-hero` from an earlier single-slide version; it is not one of these two.
+ * The artwork comes from the design's own image slots, exported to `public/home/`
+ * and named for the slide they sit on, not for the slot they came from — **the
+ * design's order is deliberately reversed here**. It maps slots by position
+ * (`slotId: 'sf-hero-' + (i + 1)`), which puts the order-notes card first; the
+ * photograph leads instead. So `hero-1.webp` is the design's `sf-hero-2` and
+ * `hero-2.webp` is its `sf-hero-1`. Its state file also holds an unused `sf-hero`
+ * from an earlier single-slide version; it is neither of these two.
  *
  * A slide with no entry in `HERO_IMAGES` falls back to the labelled placeholder at
  * the band's exact size, so a missing shot never breaks the band.
  */
-const ROTATE_MS = 6000;
+/** Dwell per slide. The design rotates at 6s; three is what this build asked for. */
+const ROTATE_MS = 3000;
 
 /**
  * One entry per slide, in slide order. A null url renders the placeholder.
@@ -45,11 +56,18 @@ const ROTATE_MS = 6000;
  * third, so the crop is what decides how much of a shot survives.
  */
 const HERO_IMAGES: Image[] = [
+  {
+    url: "/home/hero-1.webp",
+    altText:
+      "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall.",
+    width: 1200,
+    height: 675,
+  },
   /*
-   * Slide 1 is the studio's own order-notes card, as the design has it. It is an
-   * image OF text, which is why the alt below carries the whole of that text
-   * rather than describing the picture — a screen reader gets nothing from the
-   * card itself, and neither does anyone who zooms.
+   * The studio's own order-notes card. It is an image OF text, which is why the
+   * alt below carries the whole of that text rather than describing the picture —
+   * a screen reader gets nothing from the card itself, and neither does anyone
+   * who zooms.
    *
    * Two things in it are the studio's to keep true, because they go live with the
    * page: it ships from Kota Bekasi, while `lib/content/site.ts` says the studio
@@ -57,16 +75,9 @@ const HERO_IMAGES: Image[] = [
    * catalogue does not otherwise state. Change the card, change the alt with it.
    */
   {
-    url: "/home/hero-1.webp",
-    altText:
-      "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
-    width: 1200,
-    height: 675,
-  },
-  {
     url: "/home/hero-2.webp",
     altText:
-      "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall.",
+      "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
     width: 1200,
     height: 675,
   },
@@ -119,6 +130,14 @@ export function HeroCarousel({
       {slides.map((slide, slideIndex) => {
         const active = slideIndex === index;
 
+        /* Where this slide sits, in band widths from the active one. Wrapping to
+           the nearer side keeps the last slide from travelling the whole strip
+           backwards on the way round to the first. With two slides it never
+           wraps; with three or more it is what stops the jump. */
+        let offset = slideIndex - index;
+        if (offset > slides.length / 2) offset -= slides.length;
+        if (offset < -slides.length / 2) offset += slides.length;
+
         return (
           <div
             key={slide.heading}
@@ -126,8 +145,12 @@ export function HeroCarousel({
             inert={!active}
             aria-roledescription="slide"
             aria-label={`${slideIndex + 1} of ${slides.length}`}
-            style={{ opacity: active ? 1 : 0, zIndex: active ? 2 : 1 }}
-            className="absolute inset-0 transition-opacity duration-(--duration-lead) ease-entrance"
+            style={{ transform: `translateX(${offset * 100}%)`, zIndex: active ? 2 : 1 }}
+            /* No transition under reduced motion: the arrows and dots still work,
+               the slide just arrives instead of travelling. */
+            className={`absolute inset-0 ${
+              reduceMotion ? "" : "transition-transform duration-(--duration-lead) ease-entrance"
+            }`}
           >
             <Media
               image={HERO_IMAGES[slideIndex] ?? { url: null, altText: "", width: 1440, height: 600 }}
