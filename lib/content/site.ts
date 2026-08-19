@@ -135,10 +135,14 @@ export const home = {
   },
 
   /**
-   * The limited-run band. `endsAt` drives the countdown: set it to an ISO
-   * timestamp and the blocks appear; leave it empty and the band runs without
-   * them. It is empty because a run's end date is merchandising data, and a
-   * countdown that is really a fixed string is worse than no countdown.
+   * The limited-run band. **Not on the home page** — the band was cut from the
+   * sequence; `components/home/promo-band.tsx` and this copy both stay, so
+   * bringing it back is one block in `app/page.tsx`.
+   *
+   * `endsAt` drives the countdown: set it to an ISO timestamp and the blocks
+   * appear; leave it empty and the band runs without them. It is empty because a
+   * run's end date is merchandising data, and a countdown that is really a fixed
+   * string is worse than no countdown.
    */
   promo: {
     eyebrow: "Limited run",
@@ -155,7 +159,7 @@ export const home = {
   },
 
   /**
-   * "From our customers" — the voices wall between New arrivals and the mosaic.
+   * "From our customers" — the voices wall between New arrivals and made-to-order.
    *
    * These are real Shopee reviews, reproduced verbatim from the storefront
    * design: no rewriting, no tidying of the spelling, no translation. That is the
@@ -197,9 +201,11 @@ export const home = {
   },
 
   /**
-   * The category mosaic — one tall tile and four small ones. Every destination is
-   * a real catalogue filter; the design's "Tops" and "Up to 40% off" tiles are
-   * not here because neither exists in this catalogue.
+   * The category mosaic — one tall tile and four small ones. **Not on the home
+   * page**, along with the service band below it; both components remain, and so
+   * does this copy. Every destination is a real catalogue filter; the design's
+   * "Tops" and "Up to 40% off" tiles are not here because neither exists in this
+   * catalogue.
    */
   mosaic: {
     feature: { eyebrow: "Shop", label: "Wide leg", href: "/shop?category=Wide+leg" },
@@ -211,7 +217,10 @@ export const home = {
     ],
   },
 
-  /** `icon` selects a mark from `components/ui/icons.tsx`. */
+  /**
+   * The three-up service band. Not on the home page either — see `mosaic` above.
+   * `icon` selects a mark from `components/ui/icons.tsx`.
+   */
   services: [
     {
       icon: "shipping",

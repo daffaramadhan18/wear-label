@@ -64,7 +64,7 @@ Money formatting helpers only.
 
 | Route | What it is |
 |---|---|
-| `/` | Home — hero carousel, limited-run band, new arrivals, customer voices, category mosaic, service band, made-to-order band, Instagram strip |
+| `/` | Home — hero carousel, new arrivals, customer voices, made-to-order band, Instagram strip. The design's limited-run band, category mosaic and service band are cut from the page; all three components and their copy remain, so restoring one is an edit to `app/page.tsx` alone |
 | `/shop` | Catalogue — banner, promo bands, filter rail, sort, 3-up grid, paging |
 | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, tabs, related |
 | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
@@ -262,10 +262,10 @@ Not decided, and not to be filled in by guessing:
 | Shop-banner photography | Declared as an `Image` object with a null url → placeholder. The hero is no longer open: both slides are in `public/home/`, from the design's own slots |
 | Per-product Details and Fabric & care copy | `description` and `care` are `""` in fixtures → placeholders. The design reused one generic paragraph for all eleven pieces; it would state a wrong inseam and a wrong fabric on most of them |
 | About Us, My Account and 404 copy | `""` in `lib/content/site.ts` → placeholders |
-| Whether there is a limited run, and when it ends | `home.promo.endsAt` is `""`, so the countdown hides. The component is real |
+| Whether there is a limited run, and when it ends | Moot while the band is off the home page. `home.promo.endsAt` is `""`, so the countdown hides wherever the band is placed. Both components are real |
 | Social handles | `footer.socials` is empty, so no dead buttons render |
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Entries with no `href` render as plain text, never as a 404 link. Add the href when the page exists |
-| Which pieces are made to order | The catalogue does not say. No product carries the `Made to order` tag in `lib/shopify/fixtures.ts`, so that facet counts zero rather than guessing; the filter row and the mosaic tile are built and wait for the list |
+| Which pieces are made to order | The catalogue does not say. No product carries the `Made to order` tag in `lib/shopify/fixtures.ts`, so that facet counts zero rather than guessing; the filter row is built and waits for the list, as does the mosaic tile in the (currently unplaced) mosaic |
 | Product categories | Shopify product types do not exist yet. `productType` is derived from each piece's name, or from its garment shot where the name is silent — Wide leg 8, Culottes 2, Straight cut 1 |
 | A review system | The design's star rating is still deliberately absent — a fabricated score is the one placeholder that cannot be labelled as one. Real quotations are a separate matter and are live in the voices wall; there is no feed behind them, so new reviews mean editing `home.voices.reviews` |
 | Whether the studio ships from Bandung or Bekasi | The hero's order-notes card says "Pengiriman dari Kota Bekasi"; `lib/content/site.ts` says the studio is in Bandung. Both are live on the home page. Nothing in the code picks a side |
