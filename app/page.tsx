@@ -7,6 +7,7 @@ import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { ProductCard } from "@/components/shop/product-card";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { FloatingPathsBackground } from "@/components/ui/floating-paths";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { home, ui } from "@/lib/content/site";
 import { getFeaturedProducts } from "@/lib/shopify";
@@ -26,6 +27,12 @@ import { getFeaturedProducts } from "@/lib/shopify";
  * Only the hero animates on load. Everything below it reveals on scroll, which is
  * the design system's rule for a page this long.
  *
+ * Three things then keep moving: the floating-paths wash behind New arrivals, the
+ * voices wall, and the Instagram strip. They are placed so that no single viewport
+ * holds more than one of them — a page with several continuous loops in view at once
+ * reads as restless rather than alive, and the wash is the one that had to be given
+ * a home rather than the whole white stretch to sit under.
+ *
  * Each block below carries its own top spacing (`pt-section` / `mt-section`), so
  * the vertical rhythm holds whichever of them are present.
  */
@@ -39,33 +46,40 @@ export default async function HomePage() {
     <>
       <HeroCarousel slides={home.hero.slides} label={ui.heroLabel} />
 
-      <section aria-labelledby="arrivals-heading" className="pt-section">
-        <Container className="flex flex-col gap-10">
-          <Reveal className="flex flex-col items-center gap-3">
-            <h2 id="arrivals-heading" className="text-center text-h1 leading-h1">
-              {home.arrivals.heading}
-            </h2>
-            {/* The design's short rule under a centred heading. Decorative, so it
-                is a div rather than an <hr>: there is no section break here. */}
-            <div aria-hidden="true" className="h-0.75 w-16 rounded-pill bg-brand" />
-          </Reveal>
+      {/* The wash sits behind New arrivals and nowhere else on this page. Two
+          reasons, both of them limits rather than taste: the strands must not run
+          under the voices wall or the Instagram strip, which are already the one
+          thing moving in their own viewport, and the artwork is landscape — it
+          reads as line work across a band and as steep verticals down a page. */}
+      <FloatingPathsBackground position={-1} tone="subtle">
+        <section aria-labelledby="arrivals-heading" className="pt-section">
+          <Container className="flex flex-col gap-10">
+            <Reveal className="flex flex-col items-center gap-3">
+              <h2 id="arrivals-heading" className="text-center text-h1 leading-h1">
+                {home.arrivals.heading}
+              </h2>
+              {/* The design's short rule under a centred heading. Decorative, so
+                  it is a div rather than an <hr>: there is no section break. */}
+              <div aria-hidden="true" className="h-0.75 w-16 rounded-pill bg-brand" />
+            </Reveal>
 
-          <Stagger className="grid gap-x-7 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-            {products.slice(0, 8).map((product) => (
-              <StaggerItem key={product.id}>
-                <ProductCard product={product} sizes={CARD_SIZES} />
-              </StaggerItem>
-            ))}
-          </Stagger>
+            <Stagger className="grid gap-x-7 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+              {products.slice(0, 8).map((product) => (
+                <StaggerItem key={product.id}>
+                  <ProductCard product={product} sizes={CARD_SIZES} />
+                </StaggerItem>
+              ))}
+            </Stagger>
 
-          <Reveal className="flex justify-center">
-            <ButtonLink href={home.arrivals.href} variant="outline" size="lg">
-              {home.arrivals.cta}
-              <ArrowRightIcon className="size-5" />
-            </ButtonLink>
-          </Reveal>
-        </Container>
-      </section>
+            <Reveal className="flex justify-center">
+              <ButtonLink href={home.arrivals.href} variant="outline" size="lg">
+                {home.arrivals.cta}
+                <ArrowRightIcon className="size-5" />
+              </ButtonLink>
+            </Reveal>
+          </Container>
+        </section>
+      </FloatingPathsBackground>
 
       <Reveal>
         <TestimonialWall heading={home.voices.heading} reviews={home.voices.reviews} />
