@@ -289,53 +289,6 @@
       transform: translateY(-50%);
     }
   }
-
-  /*
-   * The floating-paths wash — a dash travelling along each of 36 bezier strands.
-   *
-   * Every path carries `pathLength="1"`, which normalises SVG's dash units to
-   * fractions of the curve. That is what lets one keyframe serve all 36 strands
-   * whatever their real length: a 0.3/0.7 pattern has a period of exactly 1, so
-   * travelling -1 lands on an identical frame and the loop is seamless — the same
-   * reasoning as the marquee's -50%.
-   *
-   * `--path-duration` and `--path-delay` are set per strand by
-   * `components/ui/floating-paths.tsx`; the delays are negative, so each strand is
-   * already mid-flight on the first frame.
-   *
-   * The opacity pulse rides the same period, so a strand brightens once per pass
-   * rather than on a beat of its own. It multiplies the per-path `stroke-opacity`
-   * ramp instead of replacing it — two different properties.
-   */
-  /*
-   * The wash is the one loop left that repaints rather than composites: a dash
-   * travels along each of the 36 strands, and `stroke-dashoffset` is a paint
-   * property. Skipping it while the band is off-screen is what keeps that off the
-   * scroll budget. It is absolutely positioned, so no intrinsic size is needed —
-   * nothing lays out against it.
-   */
-  .wl-paths-layer {
-    content-visibility: auto;
-  }
-
-  .wl-paths path {
-    stroke-dasharray: 0.3 0.7;
-    animation: wl-paths var(--path-duration) linear var(--path-delay) infinite;
-  }
-
-  @keyframes wl-paths {
-    from {
-      stroke-dashoffset: 0;
-      opacity: 0.55;
-    }
-    50% {
-      opacity: 1;
-    }
-    to {
-      stroke-dashoffset: -1;
-      opacity: 0.55;
-    }
-  }
 }
 
 @layer utilities {
@@ -395,18 +348,6 @@
 
   .wl-aurora::after {
     animation: none;
-  }
-
-  /*
-   * The strands stop AND close up. Stopping alone freezes a 0.3/0.7 dash pattern
-   * mid-travel, which leaves the wash as 36 broken segments — a resting state that
-   * looks like a rendering fault rather than a background. Dropping the dash draws
-   * every curve whole, which is the artwork at rest.
-   */
-  .wl-paths path {
-    stroke-dasharray: none;
-    animation: none;
-    opacity: 1;
   }
 
   /*
