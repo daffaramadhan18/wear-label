@@ -10,8 +10,8 @@
     "theme:css": "tailwindcss -i theme-src/theme.css -o theme/assets/theme.css --minify",
     "theme:css:watch": "tailwindcss -i theme-src/theme.css -o theme/assets/theme.css --watch",
     "theme:check": "shopify theme check --path theme",
-    "theme:dev": "npm run theme:css && shopify theme dev --path theme",
-    "theme:push": "npm run theme:css && shopify theme check --path theme && shopify theme push --path theme"
+    "theme:dev": "npm run theme:css && shopify theme dev --path theme --store kbysza-bk.myshopify.com",
+    "theme:push": "npm run theme:css && npm run theme:check && shopify theme push --path theme --store kbysza-bk.myshopify.com --theme 205197312286"
   },
   "dependencies": {
     "motion": "^13.1.0",
@@ -20,6 +20,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@shopify/cli": "^4.7.0",
     "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

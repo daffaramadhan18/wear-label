@@ -1,288 +1,264 @@
 # Wear Label
 
 Company profile, product catalogue and storefront for **Wear Label** — an apparel
-brand in Bandung, Indonesia. A custom Next.js frontend on top of Shopify as the
-commerce engine.
+brand in Bandung, Indonesia. A **Shopify theme**, built from an approved design.
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
+npm run theme:css        # build theme/assets/theme.css
+npm run theme:check      # shopify theme check — runs offline
+npm run theme:dev        # local preview with hot reload
 ```
 
 | | |
 |---|---|
-| **Stack** | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Motion |
-| **Commerce** | Shopify Storefront + Cart API — *not connected yet*, typed fixtures stand in |
-| **Deploy** | Vercel, source on GitHub |
+| **Deliverable** | Liquid theme in [`theme/`](./theme/README.md) — Online Store 2.0, JSON templates, sections and blocks |
+| **Styling** | Tailwind CSS v4 precompiled, CSS-variable design tokens |
+| **Store** | `kbysza-bk.myshopify.com`, theme `205197312286`, role `unpublished` |
+| **Tooling** | Shopify CLI pinned as a devDependency; `npm install` is all you need |
 | **Design** | Ported from two Claude Design documents — see [Design](#design) |
+| **Archive** | The Next.js app at the repo root is the reference the theme was ported from |
 
 [`CLAUDE.md`](./CLAUDE.md) is the working document: architecture, conventions, the
-data-layer API, the catalogue table and every decision that has been made or
-deliberately deferred. This file is the tour.
+catalogue table, the store's identity and every decision made or deliberately
+deferred. [`theme/README.md`](./theme/README.md) is the port's own record — what
+moved, what got better, and the one thing that got worse. This file is the tour.
 
 ---
+
+## It was headless, and now it is not
+
+The site was built first as a custom Next.js frontend on the Shopify Storefront API.
+That was rebuilt as a theme on 2026-08-20, for a reason the old `CLAUDE.md` had
+already written down without drawing the conclusion:
+
+> This repo is **presentation only**. No commerce logic lives here.
+
+If there is no commerce logic, headless is paying for control nobody uses — and
+`lib/shopify/` was ~850 lines standing in for things Liquid does natively:
+
+| Deleted | Lines | Replaced by |
+|---|---|---|
+| `cart.ts` + `actions.ts` | 343 | form posts to `/cart/add` and `/cart/change` |
+| `catalogue.ts` | 241 | `collection.filters`, `sort_by`, `paginate` |
+| `fixtures.ts` | 121 | the store |
+| `types.ts` | 79 | Shopify's own objects |
+| `money.ts` | 39 | `{{ price \| money }}` |
+| `env.ts` | 26 | no live/fixture gate left to keep |
+
+The port was a rewrite of markup, not of behaviour, because the two conventions the
+app was built on are Shopify's own model:
+
+- **"The URL is the state"** — filters are links that flip one facet and preserve
+  the rest. That is exactly `?filter.v.option.size=M&sort_by=price-ascending`.
+- **"Forms work without JavaScript"** — that is how a Liquid cart form works.
+
+Three platform facts pointed the same way: checkout is Shopify-hosted either way on
+a non-Plus plan, Indonesian couriers need an app that quotes rates during checkout,
+and the client can write their own copy in the theme editor instead of waiting on a
+code change.
 
 ## What is built
 
-Six routes. Every screen in the approved design exists and works.
+All six routes, plus the shell.
 
 | Route | What it is |
 |---|---|
-| `/` | Hero carousel, new arrivals, customer voices wall, category mosaic, service band, Instagram strip |
-| `/shop` | Catalogue — campaign banner, promo tiles, filter rail (category · size · colourway · made-to-order), sort, 3-up grid, paging |
-| `/shop/[handle]` | Product — gallery, size and colourway, quantity, add to bag, tabs, related pieces |
+| `/` | Hero carousel, new arrivals, customer voices wall, service band, Instagram strip |
+| `/collections/all` | Catalogue — filter rail, sort, 3-up grid, paging |
+| `/products/<handle>` | Product — gallery, size and colourway, quantity, add to bag, tabs, related |
 | `/cart` | Bag — lines, quantity, removal, order summary, hand-off to Shopify checkout |
-| `/about` | About Us — company profile |
-| `/account` | My Account — route and layout only, no auth |
+| `/pages/about` | About Us — the Shopify page's own title and content |
+| 404 | Branded, with placeholders until the copy exists |
 
-Plus a branded 404. One component from the design (`promo-band`) is built and kept but
-not placed on the home page — putting it back is an edit to `app/page.tsx` alone.
+Three sections are built and deliberately **not placed**: the category mosaic
+(removed on request), the limited-run band (cut from the design's sequence), and
+made-to-order. The first two may go back — and because they have presets, that is
+now a click in the theme editor rather than a code change.
 
-`made-to-order` is built and kept but must **not** be put back: the studio does not
-offer that service, so every line of that band is a promise nobody can keep. The
-mosaic and the service band moved below the voices wall to fill the slot it held.
-[`PRODUCT.md`](./PRODUCT.md) records the decision and the customer evidence behind it.
-
-**41 components, 13 of them client-side.** Everything else is server-rendered,
-including every product card body, the whole filter rail, every row of the bag and
-both marquees.
-
----
+Made-to-order must **not**: the studio does not offer that service, so every line of
+that band is a promise nobody can keep. [`PRODUCT.md`](./PRODUCT.md) records the
+decision and the customer evidence behind it.
 
 ## What is *not* built, and why
 
-Three gaps, all deliberate. None of them is a TODO you should fill in by guessing.
+Store configuration, not code — and every gap renders a labelled placeholder at
+final size rather than breaking:
 
-**1. Shopify is not connected.** There are no credentials, so there is no GraphQL
-client. `lib/shopify/` returns typed fixtures shaped exactly like Storefront API
-responses. Going live is an environment change:
-
-```bash
-SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
-SHOPIFY_STOREFRONT_ACCESS_TOKEN=...   # public Headless-channel token
-```
-
-Set those two and every read throws a loud `notImplemented` error instead of quietly
-serving mock data from a deployment that was configured to be real. That is the
-signal to write the client — inside `lib/shopify/`, nowhere else.
-
-**2. Marketing copy is empty.** Brand voice is not settled, so every non-product
-string in [`lib/content/site.ts`](./lib/content/site.ts) is `""`, as are the
-per-product `description` and `care` fields.
-
-An empty string is a **valid state**, not a bug: `components/ui/copy.tsx` renders a
-labelled placeholder block sized in `em`, so a heading placeholder is heading-sized
-and a caption placeholder caption-sized. The layout is already the final one —
-filling in that module replaces every block with text, with no component change and
-no layout shift. Images behave the same way: a null `url` renders a labelled box at
-the real aspect ratio, so CLS stays 0 either way.
-
-**3. Roughly a dozen decisions.** Payment gateway, whether accounts exist, which
-pieces are made to order, whether the studio ships from Bandung or Bekasi, and so on.
-All of them are listed in CLAUDE.md's *Still open* table with what the code does
-meanwhile.
+| Missing | What you see instead |
+|---|---|
+| The eleven products | Placeholder cards at the real card proportions — nine on the catalogue, eight on the home page |
+| Storefront filters | The rail says they are configured in Shopify's Search and Discovery app |
+| The `about` page | `/pages/about` 404s; the section is written and waiting |
+| `custom.material`, `custom.care` metafields | Labelled placeholders on the card's material line and the Fabric & care tab |
+| Brand copy | Blank theme settings render labelled placeholders at final size |
 
 ### The rule that shapes all of it
 
-**Never invent commerce data.** No fabricated shipping rate, review count, stock
-number, countdown or discount depth — not even as placeholder polish. Where a number
-cannot be known the UI says where it comes from ("Calculated at checkout") or the
-block hides itself. That is why the design's star rating and its "Up to 40% off" tile
-are absent, and why no piece is flagged made-to-order.
+**Never invent commerce data.** No fabricated shipping rates, review counts, stock
+numbers, countdowns or discount depths — not even as placeholder polish. Where a
+number cannot be known, the UI says where it comes from ("Calculated at checkout") or
+the block hides itself. It is why the design's star rating and its "Up to 40% off"
+tile are absent.
 
-Quoting a customer is not inventing one: the voices wall carries twenty real Shopee
-reviews verbatim, in Indonesian, because reproducing what someone wrote is not the
-same as synthesising a score.
-
----
+**Quoting a customer is not inventing one.** The voices wall carries twenty real
+Shopee reviews, verbatim, in Indonesian. That is why it is allowed where a star
+rating is not: it reproduces what customers wrote instead of synthesising a score.
+They are extracted from the source programmatically and asserted verbatim — never
+edited, tidied or translated.
 
 ## The catalogue is real
 
-Eleven pieces, from the client's own catalogue via the design project: real names,
-materials, prices, four markdowns, three new flags, and one square garment photograph
-each in `public/products/`, named by handle.
+Eleven pieces, from the design project's own `CATALOG`. Real names, materials,
+prices, markdowns and photography. Sizes XS–XL and five colourways apply to every
+piece, giving 25 variants each. Stock is not modelled — the sold-out states are
+implemented throughout and light up the moment Shopify reports inventory.
 
-| | |
-|---|---|
-| Pieces | 11 — culottes and trousers, Rp 159.000 – Rp 199.000 |
-| Sizes | XS · S · M · L · XL |
-| Colourways | Cream · Camel · Taupe · Sage · Espresso |
-| Variants | 25 per piece (size × colourway) |
-| Categories | Wide leg 8 · Culottes 2 · Straight cut 1 |
-
-The full table is in CLAUDE.md. Two honest caveats: **stock is not modelled** (every
-variant reads as available — the sold-out states are built and wait for Shopify), and
-**`productType` is derived**, from each piece's name where the name states the cut and
-from its garment shot where it does not, because Shopify product types do not exist
-yet.
-
----
-
-## Data layer
-
-All Shopify access goes through **[`lib/shopify/`](./lib/shopify)**. Components never
-call the Storefront API and never import GraphQL documents.
-
-| File | Role |
-|---|---|
-| `index.ts` | The barrel — `getAllProducts`, `getFeaturedProducts`, `getProductByHandle`, `getRelatedProducts` |
-| `types.ts` | Storefront API shapes. `Image.url` is nullable for the slots with no photography yet |
-| `fixtures.ts` | The catalogue. Deleted when the store goes live |
-| `catalogue.ts` | Filtering, sorting, facets, paging, `catalogueHref` |
-| `vocabulary.ts` | `TAGS` and `COLOURWAYS` — the strings the data layer and the UI must agree on |
-| `cart.ts` | The bag. Server-only: it reads a cookie |
-| `actions.ts` | Server Functions — the only thing that writes the cart cookie |
-| `env.ts` · `money.ts` · `form-state.ts` | Live-mode guard · `Intl` money formatting · form result type |
-
-Two patterns worth knowing before you touch a page:
-
-**The URL is the state.** Every catalogue filter is a *link* that flips one facet and
-preserves the rest; sort is a plain `GET` form. No client-side filtering, no state to
-keep in step with the URL, and the result is shareable and back-button friendly. Once
-the store is live the same query becomes Storefront API arguments.
-
-**The bag lives in a cookie, then in Shopify.** `cart.ts` holds lines in `wl_cart`
-until Shopify holds them, and it is the only place any price arithmetic is allowed —
-because it is the part `cart.cost` replaces. Writes happen in Server Functions, never
-during render, because a cookie cannot be set while rendering.
-
----
+The full table, and how `productType` was derived, is in
+[`CLAUDE.md`](./CLAUDE.md#the-catalogue). Importing it into Shopify is the next big
+step.
 
 ## Design
 
-Ported from two documents in the Claude Design project
-[`bf11a0f4`](https://claude.ai/design/p/bf11a0f4-4b1c-400b-802c-b9c9c2d66673), both
-derived from the client's brand guideline and catalogue upload:
-
-- **`Wear Label Design System.html`** — the authority for colour, type, radius,
-  spacing, shadow and motion. Ported into [`app/tokens.css`](./app/tokens.css).
-- **`Wear Label Storefront.dc.html`** — the approved screens (home, shop, product,
-  bag). Ported into the routes and components.
+Ported from two Claude Design documents derived from the client's brand guideline:
+a design system (the authority for colour, type, radius, spacing, shadow and motion)
+and four approved screens.
 
 ### Tokens
 
-One file, two layers. `:root` holds the brand primitives (`--wl-*`, never referenced
-from JSX); `@theme` holds the semantic tokens Tailwind turns into utilities.
+One file — [`app/tokens.css`](./app/tokens.css) — and it is **shared** between the
+theme and the archived app. `:root` holds brand primitives (`--wl-*`); `@theme` holds
+the semantic tokens Tailwind turns into utilities. No section or snippet contains a
+hardcoded design value; the palette is replaceable in one edit.
 
-| | |
-|---|---|
-| Palette | Taupe ramp 100–900 (`#725E4C` brand · `#9C8166` camel · `#DFD0C4` sand · `#1E1A16` espresso), blush and sage ramps, three rule weights, rust for errors |
-| Shell | **White page, cream bands.** Cream fills things *on* the page — the hero panel, chips, inputs, review cards. Paint the shell cream and all of those flatten into it |
-| Type | Playfair Display (editorial) + Poppins (interface), self-hosted via `next/font`. Display 64 · H1 44 · H2 30 · H3 20 · Body 16 · Small 14 · Label 12 · Micro 11 |
-| Geometry | Radius 0 / 3px / pill — pills only for badges and chips. 8pt spacing, sections 80–96px, 1240px measure, 76px sticky header |
-| Elevation | Warm-toned shadows only, never neutral grey |
+`app/base.css` holds the base layer and is shared the same way.
+`theme-src/theme.css` imports both and adds only what exists because Liquid has no
+React — the disclosure's icon swap, the reveal transitions, the no-script fallbacks.
+720 lines of design system maintained twice would drift, so they are not.
 
-No component contains a hardcoded colour, font, radius, spacing or duration, so the
-palette is replaceable in one edit. Motion values are mirrored in
-`components/motion/tokens.ts`, because Motion needs numbers rather than `var()`
-strings — change one, change the other.
+Palette, spacing, radius and motion are deliberately **not** theme settings.
+Exposing them in the editor would let one edit break the system.
 
 ### Assets
 
-Everything in `public/` came out of the design project byte-exact: 11 catalogue
-photographs, 7 logotype files (`wordmark`, `stacked`, `mark`, each with a cream
-variant), the two hero slides, and the monogram as the favicon. The logotype is drawn
-artwork and is **never** set in a typeface — `components/layout/wordmark.tsx` renders
-the file, and swaps to the cream artwork on dark surfaces rather than filtering it.
-
-The icon set lives inline in `components/ui/icons.tsx`, with path data copied verbatim
-from the design's SVGs.
+Everything came out of the design project byte-exact. `snippets/icon.liquid` is
+generated from the React icon set and all twelve paths verified against it — the
+design's SVGs were pulled once to diff, matched, and then not shipped twice.
 
 ### Accessibility
 
-Part of the design, not a pass afterwards: one `h1` per page with no skipped levels,
-44px minimum control height, focus never removed, sticky-header scroll padding so a
-focused target is never obscured, and **colour never carries meaning alone** — sold
-out says "Sold out", an applied filter carries `aria-current`, a toggle carries
-`aria-pressed`.
+Part of the design, not a pass afterwards. One `h1` per page with no skipped levels —
+the carousel puts an `h1` on every slide and makes the inactive ones `inert`, which
+is what keeps that true. 44px minimum control height, visible focus never removed,
+and **colour never carries meaning alone**: sold out says "Sold out", an applied
+filter carries `aria-current`, a toggle carries `aria-pressed`.
 
-Four contrast pairs in the brand palette fall short of WCAG 2.2 AA. They are
-implemented as specified — the brand system is the authority — and each one is
-annotated with its measured ratio and its one-line remedy at the top of
-`app/tokens.css`. The focus ring is the one place the design was extended rather than
-followed: its camel ring is 1.92:1 on cream, so a 1px brand-taupe inner edge was added
-to keep the indicator perceivable.
+Four contrast pairs the design specifies fall short of AA. They are implemented as
+specified and annotated at the top of `tokens.css`, so the decision is visible rather
+than buried.
 
 ### Motion, and the performance rules behind it
 
-Reveals and staggered grids use Motion; the three continuous background loops (aurora
-wash, Instagram marquee, voices wall) are pure CSS and cost no JavaScript.
+Two continuous background loops and a screenful of scroll reveals. Both have already
+cost a round of visible stutter:
 
-Two rounds of visible stutter produced three rules, and they are not negotiable:
+- **A continuous loop animates `transform` or `opacity`. Nothing else.** Anything
+  else is re-rasterised on the main thread every frame.
+- **`background-attachment: fixed` is banned.** It was the worst offender here.
+- **Never wrap a 3D scene or a blended layer in something that animates opacity.**
+  It becomes a stacking context, which flattens `preserve-3d` and breaks
+  `mix-blend-mode`. The voices wall and the Instagram strip carry no reveal for
+  exactly that reason.
+- **`prefers-reduced-motion` leaves content reachable**, not merely frozen. A
+  stopped tilted wall holds most of its reviews outside a stage that clips at 560px,
+  so it flattens to a grid instead.
 
-1. **A continuous loop animates `transform` or `opacity`, nothing else.** Anything
-   else repaints on the main thread every frame. A 36-strand line-art wash was deleted
-   for exactly this, and the aurora translates an oversized layer rather than sliding
-   a background. `background-attachment: fixed` is banned outright.
-2. **Never wrap a 3D scene or a blended layer in something that animates opacity.** It
-   becomes a stacking context, which flattens `preserve-3d` and makes `mix-blend-mode`
-   blend against the wrapper instead of the page — a hard edge on the voices wall and
-   a visible rectangle on the aurora band.
-3. **Skip what is off screen.** `content-visibility: auto` on the heavy scenes, scoped
-   to the breakpoint where their height is known.
+The voices wall and the Instagram strip cost **zero JavaScript** — both loop on CSS.
 
-`prefers-reduced-motion` does more than pause: the Instagram strip becomes a
-scrollable rail and the voices wall drops its tilt and duplicates to become a plain
-grid, because a frozen tilted wall holds most of its reviews outside the stage.
+## Progressive enhancement
 
----
+`theme/assets/theme.js` is seven behaviours, and each one is paired with a fallback:
+
+| Behaviour | Without JavaScript |
+|---|---|
+| Header disclosure | Ships open; script is what closes it |
+| Scroll reveals | Forced to their final state under `scripting: none` |
+| Hero carousel | Each slide parked at its own offset; controls removed |
+| Product tabs | All three panels visible, tab strip removed |
+| Product gallery | Every angle shown in sequence |
+| Quantity stepper | The value lives in a real number input; ± are decoration |
+| Save for later | Inert, as it was in React — `localStorage` only either way |
+
+The variant picker and the catalogue filters need no fallback: both are plain links.
 
 ## Platform constraints
 
-Fixed properties of Shopify in this market. Design around them; do not retry them.
+Fixed properties of Shopify in this market:
 
-- **Shopify Payments is unavailable in Indonesia.** A third-party gateway is required,
-  and Shopify adds a transaction fee on top of the gateway's when Payments is not used.
-- **A custom checkout UI requires Shopify Plus.** Below that, checkout is
-  Shopify-hosted — which is why the bag has no shipping selector and no address
-  fields, and why its total equals its subtotal.
-- **JNE, J&T and SiCepat are not native to Shopify.** They need a RajaOngkir/Biteship
-  app that quotes rates *during* checkout, so the bag says "Calculated at checkout"
-  rather than showing a rate it cannot know.
-- **Discount codes are validated by Shopify**, so the promo field reports that it is
-  not connected yet instead of pretending to apply anything.
-
----
+- **Shopify Payments is unavailable in Indonesia** — a third-party gateway is
+  required, and Shopify adds a fee on top of the gateway's.
+- **A custom checkout UI needs Shopify Plus.** Checkout is Shopify-hosted, which is
+  why the bag has no shipping selector and its total equals its subtotal.
+- **JNE, J&T and SiCepat are not native to Shopify** — they need a
+  RajaOngkir/Biteship app, which quotes rates *during* checkout. Hence "Calculated
+  at checkout".
+- **Discount codes are validated at checkout and nowhere else**, so the bag's promo
+  field carries the code there as `?discount=` rather than applying it in place.
+- **Filter counts are computed against the filtered set.** Shopify exposes no
+  whole-catalogue equivalent, so the React app's rule — counts from every product,
+  because a count that shrinks as you narrow tells you nothing — could not be kept.
+  It is the port's one genuine regression, and it is written into the snippet.
 
 ## Repo layout
 
 ```
-app/                Routes, root layout, tokens.css + globals.css
-components/ui/      Primitives — button, badge, alert, media, price, copy, section,
-                    container, breadcrumbs, icons, aurora, save-button, notice-form
-components/layout/  Announcement bar, header, cart badge, footer, wordmark
-components/home/    Hero carousel, promo band, countdown, category mosaic,
-                    service band, made-to-order, Instagram strip, testimonial wall
-components/shop/    Product card, catalogue filters, results toolbar, pagination,
-                    shop promos, card hover
-components/product/ Gallery, purchase block, tabs
-components/cart/    Bag lines, order summary
-components/motion/  Reveal, Stagger, page transition, motion tokens
-lib/content/        Site copy — one module
-lib/shopify/        The only place Shopify is touched
-public/brand/       Logotype artwork
-public/products/    Catalogue photography
-public/home/        Hero artwork
-.design-sync/       Config for syncing components to claude.ai/design
-graphify-out/       Generated knowledge graph (gitignored)
+theme/                 THE DELIVERABLE
+  layout/              theme.liquid — the shell
+  sections/            one per block; *-group.json for header and footer
+  snippets/            primitives and composites
+  templates/           JSON templates, one per route
+  assets/              theme.css (built), theme.js, artwork
+  config/ locales/     settings schema, interface chrome
+theme-src/theme.css    stylesheet entry
+
+app/tokens.css         DESIGN TOKENS — shared, live
+app/base.css           base layer — shared, live
+
+app/ components/ lib/  archived Next.js app — the port's reference
+public/                original asset exports
+.design-sync/          syncs .tsx to claude.ai/design; knows nothing about Liquid
 ```
 
 ## Commands
 
 ```bash
-npm run dev        # dev server
-npm run build      # production build
-npm start          # serve the build
-npm run lint       # eslint
-npx tsc --noEmit   # types only
-npx next typegen   # regenerate route types after adding a route
-graphify update .  # refresh the code graph after changing code
+npm run theme:css          # build theme/assets/theme.css (minified)
+npm run theme:css:watch    # rebuild on change
+npm run theme:check        # shopify theme check
+npm run theme:dev          # local preview
+npm run theme:push         # build, check, push to theme 205197312286
 ```
+
+The store and the theme id are pinned inside `theme:dev` and `theme:push`, so
+neither can wander onto the live theme by accident.
+
+`theme/assets/theme.css` is **committed** — Shopify has no build step, so the built
+asset is what the store serves. Never hand-edit it.
+
+The archived app's `npm run dev` and `npm run build` still work, and the build is
+kept green, because `app/tokens.css` and `app/base.css` are shared: a regression
+there is a regression in the theme.
 
 ## Working on this repo
 
-Verify before you commit (`tsc --noEmit`, `lint`, `build`), commit straight onto
-`main`, push. No feature branches, no uncommitted leftovers, nothing unpushed. Commit
-messages carry the reasoning, not just the change — the next person's first question
-is always "why is it like this". The long form is in CLAUDE.md under *Working
-agreement*.
+Read [`CLAUDE.md`](./CLAUDE.md) first — it carries the conventions and the working
+agreement, including the rule that a change is not done until it is on the store,
+verified against the rendered HTML, and pushed to `main`.
+
+Two things worth knowing before the first edit:
+
+1. **`theme check` is not verification.** It proves the Liquid parses. It does not
+   prove the page renders what you meant. Fetch the preview URL and count what comes
+   back.
+2. **Do not port changes backwards** into the archived React app to keep the two
+   level. They are allowed to drift; record the divergence in the theme.

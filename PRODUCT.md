@@ -12,8 +12,9 @@ web
 trousers.** Confirmed 2026-08-20.
 
 What they actually decide on is documented in their own words — twenty verbatim
-Shopee reviews in `lib/content/site.ts` (`home.voices.reviews`), the only
-first-party customer evidence this project holds:
+Shopee reviews in `theme/sections/voices-wall.liquid` — extracted from
+`lib/content/site.ts` and asserted verbatim against it — the only first-party
+customer evidence this project holds:
 
 - **Fit against a stated body.** Almost every review names a height and weight
   before it names a size ("BB 38/155", "TB 167 cm, BB 60"). Fit is the purchase
@@ -73,7 +74,8 @@ at Rp 159.000–199.000, not on catalogue breadth and not on discount depth.
   which is the studio's own artwork, says dispatch from Kota Bekasi. Both are
   live on the home page and nothing in the project picks a side. **Open.**
 - **Order rituals, reproduced from the studio's own notes card** (transcribed in
-  `components/home/hero-carousel.tsx`): payment before 15.00 WIB dispatches the
+  the first hero slide's alt text, `theme/templates/index.json`): payment before
+  15.00 WIB dispatches the
   same day; orders cannot be cancelled after checkout; dispatch Monday–Saturday,
   none on public holidays; complaints within 3 days of delivery and only with an
   unboxing video; instant and same-day delivery available; model and colour
@@ -108,14 +110,15 @@ carries the tag, so the catalogue facet counts zero, which is correct.
 
 The site used to promise it anyway. That has been taken out: the made-to-order band
 and its three stats are off the home page, the hero's second slide points at the
-customer voices instead of "Start an order", the mosaic's fourth tile is "New in",
-and the bag's summary note and the product Shipping tab no longer state a
-made-to-order policy. `components/home/made-to-order.tsx` and its copy are kept for
-the day the service exists and are marked in the content module as not to be placed.
+customer voices instead of "Start an order", and the bag's summary note and the
+product Shipping tab no longer state a made-to-order policy. The band is kept for
+the day the service exists, marked as not to be placed.
 
-One surface still refers to it: `/shop` offers a "Made to order" availability filter
-that matches nothing. Removing it touches `QUERY_KEYS`, which is the URL contract, so
-it is a decision rather than a tidy-up — **still open**.
+**No surface refers to it any more.** The last one did — the catalogue's "Made to
+order" availability filter, which matched nothing and survived only because removing
+it meant touching the old `QUERY_KEYS` URL contract. The rebuild onto Shopify closed
+it by itself: storefront filters exist only if somebody creates them in Search and
+Discovery, and nobody will create that one.
 
 **Language.** English interface, single locale, no i18n layer. Confirmed
 2026-08-20 as settled, not an artifact. Quoted material keeps the language it was
@@ -158,8 +161,9 @@ with no page behind them. Whether there is a limited run, and when it ends.
 
 Real, and reusable:
 
-- **Twenty verbatim Shopee reviews** — `lib/content/site.ts`,
-  `home.voices.reviews`. The only customer proof that exists. They carry the fit
+- **Twenty verbatim Shopee reviews** — `theme/sections/voices-wall.liquid`, with
+  `lib/content/site.ts` as the archived source they are asserted against. The only
+  customer proof that exists. They carry the fit
   record, the sheerness question, the heat claim and the studio's
   responsiveness — everything a testimonial would otherwise have to invent.
 - **Eleven client garment photographs** — `public/products/*.webp`, square, one
