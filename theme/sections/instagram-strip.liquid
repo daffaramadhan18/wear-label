@@ -37,15 +37,27 @@
   <div class="wl-marquee wl-rail overflow-x-auto [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
     <ul class="wl-marquee-track">
       {%- comment -%} Two runs, so translateX(-50%) lands exactly where it started. {%- endcomment -%}
+      {%- comment -%}
+        A partially stocked collection is a THIRD fact, and neither branch used to
+        handle it. The old shape was "any products at all -> render them, otherwise
+        render `shown` placeholders", so a collection holding one piece drew exactly
+        one tile and the rest of the rail was empty. On the marquee that also killed
+        the motion: a two-tile track is narrower than the viewport, so translateX(-50%)
+        had nothing to travel over and the strip sat still looking broken. It will
+        happen again on the real import, which lands eleven pieces one at a time.
+        So: render what exists, then top up with labelled placeholders to `shown`.
+      {%- endcomment -%}
       {%- for copy in (0..1) -%}
-        {%- if source.products.size > 0 -%}
-          {%- for product in source.products limit: shown -%}
-            <li class="w-58 shrink-0" {% if copy == 1 %}aria-hidden="true"{% endif %}>
-              {% render 'media', image: product.featured_image, sizes: '232px', ratio: '1 / 1', label: 'Studio post', class: 'rounded-none' %}
-            </li>
-          {%- endfor -%}
-        {%- else -%}
-          {%- for i in (1..shown) -%}
+        {%- assign real = source.products.size -%}
+        {%- if real > shown -%}{%- assign real = shown -%}{%- endif -%}
+        {%- assign pad = shown | minus: real -%}
+        {%- for product in source.products limit: shown -%}
+          <li class="w-58 shrink-0" {% if copy == 1 %}aria-hidden="true"{% endif %}>
+            {% render 'media', image: product.featured_image, sizes: '232px', ratio: '1 / 1', label: 'Studio post', class: 'rounded-none' %}
+          </li>
+        {%- endfor -%}
+        {%- if pad > 0 -%}
+          {%- for i in (1..pad) -%}
             <li class="w-58 shrink-0" {% if copy == 1 %}aria-hidden="true"{% endif %}>
               {% render 'media', image: nil, sizes: '232px', ratio: '1 / 1', label: 'Studio post', class: 'rounded-none' %}
             </li>

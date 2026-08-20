@@ -207,33 +207,12 @@
             "size": "ukuran M"
           }
         },
-        "fit-3": {
-          "type": "fit",
-          "settings": {
-            "measure": "BB 38/155",
-            "user": "g*****i"
-          }
-        },
-        "fit-4": {
-          "type": "fit",
-          "settings": {
-            "measure": "tb 167 cm, BB 60",
-            "user": "l*****l"
-          }
-        },
         "fit-5": {
           "type": "fit",
           "settings": {
             "measure": "bb/tb 43/162",
             "user": "k*****_",
             "size": "uk M"
-          }
-        },
-        "fit-6": {
-          "type": "fit",
-          "settings": {
-            "measure": "BB aq 57 TB 155",
-            "user": "tinnayumiko05"
           }
         },
         "fit-7": {
@@ -268,10 +247,7 @@
         "review-20",
         "fit-1",
         "fit-2",
-        "fit-3",
-        "fit-4",
         "fit-5",
-        "fit-6",
         "fit-7"
       ],
       "settings": {

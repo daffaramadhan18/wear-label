@@ -37,9 +37,12 @@
   The tracks slice the `review` blocks only, so adding a `fit` block cannot
   shorten a column.
 
-  This is also the site's second reachable use of --text-display. One display
-  moment per band: the heading deliberately stays at text-h1, because two
-  display-scale objects 40px apart cancel each other out.
+  This is also the site's second reachable use of --text-display, and it belongs
+  to the HEADING, not to the measurements. That was the other way round until the
+  band was looked at on a real page: the raw numbers at 44px with the size they
+  produced at 11px underneath is an inverted hierarchy, and a display-size figure
+  with no sentence around it is not a typographic event, it is debris. One display
+  moment per band, and the heading is it.
 
   The band's ground is espresso — bg-invert, i.e. --wl-taupe-900, which is one of
   the brand's own five named colourways and its darkest garment colour. A token
@@ -76,7 +79,7 @@
 {%- if section.blocks.size > 0 -%}
   <section aria-labelledby="voices-heading" class="flex flex-col gap-10 bg-invert py-section">
     <div class="mx-auto w-full max-w-content px-gutter flex flex-col items-center gap-3">
-      <h2 id="voices-heading" class="text-center text-h1 leading-h1 text-ink-invert">
+      <h2 id="voices-heading" class="text-center font-display text-display leading-display tracking-display text-ink-invert">
         {% render 'copy', value: section.settings.heading, label: 'heading' %}
       </h2>
       {%- comment -%}
@@ -89,30 +92,75 @@
       <div aria-hidden="true" class="h-0.75 w-16 rounded-pill bg-ink-invert-muted"></div>
     </div>
 
-    {%- if fits.size > 0 -%}
-      {%- comment -%}
-        The measurements, quoted. figure/blockquote/figcaption because each one
-        IS a quotation with a named source — the same markup the cards use, at
-        the size the number deserves. data-numeric gives them tabular figures so
-        the column of measurements does not wobble.
-      {%- endcomment -%}
-      <ul role="list" class="mx-auto grid w-full max-w-content grid-cols-1 gap-x-8 gap-y-10 px-gutter sm:grid-cols-2 lg:grid-cols-3">
-        {%- for block in fits -%}
-          <li>
-            <figure class="flex flex-col gap-2">
-              <blockquote data-numeric class="font-display text-display leading-display tracking-display text-ink-invert">
-                {% render 'copy', value: block.settings.measure, label: 'measurement' %}
-              </blockquote>
-              <figcaption class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-caption leading-snug text-ink-invert-muted">
-                {%- if block.settings.size != blank -%}
-                  <span class="text-ink-invert">{{ block.settings.size }}</span>
-                {%- endif -%}
-                <span>{{ block.settings.user }}</span>
-              </figcaption>
-            </figure>
-          </li>
-        {%- endfor -%}
-      </ul>
+    {%- comment -%}
+      The fit record.
+
+      This started life as the seven measurements set at --text-display, one per
+      grid cell. Seen on a real page that was wrong twice over. A bare "tb 165"
+      at 44px is data with no sentence around it — the reader has no way to know
+      what she is looking at — and it put the RAW NUMBER at display size while the
+      size the customer actually took, the only part that answers her question,
+      sat underneath at 11px. Inverted hierarchy, which is the exact fault this
+      same pass corrected in the service band.
+
+      So: the band's one display moment goes to the heading, and this becomes what
+      the information actually is — a table. Her task is to scan the body column
+      for someone shaped like her and read across to the size. A table gives that
+      alignment for free, gives the columns real headers for a screen reader, and
+      reads as the size chart she is already used to on Shopee.
+
+      Only reviews that state BOTH a body and a size appear. Three of the seven
+      name a measurement and no size; a measurement without a size is not a fit
+      record, and the reviews themselves are all still on the wall below, verbatim.
+
+      Every value is the customer's own phrase, never normalised — "uk L",
+      "ukuran M", "size L" stay exactly as written, because tidying a quotation
+      into "L" would make it ours instead of hers. data-numeric keeps the figures
+      tabular so the column does not wobble.
+    {%- endcomment -%}
+    {%- assign fit_rows = 0 -%}
+    {%- for block in fits -%}
+      {%- if block.settings.measure != blank and block.settings.size != blank -%}
+        {%- assign fit_rows = fit_rows | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if fit_rows > 0 -%}
+      <div class="mx-auto w-full max-w-content px-gutter">
+        <table class="wl-measure mx-auto w-full border-collapse text-left">
+          <caption class="sr-only">{{ 'voices.fit.caption' | t }}</caption>
+          <thead>
+            <tr class="border-b border-ink-invert-muted/25">
+              <th scope="col" class="pb-3 pr-6 text-micro font-medium uppercase tracking-nav text-ink-invert-muted">
+                {{ 'voices.fit.body' | t }}
+              </th>
+              <th scope="col" class="pb-3 pr-6 text-micro font-medium uppercase tracking-nav text-ink-invert-muted">
+                {{ 'voices.fit.size' | t }}
+              </th>
+              <th scope="col" class="pb-3 text-right text-micro font-medium uppercase tracking-nav text-ink-invert-muted">
+                {{ 'voices.fit.who' | t }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for block in fits -%}
+              {%- if block.settings.measure != blank and block.settings.size != blank -%}
+                <tr class="border-b border-ink-invert-muted/15 last:border-0">
+                  <th scope="row" data-numeric class="py-4 pr-6 text-body font-normal leading-snug text-ink-invert-muted">
+                    {{ block.settings.measure }}
+                  </th>
+                  <td data-numeric class="py-4 pr-6 text-h3 leading-h3 font-medium whitespace-nowrap text-ink-invert">
+                    {{ block.settings.size }}
+                  </td>
+                  <td class="py-4 text-right align-middle text-micro text-ink-invert-muted">
+                    {{ block.settings.user }}
+                  </td>
+                </tr>
+              {%- endif -%}
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </div>
     {%- endif -%}
 
     {%- if reviews.size > 0 -%}
@@ -174,11 +222,19 @@
           The fades sit on the stage, not inside the transformed stack — inside,
           they inherit the tilt and stop covering the edges they exist to hide.
           from-invert, because the ground under them is the espresso band.
+
+        Their COVERAGE was also retuned, and this one needed eyes. The measured
+        42%/30% spreads came from the design handoff, where the ground was white
+        and a wide soft veil was what stopped cream cards floating on it. Espresso
+        is opaque and the cards are light, so the same spreads stopped softening
+        the clipped edge and started eating the cards — the top row read as murky
+        grey instead of cream. Pulled back to 24%/18% with later gradient starts:
+        enough to soften where the plane is cut, not enough to dim what is on it.
         {%- endcomment -%}
-        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 hidden h-[42%] md:block motion-reduce:md:hidden bg-linear-to-b from-invert from-[16%] to-transparent"></div>
-        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[42%] md:block motion-reduce:md:hidden bg-linear-to-t from-invert from-[16%] to-transparent"></div>
-        <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 hidden w-[30%] md:block motion-reduce:md:hidden bg-linear-to-r from-invert from-[24%] to-transparent"></div>
-        <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 hidden w-[30%] md:block motion-reduce:md:hidden bg-linear-to-l from-invert from-[24%] to-transparent"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 hidden h-[24%] md:block motion-reduce:md:hidden bg-linear-to-b from-invert from-[35%] to-transparent"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[24%] md:block motion-reduce:md:hidden bg-linear-to-t from-invert from-[35%] to-transparent"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 hidden w-[18%] md:block motion-reduce:md:hidden bg-linear-to-r from-invert from-[45%] to-transparent"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 hidden w-[18%] md:block motion-reduce:md:hidden bg-linear-to-l from-invert from-[45%] to-transparent"></div>
       </div>
     {%- endif -%}
   </section>

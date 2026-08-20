@@ -43,12 +43,24 @@
     </div>
 
     <div class="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-7 sm:gap-y-10 lg:grid-cols-4">
-      {%- if source.products.size > 0 -%}
-        {%- for product in source.products limit: shown -%}
-          <div data-reveal>{% render 'product-card', product: product, sizes: card_sizes %}</div>
-        {%- endfor -%}
-      {%- else -%}
-        {%- for i in (1..shown) -%}
+    {%- comment -%}
+      A partially stocked collection is a THIRD fact, and neither branch used to
+        handle it. The old shape was "any products at all -> render them, otherwise
+        render `shown` placeholders", so a collection holding one piece drew exactly
+        one tile and the rest of the rail was empty. On the marquee that also killed
+        the motion: a two-tile track is narrower than the viewport, so translateX(-50%)
+        had nothing to travel over and the strip sat still looking broken. It will
+        happen again on the real import, which lands eleven pieces one at a time.
+        So: render what exists, then top up with labelled placeholders to `shown`.
+    {%- endcomment -%}
+      {%- assign real = source.products.size -%}
+      {%- if real > shown -%}{%- assign real = shown -%}{%- endif -%}
+      {%- assign pad = shown | minus: real -%}
+      {%- for product in source.products limit: shown -%}
+        <div data-reveal>{% render 'product-card', product: product, sizes: card_sizes %}</div>
+      {%- endfor -%}
+      {%- if pad > 0 -%}
+        {%- for i in (1..pad) -%}
           <div data-reveal>{% render 'product-card', sizes: card_sizes %}</div>
         {%- endfor -%}
       {%- endif -%}
