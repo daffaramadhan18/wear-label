@@ -1,0 +1,142 @@
+{%- comment -%}
+  Site header — port of components/layout/site-header.tsx.
+
+  The design's 76px sticky bar: the lockup on the left, uppercase nav labels at
+  0.18em in the middle with a taupe rule under the current item, and the account
+  and bag marks on the right.
+
+  Two things the React version had to do that Liquid does not. The bag count was
+  a Suspense boundary reading a cookie; here `cart.item_count` is just there.
+  And the "close the panel when the route changes" state juggling is gone —
+  every navigation is a fresh document.
+
+  The panel is a disclosure, not a modal: it opens in normal flow underneath the
+  header rather than as an overlay. Escape closes it and focus returns to the
+  toggle (see wl-disclosure in assets/theme.js). Background scroll is
+  deliberately NOT locked — the panel is part of the page, so locking it would
+  make the lower items unreachable on a short viewport.
+
+  Without JavaScript the panel is simply always open below `md`, which is the
+  honest fallback: the links stay reachable and nothing pretends to be
+  interactive. That is what the `no-js:` variants do.
+
+  The design's search mark is not here: there is no search on the site yet, and
+  an icon that does nothing is worse than one absence.
+{%- endcomment -%}
+
+<header class="sticky top-0 z-(--z-sticky) bg-surface shadow-md">
+  <div class="mx-auto flex h-19 max-w-content items-center justify-between gap-8 px-gutter">
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        data-disclosure-toggle
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        class="-ml-3 inline-flex size-11 cursor-pointer items-center justify-center rounded-sm text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted md:hidden"
+      >
+        {% render 'icon', icon: 'menu', class: 'wl-disclosure-closed' %}
+        {% render 'icon', icon: 'close', class: 'wl-disclosure-open' %}
+        <span class="sr-only wl-disclosure-closed">{{ 'general.open_menu' | t }}</span>
+        <span class="sr-only wl-disclosure-open">{{ 'general.close_menu' | t }}</span>
+      </button>
+
+      {% render 'wordmark', height: 26 %}
+    </div>
+
+    <nav aria-label="Primary" class="hidden md:block">
+      <ul class="flex items-center">
+        {%- for link in section.settings.menu.links -%}
+          <li>
+            <a
+              href="{{ link.url }}"
+              {% if link.current or link.child_current %}aria-current="page"{% endif %}
+              class="relative inline-flex min-h-11 items-center px-4 text-label uppercase tracking-nav text-ink-body transition-colors duration-(--duration-base) after:absolute after:inset-x-4 after:bottom-1.5 after:h-px after:bg-transparent after:content-[''] hover:text-brand aria-[current=page]:text-brand aria-[current=page]:after:bg-brand"
+            >
+              {{ link.title }}
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </nav>
+
+    <div class="-mr-3 flex items-center">
+      <a
+        href="{{ routes.account_url }}"
+        {% if request.path contains '/account' %}aria-current="page"{% endif %}
+        class="inline-flex size-11 items-center justify-center rounded-sm text-ink-body transition-colors duration-(--duration-base) hover:text-brand aria-[current=page]:text-brand"
+      >
+        {% render 'icon', icon: 'person', class: 'size-5' %}
+        <span class="sr-only">{{ 'customer.account.title' | t }}</span>
+      </a>
+
+      <a
+        href="{{ routes.cart_url }}"
+        {% if request.path contains '/cart' %}aria-current="page"{% endif %}
+        class="relative inline-flex size-11 items-center justify-center rounded-sm text-ink-body transition-colors duration-(--duration-base) hover:text-brand aria-[current=page]:text-brand"
+      >
+        {% render 'icon', icon: 'cart', class: 'size-5' %}
+        <span class="sr-only">{{ 'cart.bag' | t }}</span>
+        {%- comment -%}
+          An empty bag has no badge, so there is no space to reserve and nothing
+          to shift — the same reason the React version's Suspense fallback was
+          `null`.
+        {%- endcomment -%}
+        {%- if cart.item_count > 0 -%}
+          {% render 'cart-badge', count: cart.item_count %}
+        {%- endif -%}
+      </a>
+    </div>
+  </div>
+
+  {%- comment -%}
+    Mobile disclosure panel. The wrapper stays in the DOM so `aria-controls`
+    always resolves to something; the height animation is what comes and goes.
+    `overflow-hidden` is what makes it a wipe rather than a squash of the links.
+  {%- endcomment -%}
+  <div
+    id="mobile-nav"
+    data-disclosure-panel
+    class="overflow-hidden border-t border-hairline bg-surface md:hidden"
+  >
+    <nav aria-label="Primary, mobile" class="px-gutter py-2">
+      <ul class="flex flex-col">
+        {%- for link in section.settings.menu.links -%}
+          <li class="border-b border-hairline last:border-0">
+            <a
+              href="{{ link.url }}"
+              {% if link.current or link.child_current %}aria-current="page"{% endif %}
+              class="flex min-h-14 items-center text-label uppercase tracking-nav text-ink-body transition-colors duration-(--duration-base) hover:text-brand aria-[current=page]:text-brand"
+            >
+              {{ link.title }}
+            </a>
+          </li>
+        {%- endfor -%}
+        <li class="border-b border-hairline last:border-0">
+          <a href="{{ routes.account_url }}" class="flex min-h-14 items-center text-label uppercase tracking-nav text-ink-body transition-colors duration-(--duration-base) hover:text-brand">
+            {{ 'customer.account.title' | t }}
+          </a>
+        </li>
+        <li class="border-b border-hairline last:border-0">
+          <a href="{{ routes.cart_url }}" class="flex min-h-14 items-center text-label uppercase tracking-nav text-ink-body transition-colors duration-(--duration-base) hover:text-brand">
+            {{ 'cart.bag' | t }}
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu",
+      "info": "The design's nav is Home, Shop, About Us. Edit it under Navigation."
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,51 @@
+{%- comment -%}
+  The Wear Label logotype — port of components/layout/wordmark.tsx.
+
+  The design system is explicit: the logotype is drawn artwork and is never set
+  in a typeface — horizontal lockup in headers, monogram for favicons and
+  labels, stacked lockup for narrow or square spaces. Nothing here draws or
+  reconstructs it; the artwork came from the Claude Design project and now lives
+  in theme/assets/.
+
+  The `-cream` files are the same artwork in cream, for espresso and taupe
+  surfaces. Taupe artwork on a dark surface would fail contrast, so `on_dark`
+  swaps the file rather than filtering the image.
+
+  The alt text is empty and the name is carried by the adjacent sr-only span:
+  the lockup reads as the company name, and doubling it up would announce
+  "Wear Label Wear Label" to a screen reader.
+
+  Accepts: on_dark, variant ('horizontal' | 'stacked'), height (px), class
+{%- endcomment -%}
+
+{%- liquid
+  assign lockup_height = height | default: 30
+
+  if variant == 'stacked'
+    assign file = 'stacked'
+    assign art_width = 200
+    assign art_height = 140
+  else
+    assign file = 'wordmark'
+    assign art_width = 350
+    assign art_height = 100
+  endif
+
+  if on_dark
+    assign file = file | append: '-cream'
+  endif
+
+  assign file = file | append: '.png'
+-%}
+
+<a href="{{ routes.root_url }}" class="inline-flex items-center {{ class }}">
+  <span class="sr-only">{{ settings.brand_name }}</span>
+  <img
+    src="{{ file | asset_url }}"
+    alt=""
+    width="{{ art_width }}"
+    height="{{ art_height }}"
+    fetchpriority="high"
+    style="height:{{ lockup_height }}px;width:auto"
+  >
+</a>

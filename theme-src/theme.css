@@ -1,0 +1,91 @@
+/*
+ * Shopify theme stylesheet entry.
+ *
+ * Builds to theme/assets/theme.css, which theme.liquid loads. Nothing here is a
+ * design value: tokens.css and base.css are the same two files the Next.js app
+ * uses, imported rather than copied so the two targets cannot drift.
+ *
+ * Source detection is explicit. Tailwind's automatic scan walks up from the CSS
+ * file, which in this repo would sweep the whole Next.js app in as well and emit
+ * utilities the theme never uses; `source(none)` turns that off and the @source
+ * lines below name only what the theme actually renders.
+ *
+ * The type pairing has no next/font here. theme.liquid emits --font-playfair and
+ * --font-poppins from Shopify's font_face filter, so the families are self-hosted
+ * on Shopify's CDN and tokens.css resolves unchanged.
+ */
+@import "tailwindcss" source(none);
+
+@source "../theme/layout/*.liquid";
+@source "../theme/sections/*.liquid";
+@source "../theme/snippets/*.liquid";
+@source "../theme/assets/*.js";
+
+@import "../app/tokens.css";
+@import "../app/base.css";
+
+/*
+ * Theme-only rules.
+ *
+ * These exist because Liquid has no React: the disclosure's icon swap was a
+ * ternary in JSX, and the reveal was a Motion variant. Neither belongs in
+ * base.css, which the Next.js app shares — so they live here and nowhere else.
+ */
+@layer components {
+  /* The toggle carries both marks and CSS picks one, so the swap costs no
+     script and cannot fall out of step with aria-expanded — it IS aria-expanded. */
+  [data-disclosure-toggle] .wl-disclosure-open {
+    display: none;
+  }
+
+  [data-disclosure-toggle][aria-expanded="true"] .wl-disclosure-open {
+    display: block;
+  }
+
+  [data-disclosure-toggle][aria-expanded="true"] .wl-disclosure-closed {
+    display: none;
+  }
+
+  /*
+   * Scroll reveals — the CSS half of assets/theme.js.
+   *
+   * transform and opacity only: both are composited, so a page carrying a
+   * screenful of these costs nothing per frame. The 12px rise and the 400ms
+   * expo tail are RISE and DURATION.enter from components/motion/tokens.ts.
+   *
+   * `[data-reveal="lead"]` is the hero — it travels further and slower because
+   * it runs against a still page rather than against a scroll, and at
+   * 12px/400ms it finished before the reader had finished arriving.
+   */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity var(--duration-enter) var(--ease-entrance),
+      transform var(--duration-enter) var(--ease-entrance);
+  }
+
+  [data-reveal="lead"] {
+    transform: translateY(20px);
+    transition-duration: var(--duration-lead);
+    transition-delay: 120ms;
+  }
+
+  [data-reveal][data-revealed] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Reduced motion. theme.js also short-circuits the observer, but a reader who
+ * has asked for less motion must not depend on script running to get readable
+ * content — the same reason base.css carries a `scripting: none` fallback.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

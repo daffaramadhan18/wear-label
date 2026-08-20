@@ -1,0 +1,77 @@
+{
+  "general": {
+    "skip_to_content": "Skip to main content",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "pagination": "Pagination",
+    "previous_page": "Previous page",
+    "next_page": "Next page",
+    "page": "Page",
+    "email": "Email address",
+    "meta": {
+      "tags": "Tagged \"{{ tags }}\""
+    }
+  },
+  "catalogue": {
+    "filters": "Filters",
+    "category": "Category",
+    "all_pieces": "All pieces",
+    "size": "Size",
+    "colourway": "Colourway",
+    "availability": "Availability",
+    "in_stock_only": "In stock only",
+    "made_to_order": "Made to order",
+    "sort": "Sort",
+    "apply": "Apply",
+    "clear_all": "Clear all",
+    "pieces": "pieces",
+    "everything": "Everything",
+    "no_results": "No pieces match these filters."
+  },
+  "product": {
+    "sold_out": "Sold out",
+    "new": "New",
+    "add_to_bag": "Add to bag",
+    "choose_size": "Choose a size",
+    "quantity": "Quantity",
+    "increase": "Increase quantity",
+    "decrease": "Decrease quantity",
+    "added_to_bag": "Added to your bag.",
+    "save": "Save for later",
+    "saved": "Saved for later",
+    "unavailable_variant": "This combination is sold out",
+    "gallery": "Product gallery",
+    "show_image": "Show image",
+    "details": "Details",
+    "fabric_and_care": "Fabric & care",
+    "shipping": "Shipping",
+    "related_heading": "You may also like"
+  },
+  "cart": {
+    "bag": "Bag",
+    "item": "Item",
+    "price": "Price",
+    "line_total": "Total",
+    "remove": "Remove",
+    "continue_shopping": "Continue shopping",
+    "promo_code": "Promo code",
+    "count": {
+      "one": "piece in your bag",
+      "other": "pieces in your bag"
+    }
+  },
+  "home": {
+    "shop_by_category": "Shop by category"
+  },
+  "carousel": {
+    "label": "Featured collections",
+    "previous_slide": "Previous slide",
+    "next_slide": "Next slide",
+    "go_to_slide": "Go to slide"
+  },
+  "customer": {
+    "account": {
+      "title": "My Account"
+    }
+  }
+}

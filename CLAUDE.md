@@ -29,6 +29,31 @@ Everything else — palette, type, layout, motion, accessibility, the catalogue 
 is settled and sourced. If you are about to invent a price, a stock number, a review,
 a category or a shipping rate, stop: that is the one class of change this repo refuses.
 
+## The Shopify theme — and what it means for this app
+
+**As of 2026-08-20 the storefront is being rebuilt as a Liquid theme in
+[`theme/`](./theme/README.md), and the Next.js app is now the reference it is
+ported from.** Read that README before working in either.
+
+The reasoning in one line: this file already says *"This repo is presentation
+only. No commerce logic lives here."* If there is no commerce logic, headless is
+paying for control nobody is using — and `lib/shopify/` is ~850 lines imitating
+what Liquid does natively. The two conventions that made this app good, **"the
+URL is the state"** and **"forms work without JavaScript"**, are Shopify's own
+model, so the port is a rewrite of markup rather than of behaviour.
+
+**`app/tokens.css` is still the single source of truth, and it is now shared.**
+`app/globals.css` was split: the base layer moved to `app/base.css`, and both the
+Next.js entry and `theme-src/theme.css` import the same two files. Do not
+duplicate a rule into the theme — change it in `tokens.css` or `base.css` and
+both targets get it. Everything under **Conventions → Design** and
+**Performance** applies to the theme unchanged; it is the same CSS.
+
+The port is **not finished**: the shell (layout, announcement bar, header,
+footer, and the copy/aurora/icon/wordmark primitives) is done, every template
+still renders `sections/main-stub.liquid`, and the home page, catalogue, product
+page and bag are still to come.
+
 ## Working agreement
 
 **Finish the job, then land it.** When you are asked to change something, do the work
@@ -156,6 +181,8 @@ public/brand/          Logotype artwork — wordmark, stacked, monogram
 public/products/       Catalogue photography — eleven square garment shots, real
 public/home/           Hero artwork, exported from the design's image slots
 .design-sync/          Config for syncing components to claude.ai/design
+theme/                 The Shopify theme — see theme/README.md
+theme-src/             Theme stylesheet entry; imports app/tokens.css + app/base.css
 ```
 
 ## Commands and environment

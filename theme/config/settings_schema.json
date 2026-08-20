@@ -1,0 +1,68 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Wear Label",
+    "theme_version": "0.1.0",
+    "theme_author": "Wear Label",
+    "theme_documentation_url": "https://github.com/",
+    "theme_support_url": "https://github.com/"
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Palette, spacing, radius and motion are NOT theme settings. They live in the design system and resolve through assets/theme.css — exposing them here would let one edit break the whole system. Only copy and the type pairing are editable."
+      },
+      {
+        "type": "text",
+        "id": "brand_name",
+        "label": "Brand name",
+        "default": "Wear Label"
+      },
+      {
+        "type": "textarea",
+        "id": "brand_description",
+        "label": "Brand description",
+        "info": "Used for the meta description and Open Graph. Leave blank and no tag is emitted rather than an empty one.",
+        "default": "Handwoven linen and cotton, sewn in small runs in Bandung."
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The design system's pairing: Playfair Display carries the editorial voice, Poppins is the interface. Changing either is a design-system decision, not a shop decision."
+      },
+      {
+        "type": "font_picker",
+        "id": "font_display",
+        "label": "Display",
+        "default": "playfair_display_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "Interface",
+        "default": "poppins_n4"
+      }
+    ]
+  },
+  {
+    "name": "Announcement bar",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The espresso strip above the header. Nothing in it is interactive — a bar that carries a link competes with the nav directly underneath it. Leave blank and the whole band is not rendered."
+      },
+      {
+        "type": "text",
+        "id": "announcement",
+        "label": "Message",
+        "default": "Free shipping on orders over Rp 750.000"
+      }
+    ]
+  }
+]

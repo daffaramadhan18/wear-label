@@ -1,0 +1,17 @@
+{
+  "name": "Footer",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "company": { "type": "column", "settings": { "title": "Company" } },
+        "account": { "type": "column", "settings": { "title": "My account" } },
+        "care": { "type": "column", "settings": { "title": "Customer care" } }
+      },
+      "block_order": ["company", "account", "care"],
+      "settings": {}
+    }
+  },
+  "order": ["footer"]
+}

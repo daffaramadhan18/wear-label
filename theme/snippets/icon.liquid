@@ -1,0 +1,38 @@
+{%- comment -%}
+  Inline SVG icon set — port of components/ui/icons.tsx.
+
+  Two families, because the design draws two kinds of mark:
+    - chrome icons (menu, close) are stroked at 1.5 on a 24px box
+    - storefront icons imported from the design project are solid shapes
+
+  Path data is verbatim from the React component, which took it verbatim from
+  assets/icons/*.svg in the design project. Icons are decorative (aria-hidden) —
+  when an icon is the only content of a control, the control carries the
+  accessible name. Never use emoji as an icon.
+
+  Accepts: icon (name), class
+{%- endcomment -%}
+
+{%- case icon -%}
+
+  {%- when 'menu' -%}
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="{{ class }}">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+
+  {%- when 'close' -%}
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="{{ class }}">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+
+  {%- when 'cart' -%}
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false" class="{{ class }}">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M10.9212 9.33333H5.84252L4.75119 5.33333H12.9212L10.9212 9.33333ZM14.0552 4.632C13.8105 4.236 13.3865 4 12.9212 4H4.38786L3.97652 2.49133C3.89719 2.20133 3.63386 2 3.33319 2H1.99986C1.63119 2 1.33319 2.29867 1.33319 2.66667C1.33319 3.03467 1.63119 3.33333 1.99986 3.33333H2.82386L4.68986 10.1753C4.76919 10.4653 5.03252 10.6667 5.33319 10.6667H11.3332C11.5859 10.6667 11.8165 10.524 11.9299 10.298L14.1139 5.92933C14.3225 5.51267 14.2999 5.028 14.0552 4.632ZM4.99999 12C4.44799 12 3.99999 12.4473 3.99999 13C3.99999 13.5527 4.44799 14 4.99999 14C5.55199 14 5.99999 13.5527 5.99999 13C5.99999 12.4473 5.55199 12 4.99999 12ZM10.6667 13C10.6667 12.4473 11.1147 12 11.6667 12C12.2187 12 12.6667 12.4473 12.6667 13C12.6667 13.5527 12.2187 14 11.6667 14C11.1147 14 10.6667 13.5527 10.6667 13Z" />
+    </svg>
+
+  {%- when 'person' -%}
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false" class="{{ class }}">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M9.33331 4.66667C9.33331 3.93133 8.73531 3.33333 7.99998 3.33333C7.26465 3.33333 6.66665 3.93133 6.66665 4.66667C6.66665 5.402 7.26465 6 7.99998 6C8.73531 6 9.33331 5.402 9.33331 4.66667ZM10.6666 4.66667C10.6666 6.13733 9.47065 7.33333 7.99998 7.33333C6.52931 7.33333 5.33331 6.13733 5.33331 4.66667C5.33331 3.196 6.52931 2 7.99998 2C9.47065 2 10.6666 3.196 10.6666 4.66667ZM3.33331 13.3333C3.33331 10.76 5.42731 8.66667 7.99998 8.66667C10.5726 8.66667 12.6666 10.76 12.6666 13.3333C12.6666 13.7013 12.3686 14 12 14C11.6313 14 11.3333 13.7013 11.3333 13.3333C11.3333 11.4953 9.83798 10 7.99998 10C6.16198 10 4.66665 11.4953 4.66665 13.3333C4.66665 13.7013 4.36865 14 3.99998 14C3.63131 14 3.33331 13.7013 3.33331 13.3333Z" />
+    </svg>
+
+{%- endcase -%}

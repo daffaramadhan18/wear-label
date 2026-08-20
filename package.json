@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "theme:css": "tailwindcss -i theme-src/theme.css -o theme/assets/theme.css --minify",
+    "theme:css:watch": "tailwindcss -i theme-src/theme.css -o theme/assets/theme.css --watch",
+    "theme:check": "shopify theme check --path theme",
+    "theme:dev": "npm run theme:css && shopify theme dev --path theme",
+    "theme:push": "npm run theme:css && shopify theme check --path theme && shopify theme push --path theme"
   },
   "dependencies": {
     "motion": "^13.1.0",
@@ -15,6 +20,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

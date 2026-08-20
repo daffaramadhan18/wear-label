@@ -1,0 +1,33 @@
+{%- comment -%}
+  Unported route.
+
+  Six routes came over from the Next.js app and this is the marker for the ones
+  whose sections are not written yet. It follows the same rule the content
+  module follows for unwritten copy: render a labelled placeholder at final size
+  rather than filler or a blank page, so the shell around it — header, footer,
+  type scale, rhythm — is already the real thing and can be reviewed.
+
+  Delete this section from a template the moment that template's real main
+  section lands. It is scaffolding, not a fallback.
+{%- endcomment -%}
+
+<section class="mx-auto max-w-content px-gutter py-section">
+  <p class="text-micro uppercase tracking-eyebrow text-ink-subtle">
+    {{ section.settings.route }}
+  </p>
+  <h1 class="mt-3 font-display text-h1">
+    {% render 'copy', value: '', label: 'page heading' %}
+  </h1>
+  <div class="mt-6 wl-measure text-body">
+    {% render 'copy', value: '', label: 'page body', lines: 4 %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Unported route",
+  "settings": [
+    { "type": "text", "id": "route", "label": "Route name" }
+  ]
+}
+{% endschema %}

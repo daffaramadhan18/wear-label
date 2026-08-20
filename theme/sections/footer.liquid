@@ -1,0 +1,116 @@
+{%- comment -%}
+  Site footer — port of components/layout/site-footer.tsx.
+
+  The column entries are the design's information architecture in full. An entry
+  with no URL renders as plain text rather than as a link that would 404 — the
+  React version carried that rule against `href: ""` in the content module, and
+  a Shopify menu carries it the same way: a link_list the merchant has not
+  pointed anywhere yet is simply not rendered as an anchor.
+
+  The newsletter posts to Shopify's own customer form, which is the one thing
+  the React version could not do — it rendered a "not connected yet" notice
+  instead. That notice is gone because the form now works.
+
+  Socials come from Shopify's social settings, and an empty handle renders
+  nothing: a social button that goes nowhere is worse than none.
+{%- endcomment -%}
+
+<footer class="relative isolate overflow-hidden bg-invert text-ink-invert-muted">
+  {% render 'aurora', tone: 'invert', origin: 'top-left' %}
+
+  <div class="relative z-10 mx-auto max-w-content px-gutter py-section">
+    <div class="grid gap-block-lg lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
+      <div class="flex flex-col gap-4">
+        {% render 'wordmark', on_dark: true, height: 30 %}
+
+        <p class="wl-measure text-caption leading-snug">
+          {% render 'copy', value: section.settings.note, label: 'studio note', lines: 2 %}
+        </p>
+
+        <div class="mt-2">
+          <h2 class="font-display text-h3 text-ink-invert">
+            {% render 'copy', value: section.settings.newsletter_heading, label: 'newsletter heading' %}
+          </h2>
+          <p class="mt-2 wl-measure text-caption leading-snug">
+            {% render 'copy', value: section.settings.newsletter_body, label: 'newsletter body', lines: 2 %}
+          </p>
+
+          {%- form 'customer', class: 'mt-4 flex max-w-md gap-2' -%}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <label class="sr-only" for="newsletter-email">{{ 'general.email' | t }}</label>
+            <input
+              id="newsletter-email"
+              type="email"
+              name="contact[email]"
+              required
+              placeholder="{{ section.settings.newsletter_placeholder }}"
+              class="min-h-11 flex-1 rounded-sm bg-canvas px-4 text-caption text-ink placeholder:text-ink-subtle"
+            >
+            <button
+              type="submit"
+              class="min-h-11 cursor-pointer rounded-sm bg-brand px-6 text-label uppercase tracking-label text-on-brand transition-colors duration-(--duration-base) hover:bg-brand-hover"
+            >
+              {{ section.settings.newsletter_cta }}
+            </button>
+          {%- endform -%}
+        </div>
+      </div>
+
+      {%- for block in section.blocks -%}
+        <nav class="flex flex-col gap-3" {{ block.shopify_attributes }}>
+          <h2 class="text-micro uppercase tracking-nav text-ink-invert">{{ block.settings.title }}</h2>
+          <ul class="flex flex-col gap-2">
+            {%- for link in block.settings.menu.links -%}
+              <li>
+                <a
+                  href="{{ link.url }}"
+                  class="text-caption transition-colors duration-(--duration-base) hover:text-ink-invert"
+                >
+                  {{ link.title }}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endfor -%}
+    </div>
+
+    <hr class="wl-rule my-block opacity-20">
+
+    <p class="text-micro uppercase tracking-nav">{{ section.settings.copyright }}</p>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "max_blocks": 3,
+  "settings": [
+    { "type": "textarea", "id": "note", "label": "Studio note", "default": "Handwoven linen and cotton, sewn in small runs in Bandung." },
+    { "type": "header", "content": "Newsletter" },
+    { "type": "text", "id": "newsletter_heading", "label": "Heading", "default": "Letters from the studio" },
+    { "type": "textarea", "id": "newsletter_body", "label": "Body", "default": "New colourways, restocks and studio notes. No more than twice a month." },
+    { "type": "text", "id": "newsletter_placeholder", "label": "Field placeholder", "default": "Enter your email" },
+    { "type": "text", "id": "newsletter_cta", "label": "Button", "default": "Subscribe" },
+    { "type": "header", "content": "Legal" },
+    { "type": "text", "id": "copyright", "label": "Copyright", "default": "© 2026 Wear Label." }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Link column",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "link_list", "id": "menu", "label": "Menu" }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      { "type": "column", "settings": { "title": "Company" } },
+      { "type": "column", "settings": { "title": "My account" } },
+      { "type": "column", "settings": { "title": "Customer care" } }
+    ]
+  }
+}
+{% endschema %}
