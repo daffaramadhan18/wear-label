@@ -103,7 +103,7 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 | Blocked on | What the theme does meanwhile |
 |---|---|
 | No photography on the 115 Shopee pieces | Their cards draw the `media` placeholder at the real card proportions; the eleven design pieces carry their shots. Nothing in a grid is a placeholder *card* any more — 126 products are on the store. |
-| Filters not defined in Search and Discovery | The rail says where they are configured instead of inventing facet values. |
+| Only the Availability facet exists | The rail renders it, and the Shop nav, the hero CTA and New arrivals' "View all" all point at `?filter.v.availability=1` so the catalogue opens on what can actually be bought. Product type, size and colourway are still undefined; the rail says where they are configured instead of inventing facet values. |
 | No `about` page in Shopify | `/pages/about` 404s. Creating the page in Content → Pages is the whole fix; `main-page` is written and waiting. |
 | `custom.material` and `custom.care` metafields | Product cards and the Fabric & care tab show labelled placeholders. |
 

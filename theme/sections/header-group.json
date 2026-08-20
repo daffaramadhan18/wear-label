@@ -20,7 +20,7 @@
           "type": "link",
           "settings": {
             "label": "Shop",
-            "href": "/collections/all"
+            "href": "/collections/all?filter.v.availability=1"
           }
         },
         "about": {

@@ -512,8 +512,23 @@
     display: none;
   }
 
+  /*
+   * THIS REVERSES THE `stretch` DECISION RECORDED BELOW, and the measurement is
+   * why. Stretch was chosen so the rail would not come out ragged — but with the
+   * six-line clamp lifted (see the figure rule further down) the tallest review
+   * sets every card, and on a 390px viewport that meant every card was 324px
+   * while the quotes inside them filled 67-179px. So the rail read as a row of
+   * half-empty cream boxes: the "boring" the client reported, and the reason the
+   * section showed 1.3 reviews in 472px.
+   *
+   * Top-aligned natural heights measured 223/313/246/178/313/201px — no dead
+   * space anywhere, and screenshotted before committing. Ragged bottoms on ONE
+   * upright row read as a row of notes; the raggedness stretch was protecting
+   * against was the four-track tilted wall, which does not exist below `md`.
+   */
   .wl-voices-track > div {
     flex-direction: row;
+    align-items: flex-start;
     padding-bottom: 0;
   }
 
@@ -548,7 +563,26 @@
    */
   .wl-voices-track figure {
     height: auto;
+    /* 300px showed 1.3 cards in a 390px rail, so the second one was a hairline
+       and nothing said the rail moved. 16rem shows 1.6 — a card cut mid-quote
+       is the affordance, and the mask below finishes the sentence. */
+    width: 16rem;
     scroll-snap-align: start;
+  }
+
+  /*
+   * The four gradient fades in sections/voices-wall.liquid are `hidden md:block`,
+   * so below `md` the rail had NO edge treatment at all: the second card ended
+   * at a hard vertical cut flush with the screen, which reads as a clipping bug
+   * rather than as "there is more this way". A mask does the same job as those
+   * four elements for nothing — it is a static rasterisation, not an animation,
+   * so it costs no per-frame work and adds no DOM.
+   *
+   * The left stop is 2% rather than 0 so the first card is not washed out at
+   * rest; the right stop is where the peeking card starts to go.
+   */
+  .wl-voices-stage {
+    mask-image: linear-gradient(to right, transparent 0, #000 2%, #000 86%, transparent 100%);
   }
 
   .wl-voices-track blockquote {

@@ -18,9 +18,18 @@
 <footer class="relative isolate overflow-hidden bg-invert text-ink-invert-muted">
   {% render 'aurora', tone: 'invert', origin: 'top-left' %}
 
-  <div class="relative z-10 mx-auto max-w-content px-gutter py-section">
-    <div class="grid gap-block-lg lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
-      <div class="flex flex-col gap-4">
+  <div class="relative z-10 mx-auto max-w-content px-gutter py-block lg:py-section">
+    {%- comment -%}
+      MOBILE. Stacked one-per-row this footer measured 1053px on a 390x844
+      viewport — 1.25 screenfuls, and 23% of the whole home page. So below `lg`
+      the link columns go 2-up and the brand block spans both, which measured
+      736px. The last column spans the full width too and lays its own links
+      2-up: three columns into a 2-up grid otherwise leaves the bottom-right
+      cell empty, and an empty cell reads as a missing column rather than as
+      space. Measured on the store, not estimated.
+    {%- endcomment -%}
+    <div class="grid grid-cols-2 gap-x-5 gap-y-7 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))] lg:gap-block-lg">
+      <div class="col-span-2 flex flex-col gap-4 lg:col-span-1">
         {% render 'wordmark', on_dark: true, height: 30 %}
 
         <p class="wl-measure text-caption leading-snug">
@@ -35,7 +44,7 @@
             {% render 'copy', value: section.settings.newsletter_body, label: 'newsletter body', lines: 2 %}
           </p>
 
-          {%- form 'customer', class: 'mt-4 flex max-w-md gap-2' -%}
+          {%- form 'customer', class: 'mt-4 flex flex-wrap gap-2 lg:max-w-md' -%}
             <input type="hidden" name="contact[tags]" value="newsletter">
             <label class="sr-only" for="newsletter-email">{{ 'general.email' | t }}</label>
             <input
@@ -44,11 +53,16 @@
               name="contact[email]"
               required
               placeholder="{{ section.settings.newsletter_placeholder }}"
-              class="min-h-11 flex-1 rounded-sm bg-canvas px-4 text-caption text-ink placeholder:text-ink-subtle"
+              class="min-h-11 min-w-0 basis-full rounded-sm bg-canvas px-4 text-caption text-ink placeholder:text-ink-subtle lg:flex-1 lg:basis-auto"
             >
+            {%- comment -%}
+              `max-w-md` is 448px and the footer is `overflow-hidden`, so on a
+              390px screen this button was not merely off the edge — it was
+              clipped away and unreachable. It takes its own row below `lg`.
+            {%- endcomment -%}
             <button
               type="submit"
-              class="min-h-11 cursor-pointer rounded-sm bg-brand px-6 text-label uppercase tracking-label text-on-brand transition-colors duration-(--duration-base) hover:bg-brand-hover"
+              class="min-h-11 basis-full cursor-pointer rounded-sm bg-brand px-6 text-label uppercase tracking-label text-on-brand transition-colors duration-(--duration-base) hover:bg-brand-hover lg:basis-auto"
             >
               {{ section.settings.newsletter_cta }}
             </button>
@@ -57,9 +71,9 @@
       </div>
 
       {%- for block in section.blocks -%}
-        <nav class="flex flex-col gap-3" {{ block.shopify_attributes }}>
+        <nav class="flex flex-col gap-3 {% if forloop.last %}col-span-2 lg:col-span-1{% endif %}" {{ block.shopify_attributes }}>
           <h2 class="text-micro uppercase tracking-nav text-ink-invert">{{ block.settings.title }}</h2>
-          <ul class="flex flex-col gap-2">
+          <ul class="flex flex-col gap-2 {% if forloop.last %}max-lg:grid max-lg:grid-cols-2 max-lg:gap-x-5{% endif %}">
             {%- for i in (1..4) -%}
               {%- liquid
                 assign label_key = 'link_' | append: i | append: '_label'
@@ -78,7 +92,16 @@
                     links.
                   {%- endcomment -%}
                   {%- if entry_url != blank -%}
-                    <a href="{{ entry_url }}" class="text-caption transition-colors duration-(--duration-base) hover:text-ink-invert">{{ entry_label }}</a>
+                    {%- comment -%}
+                      `text-ink-invert-muted` is not decoration. base.css paints
+                      every `a` `--color-brand` — correct on cream, and on this
+                      espresso ground it measured rgb(114,94,76), which is all
+                      but invisible. The nine entries with no URL are `span`s and
+                      inherit the footer's own light text, so the three real
+                      links were the only ones that looked dead. Restating the
+                      colour is what any link on an inverted surface has to do.
+                    {%- endcomment -%}
+                    <a href="{{ entry_url }}" class="text-caption text-ink-invert-muted transition-colors duration-(--duration-base) hover:text-ink-invert">{{ entry_label }}</a>
                   {%- else -%}
                     <span class="text-caption">{{ entry_label }}</span>
                   {%- endif -%}

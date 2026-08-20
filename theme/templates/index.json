@@ -23,7 +23,7 @@
             "heading": "The Dry Season Collection",
             "body": "Handwoven linen and cotton poplin, cut loose and sewn in small runs.",
             "cta": "Shop the collection",
-            "href": "/collections/all",
+            "href": "/collections/all?filter.v.availability=1",
             "asset": "hero-2.webp",
             "alt": "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
             "text_art": true
@@ -45,7 +45,7 @@
         "heading": "New arrivals",
         "count": 8,
         "cta": "View all",
-        "href": "/collections/all"
+        "href": "/collections/all?filter.v.availability=1"
       }
     },
     "voices": {

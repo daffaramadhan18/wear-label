@@ -26,8 +26,12 @@ is reviewable now:
    their shots; the 115 imported from Shopee carry none (see [The
    catalogue](#the-catalogue)), so most of the grid still draws placeholder cards
    at the real card proportions.
-2. **No filters.** They are defined in Shopify's Search and Discovery app; until
-   then the filter rail says where they come from instead of inventing facets.
+2. **One filter, not none.** Shopify's default **Availability** facet is live —
+   `filter.v.availability=1` (In stock) and `=0` — and every entry point into the
+   catalogue now carries it, because 106 of the 126 products are sold out and the
+   bare `/collections/all` opened on eight sold-out cards out of nine. Product
+   type, size and colourway facets are still undefined; they come from the Search
+   and Discovery app, and until then the rail says so rather than inventing them.
 3. **No `about` page**, and no `custom.material` / `custom.care` metafields.
 4. **Copy.** Brand voice is unsettled. Blank theme settings render a labelled
    placeholder, so filling them in is the whole change.
