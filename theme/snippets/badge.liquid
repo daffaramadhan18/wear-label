@@ -1,0 +1,29 @@
+{%- comment -%}
+  Pill badge — port of components/ui/badge.tsx.
+
+  Pills are reserved for badges and filter chips; everything else stays
+  near-square, per the design system's radius rule.
+
+  Accepts: tone, label, class
+{%- endcomment -%}
+
+{%- liquid
+  case tone
+    when 'brand'
+      assign tone_classes = 'bg-brand text-on-brand'
+    when 'invert'
+      assign tone_classes = 'bg-invert text-ink-invert'
+    when 'sale'
+      assign tone_classes = 'bg-sale text-on-sale'
+    when 'promo'
+      assign tone_classes = 'bg-promo-surface text-on-promo-surface'
+    when 'sage'
+      assign tone_classes = 'bg-sage-surface text-on-sage-surface'
+    when 'inert'
+      assign tone_classes = 'bg-inert text-on-inert border border-inert-border'
+    else
+      assign tone_classes = 'border border-line text-ink-subtle'
+  endcase
+-%}
+
+<span class="inline-flex items-center rounded-pill px-3.5 py-1.5 text-micro uppercase tracking-eyebrow {{ tone_classes }} {{ class }}">{{ label }}</span>

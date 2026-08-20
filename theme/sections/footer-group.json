@@ -5,13 +5,65 @@
     "footer": {
       "type": "footer",
       "blocks": {
-        "company": { "type": "column", "settings": { "title": "Company" } },
-        "account": { "type": "column", "settings": { "title": "My account" } },
-        "care": { "type": "column", "settings": { "title": "Customer care" } }
+        "column-1": {
+          "type": "column",
+          "settings": {
+            "title": "Company",
+            "link_1_label": "What we do",
+            "link_1_url": "/pages/about",
+            "link_2_label": "The studio",
+            "link_2_url": "",
+            "link_3_label": "Journal",
+            "link_3_url": "",
+            "link_4_label": "FAQ",
+            "link_4_url": ""
+          }
+        },
+        "column-2": {
+          "type": "column",
+          "settings": {
+            "title": "My account",
+            "link_1_label": "Sign in",
+            "link_1_url": "/account",
+            "link_2_label": "View bag",
+            "link_2_url": "/cart",
+            "link_3_label": "Order tracking",
+            "link_3_url": "",
+            "link_4_label": "Wishlist",
+            "link_4_url": ""
+          }
+        },
+        "column-3": {
+          "type": "column",
+          "settings": {
+            "title": "Customer care",
+            "link_1_label": "Contact us",
+            "link_1_url": "",
+            "link_2_label": "Returns & refunds",
+            "link_2_url": "",
+            "link_3_label": "Size guide",
+            "link_3_url": "",
+            "link_4_label": "Terms",
+            "link_4_url": ""
+          }
+        }
       },
-      "block_order": ["company", "account", "care"],
-      "settings": {}
+      "block_order": [
+        "column-1",
+        "column-2",
+        "column-3"
+      ],
+      "settings": {
+        "note": "Taxes included.",
+        "newsletter_heading": "Letters from the studio",
+        "newsletter_body": "New colourways, restocks and studio notes. No more than twice a month.",
+        "newsletter_placeholder": "Enter your email",
+        "newsletter_cta": "Subscribe",
+        "copyright": "© 2026 Wear Label."
+      }
     }
   },
-  "order": ["footer"]
+  "order": [
+    "footer"
+  ]
 }

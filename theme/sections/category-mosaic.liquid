@@ -1,0 +1,107 @@
+{%- comment -%}
+  The category mosaic — one tall tile and four small ones, each a real catalogue
+  filter. Port of components/home/category-mosaic.tsx.
+
+  The label sits on the photograph, so it carries its own surface (a solid chip on
+  the small tiles, a heavier weight on the tall one) rather than relying on the
+  crop staying dark enough to read against.
+
+  Every destination must be a REAL catalogue query. The design's "Tops" and "Up to
+  40% off" tiles are absent because neither exists in this catalogue, and the
+  fourth tile is "New in" rather than the design's "Made to order" — that filter
+  matches nothing and names a service the studio does not offer.
+
+  Photographs fall back from an uploaded image, to the collection's Nth product,
+  to the labelled placeholder — so the mosaic needs no art direction of its own to
+  stay in step with the catalogue.
+{%- endcomment -%}
+
+{%- liquid
+  assign source = collections[section.settings.collection]
+  assign feature_image = section.settings.feature_image
+  if feature_image == blank and source.products.size > 0
+    assign feature_image = source.products.first.featured_image
+  endif
+-%}
+
+<div class="mx-auto w-full max-w-content px-gutter pt-section">
+  <nav aria-label="{{ 'home.shop_by_category' | t }}" class="grid gap-7 md:grid-cols-2">
+    <a
+      href="{{ section.settings.feature_href | default: routes.all_products_collection_url }}"
+      class="group relative flex h-112 items-start overflow-hidden rounded-sm"
+    >
+      {% render 'media', image: feature_image, fill: true, sizes: '(min-width: 768px) 50vw, 100vw', label: 'Category photo', class: 'rounded-none' %}
+      <span class="relative flex flex-col gap-2 bg-invert/85 px-8 py-6 text-ink-invert transition-colors duration-(--duration-base) group-hover:bg-invert">
+        <span class="text-micro uppercase tracking-label">{{ section.settings.feature_eyebrow }}</span>
+        <span class="font-display text-h2 leading-h2">{{ section.settings.feature_label }}</span>
+      </span>
+    </a>
+
+    <ul class="grid gap-7 sm:grid-cols-2">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign tile_image = block.settings.image
+          if tile_image == blank and source.products.size > forloop.index
+            assign tile_image = source.products[forloop.index].featured_image
+          endif
+
+          assign even = forloop.index0 | modulo: 2
+          if even == 0
+            assign chip = 'bg-invert text-ink-invert group-hover:bg-invert-hover'
+          else
+            assign chip = 'bg-brand text-on-brand group-hover:bg-brand-hover'
+          endif
+        -%}
+        <li {{ block.shopify_attributes }}>
+          <a
+            href="{{ block.settings.href | default: routes.all_products_collection_url }}"
+            class="group relative flex h-52 items-end justify-end overflow-hidden rounded-sm"
+          >
+            {% render 'media', image: tile_image, fill: true, sizes: '(min-width: 768px) 25vw, 50vw', label: 'Category photo', class: 'rounded-none' %}
+            <span class="relative px-5 py-3.5 text-micro uppercase tracking-label transition-colors duration-(--duration-base) {{ chip }}">
+              {{ block.settings.label }}
+            </span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+</div>
+
+{% schema %}
+{
+  "name": "Category mosaic",
+  "max_blocks": 4,
+  "settings": [
+    { "type": "paragraph", "content": "Every tile must point at a filter that actually matches something. A tile naming a category the catalogue does not carry is a promise the shop cannot keep." },
+    { "type": "collection", "id": "collection", "label": "Photograph source" },
+    { "type": "header", "content": "Feature tile" },
+    { "type": "text", "id": "feature_eyebrow", "label": "Eyebrow", "default": "Shop" },
+    { "type": "text", "id": "feature_label", "label": "Label", "default": "Wide leg" },
+    { "type": "url", "id": "feature_href", "label": "Link" },
+    { "type": "image_picker", "id": "feature_image", "label": "Photograph" }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url", "id": "href", "label": "Link" },
+        { "type": "image_picker", "id": "image", "label": "Photograph" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category mosaic",
+      "blocks": [
+        { "type": "tile", "settings": { "label": "Culottes" } },
+        { "type": "tile", "settings": { "label": "Straight cut" } },
+        { "type": "tile", "settings": { "label": "New in" } },
+        { "type": "tile", "settings": { "label": "Everything" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

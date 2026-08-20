@@ -200,6 +200,23 @@
   --color-info-surface: var(--wl-inert-100);
   --color-info-line: var(--wl-taupe-500);
   --color-on-info-surface: var(--wl-taupe-700); /* 7.10:1 */
+  /*
+   * The markdown badge. `components/ui/badge.tsx` has always asked for
+   * `bg-sale text-on-sale` and this pair was never defined, so every "−20%"
+   * badge in the catalogue rendered with no fill and inherited text — a real
+   * bug, and a visible one on the four marked-down pieces.
+   *
+   * The colour is not invented: badge.tsx's own comment specifies it ("A
+   * markdown. Rust, and always beside the two prices, never instead of them"),
+   * so it comes from the rust ramp already in this file. It is rust-800 rather
+   * than the rust-500 used for errors because the badge sets 11px uppercase and
+   * needs the 4.5:1 small-text minimum — cream on rust-500 is 4.01:1 and misses
+   * it, cream on rust-800 is 7.02:1 and clears it. Nothing else in the palette
+   * changed.
+   */
+  --color-sale: var(--wl-rust-800);
+  --color-on-sale: var(--wl-cream); /* 7.02:1 */
+
   --color-promo-surface: var(--wl-blush-100);
   --color-on-promo-surface: var(--wl-blush-text); /* 4.94:1 */
   --color-sage-surface: var(--wl-sage-surface);

@@ -45,14 +45,24 @@
 
     <nav aria-label="Primary" class="hidden md:block">
       <ul class="flex items-center">
-        {%- for link in section.settings.menu.links -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign nav_url = block.settings.href | default: routes.root_url
+            assign current = false
+            if nav_url == routes.root_url and request.path == routes.root_url
+              assign current = true
+            elsif nav_url != routes.root_url and request.path contains nav_url
+              assign current = true
+            endif
+          -%}
           <li>
             <a
-              href="{{ link.url }}"
-              {% if link.current or link.child_current %}aria-current="page"{% endif %}
+              href="{{ nav_url }}"
+              {% if current %}aria-current="page"{% endif %}
               class="relative inline-flex min-h-11 items-center px-4 text-label uppercase tracking-nav text-ink-body transition-colors duration-(--duration-base) after:absolute after:inset-x-4 after:bottom-1.5 after:h-px after:bg-transparent after:content-[''] hover:text-brand aria-[current=page]:text-brand aria-[current=page]:after:bg-brand"
+              {{ block.shopify_attributes }}
             >
-              {{ link.title }}
+              {{ block.settings.label }}
             </a>
           </li>
         {%- endfor -%}
@@ -100,14 +110,23 @@
   >
     <nav aria-label="Primary, mobile" class="px-gutter py-2">
       <ul class="flex flex-col">
-        {%- for link in section.settings.menu.links -%}
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign nav_url = block.settings.href | default: routes.root_url
+            assign current = false
+            if nav_url == routes.root_url and request.path == routes.root_url
+              assign current = true
+            elsif nav_url != routes.root_url and request.path contains nav_url
+              assign current = true
+            endif
+          -%}
           <li class="border-b border-hairline last:border-0">
             <a
-              href="{{ link.url }}"
-              {% if link.current or link.child_current %}aria-current="page"{% endif %}
+              href="{{ nav_url }}"
+              {% if current %}aria-current="page"{% endif %}
               class="flex min-h-14 items-center text-label uppercase tracking-nav text-ink-body transition-colors duration-(--duration-base) hover:text-brand aria-[current=page]:text-brand"
             >
-              {{ link.title }}
+              {{ block.settings.label }}
             </a>
           </li>
         {%- endfor -%}
@@ -129,13 +148,21 @@
 {% schema %}
 {
   "name": "Header",
+  "max_blocks": 5,
   "settings": [
     {
-      "type": "link_list",
-      "id": "menu",
-      "label": "Menu",
-      "default": "main-menu",
-      "info": "The design's nav is Home, Shop, About Us. Edit it under Navigation."
+      "type": "paragraph",
+      "content": "The design's nav is Home, Shop, About Us — three items, and the rule under the current one is what carries position. A Shopify menu is not used here because the nav is part of the design rather than shop data."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Nav item",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "url", "id": "href", "label": "Link" }
+      ]
     }
   ]
 }

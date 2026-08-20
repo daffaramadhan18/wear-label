@@ -1,0 +1,36 @@
+{%- comment -%}
+  Price — port of components/ui/price.tsx.
+
+  Espresso ink with tabular figures, so a column of prices does not shift width.
+  A marked-down piece shows the old price struck through beside it — never the
+  strike alone, since a line through a number is not a statement of what changed.
+
+  No price at all resolves to a Copy placeholder, which is what the catalogue
+  renders before the store has products.
+
+  Accepts: price, compare_at, size ('small' | 'display'), class
+{%- endcomment -%}
+
+{%- if price == blank -%}
+  {%- assign placeholder_class = class | append: ' max-w-24' -%}
+  {% render 'copy', value: '', label: 'price', class: placeholder_class %}
+{%- else -%}
+  {%- liquid
+    assign struck = false
+    if compare_at and compare_at > price
+      assign struck = true
+    endif
+
+    if size == 'display'
+      assign price_classes = 'font-display text-h2 leading-h2 text-ink'
+    else
+      assign price_classes = 'text-small text-ink'
+    endif
+  -%}
+  <span class="flex flex-wrap items-baseline gap-2.5 {{ class }}">
+    <span data-numeric class="{{ price_classes }}">{{ price | money }}</span>
+    {%- if struck -%}
+      <s data-numeric class="text-caption text-ink-subtle">{{ compare_at | money }}</s>
+    {%- endif -%}
+  </span>
+{%- endif -%}

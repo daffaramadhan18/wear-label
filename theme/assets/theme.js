@@ -151,3 +151,211 @@
     init();
   }
 })();
+
+/*
+ * Save for later.
+ *
+ * Appended as its own IIFE rather than folded into the one above: it is the only
+ * behaviour here that owns persistent state, and keeping it separate means the
+ * disclosure and the reveals cannot be taken down by a storage exception.
+ *
+ * Same `wl:saved` key and same semantics as components/ui/save-button.tsx —
+ * every button showing a handle updates together, and a change in another tab
+ * arrives through the `storage` event.
+ */
+(function () {
+  "use strict";
+
+  var KEY = "wl:saved";
+
+  function read() {
+    try {
+      var parsed = JSON.parse(window.localStorage.getItem(KEY) || "[]");
+      return Array.isArray(parsed) ? parsed.filter(function (e) { return typeof e === "string"; }) : [];
+    } catch (e) {
+      /* Storage can be blocked outright; an unreadable list is an empty one. */
+      return [];
+    }
+  }
+
+  function write(list) {
+    try {
+      window.localStorage.setItem(KEY, JSON.stringify(list));
+    } catch (e) {
+      /* Private mode or a full quota. The list stays as it was, which is the
+         honest outcome — better than a button that says "saved" for something
+         that is not. */
+      return false;
+    }
+    return true;
+  }
+
+  function sync() {
+    var list = read();
+    document.querySelectorAll("[data-save]").forEach(function (button) {
+      var saved = list.indexOf(button.getAttribute("data-save")) !== -1;
+      button.setAttribute("aria-pressed", String(saved));
+      var label = button.querySelector("[data-save-label]");
+      if (label) {
+        var title = button.getAttribute("data-title") || "";
+        /* Both strings come from the locale file via data attributes — the theme
+           has one content contract and script is not allowed its own copy of it. */
+        var word = button.getAttribute(saved ? "data-save-on" : "data-save-off") || "";
+        label.textContent = word + (title ? ": " + title : "");
+      }
+    });
+  }
+
+  function init() {
+    if (!document.querySelector("[data-save]")) return;
+
+    document.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-save]");
+      if (!button) return;
+
+      var handle = button.getAttribute("data-save");
+      var list = read();
+      var at = list.indexOf(handle);
+      if (at === -1) { list.push(handle); } else { list.splice(at, 1); }
+      if (write(list)) sync();
+    });
+
+    /* `storage` only fires in OTHER tabs, which is exactly what it is for here. */
+    window.addEventListener("storage", function (event) {
+      if (event.key === KEY) sync();
+    });
+
+    sync();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+/*
+ * Hero carousel.
+ *
+ * Replaces components/home/hero-carousel.tsx. The React version held index,
+ * paused and stopped in state; here they are three closure variables and the
+ * only thing written to the DOM is each slide's transform, its inert flag and
+ * the dots.
+ *
+ * The three rules that matter, in order:
+ *   - hover and keyboard focus PAUSE, so a reader can finish the sentence they
+ *     are on and reach the CTA without it moving;
+ *   - a touch, an arrow or a dot STOPS it for the rest of the visit — a reader
+ *     who has taken hold of the carousel has said what they want;
+ *   - prefers-reduced-motion never starts it at all. An auto-advancing carousel
+ *     is motion the reader did not ask for, which is what that setting is about.
+ */
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function initCarousel(root) {
+    var slides = Array.prototype.slice.call(root.querySelectorAll("[data-slide]"));
+    if (slides.length < 2) return;
+
+    var dots = Array.prototype.slice.call(root.querySelectorAll("[data-carousel-dot]"));
+    var index = 0;
+    var paused = false;
+    var stopped = false;
+    var timer = null;
+    var interval = (parseInt(root.getAttribute("data-interval"), 10) || 3) * 1000;
+
+    function render() {
+      slides.forEach(function (slide, i) {
+        /* Where this slide sits, in band widths from the active one. Wrapping to
+           the nearer side keeps the last slide from travelling the whole strip
+           backwards on the way round to the first. */
+        var offset = i - index;
+        if (offset > slides.length / 2) offset -= slides.length;
+        if (offset < -slides.length / 2) offset += slides.length;
+
+        var active = i === index;
+        slide.style.transform = "translateX(" + offset * 100 + "%)";
+        slide.style.zIndex = active ? "2" : "1";
+        slide.toggleAttribute("inert", !active);
+        if (active) {
+          slide.removeAttribute("aria-hidden");
+        } else {
+          slide.setAttribute("aria-hidden", "true");
+        }
+      });
+
+      dots.forEach(function (dot, i) {
+        var active = i === index;
+        var bar = dot.querySelector("[data-carousel-bar]");
+        if (active) {
+          dot.setAttribute("aria-current", "true");
+        } else {
+          dot.removeAttribute("aria-current");
+        }
+        if (bar) {
+          bar.classList.toggle("w-10", active);
+          bar.classList.toggle("bg-brand", active);
+          bar.classList.toggle("w-4.5", !active);
+          bar.classList.toggle("bg-ink/35", !active);
+        }
+      });
+    }
+
+    function tick() {
+      index = (index + 1) % slides.length;
+      render();
+    }
+
+    function start() {
+      if (timer || paused || stopped || reduceMotion.matches) return;
+      timer = window.setInterval(tick, interval);
+    }
+
+    function halt() {
+      if (!timer) return;
+      window.clearInterval(timer);
+      timer = null;
+    }
+
+    /* Pause is reversible; stop is not. */
+    function pause() { paused = true; halt(); }
+    function resume() { paused = false; start(); }
+    function stop() { stopped = true; halt(); }
+
+    function go(next) {
+      stop();
+      index = (next + slides.length) % slides.length;
+      render();
+    }
+
+    root.addEventListener("mouseenter", pause);
+    root.addEventListener("mouseleave", resume);
+    root.addEventListener("focusin", pause);
+    root.addEventListener("focusout", resume);
+    root.addEventListener("touchstart", stop, { passive: true });
+
+    var prev = root.querySelector("[data-carousel-prev]");
+    var next = root.querySelector("[data-carousel-next]");
+    if (prev) prev.addEventListener("click", function () { go(index - 1); });
+    if (next) next.addEventListener("click", function () { go(index + 1); });
+    dots.forEach(function (dot, i) {
+      dot.addEventListener("click", function () { go(i); });
+    });
+
+    render();
+    start();
+  }
+
+  function init() {
+    document.querySelectorAll("[data-carousel]").forEach(initCarousel);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

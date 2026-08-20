@@ -1,0 +1,77 @@
+{%- comment -%}
+  The three-up service band — port of components/home/service-band.tsx.
+
+  Rules top and bottom, a camel mark in a circle, then the promise and its detail.
+
+  Each promise must be stated elsewhere on the site — that is the reason this band
+  is allowed where the made-to-order one is not. The shipping threshold is the
+  announcement bar's, the exchange is on every product page, and fit advice over
+  WhatsApp is what the customer reviews describe the studio doing. A fourth
+  promise nobody keeps makes this band the same problem the made-to-order block
+  was.
+
+  `icon` selects a mark from snippets/icon.liquid.
+{%- endcomment -%}
+
+<section class="mt-section border-y border-rule">
+  <div class="mx-auto w-full max-w-content px-gutter">
+    <ul class="grid divide-y divide-hairline md:grid-cols-3 md:divide-x md:divide-y-0">
+      {%- for block in section.blocks -%}
+        <li class="flex min-h-30 items-center justify-center gap-4.5 px-4 py-6 md:min-h-45 md:py-8" {{ block.shopify_attributes }}>
+          <span class="inline-flex size-13 shrink-0 items-center justify-center rounded-pill bg-inert text-brand">
+            {% render 'icon', icon: block.settings.icon, class: 'size-7.5' %}
+          </span>
+          <span class="flex flex-col gap-1.5">
+            <span class="text-label font-medium uppercase tracking-nav text-ink">
+              {% render 'copy', value: block.settings.title, label: 'promise', inline: true %}
+            </span>
+            <span class="text-caption text-ink-muted">
+              {% render 'copy', value: block.settings.body, label: 'detail', inline: true %}
+            </span>
+          </span>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Service band",
+  "max_blocks": 3,
+  "settings": [
+    { "type": "paragraph", "content": "Only put a promise here that is stated somewhere else on the site. A claim that lives only in this band is a claim nobody has to keep." }
+  ],
+  "blocks": [
+    {
+      "type": "service",
+      "name": "Promise",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Mark",
+          "options": [
+            { "value": "shipping", "label": "Shipping" },
+            { "value": "support", "label": "Support" },
+            { "value": "exchange", "label": "Exchange" }
+          ],
+          "default": "shipping"
+        },
+        { "type": "text", "id": "title", "label": "Promise" },
+        { "type": "text", "id": "body", "label": "Detail" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Service band",
+      "blocks": [
+        { "type": "service", "settings": { "icon": "shipping", "title": "Free shipping", "body": "On orders over Rp 750.000" } },
+        { "type": "service", "settings": { "icon": "support", "title": "Studio support", "body": "Fit advice over WhatsApp" } },
+        { "type": "service", "settings": { "icon": "exchange", "title": "Easy exchange", "body": "One free swap in 14 days" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

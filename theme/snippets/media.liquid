@@ -1,0 +1,60 @@
+{%- comment -%}
+  Catalogue and editorial imagery — port of components/ui/media.tsx.
+
+  Per the design system's product card, an image that does not exist renders as
+  a tone-filled block with a small uppercase caption at the bottom — at the exact
+  ratio the real photo will occupy, so adding the photography later causes no
+  reflow (CLS stays 0). That is the whole reason the catalogue can be previewed
+  before the store has a single product in it.
+
+  `ratio` overrides the frame the image is cropped into, which is how the
+  design's fixed-height crops are expressed: one source photograph is cropped
+  differently by a card, a mosaic tile and a bag thumbnail. `fill` drops the
+  frame altogether and takes the size of the nearest positioned ancestor, for the
+  bands whose height is set by the layout rather than by the photograph.
+
+  Accepts: image (Shopify image or nil), sizes, ratio, fill, priority, class, label
+{%- endcomment -%}
+
+{%- liquid
+  assign media_label = label | default: 'Product photo'
+
+  if fill
+    assign box = 'absolute inset-0 h-full w-full'
+    assign frame = ''
+  else
+    assign box = 'w-full'
+    if ratio
+      assign frame = 'aspect-ratio:' | append: ratio
+    elsif image
+      assign frame = 'aspect-ratio:' | append: image.width | append: ' / ' | append: image.height
+    else
+      assign frame = 'aspect-ratio:1 / 1'
+    endif
+  endif
+-%}
+
+{%- if image == blank -%}
+  <div
+    role="img"
+    aria-label="{{ media_label }} placeholder"
+    style="{{ frame }}"
+    class="flex items-end justify-center rounded-sm bg-tone p-4.5 {{ box }} {{ class }}"
+  >
+    <span class="text-micro uppercase tracking-nav text-white/75">{{ media_label }}</span>
+  </div>
+{%- else -%}
+  <div style="{{ frame }}" class="relative overflow-hidden rounded-sm bg-tone {{ box }} {{ class }}">
+    {{
+      image
+      | image_url: width: 1200
+      | image_tag:
+        sizes: sizes,
+        widths: '256, 384, 512, 640, 768, 1024, 1200',
+        loading: loading_mode,
+        fetchpriority: priority_mode,
+        class: 'absolute inset-0 h-full w-full object-cover',
+        alt: image.alt
+    }}
+  </div>
+{%- endif -%}

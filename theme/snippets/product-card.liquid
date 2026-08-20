@@ -1,0 +1,117 @@
+{%- comment -%}
+  Catalogue card — port of components/shop/product-card.tsx.
+
+  A square crop of the garment with the flag badge at the top left and two
+  actions at the bottom right, then the material line in camel, the name in
+  Playfair, and the price.
+
+  The card is one stretched link — the name's anchor covers the whole card — so
+  there is one tab stop per product and no nested interactive elements. The two
+  actions sit above that overlay and are their own stops.
+
+  The bag action goes to the product page rather than adding straight to the bag.
+  Every piece has five sizes and five colourways, so a one-click add would have
+  to guess a variant; for apparel that is a return, not a conversion. It is
+  labelled as what it does.
+
+  The name drops one rung on the system's own scale — H3 20 instead of the card's
+  22 — below `sm`, where the catalogue runs two cards to a row and the column is
+  about 155px wide. A 22px serif wraps to three lines there.
+
+  The hover/focus scale was a Motion client component in React because the card
+  is one stretched link and pointer and keyboard land on different elements.
+  In CSS that is `group-hover` plus `group-focus-within`, which covers both for
+  free and costs no JavaScript — so the whole card is now server-rendered.
+
+  PLACEHOLDER MODE. Called with no `product`, every slot renders its labelled
+  placeholder at final size: the photo becomes the design system's tone block,
+  the material, name and price become Copy placeholders. That is what the
+  catalogue draws until the store has products, and it is the same rule the
+  content module already uses for unwritten copy — so the grid, its rhythm and
+  its card proportions are the real ones before a single product exists.
+
+  Accepts: product, sizes, heading_level ('h2' | 'h3')
+{%- endcomment -%}
+
+{%- liquid
+  assign heading_tag = heading_level | default: 'h3'
+  assign new_label = 'product.new' | t
+  assign sold_out_label = 'product.sold_out' | t
+  assign card_sizes = sizes | default: '(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw'
+
+  if product
+    assign card_price = product.price
+    assign card_compare = product.compare_at_price
+    assign card_material = product.metafields.custom.material.value
+    assign card_url = product.url
+    assign card_image = product.featured_image
+
+    assign discount = 0
+    if card_compare and card_compare > card_price
+      assign off = card_compare | minus: card_price | times: 100.0 | divided_by: card_compare
+      assign discount = off | round
+    endif
+
+    assign is_new = false
+    if product.tags contains 'New'
+      assign is_new = true
+    endif
+  endif
+-%}
+
+<article class="group relative flex flex-col gap-3">
+  <div class="relative">
+    {%- comment -%}
+      The clip lives on a static parent: scaling an element that clips itself
+      would animate the crop along with the image.
+    {%- endcomment -%}
+    <div class="overflow-hidden rounded-sm">
+      <div class="transition-transform duration-(--duration-enter) ease-(--ease-entrance) group-hover:scale-[1.03] group-focus-within:scale-[1.03]">
+        {% render 'media', image: card_image, sizes: card_sizes, ratio: '1 / 1' %}
+      </div>
+    </div>
+
+    {%- if discount > 0 -%}
+      {%- assign discount_label = '−' | append: discount | append: '%' -%}
+      {% render 'badge', tone: 'sale', label: discount_label, class: 'absolute left-3 top-3' %}
+    {%- elsif is_new -%}
+      {% render 'badge', tone: 'invert', label: new_label, class: 'absolute left-3 top-3' %}
+    {%- endif -%}
+
+    {%- comment -%} Above the stretched link, so both actions stay clickable. {%- endcomment -%}
+    <div class="absolute bottom-3 right-3 z-1 flex gap-2">
+      {% render 'save-button', product: product %}
+
+      <a
+        href="{% if card_url %}{{ card_url }}#options{% else %}#{% endif %}"
+        class="wl-tap inline-flex size-9.5 items-center justify-center rounded-xs bg-brand text-on-brand transition-colors duration-(--duration-base) hover:bg-invert"
+        {% unless card_url %}aria-disabled="true" tabindex="-1"{% endunless %}
+      >
+        {% render 'icon', icon: 'bag', class: 'size-4.5' %}
+        <span class="sr-only">{{ 'product.choose_size' | t }}{% if product %}: {{ product.title }}{% endif %}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-1.5">
+    <p class="text-caption text-ink-subtle">
+      {% render 'copy', value: card_material, label: 'material' %}
+    </p>
+
+    <{{ heading_tag }} class="font-display text-h3 leading-h3 text-ink sm:text-card sm:leading-card">
+      {%- if card_url -%}
+        <a href="{{ card_url }}" class="after:absolute after:inset-0 after:content-[''] hover:text-brand">
+          {% render 'copy', value: product.title, label: 'product name' %}
+        </a>
+      {%- else -%}
+        {% render 'copy', value: '', label: 'product name' %}
+      {%- endif -%}
+    </{{ heading_tag }}>
+
+    {% render 'price', price: card_price, compare_at: card_compare, class: 'mt-0.5' %}
+  </div>
+
+  {%- if product and product.available == false -%}
+    {% render 'badge', tone: 'inert', label: sold_out_label, class: 'self-start' %}
+  {%- endif -%}
+</article>

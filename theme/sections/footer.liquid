@@ -60,15 +60,30 @@
         <nav class="flex flex-col gap-3" {{ block.shopify_attributes }}>
           <h2 class="text-micro uppercase tracking-nav text-ink-invert">{{ block.settings.title }}</h2>
           <ul class="flex flex-col gap-2">
-            {%- for link in block.settings.menu.links -%}
-              <li>
-                <a
-                  href="{{ link.url }}"
-                  class="text-caption transition-colors duration-(--duration-base) hover:text-ink-invert"
-                >
-                  {{ link.title }}
-                </a>
-              </li>
+            {%- for i in (1..4) -%}
+              {%- liquid
+                assign label_key = 'link_' | append: i | append: '_label'
+                assign url_key = 'link_' | append: i | append: '_url'
+                assign entry_label = block.settings[label_key]
+                assign entry_url = block.settings[url_key]
+              -%}
+              {%- if entry_label != blank -%}
+                <li>
+                  {%- comment -%}
+                    An entry with no URL has no page yet, and renders as plain
+                    text rather than as a link that would 404. Filling the URL in
+                    is the only change needed once the page exists. This is the
+                    design's information architecture in full, so the unbuilt
+                    destinations stay visible as intent without becoming dead
+                    links.
+                  {%- endcomment -%}
+                  {%- if entry_url != blank -%}
+                    <a href="{{ entry_url }}" class="text-caption transition-colors duration-(--duration-base) hover:text-ink-invert">{{ entry_label }}</a>
+                  {%- else -%}
+                    <span class="text-caption">{{ entry_label }}</span>
+                  {%- endif -%}
+                </li>
+              {%- endif -%}
             {%- endfor -%}
           </ul>
         </nav>
@@ -100,8 +115,16 @@
       "type": "column",
       "name": "Link column",
       "settings": [
+        { "type": "paragraph", "content": "Leave a link's URL empty and it renders as plain text instead of a link that would 404. That is deliberate: the column shows the full information architecture without promising pages that do not exist yet." },
         { "type": "text", "id": "title", "label": "Title" },
-        { "type": "link_list", "id": "menu", "label": "Menu" }
+        { "type": "text", "id": "link_1_label", "label": "Link 1" },
+        { "type": "url", "id": "link_1_url", "label": "Link 1 URL" },
+        { "type": "text", "id": "link_2_label", "label": "Link 2" },
+        { "type": "url", "id": "link_2_url", "label": "Link 2 URL" },
+        { "type": "text", "id": "link_3_label", "label": "Link 3" },
+        { "type": "url", "id": "link_3_url", "label": "Link 3 URL" },
+        { "type": "text", "id": "link_4_label", "label": "Link 4" },
+        { "type": "url", "id": "link_4_url", "label": "Link 4 URL" }
       ]
     }
   ],

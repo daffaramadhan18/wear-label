@@ -1,0 +1,68 @@
+{%- comment -%}
+  New arrivals — the product grid under the hero. Port of the arrivals block in
+  app/page.tsx.
+
+  PLACEHOLDER MODE. With no products in the collection the grid still renders,
+  filled with placeholder cards at the exact card proportions — so the grid, its
+  gaps and its rhythm are the real ones before the store has a catalogue. The
+  moment products exist the same markup renders them; nothing here changes.
+{%- endcomment -%}
+
+{%- liquid
+  assign source = collections[section.settings.collection]
+  assign shown = section.settings.count
+  assign card_sizes = '(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw'
+-%}
+
+<section aria-labelledby="arrivals-heading" class="pt-section">
+  <div class="mx-auto w-full max-w-content px-gutter flex flex-col gap-10">
+    <div data-reveal class="flex flex-col items-center gap-3">
+      <h2 id="arrivals-heading" class="text-center text-h1 leading-h1">
+        {% render 'copy', value: section.settings.heading, label: 'heading' %}
+      </h2>
+      {%- comment -%}
+        The design's short rule under a centred heading. Decorative, so a div
+        rather than an <hr>: there is no section break.
+      {%- endcomment -%}
+      <div aria-hidden="true" class="h-0.75 w-16 rounded-pill bg-brand"></div>
+    </div>
+
+    <div class="grid gap-x-7 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+      {%- if source.products.size > 0 -%}
+        {%- for product in source.products limit: shown -%}
+          <div data-reveal>{% render 'product-card', product: product, sizes: card_sizes %}</div>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..shown) -%}
+          <div data-reveal>{% render 'product-card', sizes: card_sizes %}</div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.cta != blank -%}
+      <div data-reveal class="flex justify-center">
+        <a
+          href="{{ section.settings.href | default: routes.all_products_collection_url }}"
+          class="inline-flex min-h-13 cursor-pointer items-center justify-center gap-2 rounded-sm border border-ink-subtle bg-transparent px-11 text-caption uppercase tracking-[0.22em] text-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand hover:bg-brand hover:text-on-brand active:translate-y-px"
+        >
+          {{ section.settings.cta }}
+          {% render 'icon', icon: 'arrow-right', class: 'size-5' %}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "New arrivals",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "New arrivals" },
+    { "type": "range", "id": "count", "label": "Products shown", "min": 4, "max": 12, "step": 4, "default": 8 },
+    { "type": "text", "id": "cta", "label": "Button label", "default": "View all" },
+    { "type": "url", "id": "href", "label": "Button link" }
+  ],
+  "presets": [{ "name": "New arrivals" }]
+}
+{% endschema %}

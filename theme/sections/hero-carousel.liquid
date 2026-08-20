@@ -1,0 +1,221 @@
+{%- comment -%}
+  The hero — port of components/home/hero-carousel.tsx.
+
+  The design's 600px band with a cream card over the photograph, and as many
+  slides as there are blocks.
+
+  Slides travel sideways rather than crossfading: every slide is parked one band
+  width away on the side it will arrive from, and only the offset changes. The
+  band already clips, so nothing extra is needed to hide the parked ones.
+
+  Rotation rules, in the order they matter (all in assets/theme.js):
+    - It stops on hover and on keyboard focus, so a reader can finish the
+      sentence they are on and reach the CTA without it moving.
+    - A touch stops it FOR GOOD. There is no hover on a phone, so the pause above
+      does not exist there; the first touch, or any use of the arrows or dots,
+      ends rotation for the rest of the visit. A slide that slid back out from
+      under a thumb is worse than one that stopped.
+    - prefers-reduced-motion turns rotation off entirely rather than shortening
+      it. An auto-advancing carousel is motion the reader did not ask for.
+    - Inactive slides are `inert`, so their heading and CTA are out of the tab
+      order and out of the accessibility tree instead of being invisible tab
+      stops.
+
+  One slide renders as a still band with no arrows and no dots — the controls are
+  derived from the block count, not drawn in.
+
+  NARROW SCREENS. The band is 600px at `md` and up, and 70svh below it (svh, not
+  vh, so hiding the browser's URL bar does not resize the hero mid-scroll). The
+  copy card fills the width there, which the design's controls do not allow for:
+  arrows parked at the band's edges land on the heading and the CTA. So below
+  `md` the arrows and dots gather into one row under the card, and their wrapper
+  becomes `display: contents` at `md` — one set of markup, each control exactly
+  where the design draws it on a wide screen.
+
+  ARTWORK. The two shots ship as theme assets, exported from the design's own
+  image slots. The filenames are historical — each was named for the slide it
+  first sat on and the two have since been swapped, so hero-2.webp leads and
+  hero-1.webp follows. That is the design's own order (slotId 'sf-hero-' + i+1),
+  with the order-notes card first. `image` overrides the asset once the merchant
+  uploads their own; with neither, the labelled placeholder fills the band at its
+  exact size, so a missing shot never breaks it.
+
+  `text_art` marks a slide whose artwork is an image OF text. It cannot be
+  cropped, so it is dropped below `md` and the band's own surface shows instead:
+  the band is taller than it is wide there and object-cover keeps under half the
+  card's width, which reads as a mistake. The words belong in the alt text.
+{%- endcomment -%}
+
+{%- liquid
+  assign slide_count = section.blocks.size
+  assign many = false
+  if slide_count > 1
+    assign many = true
+  endif
+-%}
+
+<section
+  aria-roledescription="carousel"
+  aria-label="{{ 'carousel.label' | t }}"
+  data-carousel
+  data-interval="{{ section.settings.interval }}"
+  class="relative h-[70svh] min-h-112 overflow-hidden bg-surface-muted md:h-150"
+>
+  {%- for block in section.blocks -%}
+    {%- liquid
+      assign active = false
+      if forloop.first
+        assign active = true
+      endif
+
+      assign slide_image = block.settings.image
+      assign asset_name = block.settings.asset
+    -%}
+
+    <div
+      data-slide
+      {% unless active %}aria-hidden="true" inert{% endunless %}
+      aria-roledescription="slide"
+      aria-label="{{ forloop.index }} of {{ slide_count }}"
+      style="transform:translateX(0%);z-index:{% if active %}2{% else %}1{% endif %}"
+      class="absolute inset-0 motion-safe:transition-transform motion-safe:duration-(--duration-lead) motion-safe:ease-(--ease-entrance)"
+      {{ block.shopify_attributes }}
+    >
+      <div class="absolute inset-0 {% if block.settings.text_art %}hidden md:block{% endif %}">
+        {%- if slide_image -%}
+          {% render 'media', image: slide_image, fill: true, sizes: '100vw', label: 'Hero photo', class: 'rounded-none' %}
+        {%- elsif asset_name != blank -%}
+          <div class="absolute inset-0 h-full w-full overflow-hidden bg-tone">
+            <img
+              src="{{ asset_name | asset_url }}"
+              alt="{{ block.settings.alt | escape }}"
+              width="1200"
+              height="675"
+              {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+              class="absolute inset-0 h-full w-full object-cover"
+            >
+          </div>
+        {%- else -%}
+          {% render 'media', image: nil, fill: true, sizes: '100vw', label: 'Hero photo', class: 'rounded-none' %}
+        {%- endif -%}
+      </div>
+
+      {%- comment -%}
+        The bottom padding is the room the mobile control row sits in; at `md`
+        the arrows move to the sides and the card recentres, and with one slide
+        there is no row to leave room for.
+      {%- endcomment -%}
+      <div class="absolute inset-0 flex items-center md:pb-0 {% if many %}pb-16{% endif %}">
+        <div class="mx-auto w-full max-w-content px-gutter">
+          <div class="flex max-w-130 flex-col gap-4 bg-canvas/92 p-6 md:gap-5 md:px-11 md:py-12">
+            <span class="text-micro uppercase tracking-nav text-ink-subtle">
+              {% render 'copy', value: block.settings.eyebrow, label: 'eyebrow', inline: true %}
+            </span>
+
+            {%- comment -%}
+              Every slide carries an h1. Only the active slide is in the
+              accessibility tree, so the page still has exactly one.
+            {%- endcomment -%}
+            <h1 class="text-display leading-display tracking-display">
+              {% render 'copy', value: block.settings.heading, label: 'heading' %}
+            </h1>
+
+            <p class="text-body leading-body text-ink-muted">
+              {% render 'copy', value: block.settings.body, label: 'body', lines: 2 %}
+            </p>
+
+            {%- if block.settings.cta != blank -%}
+              <a
+                href="{{ block.settings.href | default: routes.all_products_collection_url }}"
+                class="inline-flex min-h-13 cursor-pointer items-center justify-center gap-2 self-start rounded-sm border border-brand bg-brand px-11 text-caption uppercase tracking-[0.22em] text-on-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand-hover hover:bg-brand-hover active:translate-y-px"
+              >
+                {{ block.settings.cta }}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- endfor -%}
+
+  {%- if many -%}
+    {%- comment -%}
+      One row under the card on a phone; at `md` the wrapper stops being a box at
+      all (`contents`) and its three children take the positions the design draws
+      — arrows against the band's edges, dots along its bottom.
+    {%- endcomment -%}
+    <div class="absolute inset-x-0 bottom-4 z-10 flex items-center justify-center gap-3 md:contents">
+      <button
+        type="button"
+        data-carousel-prev
+        class="z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:left-7 md:top-1/2 md:-translate-y-1/2"
+      >
+        {% render 'icon', icon: 'chevron-left', class: 'size-5.5' %}
+        <span class="sr-only">{{ 'carousel.previous_slide' | t }}</span>
+      </button>
+
+      <div class="z-10 flex items-center justify-center md:absolute md:inset-x-0 md:bottom-7">
+        {%- for block in section.blocks -%}
+          <button
+            type="button"
+            data-carousel-dot="{{ forloop.index0 }}"
+            {% if forloop.first %}aria-current="true"{% endif %}
+            {%- comment -%}
+              The bar is the artwork; .wl-tap is the 44px target around it, so the
+              design keeps its 4px rule and a thumb still lands.
+            {%- endcomment -%}
+            class="wl-tap inline-flex h-11 cursor-pointer items-center px-3 md:px-1.25"
+          >
+            <span data-carousel-bar class="h-1 w-4.5 bg-ink/35 transition-[width,background-color] duration-(--duration-base) hover:bg-brand/60"></span>
+            <span class="sr-only">{{ 'carousel.go_to_slide' | t }} {{ forloop.index }}</span>
+          </button>
+        {%- endfor -%}
+      </div>
+
+      <button
+        type="button"
+        data-carousel-next
+        class="z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:right-7 md:top-1/2 md:-translate-y-1/2"
+      >
+        {% render 'icon', icon: 'chevron-right', class: 'size-5.5' %}
+        <span class="sr-only">{{ 'carousel.next_slide' | t }}</span>
+      </button>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Hero carousel",
+  "settings": [
+    {
+      "type": "range",
+      "id": "interval",
+      "label": "Seconds per slide",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "default": 3,
+      "info": "The design rotates at 6s; 3 is what this build asked for. Rotation is off entirely for readers who have asked for reduced motion."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "textarea", "id": "body", "label": "Body" },
+        { "type": "text", "id": "cta", "label": "Button label" },
+        { "type": "url", "id": "href", "label": "Button link" },
+        { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped artwork below." },
+        { "type": "text", "id": "asset", "label": "Shipped asset filename", "info": "A file in the theme's assets/. Used when no photograph is uploaded." },
+        { "type": "textarea", "id": "alt", "label": "Alt text" },
+        { "type": "checkbox", "id": "text_art", "label": "Artwork is an image of text", "default": false, "info": "Hides the artwork below md, where cropping would slice the words mid-sentence." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Hero carousel" }]
+}
+{% endschema %}

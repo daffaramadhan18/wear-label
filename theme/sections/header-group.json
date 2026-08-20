@@ -2,8 +2,45 @@
   "name": "Header",
   "type": "header",
   "sections": {
-    "announcement-bar": { "type": "announcement-bar", "settings": {} },
-    "header": { "type": "header", "settings": { "menu": "main-menu" } }
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "settings": {}
+    },
+    "header": {
+      "type": "header",
+      "blocks": {
+        "home": {
+          "type": "link",
+          "settings": {
+            "label": "Home",
+            "href": "/"
+          }
+        },
+        "shop": {
+          "type": "link",
+          "settings": {
+            "label": "Shop",
+            "href": "/collections/all"
+          }
+        },
+        "about": {
+          "type": "link",
+          "settings": {
+            "label": "About Us",
+            "href": "/pages/about"
+          }
+        }
+      },
+      "block_order": [
+        "home",
+        "shop",
+        "about"
+      ],
+      "settings": {}
+    }
   },
-  "order": ["announcement-bar", "header"]
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
 }
