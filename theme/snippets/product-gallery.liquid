@@ -16,6 +16,26 @@
   Without JavaScript the first angle shows and the thumbnails are inert — the same
   as the React version, which was a client component for exactly this state.
 
+  The main crop is 4 / 5, stated on the render call rather than left to
+  media.liquid's square source default, so the real photograph and the empty
+  state below draw the SAME proportion — which is the one thing placeholder mode
+  exists to guarantee. Trousers are judged on length, so the portrait crop is the
+  right one; it does take 10% off each side of a square source, so the eleven
+  shots want eyeballing for clipped hems once they are imported.
+
+  `priority` is the FIRST shot only, not every shot. It used to be `true` on all
+  of them, which did nothing while media.liquid was dropping the parameter on the
+  floor; now that the parameter is read, `true` on all of them would fetch an
+  eight-angle gallery eagerly at fetchpriority="high" and starve the one image
+  the page is actually judged on. The rest are lazy, and the hidden ones do not
+  fetch until the thumbnails reveal them.
+
+  The first main shot carries `view-transition-name: shot-<handle>`, the other
+  half of the pair set on the catalogue card, so a card grows into the product
+  page instead of the page swapping. Exactly one element per document may carry a
+  given name, hence `forloop.first` AND the handle guard: in placeholder mode
+  there is no product and no name is emitted at all.
+
   Accepts: product
 {%- endcomment -%}
 
@@ -36,7 +56,7 @@
             type="button"
             data-gallery-thumb="{{ forloop.index0 }}"
             aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
-            class="block w-full cursor-pointer overflow-hidden rounded-xs border transition-colors duration-(--duration-base) aria-pressed:border-brand border-border hover:border-line"
+            class="wl-press-soft block w-full cursor-pointer overflow-hidden rounded-xs border transition-colors duration-(--duration-base) aria-pressed:border-brand border-border hover:border-line"
           >
             {% render 'media', image: shot, sizes: '(min-width: 1024px) 92px, 80px', ratio: '4 / 5', label: 'Angle', class: 'rounded-none' %}
             <span class="sr-only">{{ 'product.show_image' | t }} {{ forloop.index }}</span>
@@ -48,13 +68,28 @@
 
   <div class="min-w-0 flex-1">
     {%- for shot in shots -%}
-      <div data-gallery-main="{{ forloop.index0 }}" {% unless forloop.first %}hidden{% endunless %}>
-        {% render 'media', image: shot, sizes: '(min-width: 1024px) 45vw, 100vw', priority: true, label: 'Product photo' %}
+      <div
+        data-gallery-main="{{ forloop.index0 }}"
+        {% unless forloop.first %}hidden{% endunless %}
+        {% if forloop.first and product.handle != blank %}style="view-transition-name: shot-{{ product.handle }}"{% endif %}
+      >
+        {% render 'media', image: shot, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', priority: forloop.first, label: 'Product photo' %}
       </div>
     {%- endfor -%}
 
+    {%- comment -%}
+      The placeholder carries the view-transition name too, so the morph pairs
+      with the catalogue card before the photography exists. snippets/product-card
+      names its crop whenever `product` is set, not only when there is an image —
+      so without this the two guards disagree and a piece with no shot yet emits a
+      name on one page and none on the other, which is a morph that silently never
+      runs. Naming both keeps the effect reviewable on an empty store, which is
+      the whole point of placeholder mode.
+    {%- endcomment -%}
     {%- if shot_count == 0 -%}
-      {% render 'media', image: nil, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', label: 'Product photo' %}
+      <div{% if product.handle != blank %} style="view-transition-name: shot-{{ product.handle }}"{% endif %}>
+        {% render 'media', image: nil, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', label: 'Product photo' %}
+      </div>
     {%- endif -%}
   </div>
 </div>

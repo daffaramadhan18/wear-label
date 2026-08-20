@@ -48,11 +48,21 @@
       assign selected_value = current.options[forloop.index0]
     -%}
 
-    <fieldset class="flex flex-col gap-3 {% if forloop.first %}border-t border-hairline pt-5.5{% endif %}">
+    <fieldset
+      data-variant-field
+      class="flex flex-col gap-3 {% if forloop.first %}border-t border-hairline pt-5.5{% endif %}"
+    >
       {%- if is_colour -%}
-        <div class="flex items-baseline justify-between gap-4">
+        {%- comment -%}
+          The chosen colourway gets its own line at h3, not a 14px caption tucked
+          beside the label: the reviews argue about colour BY NAME, so the name is
+          what the shopper is reading, and a 40px disc cannot say "Espresso". No
+          `font-display` — base.css sets h3 and below in the interface face. The
+          line is height-held so swapping variants never shifts the swatch row.
+        {%- endcomment -%}
+        <div class="flex flex-col gap-1">
           <legend class="text-micro uppercase tracking-nav text-ink-subtle">{{ option.name }}</legend>
-          <span class="text-caption text-ink-muted">{{ selected_value }}</span>
+          <span class="min-h-7 text-h3 leading-h3 text-ink">{{ selected_value }}</span>
         </div>
       {%- else -%}
         <legend class="text-micro uppercase tracking-nav text-ink-subtle">{{ option.name }}</legend>
@@ -103,6 +113,7 @@
             {%- if is_available -%}
               <a
                 href="{{ product.url }}?variant={{ target.id }}"
+                data-variant-link
                 {% if is_selected %}aria-current="true"{% endif %}
                 title="{{ value }}"
                 {% if swatch %}style="background-color:{{ swatch }}"{% endif %}
@@ -121,8 +132,9 @@
             {%- if is_available -%}
               <a
                 href="{{ product.url }}?variant={{ target.id }}"
+                data-variant-link
                 {% if is_selected %}aria-current="true"{% endif %}
-                class="inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border px-3 text-caption tracking-wide transition-colors duration-(--duration-base) {% if is_selected %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
+                class="wl-press-soft inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border px-3 text-caption tracking-wide transition-colors duration-(--duration-base) {% if is_selected %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
               >{{ value }}</a>
             {%- else -%}
               <span
@@ -175,7 +187,14 @@
       class="inline-flex min-h-13 flex-1 cursor-pointer items-center justify-center gap-2 rounded-sm border border-brand bg-brand px-11 text-caption uppercase tracking-[0.22em] text-on-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand-hover hover:bg-brand-hover active:translate-y-px disabled:cursor-not-allowed disabled:border-disabled-border disabled:bg-disabled disabled:text-on-disabled disabled:translate-y-0"
     >{{ 'product.add_to_bag' | t }}</button>
 
-    {% render 'save-button', product: product, class: 'size-14 rounded-xs border border-ink-subtle hover:bg-inert' %}
+    {%- comment -%}
+      `class` here REPLACES save-button's own default, which is where its press
+      classes live — so they have to be restated or this is the one control on the
+      site that does not answer a tap. Painted 56px, so wl-press-soft's 0.98 is
+      the right depth; wl-tap comes along because it is what the default carries
+      and it is a no-op above 44px.
+    {%- endcomment -%}
+    {% render 'save-button', product: product, class: 'wl-tap wl-press-soft size-14 rounded-xs border border-ink-subtle hover:bg-inert' %}
   </div>
 
   {%- comment -%}

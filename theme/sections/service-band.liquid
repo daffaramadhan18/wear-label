@@ -3,6 +3,23 @@
 
   Rules top and bottom, a camel mark in a circle, then the promise and its detail.
 
+  DEVIATION — the type ratio, and the band colour. The design set the promise at
+  --text-label (12) uppercase and its own subordinate detail at --text-caption
+  (14), so the hierarchy ran backwards, and put a 52px disc beside the 12px line.
+  The promise is now --text-h3 (20, interface face per the system's type table,
+  which sets H3 and below in Poppins) and loses `uppercase tracking-nav`: it is a
+  sentence, not a label. The disc comes down to 36px with a 20px mark so it stays
+  subordinate to the line it decorates.
+
+  The band is `bg-canvas`. Cream is the design's declared band colour and this is
+  one of only two places it is used as an actual band; it is also the tonal step
+  down from the espresso voices wall directly above. Cream-on-cream is the trap
+  here: the disc was `bg-inert` (#f7f1ec) and the dividers `divide-hairline`
+  (#f2ece6), both of which disappear against cream (#fbf4ef). The disc is
+  therefore `bg-surface` (white) and the dividers `divide-line` (#dfd0c4) — the
+  boundary token every other cream-filled control in the theme already uses.
+  The section rule top and bottom stays `border-rule`, which reads on white.
+
   Each promise must be stated elsewhere on the site — that is the reason this band
   is allowed where the made-to-order one is not. The shipping threshold is the
   announcement bar's, the exchange is on every product page, and fit advice over
@@ -13,16 +30,16 @@
   `icon` selects a mark from snippets/icon.liquid.
 {%- endcomment -%}
 
-<section class="mt-section border-y border-rule">
+<section class="mt-section border-y border-rule bg-canvas">
   <div class="mx-auto w-full max-w-content px-gutter">
-    <ul class="grid divide-y divide-hairline md:grid-cols-3 md:divide-x md:divide-y-0">
+    <ul class="grid divide-y divide-line md:grid-cols-3 md:divide-x md:divide-y-0">
       {%- for block in section.blocks -%}
         <li class="flex min-h-30 items-center justify-center gap-4.5 px-4 py-6 md:min-h-45 md:py-8" {{ block.shopify_attributes }}>
-          <span class="inline-flex size-13 shrink-0 items-center justify-center rounded-pill bg-inert text-brand">
-            {% render 'icon', icon: block.settings.icon, class: 'size-7.5' %}
+          <span class="inline-flex size-9 shrink-0 items-center justify-center rounded-pill bg-surface text-brand">
+            {% render 'icon', icon: block.settings.icon, class: 'size-5' %}
           </span>
           <span class="flex flex-col gap-1.5">
-            <span class="text-label font-medium uppercase tracking-nav text-ink">
+            <span class="text-h3 leading-h3 font-medium text-ink">
               {% render 'copy', value: block.settings.title, label: 'promise', inline: true %}
             </span>
             <span class="text-caption text-ink-muted">

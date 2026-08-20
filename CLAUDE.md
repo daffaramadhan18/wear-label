@@ -260,7 +260,7 @@ that way: `snippets/icon.liquid` (all twelve paths verified byte-exact against
 `components/ui/icons.tsx`) and the twenty reviews in `sections/voices-wall.liquid`
 (asserted verbatim against `lib/content/site.ts`).
 
-**Home page sequence:** hero → new arrivals → customer voices → service band →
+**Home page sequence:** hero → customer voices → new arrivals → service band →
 Instagram strip. Three blocks exist and are deliberately not placed — the mosaic
 (removed on request), the limited-run band (cut), and made-to-order (**never** to be
 placed; the studio does not offer the service). `theme/README.md` has the table.

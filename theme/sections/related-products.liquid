@@ -1,0 +1,77 @@
+{%- comment -%}
+  Related products — the cross-sell that closes the product page. Extracted
+  from sections/main-product.liquid, where it rendered inline after the tabs
+  (the block that was main-product.liquid:71-88).
+
+  WHY IT IS ITS OWN SECTION. The customer voices wall now sits on the product
+  page, and it has to sit between the purchase decision and the cross-sell: fit
+  evidence reaches the buyer before four more pairs of trousers do. While this
+  block lived inside `main` no section order could put anything between the tabs
+  and this grid — the order ["main","voices","related"] can. Nothing else about
+  the block changed in the move; the section id is `related`.
+
+  IT HIDES ITSELF RATHER THAN DRAWING PLACEHOLDERS, and that is the behaviour it
+  had inline, kept deliberately. `related.products.size > 1` means the catalogue
+  holds something other than the piece being viewed. With an empty store there
+  is no cross-sell to make, and a row of placeholder cards under "You may also
+  like" would claim there is one — so this is not the grid-is-the-point case
+  that new arrivals and the catalogue are, where the placeholder cards exist to
+  make the columns, gaps and card proportions reviewable before import. Here an
+  absent recommendation is the honest state.
+
+  DEVIATION FROM THE BLOCK IT REPLACES — two-up on the phone. The grid was
+  `sm:grid-cols-2 lg:grid-cols-4`, so it stacked one card to a row below `sm`
+  while the catalogue and new arrivals ran two: the same card rendered at three
+  different sizes on three routes. The gap set is now byte-identical to
+  new-arrivals.liquid:48 and main-collection.liquid:48. The `sizes` hint follows
+  the grid — two-up means each card is roughly 45vw on a phone, not 90vw, which
+  is what stops image_tag picking a candidate twice the size needed.
+
+  The heading is an h2 under the h1 that `main` puts on the product title, and
+  the cards keep product-card's default h3, so the document outline is the one
+  the block had inline. It is a section setting so the client can retitle it,
+  falling back to the interface string in locales/en.default.json — which is
+  what it rendered before there was a setting at all.
+{%- endcomment -%}
+
+{%- liquid
+  assign related = collections[section.settings.related_collection] | default: collections.all
+  assign limit = section.settings.count
+  assign default_heading = 'product.related_heading' | t
+  assign heading = section.settings.heading | default: default_heading
+  assign card_sizes = '(min-width: 1024px) 23vw, 45vw'
+-%}
+
+{%- if related.products.size > 1 -%}
+  <section
+    aria-labelledby="related-heading"
+    class="mx-auto flex w-full max-w-content flex-col gap-8 px-gutter pb-section pt-block-lg"
+  >
+    <div data-reveal>
+      <h2 id="related-heading" class="font-body text-h2 leading-h2">{{ heading }}</h2>
+    </div>
+
+    <div class="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-7 sm:gap-y-10 lg:grid-cols-4">
+      {%- assign shown = 0 -%}
+      {%- for entry in related.products -%}
+        {%- if entry.handle != product.handle and shown < limit -%}
+          <div data-reveal>{% render 'product-card', product: entry, sizes: card_sizes %}</div>
+          {%- assign shown = shown | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Related products",
+  "settings": [
+    { "type": "paragraph", "content": "Hides itself when the catalogue holds nothing but the piece being viewed — there is no recommendation to make, so none is drawn." },
+    { "type": "collection", "id": "related_collection", "label": "Related from", "info": "Leave empty to draw from every product." },
+    { "type": "text", "id": "heading", "label": "Heading", "info": "Leave empty to use the theme's own wording." },
+    { "type": "range", "id": "count", "label": "Products shown", "min": 2, "max": 8, "step": 1, "default": 4 }
+  ],
+  "presets": [{ "name": "Related products" }]
+}
+{% endschema %}

@@ -20,8 +20,21 @@
 
   The hover/focus scale was a Motion client component in React because the card
   is one stretched link and pointer and keyboard land on different elements.
-  In CSS that is `group-hover` plus `group-focus-within`, which covers both for
-  free and costs no JavaScript — so the whole card is now server-rendered.
+  In CSS that is `group-hover` plus `group-has-focus-visible`, which covers both
+  for free and costs no JavaScript — so the whole card is now server-rendered.
+
+  `group-focus-within` was the first spelling and it was wrong on a phone: the
+  card contains a save `<button>`, so tapping it focuses it, `:focus-within`
+  matches, and the photograph sits zoomed with no pointer that can ever leave.
+  `:focus-visible` is what the keyboard path actually needs, and a touch tap
+  does not set it.
+
+  VIEW TRANSITION. When there is a product, the clip carries
+  `view-transition-name: shot-<handle>`, paired with the same name on
+  `product-gallery.liquid`, so the card's shot morphs into the product page's.
+  The name is emitted ONLY with a product: this snippet renders many times per
+  page, and a duplicated or empty name breaks the transition for the whole
+  document — so a placeholder card must carry none.
 
   PLACEHOLDER MODE. Called with no `product`, every slot renders its labelled
   placeholder at final size: the photo becomes the design system's tone block,
@@ -63,10 +76,24 @@
   <div class="relative">
     {%- comment -%}
       The clip lives on a static parent: scaling an element that clips itself
-      would animate the crop along with the image.
+      would animate the crop along with the image. That static parent is also
+      what carries the view-transition name — a morphing element must not be
+      the one being scaled.
     {%- endcomment -%}
-    <div class="overflow-hidden rounded-sm">
-      <div class="transition-transform duration-(--duration-enter) ease-(--ease-entrance) group-hover:scale-[1.03] group-focus-within:scale-[1.03]">
+    <div class="overflow-hidden rounded-sm"{% if product %} style="view-transition-name: shot-{{ product.handle }}"{% endif %}>
+      {%- comment -%}
+        `--duration-base` and the file's default interactive easing, matching the
+        bag action below. `--duration-enter` with `--ease-entrance` is the scroll
+        reveal curve — written for a still page, and on a pointer hover it reads
+        as slow and floaty.
+
+        NO PRESS STATE HERE, deliberately. This element already owns `transform`
+        for the hover scale, and Android Chrome sets `:active` on touch-down
+        before it knows the gesture is a scroll — a press scale would flash a
+        shrink across the whole grid on every flick. Press feedback belongs on
+        the two actions, which are real controls.
+      {%- endcomment -%}
+      <div class="transition-transform duration-(--duration-base) group-hover:scale-[1.03] group-has-focus-visible:scale-[1.03]">
         {% render 'media', image: card_image, sizes: card_sizes, ratio: '1 / 1' %}
       </div>
     </div>
@@ -94,11 +121,22 @@
   </div>
 
   <div class="flex flex-col gap-1.5">
-    <p class="text-caption text-ink-subtle">
+    {%- comment -%}
+      The material is a micro label, not a caption — the same treatment the
+      product page gives the same field (`main-product.liquid`), so one field
+      does not read two ways across two routes.
+    {%- endcomment -%}
+    <p class="text-micro uppercase tracking-label text-ink-subtle">
       {% render 'copy', value: card_material, label: 'material' %}
     </p>
 
-    <{{ heading_tag }} class="font-display text-h3 leading-h3 text-ink sm:text-card sm:leading-card">
+    {%- comment -%}
+      `text-balance` is set here rather than inherited: base.css balances `h1, h2`
+      only, and this card's heading level is the caller's (`heading_level`), so
+      without it the identical card wraps optically on the catalogue's `h2`s and
+      greedily on the home grid's `h3`s.
+    {%- endcomment -%}
+    <{{ heading_tag }} class="font-display text-h3 leading-h3 text-balance text-ink sm:text-card sm:leading-card">
       {%- if card_url -%}
         <a href="{{ card_url }}" class="after:absolute after:inset-0 after:content-[''] hover:text-brand">
           {% render 'copy', value: product.title, label: 'product name' %}

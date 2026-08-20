@@ -149,6 +149,25 @@ Three are improvements the platform hands over:
   connected yet" strings are deleted rather than kept. Keeping them would ship a
   false statement.
 
+Three more were taken on 2026-08-20, when the storefront was worked over for feel:
+
+- **The arrivals grid is two-up on a phone**, where `app/page.tsx:115` is one-up.
+  The card's own comment (`snippets/product-card.liquid`) says the name drops a
+  rung to `--text-h3` because "the column is about 155px wide" — so the card's type
+  step was already tuned for a two-up column and was mis-tuned for the layout it
+  sat in. `sections/main-product.liquid`'s related grid moved with it, so the card
+  now renders at consistent sizes on all three routes.
+- **The hero carousel can be dragged.** That overrides part of the argument
+  written at the top of `sections/hero-carousel.liquid`, which is updated in place
+  rather than left contradicting the code.
+- **View transitions are on, but the root cross-fade is off.**
+  `::view-transition-new(root)` animates opacity across the root, which would
+  transiently flatten the footer aurora's `soft-light` and the voices wall's
+  `preserve-3d` — the two effects CLAUDE.md warns about by name. There is no
+  browser in the build environment, so rather than ship a full-page fade nobody
+  has watched, only the named product-shot morph runs. Turning the root fade back
+  on is one line, once somebody has looked at it on a device.
+
 One is a genuine regression, and it is not hidden:
 
 - **Facet counts are computed against the filtered set, not the whole catalogue.**
@@ -170,7 +189,15 @@ One changes behaviour the design drew:
 
 ## Home page sequence
 
-hero → new arrivals → customer voices → service band → Instagram strip
+hero → customer voices → new arrivals → service band → Instagram strip
+
+The wall moved ahead of the arrivals grid on 2026-08-20. PRODUCT.md principle 2 is
+"credibility before conversion" — Shopee is still the till, so the twenty verbatim
+reviews are the strongest thing the page has, and they were sitting behind the
+grid. With no catalogue imported that grid was ~3,760px of identical placeholder
+between the hero and the only first-party evidence in the project. This also
+*improves* the constraint below: there are now two sections between the wall and
+the Instagram strip rather than one.
 
 Three blocks exist and are deliberately **not** placed:
 

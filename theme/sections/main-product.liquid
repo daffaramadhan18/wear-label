@@ -1,7 +1,13 @@
 {%- comment -%}
   Product page — port of app/shop/[handle]/page.tsx.
 
-  Gallery, size and colourway, quantity, add to bag, tabs, related.
+  Gallery, size and colourway, quantity, add to bag, tabs.
+
+  The related-products grid used to close this section. It is now
+  sections/related-products.liquid so the customer voices wall can sit between
+  the purchase decision and the cross-sell — a block inside `main` cannot have
+  anything ordered after it. `related_collection` moved to that section's schema
+  with it.
 
   The two store-wide notes under the purchase block are content rather than
   per-product data, which is why they are section settings: they are the same
@@ -10,7 +16,6 @@
 
 {%- liquid
   assign current = product.selected_or_first_available_variant
-  assign related_sizes = '(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw'
 
   assign discount = 0
   if current.compare_at_price and current.compare_at_price > current.price
@@ -67,25 +72,6 @@
   <div data-reveal class="mt-block-lg">
     {% render 'product-tabs', product: product, shipping: section.settings.shipping %}
   </div>
-
-  {%- assign related = collections[section.settings.related_collection] | default: collections.all -%}
-  {%- if related.products.size > 1 -%}
-    <section aria-labelledby="related-heading" class="mt-block-lg flex flex-col gap-8">
-      <div data-reveal>
-        <h2 id="related-heading" class="font-body text-h2 leading-h2">{{ 'product.related_heading' | t }}</h2>
-      </div>
-
-      <div class="grid gap-x-7 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-        {%- assign shown = 0 -%}
-        {%- for entry in related.products -%}
-          {%- if entry.handle != product.handle and shown < 4 -%}
-            <div data-reveal>{% render 'product-card', product: entry, sizes: related_sizes %}</div>
-            {%- assign shown = shown | plus: 1 -%}
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
-    </section>
-  {%- endif -%}
 </div>
 
 {% schema %}
@@ -95,8 +81,7 @@
     { "type": "paragraph", "content": "Details comes from the product description and Fabric & care from a custom.care metafield — both per product. The two lines below are store-wide policy, so they live here." },
     { "type": "text", "id": "note_1", "label": "Note 1", "default": "Ships from Bandung within 1–2 working days" },
     { "type": "text", "id": "note_2", "label": "Note 2", "default": "One free size exchange within 14 days" },
-    { "type": "textarea", "id": "shipping", "label": "Shipping tab copy", "default": "Ships from Bandung within 1–2 working days. One free size exchange within 14 days." },
-    { "type": "collection", "id": "related_collection", "label": "Related from" }
+    { "type": "textarea", "id": "shipping", "label": "Shipping tab copy", "default": "Ships from Bandung within 1–2 working days. One free size exchange within 14 days." }
   ]
 }
 {% endschema %}

@@ -21,8 +21,33 @@
       order and out of the accessibility tree instead of being invisible tab
       stops.
 
+  DRAG. The band is draggable too: pointer down, move, release, and the slide
+  nearest where the pointer let go becomes the active one (see assets/theme.js).
+  That was added deliberately and it amends the rules above — sideways travel is
+  no longer only the script's to command, the reader can push the strip. The
+  argument is the same one that stops rotation at the first touch: on a phone
+  there is no hover, and the arrows sit in a row under the card that a thumb has
+  to reach for, while the band itself is most of the screen. A drag is the
+  control already under the thumb. It ends rotation for good exactly as a tap on
+  an arrow does, for the same reason — a slide that slid back out from under a
+  thumb is worse than one that stopped.
+
+  `touch-pan-y` on the band is what keeps that from costing a vertical scroll:
+  sideways belongs to the carousel, up and down stays the page's, and the reader
+  never has to find a gap between slides to scroll past the hero. It sits on the
+  band rather than on a slide because touch-action is resolved up the hit-test
+  chain — one declaration on the clipping band covers every slide, the copy card
+  and the controls inside it.
+
+  A drag finishes in the same render pass every other advance finishes in, so the
+  parked slides keep their `inert` and their `aria-hidden` throughout. A slide
+  dragged half into view is therefore visible but still out of the tab order and
+  out of the accessibility tree, which is what keeps "one h1 per page" true
+  mid-drag as well as at rest.
+
   One slide renders as a still band with no arrows and no dots — the controls are
-  derived from the block count, not drawn in.
+  derived from the block count, not drawn in. A single slide has nothing to drag
+  to, and theme.js leaves it alone.
 
   Each slide is parked at its own offset in the markup rather than all at zero, so
   the band is correct before script runs instead of relying on the active slide
@@ -65,7 +90,7 @@
   aria-label="{{ 'carousel.label' | t }}"
   data-carousel
   data-interval="{{ section.settings.interval }}"
-  class="relative h-[70svh] min-h-112 overflow-hidden bg-surface-muted md:h-150"
+  class="relative h-[70svh] min-h-112 touch-pan-y overflow-hidden bg-surface-muted md:h-150"
 >
   {%- for block in section.blocks -%}
     {%- liquid
@@ -151,10 +176,22 @@
       — arrows against the band's edges, dots along its bottom.
     {%- endcomment -%}
     <div class="absolute inset-x-0 bottom-4 z-10 flex items-center justify-center gap-3 md:contents">
+      {%- comment -%}
+        The arrows are painted at 52px, over the 44px minimum, so the press is
+        `.wl-press-soft` (0.98) rather than `.wl-tap` (0.95) — five percent of a
+        control this size reads as a lurch. See app/base.css.
+
+        Which is also why they are no longer centred with `md:top-1/2
+        md:-translate-y-1/2`. The press state sets `transform: scale(...)`
+        outright, and it wins over the utility, so a press at `md` would have
+        dropped the arrow half its own height. `md:inset-y-0 md:my-auto` centres
+        it with margins instead — a definite height between a top and a bottom of
+        zero splits the leftover space — leaving `transform` free for the press.
+      {%- endcomment -%}
       <button
         type="button"
         data-carousel-prev
-        class="z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:left-7 md:top-1/2 md:-translate-y-1/2"
+        class="wl-press-soft z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:inset-y-0 md:left-7 md:my-auto"
       >
         {% render 'icon', icon: 'chevron-left', class: 'size-5.5' %}
         <span class="sr-only">{{ 'carousel.previous_slide' | t }}</span>
@@ -181,7 +218,7 @@
       <button
         type="button"
         data-carousel-next
-        class="z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:right-7 md:top-1/2 md:-translate-y-1/2"
+        class="wl-press-soft z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:inset-y-0 md:right-7 md:my-auto"
       >
         {% render 'icon', icon: 'chevron-right', class: 'size-5.5' %}
         <span class="sr-only">{{ 'carousel.next_slide' | t }}</span>

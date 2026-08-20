@@ -15,6 +15,13 @@
   The images are the catalogue's own, since the studio's posts are not wired up.
   There are no links on them for the same reason — a post needs a permalink, and
   inventing one would send readers nowhere.
+
+  DEVIATION — the heading is a label, not a section head. The design gave it the
+  same centred H2 treatment as New arrivals and the voices wall, which billed it
+  as a peer section; it has no links and no studio posts, only the catalogue's
+  own photographs. It is now --text-label uppercase, which states what the strip
+  is without claiming to be a destination. The element and its id stay put:
+  aria-labelledby="instagram-heading" is the section's accessible name.
 {%- endcomment -%}
 
 {%- liquid
@@ -23,7 +30,7 @@
 -%}
 
 <section aria-labelledby="instagram-heading" class="flex flex-col gap-7 py-section">
-  <h2 id="instagram-heading" class="px-gutter text-center font-body text-h2 leading-h2">
+  <h2 id="instagram-heading" class="px-gutter text-center font-body text-label uppercase tracking-nav text-ink-subtle">
     {% render 'copy', value: section.settings.heading, label: 'heading' %}
   </h2>
 

@@ -24,7 +24,23 @@
   an icon that does nothing is worse than one absence.
 {%- endcomment -%}
 
-<header class="sticky top-0 z-(--z-sticky) bg-surface shadow-md">
+{%- comment -%}
+  The bar carries a hairline bottom rule and NO resting shadow.
+
+  It used to wear `shadow-md` — the only shadow anywhere in this theme — at
+  scroll zero, which is a drop shadow cast over nothing: at the top of the
+  document there is no content under the bar for it to lift off, so the shadow
+  read as a permanent smudge rather than as depth. The boundary the design wants
+  there is a line, and `border-rule` is the section rule that reads on white;
+  `border-hairline` is the near-invisible card one and disappears here.
+
+  DO NOT RESTORE THE SHADOW. The lift is scroll-driven now — an `::after` in
+  theme-src/theme.css hung off `[data-site-header]`, so it arrives only once
+  something has actually scrolled under the bar. `sticky` is a positioned
+  element, so that pseudo-element resolves against this header without needing a
+  `relative` of its own, and nothing here clips it.
+{%- endcomment -%}
+<header data-site-header class="sticky top-0 z-(--z-sticky) border-b border-rule bg-surface">
   <div class="mx-auto flex h-19 max-w-content items-center justify-between gap-8 px-gutter">
     <div class="flex items-center gap-2">
       <button

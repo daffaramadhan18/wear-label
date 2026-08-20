@@ -321,6 +321,81 @@
     transform: translate(-50%, -50%);
   }
 
+  /*
+   * The press state for a tappable control.
+   *
+   * Two depths, because one scale does not read the same at two sizes. A 32px
+   * swatch or a 36px stepper button needs 0.95 to be felt at all; a control
+   * already painted at 44px or more — a full-width Add to bag, a filter row the
+   * width of the rail — moves so much further at 5% that it reads as a lurch, so
+   * those carry `.wl-press-soft` and 0.98 instead. `.wl-press-soft`'s rules come
+   * after `.wl-tap`'s on purpose: a control wearing both is a large control, and
+   * the softer press has to win.
+   *
+   * `1.0526` is `1 / 0.95`. The pseudo-element above is what makes a small
+   * control a 44px target, and it scales with its parent — so an un-countered
+   * press would shrink that target to 41.8px at exactly the moment the finger is
+   * on it. The counter-scale holds it at 44px through the press.
+   *
+   * The `:not([aria-disabled="true"]):not(:disabled)` guard is not defensive
+   * tidiness: `snippets/product-purchase.liquid:116` renders a sold-out control
+   * as a `<span aria-disabled="true">` carrying `.wl-tap`, and a press state on
+   * something that will never act is a lie told at the moment of the tap.
+   *
+   * Reduced motion drops the transition and KEEPS the transform. The tween is
+   * the only part that could read as motion in the periphery; the scale itself
+   * is on the control the finger is physically resting on, which is not what
+   * triggers vestibular trouble. Removing it would hand exactly those readers a
+   * surface that never answers.
+   *
+   * The property list is longer than "transform" for a cascade reason, not a
+   * design one. This block is loaded after Tailwind, so a bare
+   * `transition: transform` here beats — and therefore erases — the
+   * `transition-colors` / `transition-shadow` utility that six of the twelve
+   * `.wl-tap` call sites carry (`pagination.liquid:24`,
+   * `catalogue-filters.liquid:91` and `:112`, `cart-lines.liquid:66` `:75` `:91`,
+   * `product-card.liquid:87`, `product-purchase.liquid:109`). Restating those
+   * properties at `--duration-base` — the duration those call sites already ask
+   * for, with `--ease-out`, which resolves to the `ease` they were already
+   * getting — keeps every hover exactly as it was and adds the press on top.
+   */
+  .wl-tap {
+    transition:
+      transform var(--duration-fast) var(--ease-out),
+      color var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .wl-tap:not([aria-disabled="true"]):not(:disabled):active {
+    transform: scale(0.95);
+  }
+
+  .wl-tap:not([aria-disabled="true"]):not(:disabled):active::after {
+    transform: translate(-50%, -50%) scale(1.0526);
+  }
+
+  .wl-press-soft {
+    transition:
+      transform var(--duration-fast) var(--ease-out),
+      color var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .wl-press-soft:not([aria-disabled="true"]):not(:disabled):active {
+    transform: scale(0.98);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wl-tap,
+    .wl-press-soft {
+      transition: none;
+    }
+  }
+
   /* A rail that scrolls without showing a scrollbar. The scrolling itself is
      never decorative here — it is the fallback that keeps a stopped marquee, and
      every mobile rail, reachable — so this hides the chrome and nothing else. */
@@ -426,8 +501,35 @@
     padding-bottom: 0;
   }
 
+  /*
+   * The reviews are not clipped on the phone rail.
+   *
+   * The tilted desktop wall needs a fixed 250px card to keep its four tracks in
+   * step, so the quote is clamped to six lines there. The rail has no such
+   * constraint — it is one row of upright cards — and the longest reviews are the
+   * informative ones: on a 252px column of 14px caption text, between five and
+   * ten of the twenty overrun six lines, and every one of the overruns is a
+   * review that says something specific. The reason this rule exists is
+   * `sections/voices-wall.liquid:194`, a customer reporting the fit against her
+   * own stated body at six months pregnant — "buat ibu hamil 6 bulan muat uk L ,
+   * bb ku 55,7 kg tinggi 160cm" — which the clamp cut off before it arrived. Fit
+   * against a stated body is the purchase decision on this site, and the screen
+   * it was being cut off on is the one most of these readers are holding.
+   *
+   * `height: auto` releases the figure's `h-62.5` and lets the card grow to its
+   * quote. The row it sits in is a flex row with the default `stretch`, so every
+   * card in the rail comes out the height of the longest review rather than
+   * ragged. The stage reserves no height below `md` — `contain-intrinsic-size` is
+   * scoped to `md` and up — so nothing needs re-measuring for the taller rail.
+   */
   .wl-voices-track figure {
+    height: auto;
     scroll-snap-align: start;
+  }
+
+  .wl-voices-track blockquote {
+    display: block;
+    -webkit-line-clamp: unset;
   }
 }
 

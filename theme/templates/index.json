@@ -190,6 +190,59 @@
             "user": "e*****i",
             "body": "Proses packing cepat, packaging juga aman tebal gak worry produk cacat karna pengiriman. Pengiriman juga cepet. Total dah punya 5 koleksi cerra pants ku saking love nya, thankyou"
           }
+        },
+        "fit-1": {
+          "type": "fit",
+          "settings": {
+            "measure": "bb ku 55,7 kg tinggi 160cm",
+            "user": "r*****u",
+            "size": "uk L"
+          }
+        },
+        "fit-2": {
+          "type": "fit",
+          "settings": {
+            "measure": "TB 155 / BB 47",
+            "user": "nadonaddd",
+            "size": "ukuran M"
+          }
+        },
+        "fit-3": {
+          "type": "fit",
+          "settings": {
+            "measure": "BB 38/155",
+            "user": "g*****i"
+          }
+        },
+        "fit-4": {
+          "type": "fit",
+          "settings": {
+            "measure": "tb 167 cm, BB 60",
+            "user": "l*****l"
+          }
+        },
+        "fit-5": {
+          "type": "fit",
+          "settings": {
+            "measure": "bb/tb 43/162",
+            "user": "k*****_",
+            "size": "uk M"
+          }
+        },
+        "fit-6": {
+          "type": "fit",
+          "settings": {
+            "measure": "BB aq 57 TB 155",
+            "user": "tinnayumiko05"
+          }
+        },
+        "fit-7": {
+          "type": "fit",
+          "settings": {
+            "measure": "tb 165",
+            "user": "y*****1",
+            "size": "size L"
+          }
         }
       },
       "block_order": [
@@ -212,7 +265,14 @@
         "review-17",
         "review-18",
         "review-19",
-        "review-20"
+        "review-20",
+        "fit-1",
+        "fit-2",
+        "fit-3",
+        "fit-4",
+        "fit-5",
+        "fit-6",
+        "fit-7"
       ],
       "settings": {
         "heading": "From our customers"
@@ -264,8 +324,8 @@
   },
   "order": [
     "hero",
-    "arrivals",
     "voices",
+    "arrivals",
     "services",
     "instagram"
   ]

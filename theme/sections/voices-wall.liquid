@@ -22,10 +22,34 @@
     - Durations are four different lengths. Equal ones lock into step within
       seconds and the wall reads as a single sliding block.
 
-  The cards are cream and the fades are white, matching the page shell. BOTH
-  halves matter: cream cards on a cream page vanish, and cream fades over a white
-  page draw a visible rectangle. If the shell ever moves off white, bg-canvas here
-  and from-surface on the four fades swap together.
+  TWO BLOCK TYPES, and the split is the point.
+
+  `review` is a card in the moving wall. `fit` lifts the body measurement a
+  review already states — "BB 38/155", "TB 167 cm, BB 60" — out of 14px type on a
+  tilted, moving plane and sets it at display size above the stage. Fit against a
+  stated body is the purchase decision on this site (PRODUCT.md), and the inside
+  of a slowly rotating 3D wall is the least readable place it could be. Every
+  `fit` value is a verbatim substring of a review below, copied not retyped:
+  seven of the twenty reviews state a measurement, and those seven are the seven
+  blocks. No piece is attached to any of them — only some reviewers name one, and
+  attaching one to the rest would invent an association the customer never made.
+  The size line is optional for the same reason. The alias is the reviewer's own.
+  The tracks slice the `review` blocks only, so adding a `fit` block cannot
+  shorten a column.
+
+  This is also the site's second reachable use of --text-display. One display
+  moment per band: the heading deliberately stays at text-h1, because two
+  display-scale objects 40px apart cancel each other out.
+
+  The band's ground is espresso — bg-invert, i.e. --wl-taupe-900, which is one of
+  the brand's own five named colourways and its darkest garment colour. A token
+  used where it was not used before, not a new one. The cards stay cream, and the
+  four stage fades are painted from-invert to match the ground they lie on. BOTH
+  halves matter: cream cards on a cream band vanish, and a fade in any colour but
+  the surface underneath draws the visible rectangle this effect always risks. If
+  the band's ground ever moves, bg-invert here and from-invert on the four fades
+  move together. The card's old border-brand/13 edge is gone with the white shell
+  that needed it — cream on espresso is its own edge.
 
   Do NOT wrap this section in anything that animates opacity. That makes the
   wrapper a stacking context, which flattens preserve-3d — the plane's
@@ -34,92 +58,129 @@
 
   prefers-reduced-motion does not merely pause this: a stopped wall holds most of
   its reviews outside a stage that clips at 560px. It flattens to a plain grid
-  instead. Below md the same thing happens on its side — see base.css.
+  instead (base.css) — on espresso that grid reads as a deliberate dark editorial
+  panel rather than a carousel somebody stopped. Below md the same thing happens
+  on its side, and there the four fades are hidden entirely, so the cards go
+  cream-on-espresso with nothing over them: more contrast on a phone, not less.
 
   Keep the review count a multiple of four, or the last column runs short.
 {%- endcomment -%}
 
 {%- liquid
+  assign reviews = section.blocks | where: 'type', 'review'
+  assign fits = section.blocks | where: 'type', 'fit'
   assign durations = 'var(--duration-voices-a),var(--duration-voices-b),var(--duration-voices-c),var(--duration-voices-d)' | split: ','
   assign offsets = '380px,300px,440px,340px' | split: ','
 -%}
 
 {%- if section.blocks.size > 0 -%}
-  <section aria-labelledby="voices-heading" class="flex flex-col gap-10 pt-section">
+  <section aria-labelledby="voices-heading" class="flex flex-col gap-10 bg-invert py-section">
     <div class="mx-auto w-full max-w-content px-gutter flex flex-col items-center gap-3">
-      <h2 id="voices-heading" class="text-center text-h1 leading-h1">
+      <h2 id="voices-heading" class="text-center text-h1 leading-h1 text-ink-invert">
         {% render 'copy', value: section.settings.heading, label: 'heading' %}
       </h2>
       {%- comment -%}
         The same short rule that sits under New arrivals. Decorative, so a div
-        rather than an <hr>: there is no section break here.
+        rather than an <hr>: there is no section break here. Taupe-200 rather
+        than brand taupe: the rule is decorative, so nothing obliges it to any
+        ratio, but brand taupe on espresso measures 3.91:1 against taupe-200's
+        11.49:1 and at 3px tall the darker one reads as a smudge.
       {%- endcomment -%}
-      <div aria-hidden="true" class="h-0.75 w-16 rounded-pill bg-brand"></div>
+      <div aria-hidden="true" class="h-0.75 w-16 rounded-pill bg-ink-invert-muted"></div>
     </div>
 
-    {%- comment -%}
-      Full-bleed through a normal full-width parent, never 100vw — that includes
-      the scrollbar gutter and puts 8px of horizontal scroll on the page.
-    {%- endcomment -%}
-    <div class="wl-voices-stage wl-rail relative flex h-140 w-full items-center justify-center overflow-hidden [perspective:2200px]">
-      <div class="wl-voices-plane flex items-start gap-6 [transform-style:preserve-3d]">
-        {%- for column in (0..3) -%}
-          {%- liquid
-            assign slice_size = section.blocks.size | divided_by: 4
-            assign start = column | times: slice_size
-            assign finish = start | plus: slice_size | minus: 1
-            assign reverse = false
-            if column == 1 or column == 3
-              assign reverse = true
-            endif
-          -%}
-          <div
-            class="wl-voices-track"
-            {% if reverse %}data-reverse{% endif %}
-            style="--voices-duration:{{ durations[column] }};--voices-offset:{{ offsets[column] }}"
-          >
-            {%- comment -%}
-              Two copies, so -50% lands on an identical frame. The trailing
-              padding is what makes that land on the gap, not mid-card.
-            {%- endcomment -%}
-            {%- for copy in (0..1) -%}
-              <div {% if copy == 1 %}aria-hidden="true"{% endif %} class="flex flex-col gap-6 pb-6">
-                {%- for i in (start..finish) -%}
-                  {%- assign block = section.blocks[i] -%}
-                  {%- if block -%}
-                    {%- comment -%}
-                      Locked to 300x250 with the quote clamped, per the design's
-                      "same size for all": ragged cards on a tilted plane read as
-                      a mistake rather than a wall.
-                    {%- endcomment -%}
-                    <figure class="flex h-62.5 w-75 shrink-0 flex-col gap-3.5 overflow-hidden border border-brand/13 bg-canvas p-6">
-                      <div class="flex items-center gap-3">
-                        <span aria-hidden="true" class="flex size-9 shrink-0 items-center justify-center rounded-pill bg-avatar font-display text-small text-on-avatar">
-                          {{ block.settings.user | slice: 0 | upcase }}
-                        </span>
-                        <figcaption class="text-caption tracking-[0.02em] text-ink">{{ block.settings.user }}</figcaption>
-                      </div>
-                      <blockquote class="line-clamp-6 text-caption leading-snug text-ink-body">
-                        {{ block.settings.body }}
-                      </blockquote>
-                    </figure>
-                  {%- endif -%}
-                {%- endfor -%}
-              </div>
-            {%- endfor -%}
-          </div>
-        {%- endfor -%}
-      </div>
-
+    {%- if fits.size > 0 -%}
       {%- comment -%}
-        The fades sit on the stage, not inside the transformed stack — inside,
-        they inherit the tilt and stop covering the edges they exist to hide.
+        The measurements, quoted. figure/blockquote/figcaption because each one
+        IS a quotation with a named source — the same markup the cards use, at
+        the size the number deserves. data-numeric gives them tabular figures so
+        the column of measurements does not wobble.
       {%- endcomment -%}
-      <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 hidden h-[42%] md:block bg-linear-to-b from-surface from-[16%] to-transparent"></div>
-      <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[42%] md:block bg-linear-to-t from-surface from-[16%] to-transparent"></div>
-      <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 hidden w-[30%] md:block bg-linear-to-r from-surface from-[24%] to-transparent"></div>
-      <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 hidden w-[30%] md:block bg-linear-to-l from-surface from-[24%] to-transparent"></div>
-    </div>
+      <ul role="list" class="mx-auto grid w-full max-w-content grid-cols-1 gap-x-8 gap-y-10 px-gutter sm:grid-cols-2 lg:grid-cols-3">
+        {%- for block in fits -%}
+          <li>
+            <figure class="flex flex-col gap-2">
+              <blockquote data-numeric class="font-display text-display leading-display tracking-display text-ink-invert">
+                {% render 'copy', value: block.settings.measure, label: 'measurement' %}
+              </blockquote>
+              <figcaption class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-caption leading-snug text-ink-invert-muted">
+                {%- if block.settings.size != blank -%}
+                  <span class="text-ink-invert">{{ block.settings.size }}</span>
+                {%- endif -%}
+                <span>{{ block.settings.user }}</span>
+              </figcaption>
+            </figure>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if reviews.size > 0 -%}
+      {%- comment -%}
+        Full-bleed through a normal full-width parent, never 100vw — that includes
+        the scrollbar gutter and puts 8px of horizontal scroll on the page.
+      {%- endcomment -%}
+      <div class="wl-voices-stage wl-rail relative flex h-140 w-full items-center justify-center overflow-hidden [perspective:2200px]">
+        <div class="wl-voices-plane flex items-start gap-6 [transform-style:preserve-3d]">
+          {%- for column in (0..3) -%}
+            {%- liquid
+              assign slice_size = reviews.size | divided_by: 4
+              assign start = column | times: slice_size
+              assign finish = start | plus: slice_size | minus: 1
+              assign reverse = false
+              if column == 1 or column == 3
+                assign reverse = true
+              endif
+            -%}
+            <div
+              class="wl-voices-track"
+              {% if reverse %}data-reverse{% endif %}
+              style="--voices-duration:{{ durations[column] }};--voices-offset:{{ offsets[column] }}"
+            >
+              {%- comment -%}
+                Two copies, so -50% lands on an identical frame. The trailing
+                padding is what makes that land on the gap, not mid-card.
+              {%- endcomment -%}
+              {%- for copy in (0..1) -%}
+                <div {% if copy == 1 %}aria-hidden="true"{% endif %} class="flex flex-col gap-6 pb-6">
+                  {%- for i in (start..finish) -%}
+                    {%- assign block = reviews[i] -%}
+                    {%- if block -%}
+                      {%- comment -%}
+                        Locked to 300x250 with the quote clamped, per the design's
+                        "same size for all": ragged cards on a tilted plane read as
+                        a mistake rather than a wall.
+                      {%- endcomment -%}
+                      <figure class="flex h-62.5 w-75 shrink-0 flex-col gap-3.5 overflow-hidden bg-canvas p-6">
+                        <div class="flex items-center gap-3">
+                          <span aria-hidden="true" class="flex size-9 shrink-0 items-center justify-center rounded-pill bg-avatar font-display text-small text-on-avatar">
+                            {{ block.settings.user | slice: 0 | upcase }}
+                          </span>
+                          <figcaption class="text-caption tracking-[0.02em] text-ink">{{ block.settings.user }}</figcaption>
+                        </div>
+                        <blockquote class="line-clamp-6 text-caption leading-snug text-ink-body">
+                          {{ block.settings.body }}
+                        </blockquote>
+                      </figure>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+              {%- endfor -%}
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- comment -%}
+          The fades sit on the stage, not inside the transformed stack — inside,
+          they inherit the tilt and stop covering the edges they exist to hide.
+          from-invert, because the ground under them is the espresso band.
+        {%- endcomment -%}
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 hidden h-[42%] md:block motion-reduce:md:hidden bg-linear-to-b from-invert from-[16%] to-transparent"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[42%] md:block motion-reduce:md:hidden bg-linear-to-t from-invert from-[16%] to-transparent"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 hidden w-[30%] md:block motion-reduce:md:hidden bg-linear-to-r from-invert from-[24%] to-transparent"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 right-0 hidden w-[30%] md:block motion-reduce:md:hidden bg-linear-to-l from-invert from-[24%] to-transparent"></div>
+      </div>
+    {%- endif -%}
   </section>
 {%- endif -%}
 
@@ -155,151 +216,237 @@
           "label": "Review"
         }
       ]
+    },
+    {
+      "type": "fit",
+      "name": "Body measurement",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "A measurement a review already states, quoted. Copy the phrase out of the review exactly as the customer wrote it — do not normalise it, do not translate it, and do not add a piece: only some reviewers name one, and attaching one to the rest invents an association the customer never made."
+        },
+        {
+          "type": "text",
+          "id": "measure",
+          "label": "Measurement, verbatim",
+          "info": "e.g. the review’s own “BB 38/155”."
+        },
+        {
+          "type": "text",
+          "id": "size",
+          "label": "Size, verbatim",
+          "info": "Only if the review states one, in the reviewer’s own words. Leave empty otherwise."
+        },
+        {
+          "type": "text",
+          "id": "user",
+          "label": "Reviewer"
+        }
+      ]
     }
   ],
-  "default": {
-    "blocks": [
-      {
-        "type": "review",
-        "settings": {
-          "user": "r*****a",
-          "body": "My 2nd and 3rd yora pants.. Bagus cutting dan bahannya.. Super pewe dan ringan.. I know my photos are not doing the pants justice, but trust me, its worth to buy!"
-        }
+  "presets": [
+    {
+      "name": "Customer voices",
+      "settings": {
+        "heading": "From our customers"
       },
-      {
-        "type": "review",
-        "settings": {
-          "user": "r*****a",
-          "body": "yayy makasii bgtt celananya udah nyampe, pengemasan sm sellernya juga cepet bgtt langsung dikirim. sumph si celananya se pw itu, sebelum2nya kalo beli celana gapernah ga dikecilin(always) kali ini celananya bnr2 fit di aku dan se pw itu celananya kao dipake."
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "My 2nd and 3rd yora pants.. Bagus cutting dan bahannya.. Super pewe dan ringan.. I know my photos are not doing the pants justice, but trust me, its worth to buy!"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "yayy makasii bgtt celananya udah nyampe, pengemasan sm sellernya juga cepet bgtt langsung dikirim. sumph si celananya se pw itu, sebelum2nya kalo beli celana gapernah ga dikecilin(always) kali ini celananya bnr2 fit di aku dan se pw itu celananya kao dipake."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "y*****p",
+            "body": "bagusss banget tolong, selama ini susah cari celana ukuran oke, seneng banget nemu brand ini. Bahan jg bagus dan harganya murah. Langsung pengen beli warna lain😍"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "warna putih nya bagus ga terlalu nerawang, sehari langsung nyampe pake same day 🥰😍"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "r*****u",
+            "body": "WORTH IT BANGET!🥰🥰😍 Mau repurchase lagi nunggu yang warna putih restock, ini bener2 bagus ga panas, aku udah langsung try on jalan-jalan soalnya tadi siang di tempat panas, linennya ga gatel sama sekali, buat ibu hamil 6 bulan muat uk L , bb ku 55,7 kg tinggi 160cm."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "s*****b",
+            "body": "keren bgt, UK nya juga pas biasanya kalo dari toko sebelumnya itu terlalu gede kalo ini tuh pas bgt, sukak, next time order lagi!"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "p*****_",
+            "body": "packingan bagus aman dan rapih. celananya pas banget size nya, ga kegedean atau kekecilan, bahannya juga adem. adminnya baik responsif, btw maaf ya videonya ini tp paket nyampe dengan selamat dan barangnya bagus"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "r*****u",
+            "body": "Bahan linen produk lokal yang bagus! Udh 2x order ~ hamil 8 bulan masi muat dan suka bgt !!! ✨😍❤️ ga sesak sama sekali"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "nadonaddd",
+            "body": "Satisfying! Bahannya halus, ringan, lingkar pinggang pas sama panjang ukuran M juga passs buat aku TB 155 / BB 47, plus respon seller oke banget dan bantu bangettt awalnya keabisan choco yg M pas chat seller lgsg dibales dan ternyata masih ada 1! Aaaa pas banget lagi cari celana gini, thanks a lot!"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "ruthfelisa",
+            "body": "Bahannya bagus dan cuttingan nya pas, ga yg terlalu lebar. Ini celana ke 2 aku beli di wear label. Biar ga nerawang pakai daleman warna netral atau short pants"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "g*****i",
+            "body": "Cakepp bangettt pliss!!! Ga nyesel beli di sini, worth it banget dengan harga segitu, kualitasnya beneran bagus. Sempet ragu karna takut kebesaran dipinggang (BB 38/155), tapi ternyata pas bangettt huhu🥺 senangggg. Pengemasan dan pengirimannya juga cepat sekali. Kmrn checkout, hari ini udah nyampe."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "l*****l",
+            "body": "celananya realpict, bagus, panjang pas di aku tb 167 cm, BB 60. puas sih. cuma kalo aku pake agak jdi keliatan gendut hehe. tpi keseluruhan mantap bahannya sesuai deskripsi. penting buat lihat detail produk, sebelum membeli gaiss..❤️❤️"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "k*****_",
+            "body": "bagusss bangettt uu😍 realpict, no minus, cuttingnya rapii, packingnya cakep, buat bb/tb 43/162 cocok bgt pake uk M panjang n bagian pinggangnya pas👍 recommended banget sih ini🥰"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "satyairada",
+            "body": "Produk ini oke bgt, aku pesen wrna white dan gak nerawang, oke si buat hijabers2 yg pengen pake kulot putih n ga nerawang, kesan hw jg bikin kt terlihat lbh jenjang, good job kak! Produknya oke bgt ❤️"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "d*****a",
+            "body": "Aku suka celananya tipis tapi ga nerawang gitu bahannya juga lembut nyaman dipakai beraktifitas seharian bahkan dipake buat liburan pun oke banget sih ini"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "a*****0",
+            "body": "Sumpah ini tipe celana yg udh lama aku cari 🥺😢 Akhirnya menemukan merk ini. Mantap banget pokoknya. Suka bgttt 🫰🫰 Admin super ramah, informatif. Celananya oke, panjang nya pas, bahan bagus. Bakalan repurchaseeee😍🥰"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "j*****y",
+            "body": "Pertama kali beli dan langsung suka sama produknya wear label❤️ bahannya jatuh dan adem, jahitan super rapih, packingnya jg super rapih per produk pakai kardus sendiri-sendiri👍👍👍"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "tinnayumiko05",
+            "body": "Masya Allah ini keren banget...BB aq 57 TB 155 masih muat dong...sebagus itu dan nyaman di pake.next aq mau order lagi ..packing nya juga super rapi banget dan cepet sampai nya ..makasih ya,sumpah gak nyesel beli disini ..🤩🤩🥳"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "y*****1",
+            "body": "bagussss bangettt sukaaaa udah repeat order 3x selalu puas beli di wear labell , untuk cewe tinggi kea aku gini ga ngantung sama sekali celana nyaa😭👍 buat tb 165 aman bgtt pake yora loose panta size L😭😍 tcakeuppppp bgtt!!!! bakal order lagii yora loose pants ketagihan bahannya enakk jatuh😍"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "user": "e*****i",
+            "body": "Proses packing cepat, packaging juga aman tebal gak worry produk cacat karna pengiriman. Pengiriman juga cepet. Total dah punya 5 koleksi cerra pants ku saking love nya, thankyou"
+          }
+        },
+        {
+          "type": "fit",
+          "settings": {
+            "measure": "bb ku 55,7 kg tinggi 160cm",
+            "user": "r*****u",
+            "size": "uk L"
+          }
+        },
+        {
+          "type": "fit",
+          "settings": {
+            "measure": "TB 155 / BB 47",
+            "user": "nadonaddd",
+            "size": "ukuran M"
+          }
+        },
+        {
+          "type": "fit",
+          "settings": {
+            "measure": "BB 38/155",
+            "user": "g*****i"
+          }
+        },
+        {
+          "type": "fit",
+          "settings": {
+            "measure": "tb 167 cm, BB 60",
+            "user": "l*****l"
+          }
+        },
+        {
+          "type": "fit",
+          "settings": {
+            "measure": "bb/tb 43/162",
+            "user": "k*****_",
+            "size": "uk M"
+          }
+        },
+        {
+          "type": "fit",
+          "settings": {
+            "measure": "BB aq 57 TB 155",
+            "user": "tinnayumiko05"
+          }
+        },
+        {
+          "type": "fit",
+          "settings": {
+            "measure": "tb 165",
+            "user": "y*****1",
+            "size": "size L"
+          }
         }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "y*****p",
-          "body": "bagusss banget tolong, selama ini susah cari celana ukuran oke, seneng banget nemu brand ini. Bahan jg bagus dan harganya murah. Langsung pengen beli warna lain😍"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "r*****a",
-          "body": "warna putih nya bagus ga terlalu nerawang, sehari langsung nyampe pake same day 🥰😍"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "r*****u",
-          "body": "WORTH IT BANGET!🥰🥰😍 Mau repurchase lagi nunggu yang warna putih restock, ini bener2 bagus ga panas, aku udah langsung try on jalan-jalan soalnya tadi siang di tempat panas, linennya ga gatel sama sekali, buat ibu hamil 6 bulan muat uk L , bb ku 55,7 kg tinggi 160cm."
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "s*****b",
-          "body": "keren bgt, UK nya juga pas biasanya kalo dari toko sebelumnya itu terlalu gede kalo ini tuh pas bgt, sukak, next time order lagi!"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "p*****_",
-          "body": "packingan bagus aman dan rapih. celananya pas banget size nya, ga kegedean atau kekecilan, bahannya juga adem. adminnya baik responsif, btw maaf ya videonya ini tp paket nyampe dengan selamat dan barangnya bagus"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "r*****u",
-          "body": "Bahan linen produk lokal yang bagus! Udh 2x order ~ hamil 8 bulan masi muat dan suka bgt !!! ✨😍❤️ ga sesak sama sekali"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "nadonaddd",
-          "body": "Satisfying! Bahannya halus, ringan, lingkar pinggang pas sama panjang ukuran M juga passs buat aku TB 155 / BB 47, plus respon seller oke banget dan bantu bangettt awalnya keabisan choco yg M pas chat seller lgsg dibales dan ternyata masih ada 1! Aaaa pas banget lagi cari celana gini, thanks a lot!"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "ruthfelisa",
-          "body": "Bahannya bagus dan cuttingan nya pas, ga yg terlalu lebar. Ini celana ke 2 aku beli di wear label. Biar ga nerawang pakai daleman warna netral atau short pants"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "g*****i",
-          "body": "Cakepp bangettt pliss!!! Ga nyesel beli di sini, worth it banget dengan harga segitu, kualitasnya beneran bagus. Sempet ragu karna takut kebesaran dipinggang (BB 38/155), tapi ternyata pas bangettt huhu🥺 senangggg. Pengemasan dan pengirimannya juga cepat sekali. Kmrn checkout, hari ini udah nyampe."
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "l*****l",
-          "body": "celananya realpict, bagus, panjang pas di aku tb 167 cm, BB 60. puas sih. cuma kalo aku pake agak jdi keliatan gendut hehe. tpi keseluruhan mantap bahannya sesuai deskripsi. penting buat lihat detail produk, sebelum membeli gaiss..❤️❤️"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "k*****_",
-          "body": "bagusss bangettt uu😍 realpict, no minus, cuttingnya rapii, packingnya cakep, buat bb/tb 43/162 cocok bgt pake uk M panjang n bagian pinggangnya pas👍 recommended banget sih ini🥰"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "satyairada",
-          "body": "Produk ini oke bgt, aku pesen wrna white dan gak nerawang, oke si buat hijabers2 yg pengen pake kulot putih n ga nerawang, kesan hw jg bikin kt terlihat lbh jenjang, good job kak! Produknya oke bgt ❤️"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "d*****a",
-          "body": "Aku suka celananya tipis tapi ga nerawang gitu bahannya juga lembut nyaman dipakai beraktifitas seharian bahkan dipake buat liburan pun oke banget sih ini"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "a*****0",
-          "body": "Sumpah ini tipe celana yg udh lama aku cari 🥺😢 Akhirnya menemukan merk ini. Mantap banget pokoknya. Suka bgttt 🫰🫰 Admin super ramah, informatif. Celananya oke, panjang nya pas, bahan bagus. Bakalan repurchaseeee😍🥰"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "j*****y",
-          "body": "Pertama kali beli dan langsung suka sama produknya wear label❤️ bahannya jatuh dan adem, jahitan super rapih, packingnya jg super rapih per produk pakai kardus sendiri-sendiri👍👍👍"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "tinnayumiko05",
-          "body": "Masya Allah ini keren banget...BB aq 57 TB 155 masih muat dong...sebagus itu dan nyaman di pake.next aq mau order lagi ..packing nya juga super rapi banget dan cepet sampai nya ..makasih ya,sumpah gak nyesel beli disini ..🤩🤩🥳"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "y*****1",
-          "body": "bagussss bangettt sukaaaa udah repeat order 3x selalu puas beli di wear labell , untuk cewe tinggi kea aku gini ga ngantung sama sekali celana nyaa😭👍 buat tb 165 aman bgtt pake yora loose panta size L😭😍 tcakeuppppp bgtt!!!! bakal order lagii yora loose pants ketagihan bahannya enakk jatuh😍"
-        }
-      },
-      {
-        "type": "review",
-        "settings": {
-          "user": "e*****i",
-          "body": "Proses packing cepat, packaging juga aman tebal gak worry produk cacat karna pengiriman. Pengiriman juga cepet. Total dah punya 5 koleksi cerra pants ku saking love nya, thankyou"
-        }
-      }
-    ]
-  }
+      ]
+    }
+  ]
 }
 {% endschema %}

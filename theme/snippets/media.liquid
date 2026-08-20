@@ -13,11 +13,47 @@
   frame altogether and takes the size of the nearest positioned ancestor, for the
   bands whose height is set by the layout rather than by the photograph.
 
+  `priority` marks the one image the page is judged on — the product page's main
+  shot — and is the only thing that decides how the browser fetches it.
+
   Accepts: image (Shopify image or nil), sizes, ratio, fill, priority, class, label
+{%- endcomment -%}
+
+{%- comment -%}
+  FIXED: `loading` and `fetchpriority` were read from `loading_mode` and
+  `priority_mode`, and NEITHER WAS EVER ASSIGNED — here or anywhere else in the
+  theme. So `image_tag` got nil for both: no image on the site ever carried
+  loading="lazy" (an eleven-card grid fetched every photograph eagerly), and the
+  product page's LCP image never carried fetchpriority="high" even though its
+  caller passes `priority: true` and the header above documents the parameter.
+  A silently-ignored parameter is the bug that comes back, so both values now
+  derive from `priority` in one place, right here.
+
+  The non-priority case sends the spec's own default, `auto`, rather than a blank
+  string: a Liquid filter cannot take a conditional argument, and passing nil
+  risks emitting `fetchpriority=""`, which is not a valid value.
+{%- endcomment -%}
+
+{%- comment -%}
+  RULE 3 DEBT, left as-is deliberately: `media_label` is a hardcoded English
+  string, and every caller passes a hardcoded English `label:` too — so the
+  placeholder's caption and its aria-label are the one user-visible copy in this
+  snippet that is not translatable. It wants two interface keys, which only the
+  integrator may add: `product.media_placeholder` ("Product photo") for this
+  default, and `product.media_angle` ("Angle") for the gallery thumbnails. Not
+  invented here.
 {%- endcomment -%}
 
 {%- liquid
   assign media_label = label | default: 'Product photo'
+
+  if priority
+    assign loading_mode = 'eager'
+    assign priority_mode = 'high'
+  else
+    assign loading_mode = 'lazy'
+    assign priority_mode = 'auto'
+  endif
 
   if fill
     assign box = 'absolute inset-0 h-full w-full'

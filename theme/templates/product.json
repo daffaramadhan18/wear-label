@@ -5,12 +5,250 @@
       "settings": {
         "note_1": "Ships from Bandung within 1–2 working days",
         "note_2": "One free size exchange within 14 days",
-        "shipping": "Ships from Bandung within 1–2 working days. One free size exchange within 14 days.",
+        "shipping": "Ships from Bandung within 1–2 working days. One free size exchange within 14 days."
+      }
+    },
+    "voices": {
+      "type": "voices-wall",
+      "settings": {
+        "heading": "From our customers"
+      },
+      "blocks": {
+        "review-1": {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "My 2nd and 3rd yora pants.. Bagus cutting dan bahannya.. Super pewe dan ringan.. I know my photos are not doing the pants justice, but trust me, its worth to buy!"
+          }
+        },
+        "review-2": {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "yayy makasii bgtt celananya udah nyampe, pengemasan sm sellernya juga cepet bgtt langsung dikirim. sumph si celananya se pw itu, sebelum2nya kalo beli celana gapernah ga dikecilin(always) kali ini celananya bnr2 fit di aku dan se pw itu celananya kao dipake."
+          }
+        },
+        "review-3": {
+          "type": "review",
+          "settings": {
+            "user": "y*****p",
+            "body": "bagusss banget tolong, selama ini susah cari celana ukuran oke, seneng banget nemu brand ini. Bahan jg bagus dan harganya murah. Langsung pengen beli warna lain😍"
+          }
+        },
+        "review-4": {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "warna putih nya bagus ga terlalu nerawang, sehari langsung nyampe pake same day 🥰😍"
+          }
+        },
+        "review-5": {
+          "type": "review",
+          "settings": {
+            "user": "r*****u",
+            "body": "WORTH IT BANGET!🥰🥰😍 Mau repurchase lagi nunggu yang warna putih restock, ini bener2 bagus ga panas, aku udah langsung try on jalan-jalan soalnya tadi siang di tempat panas, linennya ga gatel sama sekali, buat ibu hamil 6 bulan muat uk L , bb ku 55,7 kg tinggi 160cm."
+          }
+        },
+        "review-6": {
+          "type": "review",
+          "settings": {
+            "user": "s*****b",
+            "body": "keren bgt, UK nya juga pas biasanya kalo dari toko sebelumnya itu terlalu gede kalo ini tuh pas bgt, sukak, next time order lagi!"
+          }
+        },
+        "review-7": {
+          "type": "review",
+          "settings": {
+            "user": "p*****_",
+            "body": "packingan bagus aman dan rapih. celananya pas banget size nya, ga kegedean atau kekecilan, bahannya juga adem. adminnya baik responsif, btw maaf ya videonya ini tp paket nyampe dengan selamat dan barangnya bagus"
+          }
+        },
+        "review-8": {
+          "type": "review",
+          "settings": {
+            "user": "r*****u",
+            "body": "Bahan linen produk lokal yang bagus! Udh 2x order ~ hamil 8 bulan masi muat dan suka bgt !!! ✨😍❤️ ga sesak sama sekali"
+          }
+        },
+        "review-9": {
+          "type": "review",
+          "settings": {
+            "user": "nadonaddd",
+            "body": "Satisfying! Bahannya halus, ringan, lingkar pinggang pas sama panjang ukuran M juga passs buat aku TB 155 / BB 47, plus respon seller oke banget dan bantu bangettt awalnya keabisan choco yg M pas chat seller lgsg dibales dan ternyata masih ada 1! Aaaa pas banget lagi cari celana gini, thanks a lot!"
+          }
+        },
+        "review-10": {
+          "type": "review",
+          "settings": {
+            "user": "ruthfelisa",
+            "body": "Bahannya bagus dan cuttingan nya pas, ga yg terlalu lebar. Ini celana ke 2 aku beli di wear label. Biar ga nerawang pakai daleman warna netral atau short pants"
+          }
+        },
+        "review-11": {
+          "type": "review",
+          "settings": {
+            "user": "g*****i",
+            "body": "Cakepp bangettt pliss!!! Ga nyesel beli di sini, worth it banget dengan harga segitu, kualitasnya beneran bagus. Sempet ragu karna takut kebesaran dipinggang (BB 38/155), tapi ternyata pas bangettt huhu🥺 senangggg. Pengemasan dan pengirimannya juga cepat sekali. Kmrn checkout, hari ini udah nyampe."
+          }
+        },
+        "review-12": {
+          "type": "review",
+          "settings": {
+            "user": "l*****l",
+            "body": "celananya realpict, bagus, panjang pas di aku tb 167 cm, BB 60. puas sih. cuma kalo aku pake agak jdi keliatan gendut hehe. tpi keseluruhan mantap bahannya sesuai deskripsi. penting buat lihat detail produk, sebelum membeli gaiss..❤️❤️"
+          }
+        },
+        "review-13": {
+          "type": "review",
+          "settings": {
+            "user": "k*****_",
+            "body": "bagusss bangettt uu😍 realpict, no minus, cuttingnya rapii, packingnya cakep, buat bb/tb 43/162 cocok bgt pake uk M panjang n bagian pinggangnya pas👍 recommended banget sih ini🥰"
+          }
+        },
+        "review-14": {
+          "type": "review",
+          "settings": {
+            "user": "satyairada",
+            "body": "Produk ini oke bgt, aku pesen wrna white dan gak nerawang, oke si buat hijabers2 yg pengen pake kulot putih n ga nerawang, kesan hw jg bikin kt terlihat lbh jenjang, good job kak! Produknya oke bgt ❤️"
+          }
+        },
+        "review-15": {
+          "type": "review",
+          "settings": {
+            "user": "d*****a",
+            "body": "Aku suka celananya tipis tapi ga nerawang gitu bahannya juga lembut nyaman dipakai beraktifitas seharian bahkan dipake buat liburan pun oke banget sih ini"
+          }
+        },
+        "review-16": {
+          "type": "review",
+          "settings": {
+            "user": "a*****0",
+            "body": "Sumpah ini tipe celana yg udh lama aku cari 🥺😢 Akhirnya menemukan merk ini. Mantap banget pokoknya. Suka bgttt 🫰🫰 Admin super ramah, informatif. Celananya oke, panjang nya pas, bahan bagus. Bakalan repurchaseeee😍🥰"
+          }
+        },
+        "review-17": {
+          "type": "review",
+          "settings": {
+            "user": "j*****y",
+            "body": "Pertama kali beli dan langsung suka sama produknya wear label❤️ bahannya jatuh dan adem, jahitan super rapih, packingnya jg super rapih per produk pakai kardus sendiri-sendiri👍👍👍"
+          }
+        },
+        "review-18": {
+          "type": "review",
+          "settings": {
+            "user": "tinnayumiko05",
+            "body": "Masya Allah ini keren banget...BB aq 57 TB 155 masih muat dong...sebagus itu dan nyaman di pake.next aq mau order lagi ..packing nya juga super rapi banget dan cepet sampai nya ..makasih ya,sumpah gak nyesel beli disini ..🤩🤩🥳"
+          }
+        },
+        "review-19": {
+          "type": "review",
+          "settings": {
+            "user": "y*****1",
+            "body": "bagussss bangettt sukaaaa udah repeat order 3x selalu puas beli di wear labell , untuk cewe tinggi kea aku gini ga ngantung sama sekali celana nyaa😭👍 buat tb 165 aman bgtt pake yora loose panta size L😭😍 tcakeuppppp bgtt!!!! bakal order lagii yora loose pants ketagihan bahannya enakk jatuh😍"
+          }
+        },
+        "review-20": {
+          "type": "review",
+          "settings": {
+            "user": "e*****i",
+            "body": "Proses packing cepat, packaging juga aman tebal gak worry produk cacat karna pengiriman. Pengiriman juga cepet. Total dah punya 5 koleksi cerra pants ku saking love nya, thankyou"
+          }
+        },
+        "fit-1": {
+          "type": "fit",
+          "settings": {
+            "measure": "bb ku 55,7 kg tinggi 160cm",
+            "user": "r*****u",
+            "size": "uk L"
+          }
+        },
+        "fit-2": {
+          "type": "fit",
+          "settings": {
+            "measure": "TB 155 / BB 47",
+            "user": "nadonaddd",
+            "size": "ukuran M"
+          }
+        },
+        "fit-3": {
+          "type": "fit",
+          "settings": {
+            "measure": "BB 38/155",
+            "user": "g*****i"
+          }
+        },
+        "fit-4": {
+          "type": "fit",
+          "settings": {
+            "measure": "tb 167 cm, BB 60",
+            "user": "l*****l"
+          }
+        },
+        "fit-5": {
+          "type": "fit",
+          "settings": {
+            "measure": "bb/tb 43/162",
+            "user": "k*****_",
+            "size": "uk M"
+          }
+        },
+        "fit-6": {
+          "type": "fit",
+          "settings": {
+            "measure": "BB aq 57 TB 155",
+            "user": "tinnayumiko05"
+          }
+        },
+        "fit-7": {
+          "type": "fit",
+          "settings": {
+            "measure": "tb 165",
+            "user": "y*****1",
+            "size": "size L"
+          }
+        }
+      },
+      "block_order": [
+        "review-1",
+        "review-2",
+        "review-3",
+        "review-4",
+        "review-5",
+        "review-6",
+        "review-7",
+        "review-8",
+        "review-9",
+        "review-10",
+        "review-11",
+        "review-12",
+        "review-13",
+        "review-14",
+        "review-15",
+        "review-16",
+        "review-17",
+        "review-18",
+        "review-19",
+        "review-20",
+        "fit-1",
+        "fit-2",
+        "fit-3",
+        "fit-4",
+        "fit-5",
+        "fit-6",
+        "fit-7"
+      ]
+    },
+    "related": {
+      "type": "related-products",
+      "settings": {
+        "count": 4,
         "related_collection": "all"
       }
     }
   },
   "order": [
-    "main"
+    "main",
+    "voices",
+    "related"
   ]
 }

@@ -67,9 +67,15 @@
    * screenful of these costs nothing per frame. The 12px rise and the 400ms
    * expo tail are RISE and DURATION.enter from components/motion/tokens.ts.
    *
-   * `[data-reveal="lead"]` is the hero — it travels further and slower because
-   * it runs against a still page rather than against a scroll, and at
-   * 12px/400ms it finished before the reader had finished arriving.
+   * There was a `[data-reveal="lead"]` variant here — a longer, slower version
+   * of this for the hero, carried over from the React app. It was defined and
+   * used by nothing, and it has been REMOVED DELIBERATELY. Do not wire it up:
+   * `[data-reveal]` ships at `opacity: 0` and assets/theme.js is deferred, so
+   * putting it on the hero h1 would leave the first thing on the page invisible
+   * from first paint until the script parses — on a slow phone, for a visible
+   * stretch. The reveals are for content the reader scrolls TO, which is always
+   * already painted by the time the observer runs. The hero's own entrance is
+   * the carousel's transform in hero-carousel.liquid, which never hides text.
    */
   [data-reveal] {
     opacity: 0;
@@ -79,15 +85,324 @@
       transform var(--duration-enter) var(--ease-entrance);
   }
 
-  [data-reveal="lead"] {
-    transform: translateY(20px);
-    transition-duration: var(--duration-lead);
-    transition-delay: 120ms;
-  }
-
   [data-reveal][data-revealed] {
     opacity: 1;
     transform: none;
+  }
+
+  /*
+   * The header's shadow, earned by scrolling.
+   *
+   * The header used to wear `shadow-md` from first paint — the only shadow
+   * anywhere in the theme, sitting under a bar that was flush against the top of
+   * an unscrolled page and therefore casting a shadow onto nothing. The markup
+   * now carries `border-b border-rule` instead, which is the honest resting
+   * state, and the elevation appears only once there is content underneath to be
+   * lifted off.
+   *
+   * Three deliberate choices:
+   *
+   * 1. It is a `::after`, not the header's own `box-shadow`. box-shadow is a
+   *    paint property: animating it re-rasterises a full-width bar every frame,
+   *    which is the exact mistake the performance notes in CLAUDE.md were written
+   *    about. The pseudo-element carries a FIXED shadow and only its `opacity`
+   *    moves, so the shadow is rasterised once and the compositor fades it.
+   * 2. `--shadow-md`, not `--shadow-sm`. shadow-sm is `0 1px 2px / 0.08` — at
+   *    that weight it would be indistinguishable from the `border-rule` line
+   *    already under the bar, so the whole effect would read as nothing. It is
+   *    `border-rule` and not `border-hairline` deliberately: hairline is the
+   *    near-invisible card rule and vanishes on white. shadow-md is
+   *    also what the header wore before, so scrolling now reveals the elevation
+   *    the design drew rather than a new one.
+   * 3. `animation-range` ends at `--header-height`, not at an invented distance:
+   *    the shadow reaches full strength once the page has scrolled by the height
+   *    of the bar itself, which is the moment the bar is provably floating over
+   *    something.
+   *
+   * A browser without scroll-driven animations gets the rule border and no
+   * shadow, which is a perfectly good resting state and most of the win. That is
+   * why the whole thing is inside `@supports` rather than guarded in script.
+   *
+   * The selector is `[data-site-header]`, the attribute sections/header.liquid
+   * carries for exactly this purpose. It is deliberately NOT `header.sticky`:
+   * that would silently delete the shadow the day the bar stops being sticky or
+   * the utility moves to a wrapper, and it would let merchant HTML in
+   * `page.content` match if it ever shipped a sticky <header>. The attribute is
+   * the contract; keep the two halves named the same thing.
+   */
+  @supports (animation-timeline: scroll()) {
+    [data-site-header]::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      pointer-events: none;
+      animation: wl-header-lift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 var(--header-height);
+    }
+  }
+
+  @keyframes wl-header-lift {
+    to {
+      opacity: 1;
+    }
+  }
+
+  /*
+   * Merchant prose — `page.content` and `product.description`.
+   *
+   * Everything else on this site is markup we wrote, wearing utilities. These
+   * two are HTML the studio types into the Shopify admin, dropped into a
+   * stylesheet whose Tailwind preflight zeroes every margin, strips list markers
+   * and resets h1–h6 to `font-size: inherit`. Left alone, About Us — which
+   * PRODUCT.md treats as a launch blocker — arrives as one unspaced wall with
+   * invisible bullets and sub-heads smaller than the body text.
+   *
+   * SCOPE. `.wl-measure` is the hook, because it is the only class that already
+   * sits on both wrappers: sections/main-page.liquid:12 and the three panels in
+   * snippets/product-tabs.liquid. It also does half the job — the 64ch measure —
+   * on its own. The five other `.wl-measure` call sites (footer x2, main-404,
+   * main-stub) are checked: every one of them is either a `<p>` itself or a div
+   * whose only child is a `copy` placeholder, so not one of the descendant
+   * selectors below can match anything there today. It is still a compromise: a
+   * measure utility should not be carrying prose typography. The clean version is
+   * a dedicated `wl-prose` hook on those two wrappers and this block re-scoped to
+   * it — a one-line markup change on each, in files another agent owns.
+   *
+   * VALUES. Sizes, colours and rules are tokens. The rhythm is in `em`, so it
+   * tracks the type step it sits under instead of adding spacing values the 8pt
+   * scale does not have — the same em-derived trick snippets/copy.liquid already
+   * uses for its placeholder bars. Border weights are 1px, which is what every
+   * `border-*` utility in this theme already compiles to.
+   *
+   * What base.css already handles and is NOT repeated here: h1/h2 get the display
+   * face, weight 500 and the h2 leading and tracking; h3 gets its size, weight
+   * and leading; `p` gets `text-wrap: pretty`; `:focus-visible` draws the double
+   * ring on prose links along with everything else. Preflight keeps `strong` at
+   * `bolder` and `em` italic, so neither needs restating — `strong` gets only the
+   * darker ink, to separate it from the muted body colour around it.
+   */
+  .wl-measure :is(p, ul, ol, dl, blockquote, pre, table, figure, hr):not(:first-child) {
+    margin-block-start: 1em;
+  }
+
+  /* A sub-head opens a new stretch of copy, so it gets the block step above it
+     and sits tight to the paragraph it introduces. */
+  .wl-measure :is(h2, h3, h4, h5, h6):not(:first-child) {
+    margin-block-start: var(--spacing-block);
+  }
+
+  /* Preflight resets h1–h6 to `font-size: inherit`, so a sub-head in merchant
+     HTML is body-sized until this puts it back on the scale. base.css gives h2
+     the display face and h3 its size; only the h2 size is genuinely missing. */
+  .wl-measure h2 {
+    font-size: var(--text-h2);
+  }
+
+  /* The scale has four steps and stops: Display, H1, H2, H3. There is no token
+     below H3, so h4–h6 share it rather than an invented one — merchant prose is
+     never that deep, and a wrong size would be worse than a repeated one. */
+  .wl-measure :is(h3, h4, h5, h6) {
+    color: var(--color-ink);
+    font-size: var(--text-h3);
+    font-weight: 500;
+    line-height: var(--leading-h3);
+  }
+
+  /* Preflight sets `list-style: none` and zeroes the padding on ul/ol, so a
+     bulleted list arrives with no bullets and no indent. Markers hang outside
+     the measure so the text edge stays straight. */
+  .wl-measure :is(ul, ol) {
+    padding-inline-start: 1.25em;
+  }
+
+  .wl-measure ul {
+    list-style: disc outside;
+  }
+
+  .wl-measure ol {
+    list-style: decimal outside;
+  }
+
+  /* Camel is the palette's accent-and-label tone. Contrast is not at issue: the
+     marker carries no information the row's own text does not. */
+  .wl-measure li::marker {
+    color: var(--color-ink-subtle);
+  }
+
+  .wl-measure li + li,
+  .wl-measure li > :is(ul, ol) {
+    margin-block-start: 0.5em;
+  }
+
+  .wl-measure strong {
+    color: var(--color-ink);
+  }
+
+  /*
+   * Prose links. base.css deliberately leaves `a` un-underlined globally — its
+   * comment says the system's underlined treatment "belongs to inline and prose
+   * links, so it is applied where those appear". This is where they appear.
+   *
+   * The rule starts as the focus sand and darkens to the link's own colour on
+   * hover, so the underline is always present (never colour-only) and hover is a
+   * change of weight rather than an appearance.
+   */
+  .wl-measure a {
+    text-decoration: underline;
+    text-decoration-color: var(--color-focus);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition:
+      color var(--duration-base) var(--ease-out),
+      text-decoration-color var(--duration-base) var(--ease-out);
+  }
+
+  .wl-measure a:hover {
+    color: var(--color-brand-hover);
+    text-decoration-color: currentcolor;
+  }
+
+  .wl-measure blockquote {
+    border-inline-start: 1px solid var(--color-rule);
+    padding-inline-start: 1em;
+    color: var(--color-ink-muted);
+    font-style: italic;
+  }
+
+  /* The theme's own section rule, so a merchant divider matches `.wl-rule`. */
+  .wl-measure hr {
+    border: 0;
+    border-block-start: 1px solid var(--color-rule);
+    margin-block: var(--spacing-block-lg);
+  }
+}
+
+/*
+ * Cross-document view transitions.
+ *
+ * Same-origin navigations inside the theme animate instead of cutting. The one
+ * pair that matters is the product shot: a card in the grid and the first frame
+ * of sections/main-product's gallery both carry
+ * `view-transition-name: shot-<handle>`, so clicking a card moves the photograph
+ * into place rather than reloading it somewhere else. That name is an identity,
+ * not a design value, which is why it is an inline `style` attribute in the two
+ * snippets and not a class here. A placeholder card has no handle and emits no
+ * name, so an empty store transitions like any other page.
+ *
+ * THE ROOT CROSS-FADE IS DELIBERATELY OFF, and this is the one decision in this
+ * file nobody has been able to look at. `::view-transition-new(root)` animates
+ * opacity across a snapshot of the whole document. An element that animates
+ * opacity is a stacking context, and CLAUDE.md names the two effects that breaks
+ * by name: the footer aurora's `mix-blend-mode: soft-light` would blend against
+ * the snapshot instead of the page and draw a visible rectangle, and the voices
+ * wall's `preserve-3d` plane would flatten, dropping its cards out from behind
+ * the stage fades. There is no browser in this environment to check whether that
+ * is visible for the ~250ms it lasts, and shipping a full-page fade nobody has
+ * watched is a worse bet than shipping none. So only the named product-shot
+ * morph runs.
+ *
+ * Turning it back on is deleting the two-selector rule below — one line, once
+ * somebody has watched a home-to-product-to-home round trip on a device.
+ *
+ * A browser without cross-document view transitions ignores `@view-transition`
+ * entirely and performs an ordinary navigation. There is nothing to feature-
+ * detect and nothing to fall back to: no markup, no script and no layout depends
+ * on this block, and the `view-transition-name` declarations are inert on their
+ * own. Reduced motion is handled with the other reduced-motion rules below.
+ */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(*) {
+  animation-duration: var(--duration-exit);
+  animation-timing-function: var(--ease-entrance);
+}
+
+/*
+ * The two named boxes are not the same shape: the catalogue card names a 1/1
+ * clip and the product gallery names a 4/5 one. The UA stylesheet puts
+ * `object-fit: fill` on both snapshots, which would STRETCH the square card
+ * into the portrait frame for the whole 260ms — so it is set to `cover` here,
+ * which is what the photographs inside both boxes already do (`object-cover`
+ * in snippets/media.liquid). The morph therefore crops, exactly as the two
+ * crops themselves do, instead of distorting the garment.
+ */
+::view-transition-old(*),
+::view-transition-new(*) {
+  object-fit: cover;
+}
+
+/* The root cross-fade is deliberately off — see above. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/*
+ * The variant picker's pending state, and the carousel's drag state.
+ *
+ * Both are attributes theme.js writes, and until now neither had a rule behind
+ * it — which made them writes nothing read. A behaviour with no rendered
+ * outcome is not progressive enhancement, so the attributes and these rules
+ * ship together or not at all.
+ *
+ * WHY THE PENDING STATE EXISTS. The variant picker is links to `?variant=<id>`,
+ * so every size and colourway tap is a full document load — a second or more on
+ * 4G. Without this, the reader taps and the page does nothing at all until it
+ * navigates, and she taps this control repeatedly, because fit is the purchase
+ * decision on this site.
+ *
+ * It is deliberately NOT `aria-current`. The navigation may fail, and claiming
+ * the selection succeeded would be a lie; `aria-current` stays on whatever
+ * Shopify actually resolved. So the tapped chip takes the brand edge and colour
+ * optimistically while the rest of its field dims, and both are undone on
+ * `pageshow` — which is what makes a back-button restore look right rather than
+ * arriving still pending.
+ *
+ * Opacity only, on both halves. Reduced motion drops the pulse and keeps the
+ * edge, the colour and the dim: still plainly a pending control, just a still
+ * one.
+ */
+[data-variant-link][data-pending] {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+  animation: wl-pending var(--duration-lead) var(--ease-out) infinite alternate;
+}
+
+@keyframes wl-pending {
+  to {
+    opacity: 0.55;
+  }
+}
+
+[data-variant-field][aria-busy="true"] {
+  cursor: progress;
+}
+
+[data-variant-field][aria-busy="true"] [data-variant-link]:not([data-pending]) {
+  opacity: 0.55;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * The drag. `user-select: none` is not decoration — without it a horizontal
+ * pointer drag across the hero selects the slide's heading text, which is what
+ * makes a hand-built drag feel broken. `grab` is gated to real pointers because
+ * a cursor is meaningless on a touch screen.
+ */
+[data-carousel][data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-carousel] {
+    cursor: grab;
   }
 }
 
@@ -101,6 +416,41 @@
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  /*
+   * The header shadow goes too, which leaves the hairline border and nothing
+   * else. This was a genuine toss-up: the fade is scroll-position-mapped rather
+   * than time-driven, nothing translates or scales, and it stops the instant the
+   * reader stops — by the letter of the guideline it is arguably not motion at
+   * all. It is switched off anyway, for one reason: it makes the reduced-motion
+   * state and the no-`@supports` state the SAME state. One fallback to reason
+   * about and one screenshot to review beats two that differ by an opacity.
+   * The rule says "there is a header here" on its own; the shadow only ever
+   * said "and it is now floating", which is a nicety.
+   */
+  [data-site-header]::after {
+    animation: none;
+  }
+
+  /*
+   * View transitions: the group animation is dropped, so nothing moves, resizes
+   * or travels between pages. The old/new image cross-fade is left running —
+   * it is opacity only and carries no movement, and killing it as well would
+   * make a same-photograph product-shot swap flicker rather than settle. The
+   * root cross-fade is already off for everyone.
+   */
+  ::view-transition-group(*) {
+    animation: none;
+  }
+
+  /*
+   * The pending pulse goes; the brand edge, the brand colour and the dimmed
+   * siblings stay. That is the readable resting state the guideline asks for —
+   * the control still says "working", it just stops breathing.
+   */
+  [data-variant-link][data-pending] {
+    animation: none;
   }
 }
 
