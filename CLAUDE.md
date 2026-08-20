@@ -55,9 +55,36 @@ not written down here and must not be committed.
 **Never push to the live theme.** Push to `205197312286` by id. Publishing is a
 decision, not a step.
 
-Some Admin API work still needs `shopify store auth --store kbysza-bk.myshopify.com`
-run interactively — importing the catalogue, for one. `shopify auth login` alone is
-enough for theme commands.
+Some Admin API work still needs store-level auth run interactively — importing the
+catalogue, for one. `shopify auth login` alone is enough for theme commands.
+
+Two things about that command, both of which have cost a round trip:
+
+- **`shopify` is not on `PATH`.** The CLI is a pinned devDependency, so it is
+  `npx shopify …` or nothing.
+- **`--scopes` is required**, and CLI 4.7's error for omitting it is just
+  `Missing required flag scopes`. It takes a comma-separated list of Admin API
+  scopes and stores an online access token; re-run it if the token expires or if
+  you need a scope it was not granted.
+
+The invocation for a catalogue import, with why each scope is there:
+
+```bash
+npx shopify store auth --store kbysza-bk.myshopify.com \
+  --scopes read_products,write_products,read_files,write_files,\
+read_publications,write_publications,read_metaobjects,write_metaobjects,\
+read_inventory,write_inventory
+```
+
+| Scope | Why |
+|---|---|
+| `read/write_products` | The eleven pieces, their two options, 25 variants each, and the `custom.material` / `custom.care` product metafields |
+| `read/write_files` | Uploading the eleven `public/products/*.webp` photographs |
+| `read/write_publications` | Publishing to the Online Store channel. **Without this the products import invisible** — they exist in admin and the storefront renders placeholders |
+| `read/write_metaobjects` | Colourway swatches. Without swatch metaobjects the picker draws five identical rectangles |
+| `read/write_inventory` | To set the variants *untracked*, which is the honest state while there is no stock data — a tracked variant with 0 on hand would read as sold out, and inventing a stock number is exactly what this repo refuses |
+
+Then `npx shopify store execute` runs the GraphQL mutations.
 
 ## Working agreement
 
