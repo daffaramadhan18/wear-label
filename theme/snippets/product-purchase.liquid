@@ -26,6 +26,9 @@
 
 {%- liquid
   assign current = product.selected_or_first_available_variant
+  unless current
+    assign current = product.variants.first
+  endunless
   assign purchasable = false
   if current and current.available
     assign purchasable = true
@@ -37,6 +40,14 @@
   <input type="hidden" name="utf8" value="✓">
   <input type="hidden" name="id" value="{{ current.id }}">
 
+  {%- comment -%}
+    A product with no real options still reports one — Shopify's synthetic
+    "Title" option, whose single value is "Default Title". Rendering it draws a
+    fieldset labelled Title holding one chip that says Default Title, which is
+    an option the shopper does not have. Every piece imported from the Shopee
+    catalogue is in that state, so the picker has to sit behind this guard.
+  {%- endcomment -%}
+  {%- unless product.has_only_default_variant -%}
   {%- for option in product.options_with_values -%}
     {%- liquid
       assign option_index = forloop.index
@@ -147,6 +158,7 @@
       </div>
     </fieldset>
   {%- endfor -%}
+  {%- endunless -%}
 
   <div class="flex flex-wrap items-stretch gap-3.5">
     {%- comment -%}

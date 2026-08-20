@@ -22,8 +22,10 @@ ported. What is missing is store *configuration*, not code — and every one of 
 gaps renders a labelled placeholder at final size rather than breaking, so the theme
 is reviewable now:
 
-1. **No products.** The eleven pieces below are not imported yet, so every grid
-   draws placeholder cards at the real card proportions.
+1. **No photography for the 115 Shopee pieces.** The eleven design pieces carry
+   their shots; the 115 imported from Shopee carry none (see [The
+   catalogue](#the-catalogue)), so most of the grid still draws placeholder cards
+   at the real card proportions.
 2. **No filters.** They are defined in Shopify's Search and Discovery app; until
    then the filter rail says where they come from instead of inventing facets.
 3. **No `about` page**, and no `custom.material` / `custom.care` metafields.
@@ -82,9 +84,25 @@ read_inventory,write_inventory
 | `read/write_files` | Uploading the eleven `public/products/*.webp` photographs |
 | `read/write_publications` | Publishing to the Online Store channel. **Without this the products import invisible** — they exist in admin and the storefront renders placeholders |
 | `read/write_metaobjects` | Colourway swatches. Without swatch metaobjects the picker draws five identical rectangles |
-| `read/write_inventory` | To set the variants *untracked*, which is the honest state while there is no stock data — a tracked variant with 0 on hand would read as sold out, and inventing a stock number is exactly what this repo refuses |
+| `read/write_inventory` | To set each variant's tracking. *Untracked* is the honest state where there is no stock data — inventing a stock number is exactly what this repo refuses. *Tracked at 0* is the honest state where the source says sold out, and it is what lights up the theme's sold-out markup |
 
 Then `npx shopify store execute` runs the GraphQL mutations.
+
+Three things the catalogue import turned up, each of which cost a round trip:
+
+- **`ProductCreateInput` has no publications field.** Publishing is a second
+  mutation — `publishablePublish` against
+  `gid://shopify/Publication/377657065758` (Online Store). Skip it and the
+  product exists in admin while the storefront still draws a placeholder.
+- **`productSet` rejects a variant without `optionValues`**, so a product with no
+  real options is `productCreate` (which makes the default variant on its own)
+  followed by `productVariantsBulkUpdate` for price and inventory tracking. Two
+  calls, not one.
+- **The stored token has neither `read_locations` nor `read_product_listings`**,
+  so `locations`, `Location.name` and `publishedOnCurrentPublication` all come
+  back `ACCESS_DENIED`. Neither scope is needed: a freshly created *tracked*
+  variant is already at 0 available, and the location id is readable through
+  `variant.inventoryItem.inventoryLevels` if it is ever wanted.
 
 ## Working agreement
 
@@ -294,10 +312,16 @@ placed; the studio does not offer the service). `theme/README.md` has the table.
 
 ## The catalogue
 
-Eleven pieces, from the design project's `CATALOG` constant. Names, materials,
-prices, the markdowns and the new flags are the client's own data; the photographs
-are the client's own shots, one square `.webp` per piece in `public/products/`, named
-by handle. **None of this is in Shopify yet** — importing it is the next big step.
+**126 products are on the store, all `ACTIVE` and all published to the Online
+Store.** They arrived in two imports, done deliberately differently, and the
+difference is what to read before adding to either.
+
+### The eleven design pieces
+
+From the design project's `CATALOG` constant. Names, materials and prices are the
+client's own data; the photographs are the client's own shots, one square `.webp`
+per piece in `public/products/`, named by handle — **and they are on Shopify**:
+these eleven are the only products in the store that carry an image.
 
 | Handle | Name | Material | Price | Was | Flags | Category |
 |---|---|---|---|---|---|---|
@@ -306,10 +330,10 @@ by handle. **None of this is in Shopify yet** — importing it is the next big s
 | `basic-pants` | Basic Pants | Cotton poplin | Rp 165.000 | | | Straight cut |
 | `cerra-loose-pants` | Cerra Loose Pants | Cotton twill | Rp 159.000 | | | Wide leg |
 | `dalia-wide-pants` | Dalia Wide Pants | Tencel | Rp 175.000 | | | Wide leg |
-| `lilo-pants` | Lilo Pants | Viscose blend | Rp 159.200 | Rp 199.000 | New | Wide leg |
-| `milly-stripe-pants` | Milly Stripe Pants | Linen blend | Rp 159.200 | Rp 199.000 | New | Wide leg |
-| `moa-pants` | Moa Pants | Cotton twill | Rp 159.200 | Rp 199.000 | New | Wide leg |
-| `pallo-pants` | Pallo Pants | Pinstripe linen | Rp 159.200 | Rp 199.000 | | Wide leg |
+| `lilo-pants` | Lilo Pants | Viscose blend | Rp 199.000 | | | Wide leg |
+| `milly-stripe-pants` | Milly Stripe Pants | Linen blend | Rp 199.000 | | | Wide leg |
+| `moa-pants` | Moa Pants | Cotton twill | Rp 199.000 | | | Wide leg |
+| `pallo-pants` | Pallo Pants | Pinstripe linen | Rp 199.000 | | | Wide leg |
 | `taka-flare-pants` | Taka Flare Pants | Cupro | Rp 199.000 | | | Wide leg |
 | `yora-loose-pants` | Yora Loose Pants | Cotton twill | Rp 165.000 | | | Wide leg |
 
@@ -317,14 +341,71 @@ by handle. **None of this is in Shopify yet** — importing it is the next big s
   `lib/shopify/vocabulary.ts`, taken from the design system's Colourway row) apply to
   every piece, giving 25 variants each. That matrix is the design's, not an inference
   from the catalogue.
-- **Stock is not modelled.** The sold-out states are implemented throughout and
-  light up the moment Shopify reports inventory; inventing a sold-out run would be
-  inventing commerce data.
+- **Stock is not modelled for these eleven.** Their inventory is *untracked*, so
+  they read as available; Shopee states availability for them but never quantity,
+  and inventing a number is what this repo refuses.
+- **The Rp 159.200 markdown is over.** Lilo, Milly, Moa and Pallo were imported at
+  that price against a compare-at of Rp 199.000. Shopee now lists all four at
+  Rp 199.000, so on 2026-08-21 all 25 variants of each were set to 199.000 and
+  their compare-at cleared — a compare-at that no longer holds draws a discount
+  badge for a discount the shopper cannot get. **No product on the store carries a
+  compare-at any more**, which is why nothing renders a percentage-off flash. The
+  design's "New" flags on Lilo, Milly and Moa were never modelled in Shopify and
+  still are not.
 - **`productType` is derived** — the piece's own name where it states the cut, the
   garment shot where it does not. Wide leg 8, Culottes 2, Straight cut 1.
 - **`material` and `care` become metafields** (`custom.material`, `custom.care`).
   Until they exist the card's material line and the Fabric & care tab render
   labelled placeholders.
+- **Vendor is Shopify's default `My Store`** on these eleven, not `Wear Label`.
+  Nothing in the theme reads vendor, so it has been left rather than churned.
+
+### The 115 Shopee pieces
+
+Imported 2026-08-21 from the client's own Shopee storefront listing — the live
+one, pasted in wholesale. **Title and price only.** That was the instruction, and
+it is also all the listing gave: no photographs, no descriptions, no size or
+colour data, and the ratings and units-sold counts were deliberately dropped
+(a review score is the one placeholder that cannot be labelled as one).
+
+- **One default variant each, no options.** Assigning XS–XL × five colourways to a
+  tote bag would have been inventing the matrix. `snippets/product-purchase.liquid`
+  therefore guards its picker on `has_only_default_variant`: Shopify hands a
+  no-option product one synthetic `Title` option whose only value is
+  `Default Title`, and rendering it draws a fieldset offering a choice that does
+  not exist. Both that snippet and `sections/main-product.liquid` also fall back
+  to `product.variants.first` when `selected_or_first_available_variant` comes
+  back nil, which is what a fully sold-out product does.
+- **Nine are in stock, 106 are sold out**, and that split is Shopee's own. The 106
+  are `ACTIVE` with inventory **tracked at 0**, which is what lights up the
+  theme's sold-out markup; the nine in stock are untracked, like the eleven above.
+  So the storefront's sold-out state is now real data, not a state waiting for
+  data.
+- **Names are the Shopee titles with the marketing tail cut.** "Basic Pants by
+  Wear Label - Celana Panjang Highwaist Wanita - Formal Casual" → `Basic Pants`.
+  ALL-CAPS titles were title-cased; mixed-case ones were left alone, which is why
+  `Cerra Loose Pants BIG SIZE` keeps its shout. The reject and defect runs kept
+  their qualifier, because it is what the piece is: `Defect Sale Cerra Loose
+  Pants`, `Minor Reject Sale Canvas Bag`, `Casa Bag Minor Reject`.
+- **`productType` is the garment the name itself states** — Vest 31, Pants 25,
+  Shirt 16, Bag 7, Skirt 6, Culottes 5, Tunik 4, Cardigan 4, Outer 3, Knitwear 3,
+  Set 2, Blouse 2, Top 2, Dress 1, Blazer 1, and five left blank. The five blanks
+  are the Raya series and sets and the reject-sale linen: those names state a
+  collection or a fabric, not a garment, and the rule is that a type is derived,
+  never guessed.
+- **That mixes two axes into one facet, and it is not resolved.** The eleven are
+  typed by *cut* (Wide leg, Culottes, Straight cut); the 115 by *garment* (Pants,
+  Vest, Bag). So `/collections/all` will offer both alongside each other.
+  Normalising it — garment in `product_type`, cut in a tag or metafield — is a
+  taxonomy decision nobody has taken; it is one bulk field update when somebody
+  does. **Ask before picking a side.**
+- **Duplicates were dropped, not re-imported.** Lilo, Soso and Tara Stripe Pants
+  each appeared in both the in-stock and the sold-out listing; the in-stock row
+  won, and the eleven already on the store were skipped outright. `Cerra Loose
+  Pants BIG SIZE`, `Pallo Stripe Pants` and `Milly Balloon Skirt` are separate
+  pieces from `Cerra Loose Pants`, `Pallo Pants` and `Milly Stripe Pants`, and are
+  imported as such.
+- **Vendor is `Wear Label`** on all 115.
 
 ## Conventions
 
