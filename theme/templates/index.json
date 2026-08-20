@@ -6,19 +6,6 @@
         "slide-1": {
           "type": "slide",
           "settings": {
-            "eyebrow": "New arrivals",
-            "heading": "The Dry Season Collection",
-            "body": "Handwoven linen and cotton poplin, cut loose and sewn in small runs.",
-            "cta": "Shop the collection",
-            "href": "/collections/all",
-            "asset": "hero-2.webp",
-            "alt": "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
-            "text_art": true
-          }
-        },
-        "slide-2": {
-          "type": "slide",
-          "settings": {
             "eyebrow": "From our customers",
             "heading": "In their own words",
             "body": "Fit, fabric and how a piece actually sits, written by the people who bought it.",
@@ -27,6 +14,19 @@
             "asset": "hero-1.webp",
             "alt": "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall.",
             "text_art": false
+          }
+        },
+        "slide-2": {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "New arrivals",
+            "heading": "The Dry Season Collection",
+            "body": "Handwoven linen and cotton poplin, cut loose and sewn in small runs.",
+            "cta": "Shop the collection",
+            "href": "/collections/all",
+            "asset": "hero-2.webp",
+            "alt": "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
+            "text_art": true
           }
         }
       },

@@ -63,34 +63,58 @@
   becomes `display: contents` at `md` — one set of markup, each control exactly
   where the design draws it on a wide screen.
 
-  ARTWORK. Both shots ship as theme assets. The filenames are historical — each
-  was named for the slide it first sat on and the two have since been swapped, so
-  hero-2.webp leads and hero-1.webp follows. That is the design's own order
-  (slotId 'sf-hero-' + i+1), with the order-notes card first. `image` overrides
-  the asset once the merchant uploads their own; with neither, the labelled
-  placeholder fills the band at its exact size, so a missing shot never breaks it.
+  ARTWORK. Both shots ship as theme assets, and hero-1.webp leads with
+  hero-2.webp following. `image` overrides the asset once the merchant uploads
+  their own; with neither, the labelled placeholder fills the band at its exact
+  size, so a missing shot never breaks it.
+
+  ORDER. That is NOT the design's order, and the deviation was asked for. The
+  design maps its slots (slotId 'sf-hero-' + i+1) and puts the studio's
+  Indonesian order-notes card first; this band puts the polaroid photograph
+  first and the card second. Two things fall out of it and both are
+  improvements, which is why it was not argued with:
+
+    - Below `md` the card is dropped, because it is `text_art` (see below). With
+      the card leading, a phone opened on the band's bare surface; with the
+      photograph leading it opens on a photograph.
+    - The card is full-bleed Indonesian type. It reads as a notice, and it was
+      the first thing a first-time visitor met.
+
+  The filenames now match the positions — slide 1 is hero-1.webp, slide 2 is
+  hero-2.webp — which they did not before this swap. That is a coincidence of
+  the reorder, not a rename: each file was named for the slide it first sat on,
+  the two were swapped once already, and swapping them back put every name back
+  over its own slide. Nothing in the theme reads the number in a filename, so do
+  not start now — `theme/templates/index.json` is where the order lives.
 
   hero-2.webp is still the design's own export at 1200x675. hero-1.webp is NOT
   — it was replaced with the studio's own higher-resolution render of the same
   polaroid composition, 2730x1536, because the design's export was soft on a
   wide screen: the band is 100vw, so a 1200px shot is upscaled on anything
-  larger than a small laptop and doubly so at 2x. Two things came with it and
-  neither is an accident: the render does not carry the "Wear Label" wordmark
-  the design's export had across its top (the header already says the name a
-  few hundred pixels above it), and 249KB is where q80 at native size lands —
-  in line with hero-2.webp's 172KB, and this slide is not the LCP candidate.
-  The alt text was written about the composition, not the wordmark, so it
-  still describes what is there.
+  larger than a small laptop and doubly so at 2x. The render does not carry the
+  "Wear Label" wordmark the design's export had across its top, which is fine —
+  the header already says the name a few hundred pixels above it. The alt text
+  was written about the composition, not the wordmark, so it still describes
+  what is there.
+
+  LCP. Leading with the photograph moves `fetchpriority="high"` onto it, so the
+  first paint now pulls 249KB instead of the card's 172KB. That is the price of
+  the reorder and it is paid knowingly. It cannot be trimmed from here: Shopify
+  serves a theme asset at its own size, and `asset_url` takes no width — the
+  responsive srcset only exists down the `image` branch above, so the way to get
+  one is for the merchant to upload the shot as an image setting rather than
+  ship it as an asset.
 
   The width/height below stay 1200x675 for both. They reserve the aspect ratio
   before the shot loads and nothing else — the img is `absolute inset-0
   object-cover`, so its painted size comes from the band. Both assets are 16:9,
   so one pair of numbers is right for both.
 
-  `text_art` marks a slide whose artwork is an image OF text. It cannot be
-  cropped, so it is dropped below `md` and the band's own surface shows instead:
-  the band is taller than it is wide there and object-cover keeps under half the
-  card's width, which reads as a mistake. The words belong in the alt text.
+  `text_art` marks a slide whose artwork is an image OF text — here, the second
+  slide's order-notes card. It cannot be cropped, so it is dropped below `md` and
+  the band's own surface shows instead: the band is taller than it is wide there
+  and object-cover keeps under half the card's width, which reads as a mistake.
+  The words belong in the alt text.
 {%- endcomment -%}
 
 {%- liquid

@@ -505,19 +505,30 @@ is how somebody's change gets quietly reverted later.
 |---|---|---|
 | `public/products/*.webp` (11) | `assets/products/` | The catalogue shots. Square, 639–1024px, named by handle. **Upload these to Shopify with the products** |
 | `theme/assets/*.png` (7) | `assets/` | `wordmark`, `stacked`, `mark`, each with a cream variant, plus `wordmark-taupe` |
-| `theme/assets/hero-2.webp` | the design's `sf-hero-1` image slot | The leading slide — the order-notes card. Byte-exact, 1200x675 |
-| `theme/assets/hero-1.webp` | **the studio, not the design** | The following slide — the polaroids. 2730x1536, the studio's own higher-resolution render of the same composition, replacing the design's soft 1200x675 export on 2026-08-21. It does **not** carry the wordmark the design's export had across its top |
+| `theme/assets/hero-1.webp` | **the studio, not the design** | Slide 1 — the polaroids. 2730x1536, the studio's own higher-resolution render of the same composition, replacing the design's soft 1200x675 export on 2026-08-21. It does **not** carry the wordmark the design's export had across its top |
+| `theme/assets/hero-2.webp` | the design's `sf-hero-1` image slot | Slide 2 — the order-notes card. Byte-exact, 1200x675 |
 | `app/icon.png`, `app/apple-icon.png` | the monogram | Per the design system's "monogram for favicons" rule. **Still to set as the store's favicon** |
 
 The icon set is not a file anywhere: `snippets/icon.liquid` carries the path data,
 generated from `components/ui/icons.tsx`, which took it verbatim from
 `assets/icons/*.svg`.
 
-**The two hero filenames no longer match the slides they sit on.** They were named
-for the slides they first sat on and the two have since been swapped, so
-`hero-2.webp` (`sf-hero-1`, the order-notes card) leads and `hero-1.webp`
-(`sf-hero-2`, the photograph) follows. That is the design's own order. The slide
-order lives in `theme/templates/index.json`, not in the filenames.
+**The hero leads with the photograph, which is not the design's order.** The
+design puts the studio's Indonesian order-notes card first (`sf-hero-1`, shipped
+as `hero-2.webp`) and the polaroids second (`sf-hero-2`, `hero-1.webp`). **The
+theme runs them the other way round, on request, 2026-08-21.** Two reasons, and
+they are the ones to re-read before anybody swaps it back: the card is
+`text_art`, so it is dropped below `md` and a phone therefore used to open on the
+band's bare surface; and a screenful of full-bleed Indonesian type reads as a
+notice, which is a great deal to hand a first-time visitor before a photograph.
+
+Since that swap the filenames happen to match their positions again — slide 1 is
+`hero-1.webp`, slide 2 is `hero-2.webp`. **Do not rely on it.** Nothing in the
+theme reads the number in a filename; the slide order lives in
+`theme/templates/index.json` and nowhere else. The archived React band at
+`components/home/hero-carousel.tsx` still runs the design's order and is
+deliberately not being kept level — see [The Next.js app is an
+archive](#the-nextjs-app-is-an-archive).
 
 ## Platform constraints
 
@@ -547,7 +558,9 @@ Fixed properties of Shopify in this market — design around them, don't retry t
 `app/`, `components/` and `lib/` are the reference the theme was ported from. They
 still build, and the build is still kept green — but they are **not the
 deliverable**, and the two are allowed to drift. The theme's home page has already
-dropped the category mosaic while `app/page.tsx` still renders it.
+dropped the category mosaic while `app/page.tsx` still renders it, and its hero
+leads with the polaroids while `components/home/hero-carousel.tsx` still leads
+with the order-notes card.
 
 Rules:
 

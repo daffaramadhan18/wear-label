@@ -60,6 +60,11 @@ import type { Image } from "@/lib/shopify";
  * 1)`), with the order-notes card first. The design's state file also holds an
  * unused `sf-hero` from an earlier single-slide version; it is neither of these two.
  *
+ * **The theme has since diverged and this band deliberately has not.** On
+ * 2026-08-21 the Liquid hero was asked to lead with the polaroids and follow with
+ * the order-notes card, which is the reverse of the design and of the order below.
+ * This is the archive, so it keeps the design's order; do not "fix" it to match.
+ *
  * A slide with no entry in `HERO_IMAGES` falls back to the labelled placeholder at
  * the band's exact size, so a missing shot never breaks the band.
  */
