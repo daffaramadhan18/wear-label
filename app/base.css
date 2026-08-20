@@ -483,9 +483,25 @@
     transform: none;
   }
 
+  /*
+   * `--voices-offset: 0` alone does NOT clear the stagger, and this cost a
+   * measured round to find. The offset is an INLINE custom property on each
+   * track (see the style attribute in sections/voices-wall.liquid), and an
+   * inline custom property beats a stylesheet declaration — the same trap the
+   * plane's transform comment above already describes. So the variable is left
+   * declared for clarity and the CONSUMER is overridden instead: margin-top
+   * outright, which this unlayered block wins against the layered rule without
+   * needing !important.
+   *
+   * What it was doing: on a 390px viewport the four tracks began 340px below the
+   * plane's own top edge, so the rail sat at the bottom of its parent and the
+   * space between the fit table and the first review read as a slab of dead
+   * espresso. Measured, not guessed.
+   */
   .wl-voices-track {
     --voices-offset: 0;
 
+    margin-top: 0;
     flex-direction: row;
     animation: none;
   }
@@ -519,8 +535,16 @@
    * `height: auto` releases the figure's `h-62.5` and lets the card grow to its
    * quote. The row it sits in is a flex row with the default `stretch`, so every
    * card in the rail comes out the height of the longest review rather than
-   * ragged. The stage reserves no height below `md` — `contain-intrinsic-size` is
-   * scoped to `md` and up — so nothing needs re-measuring for the taller rail.
+   * ragged.
+   *
+   * The stage has to be released with it, and the first pass at this rule missed
+   * why: the height below `md` is not reserved by `contain-intrinsic-size` (that
+   * one really is scoped to `md` and up) but by the plain `h-140` utility on the
+   * stage in sections/voices-wall.liquid, which applies at every width. Once the
+   * cards grew to their quotes the rail went to 762px inside a 560px stage, and
+   * because the stage is `items-center` with `overflow-y: hidden` it centred the
+   * overflow and clipped it — about 400px of dead espresso between the fit table
+   * and the first review on a phone. Measured on a 390px viewport, not guessed.
    */
   .wl-voices-track figure {
     height: auto;
