@@ -73,5 +73,12 @@
     "account": {
       "title": "My Account"
     }
+  },
+  "gift_card": {
+    "issued": {
+      "title": "Your gift card",
+      "expires": "Expires {{ expiry }}",
+      "shop_link": "Start shopping"
+    }
   }
 }

@@ -1,9 +1,0 @@
-{
-  "sections": {
-    "main": {
-      "type": "main-stub",
-      "settings": { "route": "gift card" }
-    }
-  },
-  "order": ["main"]
-}
