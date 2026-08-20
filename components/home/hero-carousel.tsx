@@ -47,7 +47,12 @@ import type { Image } from "@/lib/shopify";
  * wrapper that holds them becomes `display: contents` at `md` — one set of markup,
  * with each control positioned exactly as the design draws it on a wide screen.
  *
- * The artwork comes from the design's own image slots, exported to `public/home/`.
+ * The artwork lives in `public/home/`, which the Liquid theme copies verbatim into
+ * `theme/assets/` — the two are byte-identical per asset, so this folder is where a
+ * hero shot is replaced. `hero-2.webp` is the design's own export; `hero-1.webp` is
+ * the studio's own higher-resolution render of the same polaroid composition, which
+ * replaced the design's soft 1200x675 export and does not carry the wordmark that
+ * one had across its top. See the ARTWORK note in `theme/sections/hero-carousel.liquid`.
  * The filenames are historical — each was named for the slide it first sat on, and
  * those two have since been swapped, so **`hero-2.webp` leads and `hero-1.webp`
  * follows**. In the design's own terms that is `sf-hero-1` then `sf-hero-2`: the
@@ -73,9 +78,10 @@ type HeroImage = Image & {
 /**
  * One entry per slide, in slide order. A null url renders the placeholder.
  *
- * The band is 1440x600 and these are 1200x675, so `Media` crops them to fill —
- * which is what the design does with them too. The cream card sits over the left
- * third, so the crop is what decides how much of a shot survives.
+ * The band is 1440x600 and both shots are 16:9 — 1200x675 and 2730x1536 — so
+ * `Media` crops them to fill, which is what the design does with them too. The
+ * cream card sits over the left third, so the crop is what decides how much of a
+ * shot survives.
  */
 const HERO_IMAGES: HeroImage[] = [
   /*
@@ -108,8 +114,8 @@ const HERO_IMAGES: HeroImage[] = [
     url: "/home/hero-1.webp",
     altText:
       "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall.",
-    width: 1200,
-    height: 675,
+    width: 2730,
+    height: 1536,
   },
 ];
 

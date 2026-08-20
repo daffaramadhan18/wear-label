@@ -495,14 +495,18 @@ section or snippet that took them, and the port's own deviations are listed in
 ### Assets, and how they were pulled
 
 Everything came out of the design project byte-exact — nothing was redrawn,
-re-exported or approximated. `public/` holds the original exports; `theme/assets/`
-holds the copies the theme serves.
+re-exported or approximated, **with one exception, `hero-1.webp`, noted below.**
+`public/` holds the original exports; `theme/assets/` holds the copies the theme
+serves, and for every asset the two are byte-identical. Replace one, replace both:
+nothing copies `public/` into `theme/assets/` for you, so a stale original there
+is how somebody's change gets quietly reverted later.
 
 | Local | From | Notes |
 |---|---|---|
 | `public/products/*.webp` (11) | `assets/products/` | The catalogue shots. Square, 639–1024px, named by handle. **Upload these to Shopify with the products** |
 | `theme/assets/*.png` (7) | `assets/` | `wordmark`, `stacked`, `mark`, each with a cream variant, plus `wordmark-taupe` |
-| `theme/assets/hero-{1,2}.webp` | the design's `sf-hero-*` image slots | The two hero slides |
+| `theme/assets/hero-2.webp` | the design's `sf-hero-1` image slot | The leading slide — the order-notes card. Byte-exact, 1200x675 |
+| `theme/assets/hero-1.webp` | **the studio, not the design** | The following slide — the polaroids. 2730x1536, the studio's own higher-resolution render of the same composition, replacing the design's soft 1200x675 export on 2026-08-21. It does **not** carry the wordmark the design's export had across its top |
 | `app/icon.png`, `app/apple-icon.png` | the monogram | Per the design system's "monogram for favicons" rule. **Still to set as the store's favicon** |
 
 The icon set is not a file anywhere: `snippets/icon.liquid` carries the path data,

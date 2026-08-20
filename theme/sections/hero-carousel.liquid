@@ -63,13 +63,29 @@
   becomes `display: contents` at `md` — one set of markup, each control exactly
   where the design draws it on a wide screen.
 
-  ARTWORK. The two shots ship as theme assets, exported from the design's own
-  image slots. The filenames are historical — each was named for the slide it
-  first sat on and the two have since been swapped, so hero-2.webp leads and
-  hero-1.webp follows. That is the design's own order (slotId 'sf-hero-' + i+1),
-  with the order-notes card first. `image` overrides the asset once the merchant
-  uploads their own; with neither, the labelled placeholder fills the band at its
-  exact size, so a missing shot never breaks it.
+  ARTWORK. Both shots ship as theme assets. The filenames are historical — each
+  was named for the slide it first sat on and the two have since been swapped, so
+  hero-2.webp leads and hero-1.webp follows. That is the design's own order
+  (slotId 'sf-hero-' + i+1), with the order-notes card first. `image` overrides
+  the asset once the merchant uploads their own; with neither, the labelled
+  placeholder fills the band at its exact size, so a missing shot never breaks it.
+
+  hero-2.webp is still the design's own export at 1200x675. hero-1.webp is NOT
+  — it was replaced with the studio's own higher-resolution render of the same
+  polaroid composition, 2730x1536, because the design's export was soft on a
+  wide screen: the band is 100vw, so a 1200px shot is upscaled on anything
+  larger than a small laptop and doubly so at 2x. Two things came with it and
+  neither is an accident: the render does not carry the "Wear Label" wordmark
+  the design's export had across its top (the header already says the name a
+  few hundred pixels above it), and 249KB is where q80 at native size lands —
+  in line with hero-2.webp's 172KB, and this slide is not the LCP candidate.
+  The alt text was written about the composition, not the wordmark, so it
+  still describes what is there.
+
+  The width/height below stay 1200x675 for both. They reserve the aspect ratio
+  before the shot loads and nothing else — the img is `absolute inset-0
+  object-cover`, so its painted size comes from the band. Both assets are 16:9,
+  so one pair of numbers is right for both.
 
   `text_art` marks a slide whose artwork is an image OF text. It cannot be
   cropped, so it is dropped below `md` and the band's own surface shows instead:
