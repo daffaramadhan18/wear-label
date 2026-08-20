@@ -76,6 +76,9 @@ export const ui = {
   bagCountOne: "piece in your bag",
   bagCountMany: "pieces in your bag",
 
+  /* Home */
+  shopByCategory: "Shop by category",
+
   /* Carousel */
   heroLabel: "Featured collections",
   previousSlide: "Previous slide",
@@ -124,12 +127,23 @@ export const home = {
         cta: "Shop the collection",
         href: "/shop",
       },
+      /**
+       * The second slide used to sell made to order. The studio does not offer
+       * that service, so it now points at the one thing on this site that needs
+       * no claim of its own: what customers wrote. Nothing here is a promise —
+       * the heading describes the voices wall and the CTA scrolls to it.
+       *
+       * `#voices-heading` is the id on the wall's own `h2` in
+       * `components/home/testimonial-wall.tsx`. Rename that id and this link
+       * goes nowhere; it is the same coupling the catalogue hrefs above have to
+       * `QUERY_KEYS`.
+       */
       {
-        eyebrow: "Made to order",
-        heading: "Cut to your measurements",
-        body: "Choose a colourway and we sew it for you. Ten working days, from the Bandung studio.",
-        cta: "Start an order",
-        href: "/shop?made-to-order=1",
+        eyebrow: "From our customers",
+        heading: "In their own words",
+        body: "Fit, fabric and how a piece actually sits, written by the people who bought it.",
+        cta: "Read what they wrote",
+        href: "#voices-heading",
       },
     ],
   },
@@ -201,24 +215,36 @@ export const home = {
   },
 
   /**
-   * The category mosaic — one tall tile and four small ones. **Not on the home
-   * page**, along with the service band below it; both components remain, and so
-   * does this copy. Every destination is a real catalogue filter; the design's
-   * "Tops" and "Up to 40% off" tiles are not here because neither exists in this
-   * catalogue.
+   * The category mosaic — one tall tile and four small ones. It sits between the
+   * voices wall and the service band, in the slot the made-to-order band used to
+   * hold: something has to stand between the two continuous loops (see
+   * `app/page.tsx`), and this is the tallest true block there is.
+   *
+   * Every destination is a real catalogue query. The design's "Tops" and "Up to
+   * 40% off" tiles are not here because neither exists in this catalogue, and the
+   * fourth tile is "New in" rather than the design's "Made to order" — that filter
+   * matches nothing and names a service the studio does not offer. `sort=newest`
+   * puts the three New-flagged pieces first, which is what the tile promises.
    */
   mosaic: {
     feature: { eyebrow: "Shop", label: "Wide leg", href: "/shop?category=Wide+leg" },
     tiles: [
       { label: "Culottes", href: "/shop?category=Culottes" },
       { label: "Straight cut", href: "/shop?category=Straight+cut" },
-      { label: "Made to order", href: "/shop?made-to-order=1" },
+      { label: "New in", href: "/shop?sort=newest" },
       { label: "Everything", href: "/shop" },
     ],
   },
 
   /**
-   * The three-up service band. Not on the home page either — see `mosaic` above.
+   * The three-up service band, under the mosaic — the design's own pairing, and the
+   * closing block before the Instagram strip.
+   *
+   * All three promises are stated elsewhere in this file, which is the reason this
+   * band is allowed where the made-to-order one is not: the threshold is the
+   * announcement bar's, the exchange is on every product page, and fit advice over
+   * WhatsApp is what the customer reviews describe the studio doing.
+   *
    * `icon` selects a mark from `components/ui/icons.tsx`.
    */
   services: [
@@ -239,6 +265,17 @@ export const home = {
     },
   ],
 
+  /**
+   * The made-to-order band. **Not on the home page, and not to be put back.**
+   *
+   * Unlike the promo band and the mosaic above — which are merely unplaced — this
+   * one describes a service the studio does not run (confirmed 2026-08-20, see
+   * PRODUCT.md). Every line of it is a promise nobody can keep: measurements, ten
+   * working days, one tailor end to end. The copy and `components/home/made-to-order.tsx`
+   * are kept because the band is the approved design and the service may exist one
+   * day. Placing it before then ships a claim the studio cannot honour, which is
+   * the one thing this project refuses.
+   */
   madeToOrder: {
     eyebrow: "Made to order",
     heading: "Cut to your measurements",
@@ -275,7 +312,7 @@ export const shop = {
 export const product = {
   /** Store-wide policy, so it is content rather than per-product data. */
   shipping:
-    "Ships from Bandung within 1–2 working days. One free size exchange within 14 days; made-to-order pieces are final sale.",
+    "Ships from Bandung within 1–2 working days. One free size exchange within 14 days.",
   notes: [
     "Ships from Bandung within 1–2 working days",
     "One free size exchange within 14 days",
@@ -298,7 +335,9 @@ export const cart = {
     shippingNote: "Calculated at checkout",
     total: "Total",
     cta: "Continue to payment",
-    note: "Taxes included. Made-to-order pieces ship within 10 working days.",
+    /* The made-to-order sentence that used to sit here described a service the
+       studio does not run. See PRODUCT.md. */
+    note: "Taxes included.",
   },
 } as const;
 

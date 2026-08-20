@@ -28,16 +28,20 @@ Six routes. Every screen in the approved design exists and works.
 
 | Route | What it is |
 |---|---|
-| `/` | Hero carousel, new arrivals, customer voices wall, made-to-order band, Instagram strip |
+| `/` | Hero carousel, new arrivals, customer voices wall, category mosaic, service band, Instagram strip |
 | `/shop` | Catalogue — campaign banner, promo tiles, filter rail (category · size · colourway · made-to-order), sort, 3-up grid, paging |
 | `/shop/[handle]` | Product — gallery, size and colourway, quantity, add to bag, tabs, related pieces |
 | `/cart` | Bag — lines, quantity, removal, order summary, hand-off to Shopify checkout |
 | `/about` | About Us — company profile |
 | `/account` | My Account — route and layout only, no auth |
 
-Plus a branded 404. Three components from the design (`promo-band`, `category-mosaic`,
-`service-band`) are built and kept but not placed on the home page — putting one back
-is an edit to `app/page.tsx` alone.
+Plus a branded 404. One component from the design (`promo-band`) is built and kept but
+not placed on the home page — putting it back is an edit to `app/page.tsx` alone.
+
+`made-to-order` is built and kept but must **not** be put back: the studio does not
+offer that service, so every line of that band is a promise nobody can keep. The
+mosaic and the service band moved below the voices wall to fill the slot it held.
+[`PRODUCT.md`](./PRODUCT.md) records the decision and the customer evidence behind it.
 
 **41 components, 13 of them client-side.** Everything else is server-rendered,
 including every product card body, the whole filter rail, every row of the bag and

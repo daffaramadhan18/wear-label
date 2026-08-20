@@ -8,6 +8,11 @@ Company profile + product catalogue + commerce storefront for **Wear Label**, a
 fashion/apparel brand in Bandung, Indonesia. Custom Next.js frontend on top of
 Shopify as the commerce engine.
 
+**Who this is for and what it is for: [`PRODUCT.md`](./PRODUCT.md).** The primary
+buyer, what she decides on, and the fact that this site is a credibility surface
+rather than the till are recorded there, with the customer evidence behind each one.
+Read it before proposing anything that changes what the site claims.
+
 **Status: every screen is built, against fixtures.** Six routes, the design system,
 the real catalogue (eleven pieces, real names, materials, prices and photography) and
 the bag all exist and work. Three things are missing, and only three:
@@ -119,7 +124,7 @@ Money formatting helpers only.
 
 | Route | What it is |
 |---|---|
-| `/` | Home — hero carousel, new arrivals, customer voices, made-to-order band, Instagram strip. The design's limited-run band, category mosaic and service band are cut from the page; all three components and their copy remain, so restoring one is an edit to `app/page.tsx` alone |
+| `/` | Home — hero carousel, new arrivals, customer voices, category mosaic, service band, Instagram strip. The design's limited-run band is cut from the page; the component and its copy remain, so restoring it is an edit to `app/page.tsx` alone. The made-to-order band is **removed rather than merely unplaced** — see [Still open](#still-open) — and the mosaic and service band moved below the voices wall to take the slot it held, which is a documented deviation from the design's block order recorded at the top of `app/page.tsx` |
 | `/shop` | Catalogue — banner, promo bands, filter rail, sort, 3-up grid, paging |
 | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, tabs, related |
 | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
@@ -462,7 +467,7 @@ Not decided, and not to be filled in by guessing:
 | Whether there is a limited run, and when it ends | Moot while the band is off the home page. `home.promo.endsAt` is `""`, so the countdown hides wherever the band is placed. Both components are real |
 | Social handles | `footer.socials` is empty, so no dead buttons render |
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Entries with no `href` render as plain text, never as a 404 link. Add the href when the page exists |
-| Which pieces are made to order | The catalogue does not say. No product carries the `Made to order` tag in `lib/shopify/fixtures.ts`, so that facet counts zero rather than guessing; the filter row is built and waits for the list, as does the mosaic tile in the (currently unplaced) mosaic |
+| ~~Which pieces are made to order~~ — **answered 2026-08-20: none. The studio does not offer the service.** | The band, its three stats and every "Start an order" link are off the home page, the hero's second slide now points at the customer voices, and the mosaic's fourth tile is "New in" instead. `components/home/made-to-order.tsx` and `home.madeToOrder` are kept for the day the service exists, marked in the content module as not to be placed. Still there and still a decision: `/shop` offers a `Made to order` availability row that counts zero. Removing it touches `QUERY_KEYS` — the URL contract — so it was left alone |
 | Product categories | Shopify product types do not exist yet. `productType` is derived from each piece's name, or from its garment shot where the name is silent — Wide leg 8, Culottes 2, Straight cut 1 |
 | A review system | The design's star rating is still deliberately absent — a fabricated score is the one placeholder that cannot be labelled as one. Real quotations are a separate matter and are live in the voices wall; there is no feed behind them, so new reviews mean editing `home.voices.reviews` |
 | Whether the studio ships from Bandung or Bekasi | The hero's order-notes card says "Pengiriman dari Kota Bekasi"; `lib/content/site.ts` says the studio is in Bandung. Both are live on the home page. Nothing in the code picks a side |

@@ -103,14 +103,19 @@ constraints, not retryable:
 - Indonesian couriers quote rates during checkout, so no rate can be shown
   before it.
 
-**Made to order is not a service the studio runs.** Confirmed 2026-08-20, and it
-contradicts what the site currently says. No piece carries the tag — so the
-catalogue facet correctly counts zero — but the home page still carries a
-made-to-order band promising "send us your measurements… ten working days", three
-supporting stats ("10 days", "5 tones", "1 tailor"), and three "Start an order"
-destinations (hero slide 2, the mosaic tile, the band). Those are claims the
-studio cannot honour. **This must be resolved before the site is public**; it is
-the one place the project states something untrue.
+**Made to order is not a service the studio runs.** Confirmed 2026-08-20. No piece
+carries the tag, so the catalogue facet counts zero, which is correct.
+
+The site used to promise it anyway. That has been taken out: the made-to-order band
+and its three stats are off the home page, the hero's second slide points at the
+customer voices instead of "Start an order", the mosaic's fourth tile is "New in",
+and the bag's summary note and the product Shipping tab no longer state a
+made-to-order policy. `components/home/made-to-order.tsx` and its copy are kept for
+the day the service exists and are marked in the content module as not to be placed.
+
+One surface still refers to it: `/shop` offers a "Made to order" availability filter
+that matches nothing. Removing it touches `QUERY_KEYS`, which is the URL contract, so
+it is a decision rather than a tidy-up — **still open**.
 
 **Language.** English interface, single locale, no i18n layer. Confirmed
 2026-08-20 as settled, not an artifact. Quoted material keeps the language it was
