@@ -49,10 +49,15 @@ duplicate a rule into the theme — change it in `tokens.css` or `base.css` and
 both targets get it. Everything under **Conventions → Design** and
 **Performance** applies to the theme unchanged; it is the same CSS.
 
-The port is **not finished**: the shell (layout, announcement bar, header,
-footer, and the copy/aurora/icon/wordmark primitives) is done, every template
-still renders `sections/main-stub.liquid`, and the home page, catalogue, product
-page and bag are still to come.
+**All six routes are ported** — home, catalogue, product, bag, page and 404 —
+along with the shell and the primitives. What is left is store configuration
+rather than code: no products are imported, filters are not defined in Search and
+Discovery, the `about` page does not exist in Shopify, and the `custom.material`
+and `custom.care` metafields are unset. Every one of those states renders a
+labelled placeholder at final size rather than breaking, so the theme is
+reviewable now. `theme/README.md` tracks it, including the one genuine regression
+(facet counts are per-filtered-set, because Shopify exposes no whole-catalogue
+count) and the deviations that are improvements.
 
 ## Working agreement
 

@@ -1,0 +1,79 @@
+{%- comment -%}
+  The bag's summary panel — port of components/cart/order-summary.tsx.
+
+  It shows what Shopify knows and says so about what it does not. Shipping is
+  quoted by the courier app during checkout — Indonesian couriers are not native
+  to Shopify — and tax is Shopify's to add, so there is no shipping selector here
+  and the total is the subtotal. Putting a rate on this page would mean inventing
+  one, and a checkout that then disagreed with it is worse than a line that says
+  "calculated at checkout".
+
+  TWO THINGS THE PORT CHANGES, both because Shopify is now actually connected:
+
+  1. Checkout is real. The React version had `cart.checkoutUrl` as null and
+     disabled the action with the reason beside it; here the button is a submit
+     named `checkout` on the cart form, which is Shopify's own hand-off. The
+     "checkout is not connected yet" sentence is deleted rather than kept,
+     because it is now false.
+
+  2. The promo field posts to checkout rather than reporting that it cannot
+     apply anything. Shopify validates discount codes at checkout and nowhere
+     else, so a code entered here rides along as ?discount= and is applied
+     there. That is a real behaviour where the React version had an honest
+     placeholder — but it does mean submitting the code moves you to checkout,
+     which the design did not draw. The label says so.
+
+  `isolate` on the wrapper is required: it is what keeps the aurora's soft-light
+  blending against this panel rather than against the page.
+{%- endcomment -%}
+
+<aside aria-labelledby="summary-heading" class="relative isolate overflow-hidden rounded-sm bg-inert p-6 md:p-9">
+  {% render 'aurora', tone: 'inert', origin: 'top-right', intensity: 0.7 %}
+
+  <div class="relative z-1 flex w-full flex-col gap-5">
+    <h2 id="summary-heading" class="font-body text-micro uppercase tracking-label text-ink-subtle">
+      {% render 'copy', value: section.settings.summary_heading, label: 'summary heading', inline: true %}
+    </h2>
+
+    <div class="flex items-baseline justify-between gap-4 text-small text-ink-body">
+      <span>{{ section.settings.subtotal_label }}</span>
+      {% render 'price', price: cart.total_price %}
+    </div>
+
+    <div class="flex items-baseline justify-between gap-4 border-t border-rule pt-5 text-small text-ink-body">
+      <span>{{ section.settings.shipping_label }}</span>
+      <span class="text-caption text-ink-muted">{{ section.settings.shipping_note }}</span>
+    </div>
+
+    <div class="flex items-baseline justify-between gap-4 border-t border-rule pt-5">
+      <span class="font-display text-h2 leading-h2 text-ink">{{ section.settings.total_label }}</span>
+      {% render 'price', price: cart.total_price, size: 'display' %}
+    </div>
+
+    <button
+      type="submit"
+      name="checkout"
+      form="cart-form"
+      class="inline-flex min-h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-sm border border-invert bg-invert px-6 text-label uppercase tracking-label text-ink-invert transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-invert-hover hover:bg-invert-hover active:translate-y-px"
+    >{{ section.settings.checkout_cta }}</button>
+
+    <form action="/checkout" method="get" class="flex flex-wrap gap-2.5">
+      <label for="promo-code" class="sr-only">{{ 'cart.promo_code' | t }}</label>
+      <input
+        id="promo-code"
+        type="text"
+        name="discount"
+        autocomplete="off"
+        placeholder="{{ 'cart.promo_code' | t }}"
+        class="min-h-12 min-w-0 flex-1 rounded-sm border border-line bg-canvas px-4 text-small text-ink placeholder:text-ink-subtle focus:border-brand"
+      >
+      <button
+        type="submit"
+        class="min-h-12 cursor-pointer rounded-sm border border-line px-5 text-micro uppercase tracking-nav text-ink-muted transition-colors duration-(--duration-base) hover:border-brand hover:text-brand"
+      >{{ 'catalogue.apply' | t }}</button>
+      <p class="w-full text-caption leading-snug text-ink-muted">{{ section.settings.promo_note }}</p>
+    </form>
+
+    <p class="text-caption leading-snug text-ink-subtle">{{ section.settings.tax_note }}</p>
+  </div>
+</aside>

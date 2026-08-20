@@ -1,0 +1,43 @@
+{%- comment -%}
+  Paging — port of components/shop/pagination.tsx.
+
+  Links, like the filters, so a page is a real URL and the back button works. The
+  current page is not a link — it carries aria-current="page", which is what tells
+  a screen reader where it is; the fill is not doing that job alone.
+
+  A single page of results renders nothing. Shopify's `paginate` drives it, so
+  the page size lives on the `paginate` tag in the section rather than in a
+  PER_PAGE constant.
+
+  Accepts: paginate
+{%- endcomment -%}
+
+{%- if paginate.pages > 1 -%}
+  <nav aria-label="{{ 'general.pagination' | t }}" class="flex flex-wrap items-center gap-2 border-t border-hairline pt-6">
+    <ul class="flex flex-wrap items-center gap-2">
+      {%- for part in paginate.parts -%}
+        <li>
+          {%- if part.is_link -%}
+            <a
+              href="{{ part.url }}"
+              data-numeric
+              class="wl-tap inline-flex size-10 items-center justify-center rounded-xs border border-line text-caption text-ink-muted transition-colors duration-(--duration-base) hover:border-brand hover:text-brand"
+            >{{ part.title }}</a>
+          {%- elsif part.title == '&hellip;' or part.title == '…' -%}
+            <span data-numeric class="inline-flex size-10 items-center justify-center text-caption text-ink-subtle">{{ part.title }}</span>
+          {%- else -%}
+            <span
+              aria-current="page"
+              data-numeric
+              class="inline-flex size-10 items-center justify-center rounded-xs border border-brand bg-brand text-caption text-on-brand"
+            >{{ part.title }}</span>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    <p class="ml-2 text-caption text-ink-subtle">
+      {{ 'general.page' | t }} <span data-numeric>{{ paginate.current_page }}</span> of <span data-numeric>{{ paginate.pages }}</span>
+    </p>
+  </nav>
+{%- endif -%}

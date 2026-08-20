@@ -1,0 +1,169 @@
+{%- comment -%}
+  Catalogue filters — port of components/shop/catalogue-filters.tsx.
+
+  Styled from the design system's Forms section: 11px camel field labels at
+  0.18em, cream-filled controls with a sand rule, and pill chips — which the
+  system reserves for badges and filter chips exactly like these.
+
+  Every control is a LINK, not a form field. Each one is the current URL with one
+  facet flipped, so filtering needs no JavaScript, no submit step and no client
+  state: the URL is the state, it is shareable, and the back button undoes exactly
+  one choice. In the React app lib/shopify/catalogue.ts built those hrefs; here
+  Shopify builds them itself as `value.url_to_add` / `value.url_to_remove`. That
+  swap is the whole reason this port deletes 241 lines.
+
+  A link cannot be aria-pressed, so an applied filter carries aria-current
+  instead — the fill is never the only thing saying it is on. Colourways carry
+  their name as well as their swatch, for the same reason.
+
+  Below `lg` the rail collapses into a <details>, closed to start with: expanded,
+  it is around 450px of controls above the first product. <details> keeps that a
+  disclosure the browser runs on its own, so the whole rail still works with
+  JavaScript off, exactly as the links inside it do. What is NOT allowed to
+  collapse with it is the fact that a filter is applied — so the summary carries
+  the count of applied facets, and the panel is the same markup either way.
+
+  TWO DELIBERATE DEVIATIONS, both forced by the platform and neither hidden:
+
+  1. COUNTS ARE AGAINST THE FILTERED SET, not the whole catalogue. The React app
+     computed facets from every product on purpose — "a count that changes as you
+     narrow tells you nothing about what the filter would do". Shopify computes
+     `value.count` against the current result set and exposes no whole-catalogue
+     equivalent, so that rule cannot be kept here. It is a real regression, and
+     it is written down rather than quietly accepted.
+
+  2. THE "MADE TO ORDER" ROW IS GONE, and that is a fix. In the React app it was
+     an availability row that counted zero, kept only because removing it meant
+     touching QUERY_KEYS — the URL contract. Shopify has no such filter unless
+     somebody creates one, so it simply does not appear, and a Still-open item
+     closes itself.
+
+  Filters are defined in Shopify's Search and Discovery app, not here. Until they
+  are, `collection.filters` is empty and the rail says so instead of inventing
+  facet values it cannot know.
+
+  Accepts: collection, results_url
+{%- endcomment -%}
+
+{%- liquid
+  assign applied = 0
+  for filter in collection.filters
+    assign applied = applied | plus: filter.active_values.size
+    if filter.type == 'price_range' and filter.min_value.value
+      assign applied = applied | plus: 1
+    endif
+  endfor
+-%}
+
+{%- capture filter_panel -%}
+  {%- if collection.filters.size == 0 -%}
+    {% render 'alert', body: 'Catalogue filters are set up in Shopify, under the Search and Discovery app. Once category, size, colourway and availability are enabled there, this rail fills itself in.' %}
+  {%- else -%}
+    {%- for filter in collection.filters -%}
+      {%- liquid
+        assign group_classes = 'flex flex-col gap-3.5 border-t border-hairline pt-7'
+        if forloop.first
+          assign group_classes = 'flex flex-col gap-3.5'
+        endif
+
+        assign is_colour = false
+        assign lowered = filter.label | downcase
+        if lowered contains 'colour' or lowered contains 'color'
+          assign is_colour = true
+        endif
+
+        assign is_size = false
+        if lowered contains 'size'
+          assign is_size = true
+        endif
+      -%}
+
+      <section class="{{ group_classes }}">
+        <h2 class="font-body text-micro uppercase tracking-label text-ink-subtle">{{ filter.label }}</h2>
+
+        {%- if is_size -%}
+          <ul class="flex flex-wrap gap-2">
+            {%- for value in filter.values -%}
+              <li>
+                <a
+                  href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+                  {% if value.active %}aria-current="true"{% endif %}
+                  class="wl-tap inline-flex h-10 min-w-11 items-center justify-center rounded-xs border px-2 text-caption tracking-wide transition-colors duration-(--duration-base) {% if value.active %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
+                >{{ value.label }}</a>
+              </li>
+            {%- endfor -%}
+          </ul>
+
+        {%- elsif is_colour -%}
+          <ul class="flex flex-wrap gap-3">
+            {%- for value in filter.values -%}
+              {%- comment -%}
+                The swatch hex comes from the value's own swatch when Shopify has
+                one; without it the chip falls back to a named pill, because a
+                blank circle carries nothing at all.
+              {%- endcomment -%}
+              <li>
+                {%- if value.swatch.color -%}
+                  <a
+                    href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+                    {% if value.active %}aria-current="true"{% endif %}
+                    title="{{ value.label }}"
+                    style="background-color:{{ value.swatch.color }}"
+                    class="wl-tap inline-block size-8 rounded-pill border border-line transition-shadow duration-(--duration-base) {% if value.active %}ring-2 ring-brand ring-offset-2{% else %}hover:ring-1 hover:ring-line{% endif %}"
+                  ><span class="sr-only">{{ value.label }}</span></a>
+                {%- else -%}
+                  <a
+                    href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+                    {% if value.active %}aria-current="true"{% endif %}
+                    class="inline-flex min-h-11 items-center rounded-pill border px-4 text-caption transition-colors duration-(--duration-base) {% if value.active %}border-brand bg-surface-muted text-ink{% else %}border-line bg-canvas text-ink-body hover:bg-surface-muted{% endif %}"
+                  >{{ value.label }}</a>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+
+        {%- else -%}
+          <ul class="flex flex-col gap-3.5">
+            {%- for value in filter.values -%}
+              <li>
+                <a
+                  href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+                  {% if value.active %}aria-current="true"{% endif %}
+                  class="flex min-h-11 items-center justify-between gap-4 text-small lg:min-h-8 transition-colors duration-(--duration-base) hover:text-brand {% if value.active %}text-brand{% else %}text-ink-body{% endif %}"
+                >
+                  <span>{{ value.label }}</span>
+                  <span data-numeric class="text-caption text-on-inert">{{ value.count }}</span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </section>
+    {%- endfor -%}
+
+    {%- if applied > 0 -%}
+      <a
+        href="{{ collection.url }}"
+        class="inline-flex min-h-11 items-center self-start border-b border-line py-2 text-caption text-brand transition-colors duration-(--duration-base) hover:border-brand"
+      >{{ 'catalogue.clear_all' | t }}</a>
+    {%- endif -%}
+  {%- endif -%}
+{%- endcapture -%}
+
+<aside aria-label="{{ 'catalogue.filters' | t }}" class="lg:sticky lg:top-[calc(var(--header-height)+1rem)]">
+  <details class="group border-b border-rule pb-6 lg:hidden">
+    <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 text-micro uppercase tracking-label text-ink [&::-webkit-details-marker]:hidden">
+      <span>
+        {{ 'catalogue.filters' | t }}
+        {%- if applied > 0 -%}
+          <span data-numeric class="text-ink-subtle"> ({{ applied }})</span>
+        {%- endif -%}
+      </span>
+      {% render 'icon', icon: 'chevron-right', class: 'size-4 rotate-90 text-ink-subtle transition-transform duration-(--duration-base) group-open:-rotate-90' %}
+    </summary>
+
+    <div class="flex flex-col gap-block pt-7">{{ filter_panel }}</div>
+  </details>
+
+  <div class="hidden lg:flex lg:flex-col lg:gap-block">{{ filter_panel }}</div>
+</aside>

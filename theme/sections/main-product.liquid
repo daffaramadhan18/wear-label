@@ -1,0 +1,102 @@
+{%- comment -%}
+  Product page — port of app/shop/[handle]/page.tsx.
+
+  Gallery, size and colourway, quantity, add to bag, tabs, related.
+
+  The two store-wide notes under the purchase block are content rather than
+  per-product data, which is why they are section settings: they are the same
+  sentence on all eleven pieces.
+{%- endcomment -%}
+
+{%- liquid
+  assign current = product.selected_or_first_available_variant
+  assign related_sizes = '(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw'
+
+  assign discount = 0
+  if current.compare_at_price and current.compare_at_price > current.price
+    assign off = current.compare_at_price | minus: current.price | times: 100.0 | divided_by: current.compare_at_price
+    assign discount = off | round
+  endif
+-%}
+
+<div class="mx-auto w-full max-w-content px-gutter pb-section pt-8">
+  {% render 'breadcrumbs', current: product.title, class: 'mb-block' %}
+
+  <div class="grid gap-block-lg lg:grid-cols-[1.1fr_minmax(0,1fr)] lg:gap-14">
+    {% render 'product-gallery', product: product %}
+
+    <div class="flex flex-col gap-5.5">
+      <div class="flex flex-col gap-2.5">
+        <span class="text-micro uppercase tracking-label text-ink-subtle">
+          {% render 'copy', value: product.metafields.custom.material.value, label: 'material', inline: true %}
+        </span>
+
+        <h1 class="text-h1 leading-h1">{{ product.title }}</h1>
+
+        <div class="mt-1.5 flex flex-wrap items-baseline gap-3.5">
+          {% render 'price', price: current.price, compare_at: current.compare_at_price, size: 'display' %}
+
+          {%- if discount > 0 -%}
+            {%- assign discount_label = '−' | append: discount | append: '%' -%}
+            {% render 'badge', tone: 'sale', label: discount_label %}
+          {%- endif -%}
+
+          {%- if product.tags contains 'New' -%}
+            {%- assign new_label = 'product.new' | t -%}
+            {% render 'badge', tone: 'invert', label: new_label %}
+          {%- endif -%}
+
+          {%- unless product.available -%}
+            {%- assign sold_out_label = 'product.sold_out' | t -%}
+            {% render 'badge', tone: 'inert', label: sold_out_label %}
+          {%- endunless -%}
+        </div>
+      </div>
+
+      {% render 'product-purchase', product: product %}
+
+      {%- if section.settings.note_1 != blank or section.settings.note_2 != blank -%}
+        <ul class="flex flex-col gap-2.5 border-t border-hairline pt-5.5 text-caption leading-snug text-ink-muted">
+          {%- if section.settings.note_1 != blank -%}<li>{{ section.settings.note_1 }}</li>{%- endif -%}
+          {%- if section.settings.note_2 != blank -%}<li>{{ section.settings.note_2 }}</li>{%- endif -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+
+  <div data-reveal class="mt-block-lg">
+    {% render 'product-tabs', product: product, shipping: section.settings.shipping %}
+  </div>
+
+  {%- assign related = collections[section.settings.related_collection] | default: collections.all -%}
+  {%- if related.products.size > 1 -%}
+    <section aria-labelledby="related-heading" class="mt-block-lg flex flex-col gap-8">
+      <div data-reveal>
+        <h2 id="related-heading" class="font-body text-h2 leading-h2">{{ 'product.related_heading' | t }}</h2>
+      </div>
+
+      <div class="grid gap-x-7 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+        {%- assign shown = 0 -%}
+        {%- for entry in related.products -%}
+          {%- if entry.handle != product.handle and shown < 4 -%}
+            <div data-reveal>{% render 'product-card', product: entry, sizes: related_sizes %}</div>
+            {%- assign shown = shown | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </section>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": [
+    { "type": "paragraph", "content": "Details comes from the product description and Fabric & care from a custom.care metafield — both per product. The two lines below are store-wide policy, so they live here." },
+    { "type": "text", "id": "note_1", "label": "Note 1", "default": "Ships from Bandung within 1–2 working days" },
+    { "type": "text", "id": "note_2", "label": "Note 2", "default": "One free size exchange within 14 days" },
+    { "type": "textarea", "id": "shipping", "label": "Shipping tab copy", "default": "Ships from Bandung within 1–2 working days. One free size exchange within 14 days." },
+    { "type": "collection", "id": "related_collection", "label": "Related from" }
+  ]
+}
+{% endschema %}

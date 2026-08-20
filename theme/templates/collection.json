@@ -1,9 +1,14 @@
 {
   "sections": {
     "main": {
-      "type": "main-stub",
-      "settings": { "route": "collection" }
+      "type": "main-collection",
+      "settings": {
+        "heading": "New Arrivals",
+        "per_page": 9
+      }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

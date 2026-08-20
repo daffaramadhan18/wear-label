@@ -1,0 +1,60 @@
+{%- comment -%}
+  Product gallery — port of components/product/product-gallery.tsx.
+
+  A column of thumbnails beside the main crop. Thumbnails are buttons with
+  aria-pressed, not links, because choosing an angle is not a navigation; the main
+  image gets the selected shot rather than the page scrolling to it.
+
+  Where a piece has only one shot the remaining slots are the labelled placeholder
+  at the right ratio, so the rail is already its final size and shape. A gallery
+  with one entry hides the rail altogether.
+
+  The rail is a column beside the photograph from `lg` up and a scrolling row
+  beneath it below that: 92px of thumbnails alongside leaves the main crop about
+  260px on a phone, and the main crop is the thing being bought.
+
+  Without JavaScript the first angle shows and the thumbnails are inert — the same
+  as the React version, which was a client component for exactly this state.
+
+  Accepts: product
+{%- endcomment -%}
+
+{%- liquid
+  assign shots = product.images
+  assign shot_count = shots.size
+-%}
+
+<div class="flex flex-col-reverse gap-4 lg:flex-row" data-gallery>
+  {%- if shot_count > 1 -%}
+    <ul
+      aria-label="{{ 'product.gallery' | t }}"
+      class="wl-rail flex gap-3 overflow-x-auto lg:w-23 lg:shrink-0 lg:flex-col lg:gap-4 lg:overflow-visible"
+    >
+      {%- for shot in shots -%}
+        <li class="w-20 shrink-0 lg:w-full">
+          <button
+            type="button"
+            data-gallery-thumb="{{ forloop.index0 }}"
+            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+            class="block w-full cursor-pointer overflow-hidden rounded-xs border transition-colors duration-(--duration-base) aria-pressed:border-brand border-border hover:border-line"
+          >
+            {% render 'media', image: shot, sizes: '(min-width: 1024px) 92px, 80px', ratio: '4 / 5', label: 'Angle', class: 'rounded-none' %}
+            <span class="sr-only">{{ 'product.show_image' | t }} {{ forloop.index }}</span>
+          </button>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  <div class="min-w-0 flex-1">
+    {%- for shot in shots -%}
+      <div data-gallery-main="{{ forloop.index0 }}" {% unless forloop.first %}hidden{% endunless %}>
+        {% render 'media', image: shot, sizes: '(min-width: 1024px) 45vw, 100vw', priority: true, label: 'Product photo' %}
+      </div>
+    {%- endfor -%}
+
+    {%- if shot_count == 0 -%}
+      {% render 'media', image: nil, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', label: 'Product photo' %}
+    {%- endif -%}
+  </div>
+</div>

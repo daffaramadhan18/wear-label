@@ -47,6 +47,20 @@
   }
 
   /*
+   * A tab panel that has not been taken over by script yet.
+   *
+   * Without this the first paint shows all three panels stacked until init runs.
+   * With it — and nothing else — a reader with script blocked would lose two
+   * panels of copy permanently, which is worse. So it is paired with the
+   * `scripting: none` override at the bottom of this file, the same pairing
+   * base.css already uses for the reveals: hidden while script is expected,
+   * visible when it is known not to be coming.
+   */
+  [data-tabs] [data-tab-hidden] {
+    display: none;
+  }
+
+  /*
    * Scroll reveals — the CSS half of assets/theme.js.
    *
    * transform and opacity only: both are composited, so a page carrying a
@@ -87,5 +101,32 @@
     opacity: 1;
     transform: none;
     transition: none;
+  }
+}
+
+/*
+ * No-script fallbacks.
+ *
+ * base.css carries the one for the reveals. These two are the theme's own: a tab
+ * strip and a gallery rail are both enhancements over content that has to stay
+ * readable regardless, so with scripting off every panel and every photograph is
+ * shown in sequence and the controls that would have switched between them are
+ * taken out of the page rather than left there doing nothing.
+ */
+@media (scripting: none) {
+  [data-tabs] [data-tab-hidden] {
+    display: block;
+  }
+
+  [data-tabs] [role="tablist"] {
+    display: none;
+  }
+
+  [data-gallery] [data-gallery-main][hidden] {
+    display: block;
+  }
+
+  [data-gallery] [aria-label] > li > [data-gallery-thumb] {
+    pointer-events: none;
   }
 }

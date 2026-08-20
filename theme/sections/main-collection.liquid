@@ -1,0 +1,89 @@
+{%- comment -%}
+  The catalogue — port of app/shop/page.tsx.
+
+  The entire query lives in the URL, which is why this needed no rewriting of
+  behaviour: Shopify's storefront filtering already IS "the URL is the state".
+  No client-side filtering, no hydrated state to keep in step, and the result is
+  a link anyone can send to anyone.
+
+  The page opens straight on the catalogue. The breadcrumbs, the campaign banner
+  and the two promo bands the design draws above the grid are cut, exactly as
+  they are in the React route, so /collections/all lands on the pieces and the
+  filter rail with nothing in front of them.
+
+  The heading is screen-reader only because it is the page's single h1: without
+  it the filter legends and the product-card titles would be h2s sitting under no
+  h1 at all, and the route would announce itself by its <title> only.
+
+  PLACEHOLDER MODE. An empty collection draws a full grid of placeholder cards
+  rather than an empty-state message, because on this store "empty" means "no
+  products imported yet", not "no results". A collection that is non-empty but
+  filtered to nothing gets the real no-results alert — those are two different
+  facts and they must not look the same.
+{%- endcomment -%}
+
+{%- liquid
+  assign card_sizes = '(min-width: 1280px) 22vw, (min-width: 640px) 40vw, 45vw'
+
+  assign filter_label = 'catalogue.all_pieces' | t
+  for filter in collection.filters
+    for value in filter.active_values
+      assign filter_label = value.label
+      break
+    endfor
+  endfor
+-%}
+
+{% paginate collection.products by section.settings.per_page %}
+  <div class="mx-auto w-full max-w-content px-gutter pb-section pt-block-lg">
+    <h1 class="sr-only">{{ collection.title | default: section.settings.heading }}</h1>
+
+    <div class="grid gap-block-lg lg:grid-cols-[15rem_minmax(0,1fr)]">
+      {% render 'catalogue-filters', collection: collection %}
+
+      <div class="flex flex-col gap-7">
+        {% render 'results-toolbar', collection: collection, count: collection.products_count, filter_label: filter_label %}
+
+        {%- if collection.products.size > 0 -%}
+          <div class="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-7 sm:gap-y-10 xl:grid-cols-3">
+            {%- for product in collection.products -%}
+              <div data-reveal>
+                {% render 'product-card', product: product, heading_level: 'h2', sizes: card_sizes %}
+              </div>
+            {%- endfor -%}
+          </div>
+
+        {%- elsif collection.all_products_count > 0 -%}
+          {%- comment -%}
+            A real no-results: the catalogue has pieces, this filter matches none.
+          {%- endcomment -%}
+          {% render 'alert', body: 'No pieces match these filters.' %}
+
+        {%- else -%}
+          {%- comment -%}
+            The store has no products at all. Draw the grid so its columns, gaps
+            and card proportions are reviewable now — the same rule the content
+            module uses for unwritten copy.
+          {%- endcomment -%}
+          <div class="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-7 sm:gap-y-10 xl:grid-cols-3">
+            {%- for i in (1..9) -%}
+              <div data-reveal>{% render 'product-card', heading_level: 'h2', sizes: card_sizes %}</div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {% render 'pagination', paginate: paginate %}
+      </div>
+    </div>
+  </div>
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "Catalogue",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Fallback heading", "default": "New Arrivals", "info": "Used only when the collection has no title. It is screen-reader only either way — it is the page's single h1." },
+    { "type": "range", "id": "per_page", "label": "Products per page", "min": 6, "max": 24, "step": 3, "default": 9 }
+  ]
+}
+{% endschema %}

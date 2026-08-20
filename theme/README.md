@@ -62,7 +62,7 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 
 ## Port status
 
-**Done — the shell.**
+**Done — the shell and all six routes.**
 
 | File | From |
 |---|---|
@@ -75,15 +75,40 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 | `snippets/copy.liquid` | `components/ui/copy.tsx` |
 | `snippets/aurora.liquid` | `components/ui/aurora.tsx` |
 | `snippets/icon.liquid` | `components/ui/icons.tsx` — four of the marks so far |
-| `assets/theme.js` | `components/motion/{reveal,stagger}.tsx` + the header disclosure |
+| `assets/theme.js` | `components/motion/{reveal,stagger}.tsx`, the header disclosure, the carousel, the gallery, the tabs, the stepper, the save button |
+| `sections/hero-carousel.liquid` | `components/home/hero-carousel.tsx` |
+| `sections/new-arrivals.liquid` | the arrivals block in `app/page.tsx` |
+| `sections/voices-wall.liquid` | `components/home/testimonial-wall.tsx` |
+| `sections/category-mosaic.liquid` | `components/home/category-mosaic.tsx` |
+| `sections/service-band.liquid` | `components/home/service-band.tsx` |
+| `sections/instagram-strip.liquid` | `components/home/instagram-strip.tsx` |
+| `sections/main-collection.liquid` | `app/shop/page.tsx` |
+| `sections/main-product.liquid` | `app/shop/[handle]/page.tsx` |
+| `sections/main-cart.liquid` | `app/cart/page.tsx` |
+| `sections/main-page.liquid` | `app/about/page.tsx` |
+| `sections/main-404.liquid` | `app/not-found.tsx` |
+| `snippets/product-card.liquid` | `components/shop/product-card.tsx` + `card-hover.tsx` |
+| `snippets/catalogue-filters.liquid` | `components/shop/catalogue-filters.tsx` |
+| `snippets/results-toolbar.liquid` | `components/shop/results-toolbar.tsx` |
+| `snippets/pagination.liquid` | `components/shop/pagination.tsx` |
+| `snippets/product-gallery.liquid` | `components/product/product-gallery.tsx` |
+| `snippets/product-purchase.liquid` | `components/product/product-purchase.tsx` |
+| `snippets/product-tabs.liquid` | `components/product/product-tabs.tsx` |
+| `snippets/cart-lines.liquid` | `components/cart/cart-lines.tsx` |
+| `snippets/order-summary.liquid` | `components/cart/order-summary.tsx` |
+| `snippets/media.liquid`, `price`, `badge`, `alert`, `breadcrumbs`, `save-button` | the matching `components/ui/*` |
 
-**Not done.** Every template renders `sections/main-stub.liquid`, which draws a
-labelled placeholder at final size — the same rule the content module uses for
-unwritten copy, so the shell around it is reviewable now. Delete the stub from a
-template the moment that template's real main section lands.
+**Not done, and it is store configuration rather than code:**
 
-Still to port: the home page's seven blocks, the catalogue, the product page, the
-bag, and the remaining marks in `snippets/icon.liquid`.
+| Blocked on | What the theme does meanwhile |
+|---|---|
+| No products in the store | Every grid draws placeholder cards at the real card proportions. `/collections/all` shows nine, New arrivals eight, the strip eleven doubled. |
+| Filters not defined in Search and Discovery | The rail says where they are configured instead of inventing facet values. |
+| No `about` page in Shopify | `/pages/about` 404s. Creating the page in Content → Pages is the whole fix; `main-page` is written and waiting. |
+| `custom.material` and `custom.care` metafields | Product cards and the Fabric & care tab show labelled placeholders. |
+
+`sections/main-stub.liquid` still backs the templates the design never covered —
+blog, article, search, list-collections, gift card, customer pages.
 
 ## Copy
 
@@ -107,3 +132,38 @@ still applies — the aurora's veil must match its surface, `isolate` is require
 on an aurora band, a continuous loop animates `transform` or `opacity` and
 nothing else, and never wrap a blended layer in something that animates opacity.
 The CSS is the same CSS; the bugs it can have are the same bugs.
+
+## Deviations from the React app, all deliberate
+
+Three are improvements the platform hands over:
+
+- **The variant picker works without JavaScript.** React held the selection in
+  `useState`; each option value is now a link to `?variant=<id>`, the same "URL is
+  the state" rule the catalogue filters follow. A chosen variant is shareable and
+  the back button undoes one choice.
+- **The product card is fully server-rendered.** Its hover scale was a Motion
+  client component because the card is one stretched link and pointer and keyboard
+  land on different elements. `group-hover` plus `group-focus-within` covers both
+  in CSS.
+- **Checkout, the newsletter and discount codes are real**, so the three "not
+  connected yet" strings are deleted rather than kept. Keeping them would ship a
+  false statement.
+
+One is a genuine regression, and it is not hidden:
+
+- **Facet counts are computed against the filtered set, not the whole catalogue.**
+  The React app used whole-catalogue counts on purpose — "a count that changes as
+  you narrow tells you nothing about what the filter would do". Shopify's
+  `value.count` has no whole-catalogue equivalent, so that rule cannot be kept.
+
+One closes a Still-open item by itself:
+
+- **The "Made to order" filter row is gone.** In React it was an availability row
+  that counted zero, kept only because removing it meant touching `QUERY_KEYS`.
+  Shopify has no such filter unless somebody creates one.
+
+One changes behaviour the design drew:
+
+- **The bag's promo field moves you to checkout.** Shopify validates discount
+  codes at checkout and nowhere else, so the field rides along as `?discount=`
+  rather than applying in place. The note beside it says so.

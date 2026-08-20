@@ -1,0 +1,54 @@
+{%- comment -%}
+  Details / Fabric & care / Shipping — port of components/product/product-tabs.tsx.
+
+  Real ARIA tabs, which means the keyboard contract has to be real too: arrow keys
+  move between tabs, Home and End jump to the ends, and the tab strip is a single
+  tab stop with Tab moving on to the panel. A row of buttons that only responds to
+  clicks looks like this and is not this. See wl-tabs in assets/theme.js.
+
+  A panel whose copy has not been written renders the labelled placeholder at body
+  size, so the block keeps its height either way. Details comes from the product
+  description and Fabric & care from a `custom.care` metafield; both are blank on
+  this catalogue on purpose — the design reused one generic paragraph for all
+  eleven pieces, which would state a wrong inseam and a wrong fabric on most of
+  them.
+
+  Without JavaScript every panel is visible in sequence and the tab strip is
+  removed, rather than two panels of copy being lost to a control that cannot
+  work — see the `scripting: none` block in theme-src/theme.css. The copy is the
+  point; the tabbing is the enhancement.
+
+  Accepts: product, shipping (store-wide policy copy)
+{%- endcomment -%}
+
+<div class="border-t border-rule" data-tabs>
+  <div role="tablist" class="flex flex-wrap">
+    <button type="button" role="tab" id="tab-details" aria-selected="true" aria-controls="panel-details" tabindex="0"
+      class="cursor-pointer border-b-2 border-transparent px-6 py-5.5 text-label uppercase tracking-nav text-ink-subtle transition-colors duration-(--duration-base) hover:text-brand aria-selected:border-brand aria-selected:text-ink sm:px-8">
+      {{ 'product.details' | t }}
+    </button>
+    <button type="button" role="tab" id="tab-care" aria-selected="false" aria-controls="panel-care" tabindex="-1"
+      class="cursor-pointer border-b-2 border-transparent px-6 py-5.5 text-label uppercase tracking-nav text-ink-subtle transition-colors duration-(--duration-base) hover:text-brand aria-selected:border-brand aria-selected:text-ink sm:px-8">
+      {{ 'product.fabric_and_care' | t }}
+    </button>
+    <button type="button" role="tab" id="tab-shipping" aria-selected="false" aria-controls="panel-shipping" tabindex="-1"
+      class="cursor-pointer border-b-2 border-transparent px-6 py-5.5 text-label uppercase tracking-nav text-ink-subtle transition-colors duration-(--duration-base) hover:text-brand aria-selected:border-brand aria-selected:text-ink sm:px-8">
+      {{ 'product.shipping' | t }}
+    </button>
+  </div>
+
+  <div role="tabpanel" id="panel-details" aria-labelledby="tab-details" tabindex="0"
+    class="wl-measure py-8 text-body leading-body text-ink-body">
+    {% render 'copy', value: product.description, label: 'product details', lines: 3 %}
+  </div>
+
+  <div role="tabpanel" id="panel-care" aria-labelledby="tab-care" tabindex="0" data-tab-hidden
+    class="wl-measure py-8 text-body leading-body text-ink-body">
+    {% render 'copy', value: product.metafields.custom.care.value, label: 'fabric and care', lines: 3 %}
+  </div>
+
+  <div role="tabpanel" id="panel-shipping" aria-labelledby="tab-shipping" tabindex="0" data-tab-hidden
+    class="wl-measure py-8 text-body leading-body text-ink-body">
+    {% render 'copy', value: shipping, label: 'shipping', lines: 3 %}
+  </div>
+</div>

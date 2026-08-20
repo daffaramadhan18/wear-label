@@ -1,0 +1,100 @@
+{%- comment -%}
+  The lines in the bag — port of components/cart/cart-lines.tsx.
+
+  No client code at all, and less than before. Each line is one form posting to
+  /cart/change: the quantity buttons carry the value they would set
+  (name="quantity", two buttons with different values) and remove is the same
+  endpoint with quantity 0. The React version needed `formAction` to retarget a
+  second Server Function; Shopify needs one endpoint, so that goes away.
+
+  Decrementing stops at one; removing a line is the × and only the ×, so a
+  mis-aimed click on a stepper can never delete something. That rule survives the
+  port even though remove is now "quantity 0" — the stepper's lower bound is what
+  enforces it.
+
+  The column headers only exist on wide screens — below that each line stacks and
+  every value carries its own label, since a bare number in a column with no
+  header is meaningless.
+{%- endcomment -%}
+
+<div class="flex flex-col">
+  <div
+    aria-hidden="true"
+    class="hidden gap-5 border-b border-rule pb-4 text-micro uppercase tracking-nav text-ink-subtle md:grid md:grid-cols-[2.2fr_1fr_1fr_1fr_2.5rem]"
+  >
+    <span>{{ 'cart.item' | t }}</span>
+    <span>{{ 'cart.price' | t }}</span>
+    <span>{{ 'product.quantity' | t }}</span>
+    <span>{{ 'cart.line_total' | t }}</span>
+    <span></span>
+  </div>
+
+  <ul>
+    {%- for line in cart.items -%}
+      <li class="grid grid-cols-2 items-center gap-5 border-b border-hairline py-6 md:grid-cols-[2.2fr_1fr_1fr_1fr_2.5rem]">
+        <div class="col-span-2 flex items-center gap-4.5 md:col-span-1">
+          <div class="w-22 shrink-0">
+            {% render 'media', image: line.image, sizes: '88px', ratio: '4 / 5', label: 'Product photo' %}
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <a
+              href="{{ line.url }}"
+              class="font-display text-h3 leading-h3 text-ink transition-colors duration-(--duration-base) hover:text-brand"
+            >{{ line.product.title }}</a>
+            <span class="text-caption text-ink-subtle">{{ line.variant.title }}</span>
+            {%- unless line.variant.available -%}
+              {%- assign sold_out_label = 'product.sold_out' | t -%}
+              {% render 'badge', tone: 'inert', label: sold_out_label, class: 'mt-1 self-start' %}
+            {%- endunless -%}
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <span class="text-micro uppercase tracking-nav text-ink-subtle md:hidden">{{ 'cart.price' | t }}</span>
+          {% render 'price', price: line.final_price %}
+        </div>
+
+        <form method="post" action="{{ routes.cart_change_url }}" class="flex flex-col gap-1">
+          <input type="hidden" name="line" value="{{ forloop.index }}">
+          <span class="text-micro uppercase tracking-nav text-ink-subtle md:hidden">{{ 'product.quantity' | t }}</span>
+          <div class="inline-flex w-fit items-center rounded-xs border border-line bg-canvas">
+            <button
+              type="submit"
+              name="quantity"
+              value="{{ line.quantity | minus: 1 }}"
+              {% if line.quantity <= 1 %}disabled{% endif %}
+              class="wl-tap h-10 w-9 cursor-pointer text-body text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted disabled:cursor-not-allowed disabled:text-on-inert"
+            >−<span class="sr-only">{{ 'product.decrease' | t }}</span></button>
+
+            <span data-numeric class="w-9 text-center text-small text-ink">{{ line.quantity }}</span>
+
+            <button
+              type="submit"
+              name="quantity"
+              value="{{ line.quantity | plus: 1 }}"
+              class="wl-tap h-10 w-9 cursor-pointer text-body text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted"
+            >+<span class="sr-only">{{ 'product.increase' | t }}</span></button>
+          </div>
+        </form>
+
+        <div class="flex flex-col gap-1">
+          <span class="text-micro uppercase tracking-nav text-ink-subtle md:hidden">{{ 'cart.line_total' | t }}</span>
+          {% render 'price', price: line.final_line_price, class: 'font-medium' %}
+        </div>
+
+        {%- comment -%} Same endpoint as the stepper, at quantity zero. {%- endcomment -%}
+        <form method="post" action="{{ routes.cart_change_url }}" class="justify-self-end">
+          <input type="hidden" name="line" value="{{ forloop.index }}">
+          <input type="hidden" name="quantity" value="0">
+          <button
+            type="submit"
+            class="wl-tap inline-flex size-9 cursor-pointer items-center justify-center rounded-xs text-ink-muted transition-colors duration-(--duration-base) hover:bg-surface-muted hover:text-ink"
+          >
+            {% render 'icon', icon: 'close', class: 'size-4' %}
+            <span class="sr-only">{{ 'cart.remove' | t }}: {{ line.product.title }}</span>
+          </button>
+        </form>
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>

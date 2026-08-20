@@ -1,0 +1,62 @@
+{%- comment -%}
+  The row above the grid — port of components/shop/results-toolbar.tsx.
+
+  How many pieces are showing and what is narrowing them, then the sort control.
+
+  Sort is the one facet that stays a form rather than becoming a set of links — a
+  <select> is the right control for a handful of mutually exclusive orderings, and
+  the design draws it that way. It is a plain GET, so it needs no JavaScript: the
+  hidden fields carry the active filters through, and `page` is deliberately NOT
+  among them, because a re-sorted catalogue starts again at page one.
+
+  The orderings are Shopify's own `collection.sort_options` rather than the
+  design's four hardcoded keys — which the merchant controls in admin, and which
+  is the same reason the sort select exists at all.
+
+  Accepts: collection, count, filter_label
+{%- endcomment -%}
+
+<div class="flex flex-wrap items-center justify-between gap-4 border-b border-hairline pb-4.5">
+  <p class="text-caption text-ink-muted">
+    <span data-numeric>{{ count }}</span> {{ 'catalogue.pieces' | t }} · {{ filter_label }}
+  </p>
+
+  <form action="{{ collection.url }}" method="get" class="flex items-center gap-3">
+    {%- comment -%}
+      Every applied facet is carried forward by hand. Without these the sort
+      submit would silently clear the filters — and `page` is left out on
+      purpose, so re-sorting lands on page one rather than page four of a
+      different ordering.
+    {%- endcomment -%}
+    {%- for filter in collection.filters -%}
+      {%- for value in filter.active_values -%}
+        <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+      {%- endfor -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- if filter.min_value.value -%}
+          <input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value }}">
+        {%- endif -%}
+        {%- if filter.max_value.value -%}
+          <input type="hidden" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value }}">
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    <label for="sort" class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'catalogue.sort' | t }}</label>
+    <select
+      id="sort"
+      name="sort_by"
+      class="min-h-11 cursor-pointer rounded-sm border border-line bg-canvas px-3.5 text-caption text-ink transition-colors duration-(--duration-base) focus:border-brand"
+    >
+      {%- assign current_sort = collection.sort_by | default: collection.default_sort_by -%}
+      {%- for option in collection.sort_options -%}
+        <option value="{{ option.value }}" {% if option.value == current_sort %}selected{% endif %}>{{ option.name }}</option>
+      {%- endfor -%}
+    </select>
+
+    <button
+      type="submit"
+      class="inline-flex min-h-11 cursor-pointer items-center rounded-sm border border-line px-4 text-micro uppercase tracking-nav text-ink-muted transition-colors duration-(--duration-base) hover:border-brand hover:text-brand"
+    >{{ 'catalogue.apply' | t }}</button>
+  </form>
+</div>

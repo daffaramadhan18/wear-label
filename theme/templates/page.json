@@ -1,9 +1,11 @@
 {
   "sections": {
     "main": {
-      "type": "main-stub",
-      "settings": { "route": "page" }
+      "type": "main-page",
+      "settings": {}
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

@@ -1,0 +1,35 @@
+{%- comment -%}
+  A content page — About Us and anything else the studio writes. Port of
+  app/about/page.tsx and the PageHeading primitive in components/ui/section.tsx.
+
+  The heading and the body come from the Shopify page itself, so the studio writes
+  About Us in the admin rather than in a content module. Where the page has no
+  content yet the labelled placeholder renders at final size — About Us copy is
+  still unwritten, and that is the state it should show.
+{%- endcomment -%}
+
+<div class="mx-auto w-full max-w-content px-gutter pb-section pt-block-lg">
+  <div class="wl-measure">
+    <h1 class="text-h1 leading-h1">
+      {% render 'copy', value: page.title, label: 'page heading' %}
+    </h1>
+
+    <div class="mt-6 text-body leading-body text-ink-muted">
+      {%- if page.content != blank -%}
+        {{ page.content }}
+      {%- else -%}
+        {% render 'copy', value: '', label: 'intro', lines: 2 %}
+        <div class="mt-8">{% render 'copy', value: '', label: 'body', lines: 5 %}</div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Page",
+  "settings": [
+    { "type": "paragraph", "content": "The heading and body are the Shopify page's own title and content — edit them under Content → Pages, not here. An empty page renders a labelled placeholder at final size rather than a blank screen." }
+  ]
+}
+{% endschema %}

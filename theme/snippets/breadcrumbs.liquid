@@ -1,0 +1,25 @@
+{%- comment -%}
+  Breadcrumb trail — port of components/ui/breadcrumbs.tsx.
+
+  The last entry is the current page and is not a link — it carries
+  aria-current="page" instead, so the trail reads as a position rather than as a
+  set of destinations.
+
+  Accepts: current (label of the current page), class
+{%- endcomment -%}
+
+<nav aria-label="Breadcrumb" class="{{ class }}">
+  <ol class="flex flex-wrap items-center gap-2.5 text-caption text-ink-subtle">
+    <li class="flex items-center gap-2.5">
+      <a href="{{ routes.root_url }}" class="transition-colors duration-(--duration-base) hover:text-brand">Home</a>
+    </li>
+    <li class="flex items-center gap-2.5">
+      <span aria-hidden="true" class="text-line">/</span>
+      <a href="{{ routes.all_products_collection_url }}" class="transition-colors duration-(--duration-base) hover:text-brand">Shop</a>
+    </li>
+    <li class="flex items-center gap-2.5">
+      <span aria-hidden="true" class="text-line">/</span>
+      <span aria-current="page" class="text-ink">{{ current }}</span>
+    </li>
+  </ol>
+</nav>

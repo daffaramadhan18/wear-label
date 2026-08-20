@@ -1,0 +1,192 @@
+{%- comment -%}
+  Size, colourway, quantity, add to bag — port of
+  components/product/product-purchase.tsx.
+
+  Shopify holds a variant per combination of option values, so the option grids
+  resolve to a single variant id, which is the only thing the form posts. Price,
+  stock and availability are all read from that variant and never computed here —
+  the same rule the React version worked to, except that here the variant is
+  Shopify's own object rather than one found in a fixture.
+
+  THE ONE ARCHITECTURAL CHANGE, and it is an improvement. React held the
+  selection in useState, so the picker did not work without JavaScript. Here each
+  option value is a LINK to ?variant=<id> — the same "URL is the state" rule the
+  catalogue filters follow. That makes the picker work with script off, makes a
+  chosen variant shareable, and makes the back button undo exactly one choice.
+  Shopify resolves `product.selected_or_first_available_variant` from that param,
+  so there is no state to keep in step.
+
+  A combination with no stock does not silently do nothing: the value is rendered
+  disabled and struck through, and where the pair itself is the problem the action
+  is disabled and says so in words. Sold out is never communicated by colour
+  alone.
+
+  Accepts: product
+{%- endcomment -%}
+
+{%- liquid
+  assign current = product.selected_or_first_available_variant
+  assign purchasable = false
+  if current and current.available
+    assign purchasable = true
+  endif
+-%}
+
+<form method="post" action="{{ routes.cart_add_url }}" id="options" class="flex flex-col gap-5.5">
+  <input type="hidden" name="form_type" value="product">
+  <input type="hidden" name="utf8" value="✓">
+  <input type="hidden" name="id" value="{{ current.id }}">
+
+  {%- for option in product.options_with_values -%}
+    {%- liquid
+      assign option_index = forloop.index
+      assign lowered = option.name | downcase
+      assign is_colour = false
+      if lowered contains 'colour' or lowered contains 'color'
+        assign is_colour = true
+      endif
+      assign selected_value = current.options[forloop.index0]
+    -%}
+
+    <fieldset class="flex flex-col gap-3 {% if forloop.first %}border-t border-hairline pt-5.5{% endif %}">
+      {%- if is_colour -%}
+        <div class="flex items-baseline justify-between gap-4">
+          <legend class="text-micro uppercase tracking-nav text-ink-subtle">{{ option.name }}</legend>
+          <span class="text-caption text-ink-muted">{{ selected_value }}</span>
+        </div>
+      {%- else -%}
+        <legend class="text-micro uppercase tracking-nav text-ink-subtle">{{ option.name }}</legend>
+      {%- endif -%}
+
+      <div class="flex flex-wrap {% if is_colour %}gap-3.5{% else %}gap-2.5{% endif %}">
+        {%- for value in option.values -%}
+          {%- comment -%}
+            The variant this value would land on: the current selection with just
+            this one option swapped. Nothing is guessed — if no such variant
+            exists the value is rendered unavailable rather than linked.
+          {%- endcomment -%}
+          {%- liquid
+            assign target = nil
+            for candidate in product.variants
+              assign matches = true
+              for other in product.options_with_values
+                assign other_index = forloop.index
+                if other_index == option_index
+                  if candidate.options[forloop.index0] != value
+                    assign matches = false
+                  endif
+                else
+                  if candidate.options[forloop.index0] != current.options[forloop.index0]
+                    assign matches = false
+                  endif
+                endif
+              endfor
+              if matches
+                assign target = candidate
+                break
+              endif
+            endfor
+
+            assign is_selected = false
+            if value == selected_value
+              assign is_selected = true
+            endif
+
+            assign is_available = false
+            if target and target.available
+              assign is_available = true
+            endif
+          -%}
+
+          {%- if is_colour -%}
+            {%- assign swatch = value.swatch.color -%}
+            {%- if is_available -%}
+              <a
+                href="{{ product.url }}?variant={{ target.id }}"
+                {% if is_selected %}aria-current="true"{% endif %}
+                title="{{ value }}"
+                {% if swatch %}style="background-color:{{ swatch }}"{% endif %}
+                class="wl-tap size-10 rounded-pill border border-line transition-shadow duration-(--duration-base) {% if is_selected %}ring-2 ring-brand ring-offset-2{% else %}hover:ring-1 hover:ring-line{% endif %} {% unless swatch %}bg-tone{% endunless %}"
+              ><span class="sr-only">{{ value }}</span></a>
+            {%- else -%}
+              <span
+                aria-disabled="true"
+                title="{{ value }}"
+                {% if swatch %}style="background-color:{{ swatch }}"{% endif %}
+                class="wl-tap inline-block size-10 rounded-pill border border-line opacity-40 {% unless swatch %}bg-tone{% endunless %}"
+              ><span class="sr-only">{{ value }} — {{ 'product.sold_out' | t }}</span></span>
+            {%- endif -%}
+
+          {%- else -%}
+            {%- if is_available -%}
+              <a
+                href="{{ product.url }}?variant={{ target.id }}"
+                {% if is_selected %}aria-current="true"{% endif %}
+                class="inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border px-3 text-caption tracking-wide transition-colors duration-(--duration-base) {% if is_selected %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
+              >{{ value }}</a>
+            {%- else -%}
+              <span
+                aria-disabled="true"
+                class="inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border border-inert-border bg-inert px-3 text-caption tracking-wide text-on-inert line-through"
+              >{{ value }}<span class="sr-only"> — {{ 'product.sold_out' | t }}</span></span>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </fieldset>
+  {%- endfor -%}
+
+  <div class="flex flex-wrap items-stretch gap-3.5">
+    {%- comment -%}
+      The stepper's two buttons are an enhancement; the number input underneath
+      them is what actually carries the value, so quantity still works with
+      script off. That is why they are type="button" and not submits.
+    {%- endcomment -%}
+    <div class="inline-flex items-center rounded-xs border border-line bg-canvas" data-stepper>
+      <button
+        type="button"
+        data-stepper-down
+        class="h-14 w-12 cursor-pointer text-h3 text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted disabled:cursor-not-allowed disabled:text-on-inert"
+      >−<span class="sr-only">{{ 'product.decrease' | t }}</span></button>
+
+      <input
+        type="number"
+        name="quantity"
+        value="1"
+        min="1"
+        max="10"
+        step="1"
+        aria-label="{{ 'product.quantity' | t }}"
+        data-numeric
+        data-stepper-value
+        class="w-13 border-0 bg-transparent text-center text-body text-ink [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      >
+
+      <button
+        type="button"
+        data-stepper-up
+        class="h-14 w-12 cursor-pointer text-h3 text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted disabled:cursor-not-allowed disabled:text-on-inert"
+      >+<span class="sr-only">{{ 'product.increase' | t }}</span></button>
+    </div>
+
+    <button
+      type="submit"
+      {% unless purchasable %}disabled{% endunless %}
+      class="inline-flex min-h-13 flex-1 cursor-pointer items-center justify-center gap-2 rounded-sm border border-brand bg-brand px-11 text-caption uppercase tracking-[0.22em] text-on-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand-hover hover:bg-brand-hover active:translate-y-px disabled:cursor-not-allowed disabled:border-disabled-border disabled:bg-disabled disabled:text-on-disabled disabled:translate-y-0"
+    >{{ 'product.add_to_bag' | t }}</button>
+
+    {% render 'save-button', product: product, class: 'size-14 rounded-xs border border-ink-subtle hover:bg-inert' %}
+  </div>
+
+  {%- comment -%}
+    Present from first render, so a message is an update to a region that already
+    exists rather than a new one appearing.
+  {%- endcomment -%}
+  <p aria-live="polite" class="min-h-5 text-caption text-ink-muted">
+    {%- if purchasable -%}
+      {{ form.errors | default_errors }}
+    {%- else -%}
+      {{ 'product.unavailable_variant' | t }}
+    {%- endif -%}
+  </p>
+</form>

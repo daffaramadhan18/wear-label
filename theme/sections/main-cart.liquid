@@ -1,0 +1,93 @@
+{%- comment -%}
+  The bag — port of app/cart/page.tsx.
+
+  Nothing on this page computes a price, a shipping rate or a total: Shopify's
+  `cart` object is the authority, which is exactly what lib/shopify/cart.ts's
+  arithmetic existed to stand in for. That is 251 lines this port deletes.
+
+  An empty bag is a state, not an error, so it gets the design's own block and a
+  way back into the catalogue rather than an empty table.
+
+  Three children rather than a summary beside a stacked column, so the order can
+  differ by width: on a phone the summary follows the lines directly, ahead of
+  "Continue shopping", which would otherwise put checkout at the very bottom of a
+  long page. The explicit row and column placement from `lg` up reproduces the
+  design's two-column layout exactly.
+
+  The bare <form id="cart-form"> is deliberate and must stay OUTSIDE the lines.
+  Each line is its own form, nested forms are illegal, and the checkout button
+  reaches this one by its `form` attribute instead of being wrapped in it.
+{%- endcomment -%}
+
+<div class="mx-auto w-full max-w-content px-gutter pb-section pt-8">
+  <nav aria-label="Breadcrumb" class="mb-block">
+    <ol class="flex flex-wrap items-center gap-2.5 text-caption text-ink-subtle">
+      <li class="flex items-center gap-2.5">
+        <a href="{{ routes.root_url }}" class="transition-colors duration-(--duration-base) hover:text-brand">Home</a>
+      </li>
+      <li class="flex items-center gap-2.5">
+        <span aria-hidden="true" class="text-line">/</span>
+        <span aria-current="page" class="text-ink">{{ section.settings.heading }}</span>
+      </li>
+    </ol>
+  </nav>
+
+  <h1 class="text-h1 leading-h1">
+    {% render 'copy', value: section.settings.heading, label: 'page heading' %}
+  </h1>
+
+  {%- if cart.item_count > 0 -%}
+    <form id="cart-form" action="{{ routes.cart_url }}" method="post" hidden></form>
+
+    <div class="mt-block-lg grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-x-12 lg:gap-y-8">
+      <div class="lg:col-start-1 lg:row-start-1">
+        {% render 'cart-lines' %}
+      </div>
+
+      <div class="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+        {% render 'order-summary', section: section %}
+      </div>
+
+      <a
+        href="{{ routes.all_products_collection_url }}"
+        class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 self-start rounded-sm border border-ink-subtle bg-transparent px-7 text-label uppercase tracking-label text-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand hover:bg-brand hover:text-on-brand active:translate-y-px lg:col-start-1 lg:row-start-2"
+      >{{ 'cart.continue_shopping' | t }}</a>
+    </div>
+
+  {%- else -%}
+    <div class="flex flex-col items-center gap-5 py-section text-center">
+      <p class="font-display text-h2 leading-h2 text-ink">
+        {% render 'copy', value: section.settings.empty_heading, label: 'empty heading' %}
+      </p>
+      <p class="text-small text-ink-muted">
+        {% render 'copy', value: section.settings.empty_body, label: 'empty body' %}
+      </p>
+      <a
+        href="{{ routes.all_products_collection_url }}"
+        class="mt-2 inline-flex min-h-13 cursor-pointer items-center justify-center gap-2 rounded-sm border border-ink-subtle bg-transparent px-11 text-caption uppercase tracking-[0.22em] text-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand hover:bg-brand hover:text-on-brand active:translate-y-px"
+      >{{ section.settings.empty_cta }}</a>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Bag",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shopping bag" },
+    { "type": "header", "content": "Summary" },
+    { "type": "text", "id": "summary_heading", "label": "Panel heading", "default": "Order summary" },
+    { "type": "text", "id": "subtotal_label", "label": "Subtotal label", "default": "Subtotal" },
+    { "type": "text", "id": "shipping_label", "label": "Shipping label", "default": "Shipping" },
+    { "type": "text", "id": "shipping_note", "label": "Shipping value", "default": "Calculated at checkout", "info": "Indonesian couriers are quoted by an app during checkout, so this must never show a rate the bag cannot know." },
+    { "type": "text", "id": "total_label", "label": "Total label", "default": "Total" },
+    { "type": "text", "id": "checkout_cta", "label": "Checkout button", "default": "Continue to payment" },
+    { "type": "text", "id": "promo_note", "label": "Promo note", "default": "Discount codes are checked by Shopify at checkout." },
+    { "type": "text", "id": "tax_note", "label": "Tax note", "default": "Taxes included." },
+    { "type": "header", "content": "Empty bag" },
+    { "type": "text", "id": "empty_heading", "label": "Heading", "default": "Your bag is empty" },
+    { "type": "text", "id": "empty_body", "label": "Body", "default": "Pieces you add will appear here." },
+    { "type": "text", "id": "empty_cta", "label": "Button", "default": "Browse the collection" }
+  ]
+}
+{% endschema %}

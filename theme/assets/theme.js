@@ -359,3 +359,132 @@
     init();
   }
 })();
+
+/*
+ * Product page behaviour: the gallery, the tabs and the quantity stepper.
+ *
+ * All three are enhancements. The gallery ships showing the first angle, every
+ * tab panel ships visible, and the stepper's value lives in a real number input
+ * — so with script blocked the page still shows every photograph, every panel of
+ * copy and a working quantity field.
+ */
+(function () {
+  "use strict";
+
+  /* ---- Gallery ---------------------------------------------------------- *
+   * Thumbnails are buttons with aria-pressed, not links: choosing an angle is
+   * not a navigation, and the main image gets the selected shot rather than the
+   * page scrolling to it.
+   * ---------------------------------------------------------------------- */
+  function initGallery(root) {
+    var thumbs = Array.prototype.slice.call(root.querySelectorAll("[data-gallery-thumb]"));
+    var mains = Array.prototype.slice.call(root.querySelectorAll("[data-gallery-main]"));
+    if (thumbs.length < 2) return;
+
+    function show(index) {
+      thumbs.forEach(function (thumb, i) {
+        thumb.setAttribute("aria-pressed", String(i === index));
+      });
+      mains.forEach(function (main, i) {
+        main.toggleAttribute("hidden", i !== index);
+      });
+    }
+
+    thumbs.forEach(function (thumb, i) {
+      thumb.addEventListener("click", function () { show(i); });
+    });
+  }
+
+  /* ---- Tabs ------------------------------------------------------------- *
+   * Real ARIA tabs, so the keyboard contract is real: arrows move between tabs,
+   * Home and End jump to the ends, and the strip is a single tab stop with Tab
+   * moving on to the panel. A row of buttons that only responds to clicks looks
+   * like this and is not this.
+   * ---------------------------------------------------------------------- */
+  function initTabs(root) {
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+    var panels = tabs.map(function (tab) {
+      return document.getElementById(tab.getAttribute("aria-controls"));
+    });
+    if (!tabs.length) return;
+
+    /* Every panel ships visible for the no-script case; this is what hides the
+       inactive ones once tabbing actually works. */
+    panels.forEach(function (panel) {
+      if (panel) panel.removeAttribute("data-tab-hidden");
+    });
+
+    function select(index, moveFocus) {
+      var next = (index + tabs.length) % tabs.length;
+      tabs.forEach(function (tab, i) {
+        tab.setAttribute("aria-selected", String(i === next));
+        tab.setAttribute("tabindex", i === next ? "0" : "-1");
+      });
+      panels.forEach(function (panel, i) {
+        if (panel) panel.toggleAttribute("hidden", i !== next);
+      });
+      if (moveFocus) tabs[next].focus();
+    }
+
+    tabs.forEach(function (tab, i) {
+      tab.addEventListener("click", function () { select(i, false); });
+    });
+
+    root.addEventListener("keydown", function (event) {
+      var at = tabs.indexOf(document.activeElement);
+      if (at === -1) return;
+
+      if (event.key === "ArrowRight") { select(at + 1, true); }
+      else if (event.key === "ArrowLeft") { select(at - 1, true); }
+      else if (event.key === "Home") { select(0, true); }
+      else if (event.key === "End") { select(tabs.length - 1, true); }
+      else { return; }
+
+      event.preventDefault();
+    });
+
+    select(0, false);
+  }
+
+  /* ---- Quantity stepper ------------------------------------------------- */
+  function initStepper(root) {
+    var field = root.querySelector("[data-stepper-value]");
+    var down = root.querySelector("[data-stepper-down]");
+    var up = root.querySelector("[data-stepper-up]");
+    if (!field) return;
+
+    var min = parseInt(field.getAttribute("min"), 10) || 1;
+    var max = parseInt(field.getAttribute("max"), 10) || 10;
+
+    function clamp() {
+      var value = parseInt(field.value, 10);
+      if (isNaN(value)) value = min;
+      value = Math.min(max, Math.max(min, value));
+      field.value = String(value);
+      if (down) down.disabled = value <= min;
+      if (up) up.disabled = value >= max;
+    }
+
+    function step(by) {
+      field.value = String((parseInt(field.value, 10) || min) + by);
+      clamp();
+    }
+
+    if (down) down.addEventListener("click", function () { step(-1); });
+    if (up) up.addEventListener("click", function () { step(1); });
+    field.addEventListener("change", clamp);
+    clamp();
+  }
+
+  function init() {
+    document.querySelectorAll("[data-gallery]").forEach(initGallery);
+    document.querySelectorAll("[data-tabs]").forEach(initTabs);
+    document.querySelectorAll("[data-stepper]").forEach(initStepper);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

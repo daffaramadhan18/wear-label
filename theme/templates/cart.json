@@ -1,9 +1,11 @@
 {
   "sections": {
     "main": {
-      "type": "main-stub",
-      "settings": { "route": "cart" }
+      "type": "main-cart",
+      "settings": {}
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }
