@@ -160,6 +160,20 @@ Three more were taken on 2026-08-20, when the storefront was worked over for fee
 - **The hero carousel can be dragged.** That overrides part of the argument
   written at the top of `sections/hero-carousel.liquid`, which is updated in place
   rather than left contradicting the code.
+- **The voices wall stays on the white page, not on an espresso band.** Putting
+  it on the brand's darkest colourway was tried on 2026-08-21 and rejected by the
+  client: the cards are cream and they are meant to float on white, and the four
+  stage fades — which exist to soften where the tilted plane is clipped — read as
+  dirty grey when they are painted in espresso over a cream card. The fades are
+  back to `from-surface` at their measured 42%/30% spreads. Do not re-tone this
+  band without re-tuning those four gradients, and do not re-tune them without
+  looking at the result.
+- **The fit record is not a section.** Lifting the customers' stated
+  measurements out of the moving wall was tried twice on 2026-08-21 — first as
+  seven display-size figures, then as a body/size table — and both were rejected.
+  The measurements stay where the customers wrote them, inside the reviews. The
+  seven verified values are in this file's git history at a335f65 if anyone wants
+  them again.
 - **View transitions are on, but the root cross-fade is off.**
   `::view-transition-new(root)` animates opacity across the root, which would
   transiently flatten the footer aurora's `soft-light` and the voices wall's
@@ -189,15 +203,14 @@ One changes behaviour the design drew:
 
 ## Home page sequence
 
-hero → customer voices → new arrivals → service band → Instagram strip
+hero → new arrivals → customer voices → service band → Instagram strip
 
-The wall moved ahead of the arrivals grid on 2026-08-20. PRODUCT.md principle 2 is
-"credibility before conversion" — Shopee is still the till, so the twenty verbatim
-reviews are the strongest thing the page has, and they were sitting behind the
-grid. With no catalogue imported that grid was ~3,760px of identical placeholder
-between the hero and the only first-party evidence in the project. This also
-*improves* the constraint below: there are now two sections between the wall and
-the Instagram strip rather than one.
+The wall was moved ahead of the arrivals grid on 2026-08-20 and moved back on
+2026-08-21, on the client's call. The reasoning for moving it — the reviews are
+the strongest thing the page has — did not survive contact with the rendered
+page: the catalogue has since been imported, so the arrivals grid is photography
+rather than 3,760px of placeholder, and leading with the wall no longer buys what
+it was meant to buy.
 
 Three blocks exist and are deliberately **not** placed:
 

@@ -83,13 +83,5 @@
       "expires": "Expires {{ expiry }}",
       "shop_link": "Start shopping"
     }
-  },
-  "voices": {
-    "fit": {
-      "body": "Body",
-      "size": "Size taken",
-      "who": "Reviewer",
-      "caption": "Bodies and the size they took, quoted from the reviews below"
-    }
   }
 }
