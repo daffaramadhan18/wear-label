@@ -18,7 +18,7 @@
 
 <div class="flex flex-wrap items-center justify-between gap-4 border-b border-hairline pb-4.5">
   <p class="text-caption text-ink-muted">
-    <span data-numeric>{{ count }}</span> {{ 'catalogue.pieces' | t }} · {{ filter_label }}
+    <span data-numeric>{{ count }}</span> {{ 'catalogue.pieces' | t: count: count }} · {{ filter_label }}
   </p>
 
   <form action="{{ collection.url }}" method="get" class="flex items-center gap-3">

@@ -24,7 +24,10 @@
     "sort": "Sort",
     "apply": "Apply",
     "clear_all": "Clear all",
-    "pieces": "pieces",
+    "pieces": {
+      "one": "piece",
+      "other": "pieces"
+    },
     "everything": "Everything",
     "no_results": "No pieces match these filters."
   },
