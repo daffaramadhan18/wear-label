@@ -129,4 +129,16 @@
   [data-gallery] [aria-label] > li > [data-gallery-thumb] {
     pointer-events: none;
   }
+
+  /*
+   * The carousel keeps its first slide and loses its controls. Arrows and dots
+   * that cannot advance anything are worse than a still band — and the parked
+   * slides are already `inert`, so nothing behind slide one is reachable either
+   * way.
+   */
+  [data-carousel] [data-carousel-prev],
+  [data-carousel] [data-carousel-next],
+  [data-carousel] [data-carousel-dot] {
+    display: none;
+  }
 }

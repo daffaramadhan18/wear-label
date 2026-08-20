@@ -24,6 +24,12 @@
   One slide renders as a still band with no arrows and no dots — the controls are
   derived from the block count, not drawn in.
 
+  Each slide is parked at its own offset in the markup rather than all at zero, so
+  the band is correct before script runs instead of relying on the active slide
+  covering the others. With scripting off the controls are removed altogether —
+  see the `scripting: none` block in theme-src/theme.css — because arrows that
+  cannot advance anything are worse than a still band.
+
   NARROW SCREENS. The band is 600px at `md` and up, and 70svh below it (svh, not
   vh, so hiding the browser's URL bar does not resize the hero mid-scroll). The
   copy card fills the width there, which the design's controls do not allow for:
@@ -77,7 +83,7 @@
       {% unless active %}aria-hidden="true" inert{% endunless %}
       aria-roledescription="slide"
       aria-label="{{ forloop.index }} of {{ slide_count }}"
-      style="transform:translateX(0%);z-index:{% if active %}2{% else %}1{% endif %}"
+      style="transform:translateX({{ forloop.index0 | times: 100 }}%);z-index:{% if active %}2{% else %}1{% endif %}"
       class="absolute inset-0 motion-safe:transition-transform motion-safe:duration-(--duration-lead) motion-safe:ease-(--ease-entrance)"
       {{ block.shopify_attributes }}
     >

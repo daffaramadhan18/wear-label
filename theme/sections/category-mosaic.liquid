@@ -2,6 +2,27 @@
   The category mosaic — one tall tile and four small ones, each a real catalogue
   filter. Port of components/home/category-mosaic.tsx.
 
+  **NOT ON THE HOME PAGE.** Removed from templates/index.json on request, so the
+  sequence is now hero, new arrivals, customer voices, service band, Instagram
+  strip.
+
+  It is *unplaced*, not forbidden — the distinction this repo draws between the
+  limited-run band and the made-to-order band. Nothing here makes a claim the
+  studio cannot keep, so re-adding it is legitimate: it has a preset, so it goes
+  back in from the theme editor without an edit to this file. That is one thing
+  the port improved on app/page.tsx, where restoring a cut block meant a code
+  change.
+
+  What must stay true if it does go back: the block order below the voices wall
+  exists to keep the wall and the Instagram strip out of one viewport. The
+  service band does that job alone today; putting the mosaic back above the
+  service band keeps it, putting it below the strip does not.
+
+  This is now a DIVERGENCE from app/page.tsx, which still renders the mosaic.
+  The theme is the deliverable and the React app is the reference it was ported
+  from, so the two are allowed to drift — but the drift is recorded here and in
+  README.md rather than discovered later.
+
   The label sits on the photograph, so it carries its own surface (a solid chip on
   the small tiles, a heavier weight on the tall one) rather than relying on the
   crop staying dark enough to read against.

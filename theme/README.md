@@ -167,3 +167,20 @@ One changes behaviour the design drew:
 - **The bag's promo field moves you to checkout.** Shopify validates discount
   codes at checkout and nowhere else, so the field rides along as `?discount=`
   rather than applying in place. The note beside it says so.
+
+## Home page sequence
+
+hero → new arrivals → customer voices → service band → Instagram strip
+
+Three blocks exist and are deliberately **not** placed:
+
+| Block | Why it is off the page | May it go back? |
+|---|---|---|
+| `category-mosaic` | Removed on request, 2026-08-20 | Yes — it has a preset, so it goes back from the theme editor. Keep it **above** the service band: the blocks below the voices wall exist to keep the wall and the Instagram strip out of one viewport. |
+| Limited-run band | Cut from the design's sequence | Yes, once there is a real run and an end date. A countdown that is really a fixed string is worse than no countdown. |
+| Made to order | The studio does not offer the service (confirmed 2026-08-20, PRODUCT.md) | **No.** Every line of it is a promise nobody can keep. |
+
+This makes the theme's home page a **divergence from `app/page.tsx`**, which
+still renders the mosaic. The theme is the deliverable and the React app is the
+reference it was ported from, so the two are allowed to drift — the point is that
+the drift is written down.
