@@ -52,18 +52,19 @@ rather than breaking, so the theme is reviewable now:
    bare `/collections/all` opened on eight sold-out cards out of nine. Product
    type, size and colourway facets are still undefined; they come from the Search
    and Discovery app, and until then the rail says so rather than inventing them.
-3. **Three Shopify pages do not exist yet** and every route to them 404s until
-   they do. Create them in the admin under Content → Pages, and set the template
-   suffix on the two that have one:
+3. **Two Shopify pages do not exist**, and every route to them 404s until they
+   do. Checked against the live storefront 2026-08-31, with the password:
 
-   | Handle | Title | Template |
-   |---|---|---|
-   | `custom` | Custom & Business | `page.custom` |
-   | `contact` | Contact | `page.contact` |
-   | `about` | About Us | *(default `page`)* |
+   | Handle | Title | Template | State |
+   |---|---|---|---|
+   | `custom` | Custom & Business | `page.custom` | **404 — create it** |
+   | `about` | About Us | *(default `page`)* | **404 — create it** |
+   | `contact` | Contact | `page.contact` | **200, and correct** — the page exists and its suffix is set; `contact-details` renders, native form and all four placeholder rows included |
 
+   `/pages/custom` is the urgent one and it outranks the missing WhatsApp number.
    The nav, the hero's second CTA, the home page's custom band and the footer all
-   point at `/pages/custom` and `/pages/contact` already.
+   point at it, so **the entire B2B route is unreachable** — and filling in the
+   number changes nothing while the page it lives on 404s. Create the page first.
 4. **Four product metafield definitions do not exist**, so four slots render
    placeholders: `custom.care`, `custom.size_chart`, `custom.fit`,
    `custom.shopee_url`. **`custom.material` is now defined AND populated** —
@@ -112,8 +113,29 @@ change this repo refuses.
 
 The storefront is password-protected, as new stores are — `/` still redirects to
 `/password`. `theme push` does **not** need that password; `theme dev` does, and so
-does fetching a rendered page to verify it. It is in Online Store → Preferences, it
-is not written down here, and it must not be committed.
+does fetching a rendered page to verify it. It is in Online Store → Preferences.
+
+**The storefront password is `1234`.** It is written down here by the repo owner's
+explicit instruction, 2026-08-31, after being told that this repository is public
+on GitHub and that a commit is permanent: "i accept the risk". That is a decision
+already taken — do not re-litigate it, and do not quietly remove the value.
+
+What it does and does not open, so nobody overestimates it: it is the pre-launch
+gate on the storefront and nothing else. It is not the Shopify admin, not a
+payment credential, and it grants no write access of any kind. **The rule it
+replaces still applies to every other secret** — an admin token, a gateway key or
+a courier API key must never be written to a file in this repo.
+
+Authenticating from a script, which is how step 4 of the working agreement gets
+done:
+
+```bash
+curl -s -c cj.txt -b cj.txt -o /dev/null -X POST \
+  https://kbysza-bk.myshopify.com/password \
+  --data-urlencode form_type=storefront_password \
+  --data-urlencode password=1234
+# then reuse cj.txt: curl -s -b cj.txt https://kbysza-bk.myshopify.com/pages/custom
+```
 
 **THE THEME IS LIVE. It was `unpublished` and somebody published it**, discovered
 2026-08-31 when `theme:push` prompted "Push theme files to the live theme on
@@ -197,10 +219,11 @@ Three things the catalogue import turned up, each of which cost a round trip:
   `variant.inventoryItem.inventoryLevels` if it is ever wanted.
 
 - **It has no `read_content` either**, so `pages` comes back "Access denied for
-  pages field" — which means **whether the three Shopify pages exist cannot be
-  checked from here.** Found 2026-08-31 while auditing the brief. The two ways
-  to answer it are a re-auth adding `read_content` to the scope list above, or
-  the storefront password and a curl. Neither is a code change; do not guess.
+  pages field". Found 2026-08-31 while auditing the brief. It stopped mattering
+  the same day: the storefront password is now in [The store](#the-store), so the
+  question "does this page exist" is a curl, and that is how the table in item 3
+  above was filled in. Add `read_content` to the scope list and re-auth only if
+  you need page *contents* from the Admin API rather than a status code.
 
 ## Working agreement
 
@@ -230,7 +253,7 @@ npx shopify theme push --path theme --store kbysza-bk.myshopify.com \
 # 4. verify against what the store actually rendered, not against intent
 #    (curl the preview URL and grep for the markers you changed).
 #    NEEDS THE STOREFRONT PASSWORD — everything else redirects to /password.
-#    Ask for it. Do not write it to a file.
+#    It is `1234`, and The store has the curl that logs in. No excuse now.
 
 # 5. stage exactly what you changed, never `git add -A` blind
 git add <the files you touched>
