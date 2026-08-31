@@ -207,27 +207,51 @@ npm run theme:css                    # rebuild assets/theme.css
 npm run theme:check                  # shopify theme check; runs offline
 npx tsc --noEmit && npx eslint app components lib theme
 
-# 2. land it on the store — the script pins the store and theme id, never --live
-npm run theme:push
+# 2. land it on the store. THE PINNED THEME IS THE LIVE ONE NOW — see The store.
+#    npm run theme:push stops with "Failed to prompt" and needs --allow-live,
+#    which is a decision to ask about, not a flag to add.
+npx shopify theme push --path theme --store kbysza-bk.myshopify.com \
+  --theme 205197312286 --allow-live --json
 
-# 3. verify against what the store actually rendered, not against intent
-#    (curl the preview URL and grep for the markers you changed)
+# 3. READ THE PUSH OUTPUT. Its per-file `errors` map carries what theme check
+#    cannot see — a max_blocks violation pushes "successfully" and silently
+#    drops the extra blocks.
 
-# 4. stage exactly what you changed, never `git add -A` blind
+# 4. verify against what the store actually rendered, not against intent
+#    (curl the preview URL and grep for the markers you changed).
+#    NEEDS THE STOREFRONT PASSWORD — everything else redirects to /password.
+#    Ask for it. Do not write it to a file.
+
+# 5. stage exactly what you changed, never `git add -A` blind
 git add <the files you touched>
 
-# 5. commit straight onto main — no feature branch
+# 6. commit straight onto main — no feature branch
 git commit          # message: what changed and WHY, in the imperative
 
-# 6. push, then keep the graph current
+# 7. push, then keep the graph current
 git push origin main
 graphify update .
 ```
 
-**Step 3 is not optional.** `theme check` proves the Liquid parses; it does not
-prove the page renders what you meant. Every claim about this theme's output in
-git history was checked by fetching the rendered HTML and counting what came back.
-Keep doing that.
+**Step 4 is not optional.** `theme check` proves the Liquid parses; it does not
+prove the page renders what you meant. Every claim about this theme's output in git
+history was checked by fetching the rendered HTML and counting what came back.
+
+It was skipped once, knowingly — the brief's B2B commit, 2026-08-31, because the
+password was not supplied and the client chose to review in the theme editor
+instead. The commit message says so in as many words. **If you skip it, say you
+skipped it**; a verification that did not happen must never be reported as one
+that did.
+
+**`theme/` HAS UNTRACKED FILES THAT ARE NOT YOURS.** A parallel session is working
+on a scroll-driven sequence and has left `sections/scroll-sequence.liquid`,
+`assets/scroll-sequence.js`, `assets/gsap.min.js`,
+`assets/gsap-scrolltrigger.min.js` and 55 `assets/sequence-*.webp` untracked in the
+working tree. They are not referenced by any committed template. **Do not commit
+them, do not delete them, and do not "fix" the eslint errors in the two GSAP
+files** — those 10 errors are the vendored minified builds and they are the only
+eslint errors in the repo, so a clean run means "10 errors, all in GSAP", not zero.
+The branch `worktree-integrate-floating-paths` is that session's; leave it alone.
 
 The end state after every task, without being asked:
 
@@ -280,6 +304,14 @@ The theme is **presentation only**. No commerce logic lives here.
 
 If a task appears to require writing cart, order, inventory, payment, shipping-rate
 or discount logic, stop — it belongs in Shopify configuration instead.
+
+**The B2B route has no commerce logic of any kind, and that is by instruction.**
+Brief §16: "B2B tidak menggunakan ecommerce checkout -> langsung ke WA". There is no
+cart, no quote object, no stored enquiry, no inbox and no price anywhere on
+`/pages/custom` — a specification and a quantity are what a price gets quoted
+against, and that conversation happens in WhatsApp. So the whole route is
+presentation plus one link. If a task on that page appears to need a database, a
+form backend or a quote calculator, it is the wrong task.
 
 ## Stack
 
@@ -364,9 +396,16 @@ npm run theme:dev          # build CSS, then shopify theme dev
 npm run theme:push         # build, check, push to theme 205197312286
 ```
 
-The store and the theme id are pinned inside `theme:dev` and `theme:push`, so
-neither can wander onto the live theme by accident. `theme dev` will still ask for
-the storefront password once.
+The store and the theme id are pinned inside `theme:dev` and `theme:push`.
+**That no longer means what it used to mean.** The comment this replaces said
+"neither can wander onto the live theme by accident" — true when `205197312286`
+was unpublished, false now that it is the live theme. The pin is still worth
+having: it stops a push landing on `Horizon` or on a stray development theme. But
+`npm run theme:push` cannot complete on its own any more; see
+[The store](#the-store) for the `--allow-live` invocation and when to ask before
+using it.
+
+`theme dev` will still ask for the storefront password once.
 
 `theme/assets/theme.css` is **committed**. Shopify has no build step, so the built
 asset is what the store serves. Read `theme-src/theme.css`, `app/tokens.css` and
@@ -531,6 +570,76 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   imported as such.
 - **Vendor is `Wear Label`** on all 115.
 
+## Liquid, Tailwind and theme-check traps
+
+Every one of these cost a round trip. Four of them fail **silently** — the page
+renders, nothing errors, and the thing you wrote is simply not there.
+
+### A class name that does not exist literally in a file does not exist at all
+
+`theme-src/theme.css` scans these files as TEXT — `@source
+"../theme/sections/*.liquid"`, `snippets`, `layout`, `assets/*.js`. Tailwind reads
+the raw Liquid, not the rendered output. So **a class name assembled at runtime is
+never generated**:
+
+```liquid
+{%- comment -%} BROKEN: emits the right markup and no CSS exists for it {%- endcomment -%}
+{%- assign off = 'border-inert-border bg-inert' -%}
+class="disabled:{{ off | replace: ' ', ' disabled:' }}"
+```
+
+Write every utility out longhand, even when that means the same list twice for two
+variants. `snippets/button.liquid` carries both a bare and a `disabled:`-prefixed
+copy of each variant's off-state for exactly this reason, and says so.
+
+This also means: **after adding a section, always rebuild and grep the built CSS**
+for any unusual utility you used. `npm run theme:css` then
+`grep -c 'order-last' theme/assets/theme.css`. A zero there is a layout that
+will be wrong on the store and right in your head.
+
+### `render` takes no filters and no expressions
+
+Two separate limits with two different symptoms.
+
+**A filter on a `render` argument** is caught by theme check —
+`UnsupportedFilterArguments`, "Filters cannot be used on arguments passed to the
+'render' tag". Assign first:
+
+```liquid
+{%- assign slide_href = block.settings.href | default: routes.all_products_collection_url -%}
+{% render 'button', href: slide_href %}
+```
+
+**An expression is not caught by anything** and is a parse error at render time.
+`{% render 'button', disabled: purchasable == false %}` does not evaluate to false,
+it fails. The negation has to exist as its own variable first, which is why
+`product-purchase.liquid` assigns `unavailable` next to `purchasable`.
+
+### Inside `{% liquid %}`, a comment is `#` — and a stray `%}` closes the tag
+
+`{% comment %}` is not valid in there. Worse, the lexer closes a
+`{%- liquid … -%}` tag at the **first** `%}` it finds, so writing the words
+`{% comment %}` inside a `#` line silently truncates the block and everything after
+it becomes literal text on the page. Keep tag delimiters out of `{% liquid %}`
+bodies entirely — say "percent-brace", not the characters.
+
+### A block tag inside `{% comment %}` can still break the parse
+
+`{% comment %}` skips its body, but a block-level tag in there — `{% form %}`,
+`{% if %}`, `{% schema %}` — can still need its closer. Referring to Shopify's
+contact form in prose is safe; writing `{% form 'contact' %}` in a comment is not.
+`quote-form.liquid` says "Shopify's own contact form tag" for this reason.
+
+### `theme check` does not check a schema's own limits
+
+It validates Liquid and schema *shape*. It does not compare `"max_blocks"` against
+what a `*-group.json` or template actually holds. The store does, at push time, and
+reports it in the `--json` output's per-file `errors` map — **while the push
+completes and silently drops the extra blocks.** This is how the brief's six-item
+nav landed against `header.liquid`'s `"max_blocks": 5` with a green theme check.
+
+Push, then read the output. It is the only validator that sees this class of bug.
+
 ## Conventions
 
 ### Data
@@ -540,6 +649,36 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   them, and do not compute a price, a total, a discount depth or a shipping rate in
   Liquid. The one arithmetic that is allowed is a display-only percentage off, from
   `compare_at_price` and `price` that Shopify already gave you.
+- **Every product metafield the theme reads, and what shows without it.** All five
+  are undefined on the store, so all five slots are rendering placeholders right
+  now. Define them in Settings → Custom data → Products.
+
+  | Metafield | Type | Read by | Blank renders |
+  |---|---|---|---|
+  | `custom.material` | single line text | `product-card`, `main-product` | labelled placeholder |
+  | `custom.care` | rich text | `product-tabs` → Fabric & care | labelled placeholder |
+  | `custom.size_chart` | rich text | `product-tabs` → Size & fit | labelled placeholder inside `.wl-table` |
+  | `custom.fit` | rich text | `product-tabs` → Size & fit | labelled placeholder |
+  | `custom.shopee_url` | URL | `product-purchase` | **nothing at all** — see below |
+
+  `size_chart` is styled by `.wl-table` in `theme-src/theme.css`, which exists
+  because Shopify emits a bare `<table>` and `base.css` styles nothing inside one.
+  It scrolls sideways rather than shrinking: five sizes against four measurements
+  is ~420px of unbreakable numbers and horizontal *page* scroll is forbidden.
+
+- **The Shopee hand-off is a metafield with a setting as its fallback**, and the
+  precedence is deliberate. `custom.shopee_url` per product wins; `settings.shopee_shop_url`
+  fills in; with neither, the link is **absent** rather than pointing at a search
+  page. A per-product URL lands the shopper on the piece, a shop URL lands them on
+  a shop — so the fallback is a courtesy, not the intended state.
+
+  It is a LINK and not a button, and that is a hierarchy decision worth keeping: it
+  is a channel choice, not a purchase intent. A third button on the product page
+  puts the marketplace at parity with the store's own checkout, on the store's own
+  page. It also stays visible on a sold-out product on purpose — the stock data
+  came from Shopee as a snapshot, and hiding the link would assert a restock has
+  not happened when nothing here knows that.
+
 - **Never invent commerce data.** No fabricated shipping rates, review counts,
   stock numbers, countdowns or discount depths — not even as placeholder polish.
   Where a number cannot be known, the UI says where it comes from ("Calculated at
@@ -566,7 +705,24 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   in the theme editor instead of waiting on a code change. That split is what
   stopped "copy is unwritten" from being a code blocker.
 - **Never hardcode a user-visible string in a section or snippet.** If script needs
-  one, pass it in through a data attribute — `save-button` does.
+  one, pass it in through a data attribute — `save-button` does for its two states,
+  and `quote-form` does for its three field labels (`data-quote-field` carries the
+  label the composed WhatsApp message uses). There is no copy in `theme.js` and
+  there must not be. This rule was broken once and fixed on 2026-08-31:
+  `main-collection.liquid` rendered a hardcoded `'No pieces match these filters.'`
+  while `catalogue.no_results` sat in the locale file holding that exact sentence,
+  referenced by nothing.
+
+- **The locale namespaces, and what each is for.** `general` · `catalogue` ·
+  `product` · `cart` · `home` · `carousel` · `customer` · `gift_card`, plus four
+  added for the brief: **`search`** (the field, the prompt, the pluralised result
+  count, the nothing-matched line), **`collections`** (the "no collections yet"
+  notice), **`quote`** (the three field labels and the no-WhatsApp-number alert)
+  and **`contact`** (the native form's labels and its success line).
+
+  `general.opens_new_tab` is the screen-reader suffix every off-site link carries —
+  the footer socials and Buy on Shopee. A link that replaces the page without
+  saying so is the bug it exists to prevent.
 - **A blank setting is a valid state.** `snippets/copy.liquid` renders a labelled,
   correctly-sized placeholder for any blank slot, so the layout is already final
   before the copy arrives.
@@ -597,6 +753,37 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   quantities, and remove is the same endpoint at quantity 0. Nested forms are
   illegal — the checkout button reaches the cart form by its `form` attribute
   instead of being wrapped in it. Do not "fix" that into a form per button.
+
+- **`Buy now` is that same two-submits pattern**, one form with a second submit
+  carrying `name="return_to" value="/checkout"`, so only the button actually
+  pressed adds the parameter. It is **not** `{{ form | payment_button }}` — see
+  [Platform constraints](#platform-constraints).
+
+- **THE QUOTE FORM IS THE PATTERN TO COPY for anything that hands off to an
+  external app**, and it is worth understanding before touching it. It is a real
+  `<form method="get">` whose `action` is the studio's `wa.me` URL. The three
+  visible fields have **no `name` attribute**, so they are never serialised; the
+  only named control is a hidden `text` input. `theme.js` fills that input on
+  `submit`, from `data-quote-field` labels in the markup.
+
+  What that buys: with script off, `text` submits empty and WhatsApp opens the
+  same chat with nothing typed — the reader is exactly where they were going and
+  types the message themselves. With script on they arrive with it composed.
+  `required` still validates either way; native validation does not care whether a
+  field has a name.
+
+  The alternative — a click handler that builds a URL and navigates — is a control
+  that does nothing with script off. **A button that only works with script is a
+  dead control; a form that only prefills with script is a form.**
+
+- **Search is a page, not a header overlay.** `header.liquid` used to argue the
+  mark should not exist at all ("an icon that does nothing is worse than one
+  absence") and the brief asked for it, so the mark is a link to `/search`. An
+  overlay would be a second disclosure in a header that already has one, would
+  need its own focus trap and escape handling, and could not work with script off —
+  which puts the magnifier straight back to doing nothing. Results are restricted
+  to products with a hidden `type=product`, because the theme has no card for a
+  page or article result.
 - **Checkout is a hand-off.** A submit named `checkout` on the cart form. Do not
   build a custom checkout UI (see [Platform constraints](#platform-constraints)).
 - **The voices wall and the Instagram strip cost zero JavaScript** and must stay
@@ -613,6 +800,51 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   archived app get it. Theme-only rules — the ones that exist because Liquid has no
   React — live in `theme-src/theme.css` and nowhere else. Never duplicate a rule
   into the theme.
+- **There is ONE button: `snippets/button.liquid`.** Four variants — `primary`,
+  `secondary`, and `invert` / `invert-outline` for espresso grounds. It renders an
+  `<a>` when given `href` and a `<button>` otherwise, which matters: an `<a>` that
+  submits and a `<button>` that navigates are both wrong and both look identical.
+  Do not retype the class string; that is what this snippet was extracted to stop,
+  after it had been copied into three sections and was about to be copied into
+  eight more.
+
+  `secondary` is unreadable on espresso — its `text-brand` is rgb(114,94,76) on
+  rgb(30,26,22) — which is the same trap `footer.liquid` documents for its link
+  colour. Use an `invert` variant on any inverted surface.
+
+- **Two bands of the same colour must not touch.** The home page's B2B band is
+  cream and not espresso for exactly this reason: the voices wall directly below it
+  is espresso, and two espresso bands adjoining read as one very long dark region
+  with a seam in it rather than as two sections. `custom-band` gets its weight from
+  the aurora, the photograph and the pair of buttons instead. `why-wear-label` is
+  cream *cards on white* for the same reason — the cream band of `how-it-works` is
+  directly above it.
+
+- **A placeholder is for a layout that DEPENDS on the missing thing.** That is the
+  limit of the rule, and `custom-hero` is the one section that deliberately draws
+  no placeholder: an espresso ground with the aurora and the type over it is
+  already a finished surface, the way the footer is. An empty photo slot there has
+  a design, not a hole, and a grey rectangle labelled "photo" would be scaffolding
+  standing in front of something finished. Every other empty slot on the site still
+  draws its placeholder at final size.
+
+- **No new icons for a service or a value.** The design direction asks for minimal
+  icons and an editorial look; three marks in circles above three headings is the
+  layout every services section has. `custom-services` uses the photograph as the
+  mark and `how-it-works` uses numerals. Only one mark has been added to
+  `icon.liquid` since the port — `search` — and it is flagged there as the single
+  exception to "generated from `components/ui/icons.tsx`, never retyped".
+
+- **A derived number is never a typed number.** `how-it-works` zero-pads its step
+  number from `forloop.index`, so inserting a step renumbers the row. A step
+  numbered by hand goes wrong the first time somebody inserts one in the middle,
+  and the block they forget to renumber is the one that ships.
+
+- **British spelling.** "Colourway" is an option name, a locale key and a filter
+  label, so the site is British throughout — which is why the B2B page says
+  "customisation" where the brief wrote "Customization". One page spelled the other
+  way is something a reader notices without being able to say why.
+
 - **Palette, spacing, radius and motion are NOT theme settings.** Exposing them in
   the editor would let one edit break the system. Only copy and the type pairing
   are editable.
@@ -742,12 +974,27 @@ Fixed properties of Shopify in this market — design around them, don't retry t
 - **Shopify Payments is unavailable in Indonesia.** A third-party gateway is
   required, and Shopify adds a transaction fee on top of the gateway fee when
   Shopify Payments is not used.
+  - **Therefore `Buy now` cannot be an accelerated checkout button.**
+    `{{ form | payment_button }}` renders Shop Pay and the wallet buttons, all of
+    which need Shopify Payments. So the brief's `BUY NOW` (§11) is a second submit
+    on the add-to-bag form carrying `name="return_to" value="/checkout"` — the
+    shopper reaches checkout in one silent hop *through* the cart rather than
+    skipping it. Same destination, one extra request, and it is the only version
+    available on this store. Do not "upgrade" it to `payment_button`.
 - **A fully custom checkout UI requires Shopify Plus.** On lower plans checkout is
   Shopify-hosted. This is why the bag has no shipping selector and no address
   fields, and why its total equals its subtotal.
 - **Indonesian couriers (JNE, J&T, SiCepat) are not native to Shopify** — they
   require a RajaOngkir/Biteship app, which quotes rates *during* checkout. The bag
   therefore says "Calculated at checkout" rather than showing a rate it cannot know.
+- **A Liquid form cannot carry a file, and neither can a WhatsApp deep link.** Brief
+  §9.6 asks the quote form for "Upload Design / Reference jika memungkinkan" and it
+  is not possible down either route: `wa.me` takes text only, and Shopify's contact
+  form tag accepts no file input. Rather than drop the requirement silently, the
+  note under the fields says to send the reference in the chat that just opened. A
+  real upload needs the Shopify Forms app, and that **replaces** `quote-form.liquid`
+  rather than extending it — the app renders its own markup.
+
 - **Discount codes are validated by Shopify at checkout and nowhere else**, so the
   bag's promo field carries the code to checkout as `?discount=` rather than
   applying it in place. That is a behaviour the design did not draw; the note beside
