@@ -1,0 +1,90 @@
+{%- comment -%}
+  What the studio makes to order. Brief §9.2, and the same three names the home
+  page's custom band lists as labels.
+
+  One card per service: the photograph, the name, and one sentence of what it
+  covers. The split between this section and the band on the home page is
+  deliberate — the band names the services, this section explains them. Putting
+  the explanations in both places makes the home page a worse version of this
+  page and gives the studio two copies of the same sentence to keep in step.
+
+  NO ICONS. The design direction asks for minimal icons and an editorial look,
+  and three marks in circles above three headings is the layout every services
+  section has. The photograph is the mark. Nothing here needs an icon set
+  extended, which also means nothing here needs a glyph invented for a service.
+
+  4:5 CROPS, not squares. These are garments on people; a portrait crop is what
+  the design's own product cards use and it is the ratio a uniform photograph is
+  actually shot at. The crop is set here rather than read from the file so all
+  three cards are the same height whatever the studio uploads — one landscape
+  shot among three portraits would otherwise stagger the row of headings under
+  them.
+
+  Every card renders its labelled placeholder at final size until the studio
+  sends project photography, which is the state this section ships in.
+{%- endcomment -%}
+
+<section aria-labelledby="custom-services-heading" class="mx-auto w-full max-w-content px-gutter py-section">
+  <div data-reveal class="flex flex-col gap-4">
+    <h2 id="custom-services-heading" class="text-h1 leading-h1">
+      {% render 'copy', value: section.settings.heading, label: 'heading' %}
+    </h2>
+
+    {%- if section.settings.body != blank -%}
+      <p class="wl-measure text-body leading-body text-ink-muted">{{ section.settings.body }}</p>
+    {%- endif -%}
+  </div>
+
+  <ul class="mt-block grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+    {%- for block in section.blocks -%}
+      <li data-reveal class="flex flex-col gap-4.5" {{ block.shopify_attributes }}>
+        {% render 'media',
+          image: block.settings.image,
+          ratio: '4 / 5',
+          sizes: '(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw',
+          label: 'Service photo' %}
+
+        <h3 class="text-h2 leading-h2 tracking-h2">
+          {% render 'copy', value: block.settings.title, label: 'service name' %}
+        </h3>
+
+        <p class="text-body leading-body text-ink-muted">
+          {% render 'copy', value: block.settings.body, label: 'service description', lines: 2 %}
+        </p>
+      </li>
+    {%- endfor -%}
+  </ul>
+</section>
+
+{% schema %}
+{
+  "name": "Custom services",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "paragraph", "content": "Only list a service the studio actually produces. A card here is a promise that an enquiry about it will be answered." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Services" },
+    { "type": "textarea", "id": "body", "label": "Intro" }
+  ],
+  "blocks": [
+    {
+      "type": "service",
+      "name": "Service",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Name" },
+        { "type": "textarea", "id": "body", "label": "Description" },
+        { "type": "image_picker", "id": "image", "label": "Photograph", "info": "A photograph of work the studio has produced. Empty renders a labelled placeholder at final size." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom services",
+      "blocks": [
+        { "type": "service", "settings": { "title": "Custom uniform", "body": "Uniform for company, hospital, institution, and team." } },
+        { "type": "service", "settings": { "title": "Corporate apparel", "body": "Custom apparel for corporate and organization needs." } },
+        { "type": "service", "settings": { "title": "Merchandise", "body": "T-shirts, apparel, and merchandise for events, campaigns, communities, and organizations." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

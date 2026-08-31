@@ -10,7 +10,9 @@
     "email": "Email address",
     "meta": {
       "tags": "Tagged \"{{ tags }}\""
-    }
+    },
+    "social": "Social links",
+    "opens_new_tab": "(opens in a new tab)"
   },
   "catalogue": {
     "filters": "Filters",
@@ -48,7 +50,12 @@
     "details": "Details",
     "fabric_and_care": "Fabric & care",
     "shipping": "Shipping",
-    "related_heading": "You may also like"
+    "related_heading": "You may also like",
+    "size_and_fit": "Size & fit",
+    "size_chart": "Size chart",
+    "fit_information": "Fit information",
+    "buy_now": "Buy now",
+    "buy_on_shopee": "Buy on Shopee"
   },
   "cart": {
     "bag": "Bag",
@@ -83,5 +90,32 @@
       "expires": "Expires {{ expiry }}",
       "shop_link": "Start shopping"
     }
+  },
+  "search": {
+    "title": "Search",
+    "label": "Search products",
+    "placeholder": "Search for a piece",
+    "submit": "Search",
+    "prompt": "Type the name of a piece, a cut or a colourway.",
+    "results_count": {
+      "one": "1 result for “{{ terms }}”",
+      "other": "{{ count }} results for “{{ terms }}”"
+    },
+    "no_results": "Nothing matched “{{ terms }}”. Try a shorter word, or browse the catalogue."
+  },
+  "collections": {
+    "none": "No collections have been created yet. They are set up in the Shopify admin under Products → Collections."
+  },
+  "quote": {
+    "name": "Name",
+    "whatsapp": "WhatsApp number",
+    "description": "Project description",
+    "no_number": "The studio's WhatsApp number has not been set yet, so this form cannot send. Add it under Theme settings → Custom & business."
+  },
+  "contact": {
+    "name": "Name",
+    "message": "Message",
+    "send": "Send message",
+    "sent": "Thank you — your message has been sent. The studio will come back to you."
   }
 }

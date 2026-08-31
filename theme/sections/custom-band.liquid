@@ -1,0 +1,156 @@
+{%- comment -%}
+  Wear Label Custom — the B2B hook on the home page. Brief §7.
+
+  This band is the whole reason the brief exists. Wear Label has always done two
+  things — ready-to-wear for shoppers, custom apparel production for companies,
+  hospitals, schools and communities — and the site has only ever said the first.
+  A visitor who runs an organisation had no way to learn the second business
+  exists, so this band's single job is to tell them, on the home page, above the
+  fold of the second screenful.
+
+  WHY IT IS CREAM AND NOT ESPRESSO. Espresso is the loudest surface this theme
+  has, and "make the B2B band noticeable" argues for it — but the voices wall
+  directly below is already espresso, and two espresso bands touching read as one
+  very long dark region with a seam in it. Cream is the design's declared band
+  colour and it is the tonal step the service band already uses for the same
+  reason. The band gets its weight from the aurora, the photograph and the pair
+  of buttons instead of from the darkest paint available.
+
+  THE AURORA CONTRACT, restated because breaking it is subtle: this band carries
+  `relative isolate overflow-hidden` and the aurora's `tone` is `canvas` because
+  the band is `bg-canvas`. The veil layer is painted in the colour of the surface
+  underneath, so a tone that does not match the band draws a visible rectangle —
+  that is the bug this effect always has. `isolate` is what keeps `soft-light`
+  blending against the band rather than against the page.
+
+  AND NOTHING HERE IS WRAPPED IN [data-reveal] THAT CONTAINS THE AURORA. The
+  reveals animate opacity, which makes their element a stacking context, which
+  would flatten the blend against the wrapper instead of the band. The two
+  `data-reveal` divs below are the aurora's SIBLINGS, never its ancestors. If you
+  add a wrapper here, check that rule again before you add it.
+
+  THE PHOTOGRAPH IS FIRST IN THE DOM and moves to the right column at `lg`. Two
+  reasons, and the second is why the reading-order mismatch is acceptable: the
+  brief's design direction leads with large photography and a phone should open
+  this band on an image rather than on a heading, and the image is a labelled
+  `media` placeholder carrying no information a reader loses by meeting it in a
+  different order than a sighted reader does. There is no B2B photography in the
+  repo yet, so today this renders the placeholder at its final size — which is
+  the state the studio asked for until they send project shots.
+
+  Service names are blocks, not a hardcoded list, because the three the brief
+  names (Custom Uniform, Corporate Apparel, Merchandise & Community Apparel) are
+  the services as they stand today and the studio adds a fourth without a code
+  change. They are labels here, not descriptions — the descriptions are on the
+  B2B page, and repeating them would make this band a second version of that page
+  rather than a route to it.
+{%- endcomment -%}
+
+<section
+  aria-labelledby="custom-band-heading"
+  class="relative isolate mt-section overflow-hidden border-y border-rule bg-canvas"
+>
+  {% render 'aurora', tone: 'canvas', origin: 'top-right' %}
+
+  <div class="relative z-10 mx-auto grid w-full max-w-content gap-block px-gutter py-section lg:grid-cols-2 lg:items-center lg:gap-block-lg">
+    <div data-reveal class="lg:order-last">
+      {% render 'media',
+        image: section.settings.image,
+        ratio: '4 / 3',
+        sizes: '(min-width: 1024px) 46vw, 92vw',
+        label: 'Custom apparel project photo' %}
+    </div>
+
+    <div data-reveal class="flex flex-col gap-5">
+      <span class="text-micro uppercase tracking-eyebrow text-ink-subtle">
+        {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
+      </span>
+
+      <h2 id="custom-band-heading" class="text-h1 leading-h1">
+        {% render 'copy', value: section.settings.heading, label: 'heading' %}
+      </h2>
+
+      <p class="text-h3 leading-h3 text-ink-body">
+        {% render 'copy', value: section.settings.subheading, label: 'subheading', lines: 2 %}
+      </p>
+
+      <p class="wl-measure text-body leading-body text-ink-muted">
+        {% render 'copy', value: section.settings.body, label: 'description', lines: 3 %}
+      </p>
+
+      {%- if section.blocks.size > 0 -%}
+        {%- comment -%}
+          A rule per service rather than chips: three chips of unequal length
+          wrap into a ragged two-and-one on a phone, and these are a list of what
+          the studio makes, not a set of filters to choose between.
+        {%- endcomment -%}
+        <ul class="flex flex-col divide-y divide-line border-y border-line">
+          {%- for block in section.blocks -%}
+            <li class="py-3.5 text-caption uppercase tracking-nav text-ink-body" {{ block.shopify_attributes }}>
+              {% render 'copy', value: block.settings.label, label: 'service', inline: true %}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if section.settings.cta != blank or section.settings.cta_2 != blank -%}
+        <div class="mt-1 flex flex-wrap gap-3">
+          {%- if section.settings.cta != blank -%}
+            {% render 'button',
+              label: section.settings.cta,
+              href: section.settings.href,
+              variant: 'primary',
+              class: 'max-sm:w-full px-6 sm:px-11' %}
+          {%- endif -%}
+
+          {%- if section.settings.cta_2 != blank -%}
+            {% render 'button',
+              label: section.settings.cta_2,
+              href: section.settings.href_2,
+              variant: 'secondary',
+              class: 'max-sm:w-full px-6 sm:px-11' %}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Custom & business band",
+  "max_blocks": 4,
+  "settings": [
+    { "type": "paragraph", "content": "The B2B route on the home page. Keep the service names here to labels — the descriptions belong on the Custom & Business page, and repeating them here makes this band a copy of that page rather than a way into it." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Custom apparel" },
+    { "type": "text", "id": "heading", "label": "Headline", "default": "Wear Label Custom" },
+    { "type": "textarea", "id": "subheading", "label": "Subheadline", "default": "Custom apparel for companies, organizations & communities." },
+    { "type": "textarea", "id": "body", "label": "Description", "default": "From uniforms to merchandise, Wear Label provides custom apparel production tailored to your team, organization, and brand." },
+    { "type": "image_picker", "id": "image", "label": "Photograph", "info": "A photograph of work the studio has actually produced. Leave it empty and a labelled placeholder renders at the final size rather than a stock image standing in for a project." },
+    { "type": "header", "content": "Buttons" },
+    { "type": "text", "id": "cta", "label": "Primary label", "default": "Explore custom services" },
+    { "type": "url", "id": "href", "label": "Primary link" },
+    { "type": "text", "id": "cta_2", "label": "Secondary label", "default": "Request a quote" },
+    { "type": "url", "id": "href_2", "label": "Secondary link" }
+  ],
+  "blocks": [
+    {
+      "type": "service",
+      "name": "Service name",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Name" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom & business band",
+      "blocks": [
+        { "type": "service", "settings": { "label": "Custom uniform" } },
+        { "type": "service", "settings": { "label": "Corporate apparel" } },
+        { "type": "service", "settings": { "label": "Merchandise & community apparel" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

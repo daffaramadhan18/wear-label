@@ -1,5 +1,7 @@
 {%- comment -%}
-  Details / Fabric & care / Shipping — port of components/product/product-tabs.tsx.
+  Details / Size & fit / Fabric & care / Shipping — port of
+  components/product/product-tabs.tsx, plus the size-and-fit panel the brief
+  asks for (§11: size chart, fit information).
 
   Real ARIA tabs, which means the keyboard contract has to be real too: arrow keys
   move between tabs, Home and End jump to the ends, and the tab strip is a single
@@ -12,6 +14,19 @@
   this catalogue on purpose — the design reused one generic paragraph for all
   eleven pieces, which would state a wrong inseam and a wrong fabric on most of
   them.
+
+  SIZE & FIT IS THE SECOND TAB, not the last. Two things put it there and they
+  agree: the brief lists size chart and fit information ahead of care
+  instructions, and PRODUCT.md records fit as the purchase decision itself —
+  almost every one of the twenty customer reviews names a height and a weight
+  before it names a size. The tab a shopper needs first is the one next to
+  Details. Reordering it later is a change to what the page prioritises, not a
+  tidy-up.
+
+  Its two halves are separate metafields on purpose. A size chart is tabular and
+  a fit note is prose; one rich-text field holding both means the studio has to
+  remember the shape as well as the content. Each renders its own labelled
+  placeholder, so a product with a chart but no fit note shows exactly that.
 
   Without JavaScript every panel is visible in sequence and the tab strip is
   removed, rather than two panels of copy being lost to a control that cannot
@@ -27,6 +42,10 @@
       class="wl-press-soft cursor-pointer border-b-2 border-transparent px-6 py-5.5 text-label uppercase tracking-nav text-ink-subtle transition-colors duration-(--duration-base) hover:text-brand aria-selected:border-brand aria-selected:text-ink sm:px-8">
       {{ 'product.details' | t }}
     </button>
+    <button type="button" role="tab" id="tab-fit" aria-selected="false" aria-controls="panel-fit" tabindex="-1"
+      class="wl-press-soft cursor-pointer border-b-2 border-transparent px-6 py-5.5 text-label uppercase tracking-nav text-ink-subtle transition-colors duration-(--duration-base) hover:text-brand aria-selected:border-brand aria-selected:text-ink sm:px-8">
+      {{ 'product.size_and_fit' | t }}
+    </button>
     <button type="button" role="tab" id="tab-care" aria-selected="false" aria-controls="panel-care" tabindex="-1"
       class="wl-press-soft cursor-pointer border-b-2 border-transparent px-6 py-5.5 text-label uppercase tracking-nav text-ink-subtle transition-colors duration-(--duration-base) hover:text-brand aria-selected:border-brand aria-selected:text-ink sm:px-8">
       {{ 'product.fabric_and_care' | t }}
@@ -40,6 +59,27 @@
   <div role="tabpanel" id="panel-details" aria-labelledby="tab-details" tabindex="0"
     class="wl-measure py-8 text-body leading-body text-ink-body">
     {% render 'copy', value: product.description, label: 'product details', lines: 3 %}
+  </div>
+
+  <div role="tabpanel" id="panel-fit" aria-labelledby="tab-fit" tabindex="0" data-tab-hidden
+    class="wl-measure flex flex-col gap-7 py-8 text-body leading-body text-ink-body">
+    {%- comment -%}
+      `wl-table` in theme-src/theme.css is what makes a size chart pasted into a
+      rich-text metafield readable: Shopify emits a bare <table>, and base.css
+      styles nothing inside one. It also scrolls sideways rather than forcing the
+      column wider than the phone it is on.
+    {%- endcomment -%}
+    <div class="flex flex-col gap-3">
+      <h3 class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'product.size_chart' | t }}</h3>
+      <div class="wl-table">
+        {% render 'copy', value: product.metafields.custom.size_chart.value, label: 'size chart', lines: 4 %}
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <h3 class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'product.fit_information' | t }}</h3>
+      {% render 'copy', value: product.metafields.custom.fit.value, label: 'fit information', lines: 2 %}
+    </div>
   </div>
 
   <div role="tabpanel" id="panel-care" aria-labelledby="tab-care" tabindex="0" data-tab-hidden

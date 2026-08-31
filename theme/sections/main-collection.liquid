@@ -56,8 +56,15 @@
         {%- elsif collection.all_products_count > 0 -%}
           {%- comment -%}
             A real no-results: the catalogue has pieces, this filter matches none.
+
+            FIXED: the sentence used to be a hardcoded English string here —
+            `body: 'No pieces match these filters.'` — while
+            `catalogue.no_results` sat in the locale file holding exactly that
+            sentence, referenced by nothing. The one user-visible string in this
+            section was the one string that could not be translated.
           {%- endcomment -%}
-          {% render 'alert', body: 'No pieces match these filters.' %}
+          {%- assign nothing_matched = 'catalogue.no_results' | t -%}
+          {% render 'alert', body: nothing_matched %}
 
         {%- else -%}
           {%- comment -%}

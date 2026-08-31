@@ -2,18 +2,42 @@
   The category mosaic — one tall tile and four small ones, each a real catalogue
   filter. Port of components/home/category-mosaic.tsx.
 
-  **NOT ON THE HOME PAGE.** Removed from templates/index.json on request, so the
-  sequence is now hero, new arrivals, customer voices, service band, Instagram
-  strip.
+  **STILL NOT ON THE HOME PAGE, AND NOW THE BRIEF ASKS FOR IT.** Removed from
+  templates/index.json on request 2026-08-20; the website brief's §6 Section 3 is
+  "Shop by Category" with example tiles Pants, Tops, Outerwear and New Arrivals.
+  The brief is the newer instruction and it wins — this section is what will
+  serve it.
 
-  It is *unplaced*, not forbidden — the distinction this repo draws between the
-  limited-run band and the made-to-order band. Nothing here makes a claim the
-  studio cannot keep, so re-adding it is legitimate: it has a preset, so it goes
-  back in from the theme editor without an edit to this file. That is one thing
-  the port improved on app/page.tsx, where restoring a cut block meant a code
-  change.
+  WHAT IS BLOCKING IT is data, not design, and placing it early would break this
+  section's own first rule. Every tile has to point at a destination that
+  actually matches something, and today neither kind of destination exists:
 
-  What must stay true if it does go back: the block order below the voices wall
+    - There are no category COLLECTIONS on the store. `/collections/pants` is a
+      404 until somebody creates it.
+    - `?filter.p.product_type=Pants` does not filter. Shopify's Availability
+      facet is the only one defined in Search and Discovery, so a product_type
+      parameter is ignored and the page returns the whole catalogue — a link
+      that looks like it worked and did not, which is worse than a 404.
+
+  It also needs the taxonomy decision taken first: the eleven design pieces are
+  typed by CUT (Wide leg, Culottes, Straight cut) and the 115 Shopee pieces by
+  GARMENT (Pants, Vest, Shirt, Bag), so "Pants" today means two different things
+  depending on which import a product came from. The direction given is to follow
+  the brief and normalise the data — garment in `product_type`, cut moved to
+  tags — which is a bulk field update on the store, not an edit here.
+
+  So: the sequence is still hero, new arrivals, Wear Label Custom, customer
+  voices, service band, Instagram strip. This section goes back in above the
+  voices wall the moment the collections exist, from the theme editor, with no
+  edit to this file — it has a preset.
+
+  It is *unplaced*, not forbidden — the distinction this repo draws between this
+  section and the made-to-order band, which names a service the studio does not
+  offer and must never be placed. Nothing here makes a claim the studio cannot
+  keep. That the return costs no code change is one thing the port improved on
+  app/page.tsx, where restoring a cut block meant editing the route.
+
+  What must stay true when it does go back: the block order below the voices wall
   exists to keep the wall and the Instagram strip out of one viewport. The
   service band does that job alone today; putting the mosaic back above the
   service band keeps it, putting it below the strip does not.
@@ -27,10 +51,15 @@
   the small tiles, a heavier weight on the tall one) rather than relying on the
   crop staying dark enough to read against.
 
-  Every destination must be a REAL catalogue query. The design's "Tops" and "Up to
-  40% off" tiles are absent because neither exists in this catalogue, and the
-  fourth tile is "New in" rather than the design's "Made to order" — that filter
-  matches nothing and names a service the studio does not offer.
+  Every destination must be a REAL catalogue query. The design's "Up to 40% off"
+  tile is absent because no product on this store carries a compare-at price, and
+  the fourth tile is "New in" rather than the design's "Made to order" — that
+  filter matches nothing and names a service the studio does not offer.
+
+  The preset's labels are still the CUT vocabulary (Culottes, Straight cut). They
+  become the brief's garment vocabulary — Pants, Tops, Outerwear, New Arrivals —
+  in the same change that creates the collections, because a label and its
+  destination have to move together or the tile lies.
 
   Photographs fall back from an uploaded image, to the collection's Nth product,
   to the labelled placeholder — so the mosaic needs no art direction of its own to

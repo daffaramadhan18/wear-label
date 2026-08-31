@@ -195,13 +195,48 @@
               {% render 'copy', value: block.settings.body, label: 'body', lines: 2 %}
             </p>
 
-            {%- if block.settings.cta != blank -%}
-              <a
-                href="{{ block.settings.href | default: routes.all_products_collection_url }}"
-                class="inline-flex min-h-13 cursor-pointer items-center justify-center gap-2 self-start rounded-sm border border-brand bg-brand px-11 text-caption uppercase tracking-[0.22em] text-on-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand-hover hover:bg-brand-hover active:translate-y-px"
-              >
-                {{ block.settings.cta }}
-              </a>
+            {%- comment -%}
+              TWO CTAs, and the second one is the point of the whole band.
+
+              The brief's first screen has to say that Wear Label does two
+              things — ready-to-wear and custom apparel production — before the
+              reader scrolls. So the primary button shops and the secondary one
+              goes to the B2B page, and the pair sits on every slide rather than
+              only the first: any slide can be the one a reader lands on, and a
+              slide that drops the custom route is a slide where the second
+              business does not exist.
+
+              `flex-wrap` rather than a two-column grid because these labels are
+              set at 0.22em tracking and `px-11`: SHOP COLLECTION and CUSTOM
+              APPAREL side by side need 430px, and the card is 100% of a 390px
+              screen minus the gutter. They wrap to one per row there and sit in
+              a row from about `sm` up, which is the width at which they fit.
+              Both are `min-h-13` so a wrapped pair is still two 52px targets.
+            {%- endcomment -%}
+            {%- if block.settings.cta != blank or block.settings.cta_2 != blank -%}
+              {%- comment -%}
+                Assigned rather than filtered inline: theme check's
+                UnsupportedFilterArguments forbids a filter on a `render`
+                argument, so `href | default: ...` has to resolve first.
+              {%- endcomment -%}
+              {%- assign slide_href = block.settings.href | default: routes.all_products_collection_url -%}
+              <div class="flex flex-wrap gap-3">
+                {%- if block.settings.cta != blank -%}
+                  {% render 'button',
+                    label: block.settings.cta,
+                    href: slide_href,
+                    variant: 'primary',
+                    class: 'max-sm:w-full' %}
+                {%- endif -%}
+
+                {%- if block.settings.cta_2 != blank -%}
+                  {% render 'button',
+                    label: block.settings.cta_2,
+                    href: block.settings.href_2,
+                    variant: 'secondary',
+                    class: 'max-sm:w-full' %}
+                {%- endif -%}
+              </div>
             {%- endif -%}
           </div>
         </div>
@@ -292,6 +327,8 @@
         { "type": "textarea", "id": "body", "label": "Body" },
         { "type": "text", "id": "cta", "label": "Button label" },
         { "type": "url", "id": "href", "label": "Button link" },
+        { "type": "text", "id": "cta_2", "label": "Second button label", "info": "The custom-apparel route. Leave blank and only the first button renders." },
+        { "type": "url", "id": "href_2", "label": "Second button link" },
         { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped artwork below." },
         { "type": "text", "id": "asset", "label": "Shipped asset filename", "info": "A file in the theme's assets/. Used when no photograph is uploaded." },
         { "type": "textarea", "id": "alt", "label": "Alt text" },

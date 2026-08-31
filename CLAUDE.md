@@ -7,20 +7,40 @@
 Company profile + product catalogue + commerce storefront for **Wear Label**, a
 fashion/apparel brand in Bandung, Indonesia.
 
+**Wear Label is TWO businesses and the site now says so.** `BRIEF.pdf` in the repo
+root is the client's own website brief and it is the current authority on scope:
+
+1. **Ready-to-wear / B2C** — women's trousers, tops, cardigans, outerwear. Browse,
+   add to bag, check out on the web, *or* be handed to the studio's Shopee listing.
+2. **Custom apparel / B2B** — uniforms, corporate apparel and merchandise for
+   companies, hospitals, universities, organisations, communities and event
+   organisers. **No ecommerce checkout on this route** — brief §16 sends it
+   straight to WhatsApp, and that is what `sections/quote-form.liquid` does.
+
+B2B is the newer focus and the smaller book of work. The brief is explicit that the
+portfolio must not be inflated to look otherwise: no "trusted by hundreds of
+companies", no invented client list, and "Selected Projects" is **deliberately not
+built** for v1 because there are no project photographs or nameable clients yet.
+Read `BRIEF.pdf` before changing anything on the `/pages/custom` route.
+
 **The deliverable is a Shopify theme, in [`theme/`](./theme/README.md).** Work
 happens there and in the Shopify admin. The Next.js app at the repo root is the
 reference the theme was ported from — see [The Next.js app is an
 archive](#the-nextjs-app-is-an-archive) before touching it.
 
 **Who this is for and what it is for: [`PRODUCT.md`](./PRODUCT.md).** The primary
-buyer, what she decides on, and the fact that this site is a credibility surface
-rather than the till are recorded there, with the customer evidence behind each one.
-Read it before proposing anything that changes what the site claims.
+buyer, what she decides on, and the customer evidence behind each claim are recorded
+there. Read it before proposing anything that changes what the site claims — and
+note that the brief moved two of its entries: the site is becoming a till as well as
+a credibility surface, and B2B custom-apparel buyers are now an audience it serves
+rather than one it turns away.
 
-**Status: the store exists and the theme is on it, unpublished.** All six routes are
-ported. What is missing is store *configuration*, not code — and every one of those
-gaps renders a labelled placeholder at final size rather than breaking, so the theme
-is reviewable now:
+**Status: the store exists, the theme is on it, and the theme is LIVE behind the
+storefront password.** All six original routes are ported and four more have landed
+for the brief — `/pages/custom`, `/pages/contact`, `/collections` and `/search`.
+What is missing is store *configuration* and a handful of client-supplied facts, not
+code — and every one of those gaps renders a labelled placeholder at final size
+rather than breaking, so the theme is reviewable now:
 
 1. **No photography for the 115 Shopee pieces.** The eleven design pieces carry
    their shots; the 115 imported from Shopee carry none (see [The
@@ -32,10 +52,42 @@ is reviewable now:
    bare `/collections/all` opened on eight sold-out cards out of nine. Product
    type, size and colourway facets are still undefined; they come from the Search
    and Discovery app, and until then the rail says so rather than inventing them.
-3. **No `about` page**, and no `custom.material` / `custom.care` metafields.
-4. **Copy.** Brand voice is unsettled. Blank theme settings render a labelled
-   placeholder, so filling them in is the whole change.
-5. **The decisions under [Still open](#still-open).** Nothing in that list may be
+3. **Three Shopify pages do not exist yet** and every route to them 404s until
+   they do. Create them in the admin under Content → Pages, and set the template
+   suffix on the two that have one:
+
+   | Handle | Title | Template |
+   |---|---|---|
+   | `custom` | Custom & Business | `page.custom` |
+   | `contact` | Contact | `page.contact` |
+   | `about` | About Us | *(default `page`)* |
+
+   The nav, the hero's second CTA, the home page's custom band and the footer all
+   point at `/pages/custom` and `/pages/contact` already.
+4. **Five product metafield definitions do not exist**, so five slots render
+   placeholders: `custom.material`, `custom.care`, `custom.size_chart`,
+   `custom.fit`, `custom.shopee_url`.
+5. **Two theme settings are blank ON PURPOSE, pending the client**, both under
+   Theme settings → Custom & business. Neither fails silently:
+   - `whatsapp_number` — with it blank the quote form still renders at full size
+     and its submit is *disabled* with an alert saying why. **This is the entire
+     B2B conversion path**; nothing else on `/pages/custom` matters until it is
+     filled in.
+   - `shopee_shop_url` — with it blank, "Buy on Shopee" is simply absent from
+     product pages rather than linking to a search page.
+6. **Contact details are placeholders, by instruction 2026-08-31.** Email, studio
+   address and opening hours are blocks on `templates/page.contact.json` with
+   blank values, so each renders a labelled placeholder at final size. They are
+   variable facts nobody has supplied and an address is the one string a reader
+   acts on. Filling them in is a theme-editor edit.
+7. **There is no B2B photography**, by the same instruction. `custom-band` and all
+   three `custom-services` cards draw labelled placeholders at final size. The
+   B2B hero is the exception and needs no photograph — see its own comment.
+8. **Copy.** Brand voice is unsettled. Blank theme settings render a labelled
+   placeholder, so filling them in is the whole change. The brief's own strings
+   are in as section-setting *defaults*, so the client edits them in the theme
+   editor.
+9. **The decisions under [Still open](#still-open).** Nothing in that list may be
    guessed at; ask.
 
 Everything else — palette, type, layout, motion, accessibility, the catalogue
@@ -50,16 +102,48 @@ change this repo refuses.
 | Store | `kbysza-bk.myshopify.com` |
 | Shop ID | `gid://shopify/Shop/108822364446` |
 | Admin | https://admin.shopify.com/store/kbysza-bk |
-| Theme | `205197312286` — "Wear Label", role `unpublished` |
+| Theme | `205197312286` — "Wear Label", role **`live`** |
 | Preview | https://kbysza-bk.myshopify.com?preview_theme_id=205197312286 |
 | Editor | https://kbysza-bk.myshopify.com/admin/themes/205197312286/editor |
 
-The storefront is password-protected, as new stores are. `theme push` does **not**
-need that password; `theme dev` does, and it is in Online Store → Preferences. It is
-not written down here and must not be committed.
+The storefront is password-protected, as new stores are — `/` still redirects to
+`/password`. `theme push` does **not** need that password; `theme dev` does, and so
+does fetching a rendered page to verify it. It is in Online Store → Preferences, it
+is not written down here, and it must not be committed.
 
-**Never push to the live theme.** Push to `205197312286` by id. Publishing is a
-decision, not a step.
+**THE THEME IS LIVE. It was `unpublished` and somebody published it**, discovered
+2026-08-31 when `theme:push` prompted "Push theme files to the live theme on
+kbysza-bk.myshopify.com?". Nothing is publicly reachable — the storefront password
+is still on — but two instructions that used to agree now conflict, and the
+resolution is:
+
+- **`npm run theme:push` CANNOT COMPLETE non-interactively any more.** It pins
+  `--theme 205197312286`, which was the safe target and is now the live one, and the
+  CLI stops with "Failed to prompt: Push theme files to the live theme…". The flag
+  that gets past it is **`--allow-live`** (`-a`), which exists for exactly this and
+  is not the same as `--force`. Confirmed working 2026-08-31:
+
+  ```bash
+  npx shopify theme push --path theme --store kbysza-bk.myshopify.com \
+    --theme 205197312286 --allow-live --json
+  ```
+
+- **Ask before you use it.** Authorised once, 2026-08-31, for the brief's B2B and
+  search work — that authorisation was for that push, not standing. The password is
+  now the only thing keeping the store private, so a push to live is a change to the
+  thing the client looks at, and one they should know is coming.
+- **To verify without touching live, use a scratch unpublished theme.**
+  `npx shopify theme push --path theme --store kbysza-bk.myshopify.com --unpublished
+  --theme "<name>" --json` creates one and prints its id and preview URL. Push there,
+  read the rendered output, then land it. **Delete it when done** —
+  `npx shopify theme delete --store … --theme <id> --force` — it costs a theme slot
+  and the next person will mistake it for the real one.
+- **`theme push` reports errors `theme check` cannot see.** The `--json` output
+  carries a per-file `errors` map from the store's own validator. That is how a
+  `max_blocks` violation surfaces: the six-item nav the brief asks for was pushed
+  against `header.liquid`'s `"max_blocks": 5`, the push *completed*, and the store
+  returned "Block count exceeds maximum of 5 for section 'header'" while silently
+  dropping the extra blocks. `theme check` passed on it. **Read the push output.**
 
 Some Admin API work still needs store-level auth run interactively — importing the
 catalogue, for one. `shopify auth login` alone is enough for theme commands.
@@ -203,9 +287,10 @@ or discount logic, stop — it belongs in Shopify configuration instead.
 - **Liquid**, server-rendered. No framework, no build step on Shopify's side
 - **Tailwind CSS v4**, precompiled to `theme/assets/theme.css`
 - **CSS-variable design tokens** in `app/tokens.css`, shared with the archived app
-- **Vanilla JS** in `theme/assets/theme.js` — seven behaviours (the header
+- **Vanilla JS** in `theme/assets/theme.js` — eight behaviours (the header
   disclosure, the scroll reveals, the carousel, the gallery, the tabs, the quantity
-  stepper, save-for-later), all progressive enhancement
+  stepper, save-for-later, and the quote form's WhatsApp composer), all progressive
+  enhancement
 - **Shopify CLI 4.x**, pinned as a devDependency so the scripts resolve it from
   `node_modules/.bin` — a bare `shopify` is not on `PATH` here
 
@@ -223,8 +308,18 @@ Shopify route names, and what the React app called them:
 | `/products/<handle>` | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, tabs, related |
 | `/cart` | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
 | `/pages/about` | `/about` | About Us — the Shopify page's own title and content |
+| `/pages/custom` | — | **Custom & Business (B2B).** Hero, services, how it works, why Wear Label, request a quote. Template suffix `page.custom` |
+| `/pages/contact` | — | **Contact.** Placeholder detail rows plus Shopify's native contact form. Template suffix `page.contact` |
+| `/collections` | — | **Collections.** The catalogue by category. Empty until the collections are created |
+| `/search` | — | **Search.** Products only; the header mark links here |
 | `/account` | `/account` | Shopify's customer routes — still `main-stub`, not designed |
 | 404 | `app/not-found.tsx` | `sections/main-404.liquid` |
+
+The four routes with no React counterpart came from the brief, not from the port —
+§5 (the navigation) and §9 (the B2B page). `/pages/custom` and `/pages/contact` need
+a Shopify page to exist with the matching handle and template suffix or they 404;
+the other two are Shopify's own routes and work as soon as the theme has a section
+for them, which they now do.
 
 Filter and sort URLs are Shopify's: `?filter.p.product_type=Wide+leg`,
 `?filter.v.option.size=M`, `?sort_by=created-descending`, `?page=2`. That is the URL
@@ -302,17 +397,42 @@ Nothing is read from the environment any more. The three `SHOPIFY_*` /
 | `snippets/product-gallery` · `product-purchase` · `product-tabs` | `components/product/*` |
 | `snippets/cart-lines` · `order-summary` | `components/cart/*` |
 | `snippets/copy` · `media` · `price` · `badge` · `alert` · `aurora` · `icon` · `wordmark` · `breadcrumbs` · `save-button` · `cart-badge` | `components/ui/*` |
-| `assets/theme.js` | the header disclosure, the reveals, the carousel, the gallery, the tabs, the stepper, the save button |
+| `snippets/button` | nothing — extracted 2026-08-31 from the primary button's class string, which had been retyped in three sections and was about to be retyped in eight more |
+| `sections/custom-band` | nothing — brief §7, the B2B hook on the home page |
+| `sections/custom-hero` · `custom-services` · `how-it-works` · `why-wear-label` · `quote-form` | nothing — brief §9, the Custom & Business page |
+| `sections/contact-details` | nothing — brief §5 put Contact in the nav and specified nothing else |
+| `sections/main-search` | nothing — brief §5 asked for search; the route was `main-stub` |
+| `sections/main-list-collections` | nothing — brief §5 asked for Collections; the route was `main-stub` |
+| `assets/theme.js` | the header disclosure, the reveals, the carousel, the gallery, the tabs, the stepper, the save button, the quote form's WhatsApp composer |
 
 Two of those are **generated from the React source, not retyped**, and must stay
 that way: `snippets/icon.liquid` (all twelve paths verified byte-exact against
 `components/ui/icons.tsx`) and the twenty reviews in `sections/voices-wall.liquid`
 (asserted verbatim against `lib/content/site.ts`).
 
-**Home page sequence:** hero → new arrivals → customer voices → service band →
-Instagram strip. Three blocks exist and are deliberately not placed — the mosaic
-(removed on request), the limited-run band (cut), and made-to-order (**never** to be
-placed; the studio does not offer the service). `theme/README.md` has the table.
+**Home page sequence:** hero → new arrivals → **Wear Label Custom** → customer
+voices → service band → Instagram strip. The custom band went in directly after the
+product section because brief §7 puts it there, and because the hero's second CTA
+has to land somewhere on the same page for a reader who scrolls instead of clicking.
+
+**One block exists and is deliberately not placed: `category-mosaic`.** The brief
+asks for it back (§6 Section 3, "Shop by Category") and it stays out until the
+category collections exist on the store — every tile has to point at something that
+matches, and today `/collections/pants` is a 404 while
+`?filter.p.product_type=Pants` silently returns the whole catalogue because that
+facet is not defined. The section's own comment carries the full reasoning.
+
+**Two blocks are gone from the repo, and CLAUDE.md used to claim they were kept.**
+`made-to-order.liquid`, `promo-band.liquid`, `countdown.liquid` and `limited-run`
+are **not in `theme/sections/`** — checked 2026-08-31. The made-to-order rule still
+stands as a rule (the studio does not offer per-shopper made-to-order, answered
+2026-08-20) but there is no file to not-place.
+
+**The brief's B2B service does NOT reopen that decision.** They are different
+things: made-to-order was one garment cut for one shopper, which the studio does not
+do; custom apparel production is a bulk run for an organisation, which is the
+business `/pages/custom` is about. Do not read §7 as licence to put a made-to-order
+block back on a product page.
 
 ## The catalogue
 
@@ -676,22 +796,39 @@ Not decided, and not to be filled in by guessing:
 | Per-product Details and Fabric & care copy | `description` and `custom.care` → placeholders. The design reused one generic paragraph for all eleven pieces; it would state a wrong inseam and a wrong fabric on most of them |
 | About Us and 404 copy | Blank → placeholders. About Us is the Shopify page's own content |
 | Whether there is a limited run, and when it ends | Moot while the band is unplaced. Both the band and the countdown are ported and real |
-| Social handles | No socials render, so no dead buttons |
+| **The studio's WhatsApp number** | **The B2B route's single point of failure.** Blank in Theme settings → Custom & business, deliberately, 2026-08-31. `quote-form.liquid` renders at full size with a disabled submit and an alert saying the number is not set. Nothing else on `/pages/custom` converts until it is filled in |
+| **Per-product Shopee URLs** | `custom.shopee_url` is undefined and `shopee_shop_url` is blank, so "Buy on Shopee" does not render at all. The decision taken was per-product URLs with the shop URL as a fallback; start with the eleven design pieces, which are the only ones carrying photography |
+| **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
+| **B2B photography** | None exists. `custom-band` and all three `custom-services` cards draw labelled placeholders at final size, by instruction 2026-08-31. Brief §7 wants "foto actual project Wear Label" and inventing one is out |
+| **The category taxonomy, and therefore the collections** | Decided in principle 2026-08-31 — follow the brief, garment in `product_type`, cut moved to tags — and **not yet executed on the store**. Until it is: `/collections` renders its own "no collections yet" notice and `category-mosaic` stays off the home page. See [The catalogue](#the-catalogue) for the two axes that have to be merged |
+| **Selected Projects** | **Not built for v1, decided 2026-08-31.** Brief §8 and §9.3 want a portfolio and forbid inflating it; there are no project photographs and no nameable clients, so there is no section rather than an empty one. When there are projects it wants a `project` metaobject (client, category, photographs, short description) so the studio adds them in the admin |
+| Social handles | The footer has four label/URL pairs — Instagram, Shopee, TikTok and a spare — and every URL is blank, so no social link renders. Brief §19 names the three |
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Nine of twelve footer entries have no URL and render as plain text, never as a 404 link. Add the URL in the theme editor when the page exists |
 | A review system | The design's star rating is still deliberately absent — a fabricated score is the one placeholder that cannot be labelled as one. Real quotations are a separate matter and are live in the voices wall; there is no feed behind them, so new reviews mean editing the section's blocks |
 | Whether the studio ships from Bandung or Bekasi | The hero's order-notes card says "Pengiriman dari Kota Bekasi"; the footer note says the studio is in Bandung. Both are live. Nothing picks a side |
-| Search | The design's search mark is absent; Shopify's search route renders the stub |
 | The store's own domain | `kbysza-bk.myshopify.com` until a domain is connected |
-| Whether the theme goes live | It is `unpublished`. Publishing is a decision |
+| Whether the storefront password comes off | The theme is live; the password is what is still keeping the store private. Taking it off is the actual launch decision now, not publishing |
 
 **Answered, and recorded so it is not reopened:**
 
+- ~~Search~~ — **built, 2026-08-31**, because brief §5 asked for it. The header mark
+  is a link to `/search` and `sections/main-search.liquid` is a real page rather than
+  an overlay: a page has a URL, works with script off, and does not put a second
+  focus trap in a header that already has a disclosure. Results are restricted to
+  products because the theme has no card for a page or article result.
 - ~~Which pieces are made to order~~ — **none, 2026-08-20. The studio does not offer
-  the service.** The band and every "Start an order" link are off the page; the
-  hero's second slide points at the customer voices instead. `sections/category-mosaic`
-  and the made-to-order section are kept for the day the service exists, marked as
-  not to be placed. The `/shop` "Made to order" filter row that counted zero is gone
-  — Shopify has no such filter unless somebody makes one.
+  the service.** Every "Start an order" link is off the page and the `/shop` "Made to
+  order" filter row that counted zero is gone. **The brief's B2B custom apparel is a
+  different service and does not reopen this** — bulk production for an organisation,
+  not one garment cut for one shopper. The made-to-order section is no longer in the
+  repo at all; `sections/category-mosaic` is, and is unplaced for a data reason
+  rather than a promise reason.
+- ~~Whether the site is a till or only a credibility surface~~ — **both, 2026-08-31.**
+  Brief §19 makes web checkout, payment and shipping Must Have for B2C, and the
+  client's own note adds a Shopee hand-off beside it rather than instead of it. The
+  gateway and the courier app are still unchosen, so the till is not open yet — but
+  the site is no longer *only* a shop window, and PRODUCT.md has been changed to say
+  so.
 - ~~Whether to stay headless~~ — **no, 2026-08-20.** The repo's own rule was
   "presentation only, no commerce logic here"; with no commerce logic, headless was
   paying for control nobody used.

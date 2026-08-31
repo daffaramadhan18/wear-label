@@ -1,9 +1,14 @@
 {
   "sections": {
     "main": {
-      "type": "main-stub",
-      "settings": { "route": "list collections" }
+      "type": "main-list-collections",
+      "settings": {
+        "heading": "Collections",
+        "body": "The catalogue by category. Every link opens on what is in stock."
+      }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

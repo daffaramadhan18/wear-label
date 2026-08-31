@@ -11,8 +11,19 @@
   the React version could not do — it rendered a "not connected yet" notice
   instead. That notice is gone because the form now works.
 
-  Socials come from Shopify's social settings, and an empty handle renders
-  nothing: a social button that goes nowhere is worse than none.
+  SOCIALS ARE SETTINGS HERE, not Shopify's own social fields, and the comment
+  that used to sit in this spot claimed otherwise while no social markup existed
+  at all. Two reasons for owning them: Shopify's built-in social settings cover
+  Facebook, X, Instagram, TikTok, Tumblr, Snapchat, YouTube, Vimeo and Pinterest
+  and have no field for Shopee — which is the studio's actual till, and the one
+  the brief names first (§19: instagram, shopee, tiktok). And a label/URL pair
+  lets the studio add a marketplace nobody anticipated without a code change.
+
+  They are TEXT, not icons. The design direction asks for minimal icons and an
+  editorial look; a row of three uppercase words at nav tracking is that, and it
+  also means no glyph has to be drawn for a marketplace whose mark is a
+  trademark. An empty URL renders nothing at all rather than a dead button —
+  the same rule the link columns follow.
 {%- endcomment -%}
 
 <footer class="relative isolate overflow-hidden bg-invert text-ink-invert-muted">
@@ -115,7 +126,59 @@
 
     <hr class="wl-rule my-block opacity-20">
 
-    <p class="text-micro uppercase tracking-nav">{{ section.settings.copyright }}</p>
+    {%- comment -%}
+      The copyright and the socials share the bottom row and swap to a column
+      below `sm`. `flex-wrap` rather than a grid because the social row's width
+      depends on how many entries have URLs — one entry and a two-column grid
+      leaves a gap where the missing ones were.
+    {%- endcomment -%}
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <p class="text-micro uppercase tracking-nav">{{ section.settings.copyright }}</p>
+
+      {%- assign social_count = 0 -%}
+      {%- for i in (1..4) -%}
+        {%- liquid
+          assign social_url_key = 'social_' | append: i | append: '_url'
+          if section.settings[social_url_key] != blank
+            assign social_count = social_count | plus: 1
+          endif
+        -%}
+      {%- endfor -%}
+
+      {%- if social_count > 0 -%}
+        <nav aria-label="{{ 'general.social' | t }}">
+          <ul class="flex flex-wrap items-center gap-x-6 gap-y-2">
+            {%- for i in (1..4) -%}
+              {%- liquid
+                assign social_label_key = 'social_' | append: i | append: '_label'
+                assign social_url_key = 'social_' | append: i | append: '_url'
+                assign social_label = section.settings[social_label_key]
+                assign social_url = section.settings[social_url_key]
+              -%}
+              {%- if social_label != blank and social_url != blank -%}
+                <li>
+                  {%- comment -%}
+                    Off-site, so `rel="noopener"` and a screen-reader suffix, and
+                    `text-ink-invert-muted` restated for the same reason the link
+                    columns restate it: base.css paints every anchor
+                    --color-brand, which is all but invisible on espresso.
+                  {%- endcomment -%}
+                  <a
+                    href="{{ social_url }}"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex min-h-11 items-center text-micro uppercase tracking-nav text-ink-invert-muted transition-colors duration-(--duration-base) hover:text-ink-invert"
+                  >
+                    {{ social_label }}
+                    <span class="sr-only">{{ 'general.opens_new_tab' | t }}</span>
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+    </div>
   </div>
 </footer>
 
@@ -130,6 +193,16 @@
     { "type": "textarea", "id": "newsletter_body", "label": "Body", "default": "New colourways, restocks and studio notes. No more than twice a month." },
     { "type": "text", "id": "newsletter_placeholder", "label": "Field placeholder", "default": "Enter your email" },
     { "type": "text", "id": "newsletter_cta", "label": "Button", "default": "Subscribe" },
+    { "type": "header", "content": "Elsewhere" },
+    { "type": "paragraph", "content": "A row of text links beside the copyright. An entry with no URL is not rendered at all — no dead buttons. Shopee is here because Shopify's own social settings have no field for it." },
+    { "type": "text", "id": "social_1_label", "label": "Link 1", "default": "Instagram" },
+    { "type": "url", "id": "social_1_url", "label": "Link 1 URL" },
+    { "type": "text", "id": "social_2_label", "label": "Link 2", "default": "Shopee" },
+    { "type": "url", "id": "social_2_url", "label": "Link 2 URL" },
+    { "type": "text", "id": "social_3_label", "label": "Link 3", "default": "TikTok" },
+    { "type": "url", "id": "social_3_url", "label": "Link 3 URL" },
+    { "type": "text", "id": "social_4_label", "label": "Link 4" },
+    { "type": "url", "id": "social_4_url", "label": "Link 4 URL" },
     { "type": "header", "content": "Legal" },
     { "type": "text", "id": "copyright", "label": "Copyright", "default": "© 2026 Wear Label." }
   ],

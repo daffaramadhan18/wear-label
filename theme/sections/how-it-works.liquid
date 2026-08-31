@@ -1,0 +1,102 @@
+{%- comment -%}
+  How a custom order runs, start to finish. Brief §9.4.
+
+  Five steps, and the reason this section exists at all is that a B2B enquiry is
+  a commitment with no visible price. A shopper buying trousers knows exactly
+  what happens next; an organisation asking about 200 uniforms does not, and the
+  thing that stops them asking is not knowing how much process they are about to
+  sign up for. So the section's job is to make the process look finite.
+
+  THE NUMBER IS DERIVED FROM BLOCK ORDER, never typed into a setting. A step
+  numbered by hand goes wrong the first time somebody inserts a step in the
+  middle — the studio would have to renumber every block after it, and the one
+  they miss is the one that ships. Reordering blocks in the theme editor
+  renumbers the whole row here.
+
+  It is zero-padded to two digits, which is the brief's own notation ("01 —
+  Consultation"). Liquid has no pad filter, so ten or more steps would need a
+  second branch; the guard below covers it rather than silently rendering "010".
+
+  THE NUMBER IS SET IN THE BRAND COLOUR, not in a hairline tint. A process step's
+  number is content — it says which step this is and in what order — so it has to
+  be readable, and the editorial move of setting big numerals in near-invisible
+  grey would make the one piece of ordering information on the page the hardest
+  thing on it to read. The rule that colour never carries meaning alone applies
+  to legibility too.
+
+  The top rule on each cell is what reads as a process bar at `lg`, where the
+  five cells sit in a row. Below that they stack and each rule becomes a plain
+  divider, which is the same thing doing a smaller job.
+{%- endcomment -%}
+
+<section aria-labelledby="how-it-works-heading" class="border-y border-rule bg-canvas">
+  <div class="mx-auto w-full max-w-content px-gutter py-section">
+    <div data-reveal class="flex flex-col gap-4">
+      <h2 id="how-it-works-heading" class="text-h1 leading-h1">
+        {% render 'copy', value: section.settings.heading, label: 'heading' %}
+      </h2>
+
+      {%- if section.settings.body != blank -%}
+        <p class="wl-measure text-body leading-body text-ink-muted">{{ section.settings.body }}</p>
+      {%- endif -%}
+    </div>
+
+    <ol class="mt-block grid gap-7 sm:grid-cols-2 lg:grid-cols-5">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign step = forloop.index
+          if step < 10
+            assign step_label = step | prepend: '0'
+          else
+            assign step_label = step | append: ''
+          endif
+        -%}
+        <li data-reveal class="flex flex-col gap-2.5 border-t border-line pt-5" {{ block.shopify_attributes }}>
+          <span class="font-display text-h1 leading-none text-brand">{{ step_label }}</span>
+
+          <h3 class="text-h3 leading-h3 font-medium text-ink">
+            {% render 'copy', value: block.settings.title, label: 'step', inline: true %}
+          </h3>
+
+          <p class="text-caption leading-snug text-ink-muted">
+            {% render 'copy', value: block.settings.body, label: 'detail', lines: 2 %}
+          </p>
+        </li>
+      {%- endfor -%}
+    </ol>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "How it works",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "paragraph", "content": "Steps are numbered from their order here — do not type a number into the name. Reorder the blocks and the numbering follows." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "How it works" },
+    { "type": "textarea", "id": "body", "label": "Intro" }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Step",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Name" },
+        { "type": "textarea", "id": "body", "label": "Detail" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "How it works",
+      "blocks": [
+        { "type": "step", "settings": { "title": "Consultation", "body": "You tell us what the organisation needs." } },
+        { "type": "step", "settings": { "title": "Product & specification", "body": "Model, material, colour, size, branding and product detail are settled." } },
+        { "type": "step", "settings": { "title": "Quotation", "body": "Wear Label prices the order against that specification and the quantity." } },
+        { "type": "step", "settings": { "title": "Production", "body": "Sample, approval, then the production run." } },
+        { "type": "step", "settings": { "title": "Delivery", "body": "Finished pieces are shipped to you." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,159 @@
+{
+  "sections": {
+    "hero": {
+      "type": "custom-hero",
+      "settings": {
+        "eyebrow": "Wear Label Custom",
+        "heading": "Custom Apparel for Your Team & Brand",
+        "body": "Uniforms, merchandise, and apparel tailored to your organization.",
+        "cta": "Request a quote",
+        "href": "/pages/custom#quote"
+      }
+    },
+    "services": {
+      "type": "custom-services",
+      "blocks": {
+        "uniform": {
+          "type": "service",
+          "settings": {
+            "title": "Custom uniform",
+            "body": "Uniform for company, hospital, institution, and team."
+          }
+        },
+        "corporate": {
+          "type": "service",
+          "settings": {
+            "title": "Corporate apparel",
+            "body": "Custom apparel for corporate and organization needs."
+          }
+        },
+        "merchandise": {
+          "type": "service",
+          "settings": {
+            "title": "Merchandise",
+            "body": "T-shirts, apparel, and merchandise for events, campaigns, communities, and organizations."
+          }
+        }
+      },
+      "block_order": [
+        "uniform",
+        "corporate",
+        "merchandise"
+      ],
+      "settings": {
+        "heading": "Services",
+        "body": ""
+      }
+    },
+    "process": {
+      "type": "how-it-works",
+      "blocks": {
+        "s1": {
+          "type": "step",
+          "settings": {
+            "title": "Consultation",
+            "body": "You tell us what the organisation needs."
+          }
+        },
+        "s2": {
+          "type": "step",
+          "settings": {
+            "title": "Product & specification",
+            "body": "Model, material, colour, size, branding and product detail are settled."
+          }
+        },
+        "s3": {
+          "type": "step",
+          "settings": {
+            "title": "Quotation",
+            "body": "Wear Label prices the order against that specification and the quantity."
+          }
+        },
+        "s4": {
+          "type": "step",
+          "settings": {
+            "title": "Production",
+            "body": "Sample, approval, then the production run."
+          }
+        },
+        "s5": {
+          "type": "step",
+          "settings": {
+            "title": "Delivery",
+            "body": "Finished pieces are shipped to you."
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5"
+      ],
+      "settings": {
+        "heading": "How it works",
+        "body": ""
+      }
+    },
+    "why": {
+      "type": "why-wear-label",
+      "blocks": {
+        "v1": {
+          "type": "value",
+          "settings": {
+            "title": "Fashion experience",
+            "body": "Wear Label has been developing and selling fashion products since 2020."
+          }
+        },
+        "v2": {
+          "type": "value",
+          "settings": {
+            "title": "Flexible customisation",
+            "body": "Pieces are adapted to what the organisation actually needs."
+          }
+        },
+        "v3": {
+          "type": "value",
+          "settings": {
+            "title": "Product & fit understanding",
+            "body": "Experience in apparel development, material, cutting and fit."
+          }
+        },
+        "v4": {
+          "type": "value",
+          "settings": {
+            "title": "End-to-end process",
+            "body": "Consultation through production and delivery."
+          }
+        }
+      },
+      "block_order": [
+        "v1",
+        "v2",
+        "v3",
+        "v4"
+      ],
+      "settings": {
+        "heading": "Why Wear Label",
+        "body": ""
+      }
+    },
+    "quote": {
+      "type": "quote-form",
+      "settings": {
+        "heading": "Request a quote",
+        "body": "Tell us what your organisation needs and we will come back with a price against the specification and the quantity.",
+        "note": "Have a design or a reference? Send it in the chat once WhatsApp opens — the form itself cannot carry a file.",
+        "cta": "Request a quote"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "services",
+    "process",
+    "why",
+    "quote"
+  ]
+}

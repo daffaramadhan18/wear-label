@@ -56,6 +56,57 @@
    * base.css already uses for the reveals: hidden while script is expected,
    * visible when it is known not to be coming.
    */
+  /*
+   * A size chart pasted into a rich-text metafield.
+   *
+   * Shopify emits a bare <table> and base.css styles nothing inside one, so a
+   * chart arrived as unpadded, unaligned rows with no header emphasis — legible
+   * only if you already knew what the columns were. This is the smallest set of
+   * rules that makes one readable, and it is here rather than in base.css
+   * because the Next.js app has no metafields and therefore no tables.
+   *
+   * It SCROLLS SIDEWAYS rather than shrinking. A chart of five sizes against
+   * four measurements is about 420px of unbreakable numbers, and forcing that
+   * into a 358px column either wraps every cell to two lines or overflows the
+   * page — and horizontal page scroll is the one thing the layout rules here
+   * forbid outright. The overflow is on the wrapper, so the scroll belongs to
+   * the table and the document stays put.
+   *
+   * `text-align: start` rather than `left`: the measurement columns are numbers
+   * read against a row label, and a right-to-left locale flips both together.
+   */
+  .wl-table {
+    overflow-x: auto;
+  }
+
+  .wl-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-caption);
+  }
+
+  .wl-table th,
+  .wl-table td {
+    padding: 0.625rem 0.875rem;
+    text-align: start;
+    border-bottom: 1px solid var(--color-hairline);
+    white-space: nowrap;
+  }
+
+  .wl-table th {
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+
+  .wl-table td {
+    color: var(--color-ink-body);
+  }
+
+  .wl-table tr:last-child th,
+  .wl-table tr:last-child td {
+    border-bottom: 0;
+  }
+
   [data-tabs] [data-tab-hidden] {
     display: none;
   }

@@ -1,0 +1,104 @@
+{%- comment -%}
+  Search. Brief §5 puts a search mark in the header, beside Account and Cart.
+
+  This route used to render main-stub, and the header carried no mark at all —
+  header.liquid said so in as many words: "there is no search on the site yet,
+  and an icon that does nothing is worse than one absence." The brief asked for
+  search, so the absence is over and the mark in the header now has somewhere to
+  go: it is a link to this page, not a panel that drops out of the bar.
+
+  A LINK RATHER THAN AN OVERLAY, deliberately. An overlay is a second disclosure
+  in a header that already has one, it needs its own focus trap and its own
+  escape handling, and it cannot work with script off — so the fallback would be
+  a magnifier that does nothing, which is the state the brief was asked to fix.
+  A page has a URL, works with no JavaScript at all, is shareable, and puts the
+  field at a size somebody can actually type a garment name into. If a
+  type-ahead overlay is wanted later it enhances this page rather than replacing
+  it.
+
+  `type=product` is a hidden input rather than a query the merchant has to
+  remember. Shopify searches pages and articles too, and this theme has neither
+  designed: an unrestricted search would return a page card the theme has no
+  markup for. Restricting it here keeps the results grid honest about what it can
+  render.
+
+  THREE STATES, and they are three different facts, so they do not share markup:
+  nothing searched yet (the field and a prompt), searched with results (the
+  grid), searched with none (the alert naming the terms back). The catalogue
+  makes the same distinction between an empty collection and a collection
+  filtered to nothing, and for the same reason — a shopper who mistyped needs to
+  see what they typed.
+
+  There is deliberately NO placeholder grid on the empty state. main-collection
+  draws placeholder cards because "no products imported yet" is a fact about the
+  store that the layout has to be reviewable against; here an empty state means
+  the reader has not typed anything, and nine grey cards would answer a question
+  nobody asked.
+{%- endcomment -%}
+
+{%- liquid
+  assign card_sizes = '(min-width: 1280px) 22vw, (min-width: 640px) 40vw, 45vw'
+-%}
+
+{% paginate search.results by section.settings.per_page %}
+  <div class="mx-auto w-full max-w-content px-gutter pb-section pt-block-lg">
+    <h1 class="text-h1 leading-h1">{{ 'search.title' | t }}</h1>
+
+    <form action="{{ routes.search_url }}" method="get" role="search" class="mt-7 flex flex-wrap gap-3">
+      <input type="hidden" name="type" value="product">
+
+      <label class="sr-only" for="search-terms">{{ 'search.label' | t }}</label>
+      {%- comment -%}
+        `type="search"` gives the field its own clear affordance on the platforms
+        that draw one, and `autocomplete="off"` keeps the browser's history of
+        every other search box on the web out of a field about garment names.
+      {%- endcomment -%}
+      <input
+        id="search-terms"
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        autocomplete="off"
+        placeholder="{{ 'search.placeholder' | t }}"
+        class="min-h-13 min-w-0 flex-1 basis-full rounded-sm border border-line bg-canvas px-4 text-body text-ink placeholder:text-ink-subtle sm:basis-auto"
+      >
+
+      {%- assign search_cta = 'search.submit' | t -%}
+      {% render 'button', label: search_cta, variant: 'primary', type: 'submit', class: 'basis-full sm:basis-auto px-6 sm:px-11' %}
+    </form>
+
+    {%- if search.performed -%}
+      <p class="mt-6 text-caption text-ink-muted">
+        {{ 'search.results_count' | t: count: search.results_count, terms: search.terms }}
+      </p>
+
+      {%- if search.results.size > 0 -%}
+        <div class="mt-block grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-7 sm:gap-y-10 xl:grid-cols-3">
+          {%- for item in search.results -%}
+            <div data-reveal>
+              {% render 'product-card', product: item, heading_level: 'h2', sizes: card_sizes %}
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {% render 'pagination', paginate: paginate %}
+      {%- else -%}
+        {%- assign nothing = 'search.no_results' | t: terms: search.terms -%}
+        <div class="mt-7">{% render 'alert', body: nothing %}</div>
+      {%- endif -%}
+
+    {%- else -%}
+      <p class="mt-7 wl-measure text-body leading-body text-ink-muted">{{ 'search.prompt' | t }}</p>
+    {%- endif -%}
+  </div>
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "Search",
+  "settings": [
+    { "type": "paragraph", "content": "Results are restricted to products. The theme has no card for a page or an article result, so returning one would render markup that does not exist." },
+    { "type": "range", "id": "per_page", "label": "Results per page", "min": 6, "max": 24, "step": 3, "default": 9 }
+  ]
+}
+{% endschema %}

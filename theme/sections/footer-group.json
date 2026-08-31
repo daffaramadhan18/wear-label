@@ -11,11 +11,11 @@
             "title": "Company",
             "link_1_label": "What we do",
             "link_1_url": "/pages/about",
-            "link_2_label": "The studio",
-            "link_2_url": "",
-            "link_3_label": "Journal",
+            "link_2_label": "Custom & business",
+            "link_2_url": "/pages/custom",
+            "link_3_label": "The studio",
             "link_3_url": "",
-            "link_4_label": "FAQ",
+            "link_4_label": "Journal",
             "link_4_url": ""
           }
         },
@@ -38,7 +38,7 @@
           "settings": {
             "title": "Customer care",
             "link_1_label": "Contact us",
-            "link_1_url": "",
+            "link_1_url": "/pages/contact",
             "link_2_label": "Returns & refunds",
             "link_2_url": "",
             "link_3_label": "Size guide",

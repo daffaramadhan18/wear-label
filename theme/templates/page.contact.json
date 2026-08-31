@@ -1,0 +1,55 @@
+{
+  "sections": {
+    "main": {
+      "type": "contact-details",
+      "blocks": {
+        "whatsapp": {
+          "type": "detail",
+          "settings": {
+            "label": "WhatsApp",
+            "value": "",
+            "url": ""
+          }
+        },
+        "email": {
+          "type": "detail",
+          "settings": {
+            "label": "Email",
+            "value": "",
+            "url": ""
+          }
+        },
+        "studio": {
+          "type": "detail",
+          "settings": {
+            "label": "Studio",
+            "value": "",
+            "url": ""
+          }
+        },
+        "hours": {
+          "type": "detail",
+          "settings": {
+            "label": "Opening hours",
+            "value": "",
+            "url": ""
+          }
+        }
+      },
+      "block_order": [
+        "whatsapp",
+        "email",
+        "studio",
+        "hours"
+      ],
+      "settings": {
+        "heading": "Contact",
+        "body": "",
+        "form_heading": "Send us a message"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

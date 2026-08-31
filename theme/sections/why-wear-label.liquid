@@ -1,0 +1,86 @@
+{%- comment -%}
+  Why Wear Label. Brief §9.5.
+
+  Four claims, and every one of them is checkable against something the studio
+  has actually done — which is the only reason this section is allowed. The brief
+  is explicit that the B2B portfolio is still small and that wording like "trusted
+  by hundreds of companies" is not to be used, so the argument this section makes
+  is about capability, not scale: the label has been developing and selling
+  garments since 2020 (brief §13), it adapts pieces to what a client needs, it
+  knows material, cutting and fit, and it runs the job end to end. None of those
+  needs a client count to be true.
+
+  If somebody adds a fifth card here, the test is the same one the service band
+  carries: a claim that lives only in this section is a claim nobody has to keep.
+
+  CREAM CARDS ON WHITE, not a cream band. The section directly above is a cream
+  band with rules, and stacking a second cream band under it merges the two into
+  one region. Cream on white is the theme's declared card pattern — the same
+  treatment the review cards and the hero panel use — so this reads as four
+  objects on the page rather than as another horizontal stripe.
+
+  SPELLING. The brief writes "Customization"; the default below is
+  "customisation", because this site is set in British spelling throughout
+  ("Colourway" is a size-and-colour option name, a locale key and a filter
+  label). One page spelled the other way is the kind of thing a reader notices
+  without being able to say why. The setting is editable either way.
+{%- endcomment -%}
+
+<section aria-labelledby="why-heading" class="mx-auto w-full max-w-content px-gutter py-section">
+  <div data-reveal class="flex flex-col gap-4">
+    <h2 id="why-heading" class="text-h1 leading-h1">
+      {% render 'copy', value: section.settings.heading, label: 'heading' %}
+    </h2>
+
+    {%- if section.settings.body != blank -%}
+      <p class="wl-measure text-body leading-body text-ink-muted">{{ section.settings.body }}</p>
+    {%- endif -%}
+  </div>
+
+  <ul class="mt-block grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    {%- for block in section.blocks -%}
+      <li data-reveal class="flex flex-col gap-3 rounded-sm bg-canvas p-7" {{ block.shopify_attributes }}>
+        <h3 class="text-h3 leading-h3 font-medium text-ink">
+          {% render 'copy', value: block.settings.title, label: 'value' %}
+        </h3>
+
+        <p class="text-caption leading-snug text-ink-muted">
+          {% render 'copy', value: block.settings.body, label: 'detail', lines: 3 %}
+        </p>
+      </li>
+    {%- endfor -%}
+  </ul>
+</section>
+
+{% schema %}
+{
+  "name": "Why Wear Label",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "paragraph", "content": "Every card has to be checkable against something the studio has actually done. This section argues capability, not scale — the brief rules out wording like 'trusted by hundreds of companies' while the portfolio is still small." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Why Wear Label" },
+    { "type": "textarea", "id": "body", "label": "Intro" }
+  ],
+  "blocks": [
+    {
+      "type": "value",
+      "name": "Value",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title" },
+        { "type": "textarea", "id": "body", "label": "Detail" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Why Wear Label",
+      "blocks": [
+        { "type": "value", "settings": { "title": "Fashion experience", "body": "Wear Label has been developing and selling fashion products since 2020." } },
+        { "type": "value", "settings": { "title": "Flexible customisation", "body": "Pieces are adapted to what the organisation actually needs." } },
+        { "type": "value", "settings": { "title": "Product & fit understanding", "body": "Experience in apparel development, material, cutting and fit." } },
+        { "type": "value", "settings": { "title": "End-to-end process", "body": "Consultation through production and delivery." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

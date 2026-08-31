@@ -6,14 +6,16 @@
         "slide-1": {
           "type": "slide",
           "settings": {
-            "eyebrow": "From our customers",
-            "heading": "In their own words",
-            "body": "Fit, fabric and how a piece actually sits, written by the people who bought it.",
-            "cta": "Read what they wrote",
-            "href": "#voices-heading",
+            "eyebrow": "Ready-to-wear & custom apparel",
+            "heading": "Everyday Pieces, Made for You",
+            "body": "Comfortable and versatile pieces designed for everyday life.",
+            "cta": "Shop collection",
+            "href": "/collections/all?filter.v.availability=1",
             "asset": "hero-1.webp",
             "alt": "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall.",
-            "text_art": false
+            "text_art": false,
+            "cta_2": "Custom apparel",
+            "href_2": "/pages/custom"
           }
         },
         "slide-2": {
@@ -26,7 +28,9 @@
             "href": "/collections/all?filter.v.availability=1",
             "asset": "hero-2.webp",
             "alt": "Order notes from the studio. 1: Shipping from Kota Bekasi. 2: Payment before 15.00 WIB is dispatched the same day. 3: Orders cannot be cancelled — check the product, colour and size before checkout. 4: Dispatch Monday to Saturday; no dispatch on public holidays. 5: Complaints within 3 days of delivery, with an unboxing video. 6: Instant and same-day delivery available. 7: Models and colours cannot be exchanged.",
-            "text_art": true
+            "text_art": true,
+            "cta_2": "Custom apparel",
+            "href_2": "/pages/custom"
           }
         }
       },
@@ -44,7 +48,7 @@
         "collection": "all",
         "heading": "New arrivals",
         "count": 8,
-        "cta": "View all",
+        "cta": "Shop all",
         "href": "/collections/all?filter.v.availability=1"
       }
     },
@@ -260,11 +264,50 @@
         "heading": "Follow us on Instagram",
         "count": 11
       }
+    },
+    "custom": {
+      "type": "custom-band",
+      "blocks": {
+        "s1": {
+          "type": "service",
+          "settings": {
+            "label": "Custom uniform"
+          }
+        },
+        "s2": {
+          "type": "service",
+          "settings": {
+            "label": "Corporate apparel"
+          }
+        },
+        "s3": {
+          "type": "service",
+          "settings": {
+            "label": "Merchandise & community apparel"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "settings": {
+        "eyebrow": "Custom apparel",
+        "heading": "Wear Label Custom",
+        "subheading": "Custom apparel for companies, organizations & communities.",
+        "body": "From uniforms to merchandise, Wear Label provides custom apparel production tailored to your team, organization, and brand.",
+        "cta": "Explore custom services",
+        "href": "/pages/custom",
+        "cta_2": "Request a quote",
+        "href_2": "/pages/custom#quote"
+      }
     }
   },
   "order": [
     "hero",
     "arrivals",
+    "custom",
     "voices",
     "services",
     "instagram"

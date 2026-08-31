@@ -64,5 +64,26 @@
         "default": "Free shipping on orders over Rp 750.000"
       }
     ]
+  },
+  {
+    "name": "Custom & business",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The two values the B2B route and the Shopee hand-off depend on. Both are blank today, and both fail visibly rather than silently: with no WhatsApp number the quote form's button is unavailable and says why, and with no Shopee URL the 'Buy on Shopee' link is simply absent instead of landing on a search page."
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_number",
+        "label": "WhatsApp number",
+        "info": "In international format, e.g. 6281234567890. The + and any spaces or dashes are stripped before the link is built, so either form works. This is where every quote enquiry goes — there is no inbox behind the form."
+      },
+      {
+        "type": "url",
+        "id": "shopee_shop_url",
+        "label": "Shopee shop URL",
+        "info": "The fallback for products with no custom.shopee_url metafield of their own. A per-product URL always wins, because it lands the shopper on the piece rather than on the shop."
+      }
+    ]
   }
 ]

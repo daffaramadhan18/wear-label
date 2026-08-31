@@ -814,3 +814,65 @@
     init();
   }
 })();
+
+/* ------------------------------------------------------------------ *
+ * Quote form → WhatsApp
+ *
+ * The eighth behaviour, and the thinnest. sections/quote-form.liquid is a real
+ * <form method="get"> whose action is the studio's wa.me URL; its only NAMED
+ * control is a hidden `text` input. This fills that input from the visible
+ * fields just before the browser serialises the form, so the reader lands in
+ * WhatsApp with their answers already typed.
+ *
+ * THE FALLBACK IS THE FORM ITSELF. With this script blocked, `text` submits
+ * empty and WhatsApp opens the same chat with nothing in the box — the reader is
+ * where they were going and types the message themselves. Nothing is lost that
+ * was not a convenience. That is why the composition happens here rather than
+ * the whole submit being a click handler on a button: a button that only works
+ * with script is a dead control, and a form that only prefills with script is a
+ * form.
+ *
+ * EVERY STRING COMES FROM THE MARKUP. `data-quote-field` on each input carries
+ * the label to use in the message, so the composed text is in the site's
+ * language and lives in the locale file — the same contract save-button follows
+ * for its two states. There is no copy in this function and there must not be:
+ * the separator below is punctuation, not words.
+ * ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  function compose(form) {
+    var lines = [];
+
+    Array.prototype.forEach.call(form.querySelectorAll("[data-quote-field]"), function (field) {
+      var value = (field.value || "").trim();
+      if (!value) return;
+      var label = field.getAttribute("data-quote-field") || "";
+      lines.push(label ? label + ": " + value : value);
+    });
+
+    return lines.join("\n");
+  }
+
+  function initQuoteForm(form) {
+    var target = form.querySelector("[data-quote-text]");
+    if (!target) return;
+
+    /* `submit` rather than a click handler on the button: it fires after native
+       validation has passed and it also catches Enter pressed in a field, which
+       is how a keyboard user submits a three-field form. */
+    form.addEventListener("submit", function () {
+      target.value = compose(form);
+    });
+  }
+
+  function init() {
+    document.querySelectorAll("[data-quote-form]").forEach(initQuoteForm);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

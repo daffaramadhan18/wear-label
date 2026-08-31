@@ -13,6 +13,13 @@
   from the caller's class, so a 16-box mark and a 48-box mark still line up
   optically.
 
+  ONE MARK IS NOT FROM THE REACT SOURCE: `search`. components/ui/icons.tsx has
+  no magnifier, because the React app had no search — the brief added it. It is
+  drawn here in the chrome family's own terms (stroked 1.5 on a 24 box, round
+  caps) rather than imported from anywhere. The other twelve are still generated
+  and still byte-exact; do not retype them, and do not treat this one as licence
+  to hand-draw a thirteenth without saying so here.
+
   Icons are decorative (aria-hidden) — when an icon is the only content of a
   control, the control carries the accessible name. Never use emoji as an icon.
 
@@ -29,6 +36,12 @@
   {%- when 'close' -%}
     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="{{ class }}">
       <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+
+  {%- when 'search' -%}
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" class="{{ class }}">
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="M15.5 15.5 20 20" />
     </svg>
 
   {%- when 'cart' -%}

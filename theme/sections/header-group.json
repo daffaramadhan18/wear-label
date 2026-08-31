@@ -23,18 +23,42 @@
             "href": "/collections/all?filter.v.availability=1"
           }
         },
+        "collections": {
+          "type": "link",
+          "settings": {
+            "label": "Collections",
+            "href": "/collections"
+          }
+        },
+        "custom": {
+          "type": "link",
+          "settings": {
+            "label": "Custom & Business",
+            "href": "/pages/custom"
+          }
+        },
         "about": {
           "type": "link",
           "settings": {
-            "label": "About Us",
+            "label": "About",
             "href": "/pages/about"
+          }
+        },
+        "contact": {
+          "type": "link",
+          "settings": {
+            "label": "Contact",
+            "href": "/pages/contact"
           }
         }
       },
       "block_order": [
         "home",
         "shop",
-        "about"
+        "collections",
+        "custom",
+        "about",
+        "contact"
       ],
       "settings": {}
     }

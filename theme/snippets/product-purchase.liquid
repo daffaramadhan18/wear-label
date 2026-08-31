@@ -21,6 +21,29 @@
   is disabled and says so in words. Sold out is never communicated by colour
   alone.
 
+  THREE ROUTES OUT OF THIS BLOCK, and they are deliberately not three buttons.
+
+  `Add to bag` and `Buy now` are the brief's two CTAs and they are the same POST
+  to /cart/add — `Buy now` is a second submit carrying `name="return_to"
+  value="/checkout"`, so only the button the shopper actually pressed adds that
+  parameter. Exactly the pattern cart-lines.liquid uses for its two quantities.
+  It is NOT Shopify's dynamic checkout button: `{{ form | payment_button }}`
+  needs Shopify Payments, which does not exist in Indonesia (see CLAUDE.md,
+  Platform constraints). So `Buy now` reaches checkout through the cart in one
+  silent hop rather than accelerating past it, which is the whole difference.
+
+  `Buy on Shopee` is the third route and it is a LINK, not a button. It is a
+  channel choice rather than a purchase intent — the same piece, bought
+  somewhere else — and giving it a third button would put the marketplace at
+  parity with the store's own checkout on the store's own product page. It stays
+  visible on a sold-out product on purpose: this catalogue's stock data came
+  from Shopee, but that was a snapshot, and hiding the link would assert a
+  restock has not happened when nothing here knows that.
+
+  The link renders only where `custom.shopee_url` is set, falling back to the
+  shop-wide URL in theme settings. With neither it is absent — a marketplace
+  button that lands on a search page is the dead link this repo refuses.
+
   Accepts: product
 {%- endcomment -%}
 
@@ -32,6 +55,18 @@
   assign purchasable = false
   if current and current.available
     assign purchasable = true
+  endif
+
+  assign shopee_url = product.metafields.custom.shopee_url.value | default: settings.shopee_shop_url
+
+  # `render` takes a variable or a literal, never an expression — writing
+  # `disabled: purchasable == false` is a parse error, not a falsy value. The
+  # negation has to exist as its own variable before the two calls below can
+  # use it. (And inside a liquid tag a comment is a `#` line, not a comment
+  # block — a stray percent-brace in here closes the tag early.)
+  assign unavailable = true
+  if purchasable
+    assign unavailable = false
   endif
 -%}
 
@@ -193,11 +228,13 @@
       >+<span class="sr-only">{{ 'product.increase' | t }}</span></button>
     </div>
 
-    <button
-      type="submit"
-      {% unless purchasable %}disabled{% endunless %}
-      class="inline-flex min-h-13 flex-1 cursor-pointer items-center justify-center gap-2 rounded-sm border border-brand bg-brand px-11 text-caption uppercase tracking-[0.22em] text-on-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand-hover hover:bg-brand-hover active:translate-y-px disabled:cursor-not-allowed disabled:border-disabled-border disabled:bg-disabled disabled:text-on-disabled disabled:translate-y-0"
-    >{{ 'product.add_to_bag' | t }}</button>
+    {%- assign add_label = 'product.add_to_bag' | t -%}
+    {% render 'button',
+      label: add_label,
+      variant: 'primary',
+      type: 'submit',
+      disabled: unavailable,
+      class: 'flex-1 px-6 sm:px-11' %}
 
     {%- comment -%}
       `class` here REPLACES save-button's own default, which is where its press
@@ -210,6 +247,28 @@
   </div>
 
   {%- comment -%}
+    `Buy now` takes its own full-width row rather than sharing one with the bag.
+    Side by side at 0.22em tracking the pair needs about 430px and the purchase
+    column is 390px minus the gutter on a phone, so they would wrap anyway — and
+    a wrapped pair puts the secondary action level with the stepper, where it
+    reads as part of the quantity control.
+
+    It carries the same `purchasable` guard as the bag. A checkout button that
+    posts a sold-out variant fails at Shopify's end with an error the shopper
+    has to read to understand, which is worse than a control that says up front
+    it cannot be used.
+  {%- endcomment -%}
+  {%- assign buy_label = 'product.buy_now' | t -%}
+  {% render 'button',
+    label: buy_label,
+    variant: 'secondary',
+    type: 'submit',
+    name: 'return_to',
+    value: '/checkout',
+    disabled: unavailable,
+    class: 'w-full px-6 sm:px-11' %}
+
+  {%- comment -%}
     Present from first render, so a message is an update to a region that already
     exists rather than a new one appearing.
   {%- endcomment -%}
@@ -220,4 +279,26 @@
       {{ 'product.unavailable_variant' | t }}
     {%- endif -%}
   </p>
+
+  {%- if shopee_url != blank -%}
+    {%- comment -%}
+      An off-site destination, so it says so: `target="_blank"` keeps the
+      shopper's place on this page, `rel="noopener"` is required with it, and the
+      screen-reader-only suffix is what stops "Buy on Shopee" from being a link
+      that silently replaces the page for someone who cannot see the new tab
+      open. `noreferrer` is deliberately NOT here — Shopee is the studio's own
+      shop and the referrer is how their analytics attribute a visit the site
+      sent them.
+    {%- endcomment -%}
+    <a
+      href="{{ shopee_url }}"
+      target="_blank"
+      rel="noopener"
+      class="inline-flex min-h-11 items-center gap-1.5 self-start text-caption uppercase tracking-nav text-ink-muted transition-colors duration-(--duration-base) hover:text-brand"
+    >
+      {{ 'product.buy_on_shopee' | t }}
+      {% render 'icon', icon: 'arrow-right', class: 'size-4' %}
+      <span class="sr-only">{{ 'general.opens_new_tab' | t }}</span>
+    </a>
+  {%- endif -%}
 </form>

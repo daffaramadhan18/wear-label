@@ -30,33 +30,80 @@ customer evidence this project holds:
   same-day arrival. The person answering is part of the product.
 - **Repeat purchase is normal.** Second and third pairs, "5 koleksi cerra pants".
 
+**Second primary, added 2026-08-31 by the client's website brief:** the person who
+buys custom apparel for an organisation. Brief §4 names them — companies,
+hospitals, universities and schools, organisations, communities, event organisers
+and institutions — buying custom uniforms, corporate apparel, merchandise, event
+apparel and community apparel.
+
+They are a different buyer making a different decision and it is worth being blunt
+about how little the retail evidence above transfers to them:
+
+- **They do not decide from a product page.** There is no price, no size and no
+  stock — the specification and the quantity are what a price is quoted against.
+  So the B2B route's whole job is to make the *process* legible, which is why
+  brief §9.4 spends five steps on it.
+- **They do not check out.** Brief §16 is explicit: no ecommerce checkout on this
+  route, straight to WhatsApp. A B2B enquiry is a conversation.
+- **What they need to believe is capability, not scale.** The portfolio is small
+  and the brief forbids pretending otherwise. So the argument is years of garment
+  development, understanding of material and cutting and fit, and an end-to-end
+  process — all of which are true today and none of which need a client count.
+- **They arrive not knowing this business exists.** Every previous version of this
+  site only sold trousers. That is the gap the home page's custom band closes, and
+  it is why the hero carries a second CTA on every slide.
+
 **Secondary, served by the same pages:** an outside reader in English — press, a
-boutique, diaspora, a curious browser. Never at the primary buyer's expense.
+boutique, diaspora, a curious browser. Never at either primary buyer's expense.
 
 **Not a target:** wholesale or reseller buyers. Nothing in this project is built
-for a stockist.
+for a stockist. **That is not the same as the B2B audience above** and the
+distinction is load-bearing: a stockist buys finished Wear Label pieces to resell
+under Wear Label's name, and there is no trade price list, no MOQ and no line
+sheet anywhere in this project. An organisation commissioning uniforms is buying
+production, not inventory. If a request starts with "wholesale pricing" or "become
+a reseller", it is still out of scope.
 
 ## Product Purpose
 
 Wear Label's own web presence: company profile, the full catalogue, and a
 storefront. An apparel label in Bandung, Indonesia.
 
-**Its job today is credibility, not conversion.** Confirmed 2026-08-20: the
-Shopee marketplace remains the till, and this site exists so a visitor
-understands what the brand makes, how it fits, and who sews it — then buys on
-whichever channel they prefer.
+**It is now a till as well as a credibility surface. Revised 2026-08-31**, and the
+2026-08-20 position — "credibility, not conversion; the Shopee marketplace remains
+the till" — no longer holds on its own. The client's brief makes homepage, shop,
+product, cart, checkout, payment and shipping all Must Have for v1 (§19), and the
+client's own note puts web checkout and a Shopee hand-off side by side rather than
+one instead of the other: a shopper can buy here, or be sent to the piece on
+Shopee, and both are first-class.
 
-Two consequences that should govern future decisions:
+What has NOT changed is why the credibility half exists. Shopee is still where
+every piece of customer proof came from and still where a large share of buyers
+will prefer to transact, so the hand-off is a feature and not a fallback.
 
-- An unfinished checkout is **not** a launch blocker. The bag and the hand-off
-  are real and built, and they are secondary.
-- An unclear or unbelievable brand story **is** a launch blocker. About Us, the
-  fit story, and the customer evidence carry the weight the checkout does not.
+Three consequences that should govern future decisions:
+
+- **An unfinished checkout IS a launch blocker now.** It was not before. Nothing
+  in the theme is missing — the gap is a payment gateway and a courier app, both
+  Shopify configuration, both still unchosen. Shopify Payments does not exist in
+  Indonesia, so this is a real procurement decision and not a switch.
+- An unclear or unbelievable brand story is **still** a launch blocker. About Us,
+  the fit story and the customer evidence carry weight the checkout never will.
+- **The B2B route has its own single blocker, and it is one field.** With no
+  WhatsApp number in theme settings, `/pages/custom` cannot convert at all — the
+  quote form renders and its submit is disabled. Everything else on that page is
+  built.
 
 ## Positioning
 
 Small-run linen and cotton trousers cut for real Indonesian bodies, sewn in
-Bandung by a studio that answers.
+Bandung by a studio that answers — and the same studio taking custom apparel
+production for organisations.
+
+Brief §3 states the positioning as one line: **Wear Label — Ready-to-Wear &
+Custom Apparel.** The overall impression stays a modern women's fashion brand;
+the custom side has to be discoverable from the first screen without competing
+with it. That is the balance every home-page change has to hold.
 
 The part a neighbouring brand cannot truthfully copy is the **fit record**: two
 dozen customers stating their measurements and reporting how a piece sat. The

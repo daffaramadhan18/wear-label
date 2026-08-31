@@ -20,8 +20,22 @@
   honest fallback: the links stay reachable and nothing pretends to be
   interactive. That is what the `no-js:` variants do.
 
-  The design's search mark is not here: there is no search on the site yet, and
-  an icon that does nothing is worse than one absence.
+  MAX_BLOCKS WAS 5 AND THE BRIEF'S NAV IS 6. It is 7 now. Worth knowing how that
+  failed, because it fails the same way next time: `shopify theme check` passes
+  on a header-group.json holding six blocks — it validates Liquid and schema
+  shape, not a schema's own limits against a template's contents — and the error
+  arrives from the store at push time as "Block count exceeds maximum of 5 for
+  section 'header'". The push completes and the section silently loses the extra
+  blocks. So a nav change means pushing and reading the result, not just checking.
+
+  THE SEARCH MARK IS HERE NOW. It was deliberately absent — "there is no search
+  on the site yet, and an icon that does nothing is worse than one absence" —
+  and the brief asked for it (§5: Search | Account | Cart on the right). So the
+  absence is over, and the mark is a LINK to /search rather than a panel that
+  drops out of the bar: sections/main-search.liquid is a real page, so the mark
+  has a destination that works with no JavaScript and the header does not gain a
+  second disclosure to trap focus in. The reasoning is written out at the top of
+  that section.
 {%- endcomment -%}
 
 {%- comment -%}
@@ -87,6 +101,15 @@
 
     <div class="-mr-3 flex items-center">
       <a
+        href="{{ routes.search_url }}"
+        {% if request.path contains '/search' %}aria-current="page"{% endif %}
+        class="inline-flex size-11 items-center justify-center rounded-sm text-ink-body transition-colors duration-(--duration-base) hover:text-brand aria-[current=page]:text-brand"
+      >
+        {% render 'icon', icon: 'search', class: 'size-5' %}
+        <span class="sr-only">{{ 'search.title' | t }}</span>
+      </a>
+
+      <a
         href="{{ routes.account_url }}"
         {% if request.path contains '/account' %}aria-current="page"{% endif %}
         class="inline-flex size-11 items-center justify-center rounded-sm text-ink-body transition-colors duration-(--duration-base) hover:text-brand aria-[current=page]:text-brand"
@@ -147,6 +170,11 @@
           </li>
         {%- endfor -%}
         <li class="border-b border-hairline last:border-0">
+          <a href="{{ routes.search_url }}" class="flex min-h-14 items-center text-label uppercase tracking-nav text-ink-body transition-colors duration-(--duration-base) hover:text-brand">
+            {{ 'search.title' | t }}
+          </a>
+        </li>
+        <li class="border-b border-hairline last:border-0">
           <a href="{{ routes.account_url }}" class="flex min-h-14 items-center text-label uppercase tracking-nav text-ink-body transition-colors duration-(--duration-base) hover:text-brand">
             {{ 'customer.account.title' | t }}
           </a>
@@ -164,11 +192,11 @@
 {% schema %}
 {
   "name": "Header",
-  "max_blocks": 5,
+  "max_blocks": 7,
   "settings": [
     {
       "type": "paragraph",
-      "content": "The design's nav is Home, Shop, About Us — three items, and the rule under the current one is what carries position. A Shopify menu is not used here because the nav is part of the design rather than shop data."
+      "content": "The nav is Home, Shop, Collections, Custom & Business, About, Contact — the brief's six, and the rule under the current one is what carries position. A Shopify menu is not used here because the nav is part of the design rather than shop data. The cap is 7: past that the row stops fitting between the lockup and the three marks on the right, and the answer is a shorter label, not an eighth item."
     }
   ],
   "blocks": [

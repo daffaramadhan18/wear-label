@@ -1,0 +1,103 @@
+{%- comment -%}
+  The Custom & Business page hero. Brief §9.1.
+
+  An espresso band with the aurora over it, the page's h1, one line of what the
+  service is, and one button into the quote form.
+
+  NO LABELLED PLACEHOLDER WHEN THERE IS NO PHOTOGRAPH, and that is a deliberate
+  exception to this theme's placeholder rule. The rule exists so a missing asset
+  does not collapse a layout that depends on it; here the layout does not depend
+  on one. An espresso ground with the aurora and the type set over it is a
+  finished surface — it is what the footer is — so an empty photo slot has a
+  design rather than a hole, and drawing a grey rectangle labelled "photo" over
+  the top would be scaffolding standing in front of something already finished.
+  Set the photograph and it fills the band behind a scrim; leave it and the band
+  is the artwork. Both states are final.
+
+  THE SCRIM IS NOT OPTIONAL when a photograph is set. `text-ink-invert` on an
+  unknown photograph is a contrast bet, and the one thing this theme will not do
+  is let colour carry meaning it cannot guarantee — a light shot would put cream
+  type on cream. `bg-invert/72` is the same weight the category mosaic uses over
+  its tiles for the same reason.
+
+  The aurora's `tone` is `invert` because the band is `bg-invert`; the veil layer
+  has to be painted in the colour of the surface underneath or it draws a visible
+  rectangle. `relative isolate overflow-hidden` on the band is what keeps
+  `soft-light` blending against the band and not the page.
+
+  NO [data-reveal] ANYWHERE IN THIS SECTION. It is the top of the page, so there
+  is nothing to scroll to — and `[data-reveal]` ships at `opacity: 0` with
+  theme.js deferred, which on a slow phone would leave the h1 invisible from
+  first paint until the script parses. hero-carousel.liquid carries the same note
+  for the same reason.
+{%- endcomment -%}
+
+<section class="relative isolate overflow-hidden bg-invert text-ink-invert">
+  {%- if section.settings.image -%}
+    <div class="absolute inset-0">
+      {% render 'media',
+        image: section.settings.image,
+        fill: true,
+        sizes: '100vw',
+        priority: true,
+        label: 'Custom apparel photo',
+        class: 'rounded-none' %}
+      <div class="absolute inset-0 bg-invert/72"></div>
+    </div>
+  {%- else -%}
+    {% render 'aurora', tone: 'invert', origin: 'top-right' %}
+  {%- endif -%}
+
+  <div class="relative z-10 mx-auto w-full max-w-content px-gutter py-section lg:py-block-lg">
+    <div class="flex max-w-190 flex-col gap-6">
+      <span class="text-micro uppercase tracking-eyebrow text-ink-invert-muted">
+        {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
+      </span>
+
+      <h1 class="text-display leading-display tracking-display">
+        {% render 'copy', value: section.settings.heading, label: 'heading', lines: 2 %}
+      </h1>
+
+      <p class="wl-measure text-body leading-body text-ink-invert-muted">
+        {% render 'copy', value: section.settings.body, label: 'body', lines: 2 %}
+      </p>
+
+      {%- if section.settings.cta != blank -%}
+        <div class="mt-2 flex flex-wrap gap-3">
+          {% render 'button',
+            label: section.settings.cta,
+            href: section.settings.href,
+            variant: 'invert',
+            class: 'max-sm:w-full px-6 sm:px-11' %}
+
+          {%- if section.settings.cta_2 != blank -%}
+            {% render 'button',
+              label: section.settings.cta_2,
+              href: section.settings.href_2,
+              variant: 'invert-outline',
+              class: 'max-sm:w-full px-6 sm:px-11' %}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Custom hero",
+  "settings": [
+    { "type": "paragraph", "content": "Leave the photograph empty and the espresso band with its aurora is the artwork — this is the one hero on the site that does not draw a placeholder, because it does not need a photograph to be finished." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Wear Label Custom" },
+    { "type": "textarea", "id": "heading", "label": "Headline", "default": "Custom Apparel for Your Team & Brand" },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "Uniforms, merchandise, and apparel tailored to your organization." },
+    { "type": "image_picker", "id": "image", "label": "Photograph" },
+    { "type": "header", "content": "Buttons" },
+    { "type": "text", "id": "cta", "label": "Primary label", "default": "Request a quote" },
+    { "type": "url", "id": "href", "label": "Primary link" },
+    { "type": "text", "id": "cta_2", "label": "Secondary label" },
+    { "type": "url", "id": "href_2", "label": "Secondary link" }
+  ],
+  "presets": [{ "name": "Custom hero" }]
+}
+{% endschema %}

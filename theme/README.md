@@ -62,7 +62,7 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 
 ## Port status
 
-**Done — the shell and all six routes.**
+**Done — the shell, all six ported routes, and four more the brief added.**
 
 | File | From |
 |---|---|
@@ -98,17 +98,44 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 | `snippets/order-summary.liquid` | `components/cart/order-summary.tsx` |
 | `snippets/media.liquid`, `price`, `badge`, `alert`, `breadcrumbs`, `save-button` | the matching `components/ui/*` |
 
+**From `BRIEF.pdf`, not from the React app.** These have no port source — the
+archived app never had a B2B route, a search page, a collections index or a contact
+page, so nothing about them is a translation of anything:
+
+| File | Brief | What it is |
+|---|---|---|
+| `snippets/button.liquid` | — | The site's one button, four variants. Extracted because the primary button's class string had already been retyped in three sections and the B2B pages needed it in eight more. |
+| `sections/custom-band.liquid` | §7 | The B2B hook on the home page: headline, three service names, two CTAs, one photograph. Cream rather than espresso — the voices wall directly below is already espresso. |
+| `sections/custom-hero.liquid` | §9.1 | The B2B page hero. The one hero on the site that draws no placeholder when it has no photograph: an espresso aurora band is already a finished surface. |
+| `sections/custom-services.liquid` | §9.2 | Three services, one 4:5 photograph each. No icons — the photograph is the mark. |
+| `sections/how-it-works.liquid` | §9.4 | Five numbered steps. The number is derived from block order, never typed in, so inserting a step renumbers the row. |
+| `sections/why-wear-label.liquid` | §9.5 | Four capability claims, cream cards on white. Capability, not scale — the brief forbids "trusted by hundreds of companies". |
+| `sections/quote-form.liquid` | §9.6, §16 | Three fields composed into a WhatsApp deep link. A real `<form method="get">`, so it works with script off — the chat just opens empty. |
+| `sections/contact-details.liquid` | §5 | Placeholder detail rows plus Shopify's own `contact` form. The one form on the site that posts. |
+| `sections/main-search.liquid` | §5 | Search, products only. A page rather than a header overlay. Replaced `main-stub`. |
+| `sections/main-list-collections.liquid` | §5 | `/collections`, the catalogue by category. Replaced `main-stub`. Every link carries `?filter.v.availability=1`. |
+
+Three existing files changed for the brief as well: the hero gained a second CTA per
+slide (§6), `product-purchase` gained `Buy now` and `Buy on Shopee` (§11 and the
+client's own note), and `product-tabs` gained a **Size & fit** panel (§11) which sits
+*second*, ahead of Fabric & care, because fit is the purchase decision.
+
 **Not done, and it is store configuration rather than code:**
 
 | Blocked on | What the theme does meanwhile |
 |---|---|
 | No photography on the 115 Shopee pieces | Their cards draw the `media` placeholder at the real card proportions; the eleven design pieces carry their shots. Nothing in a grid is a placeholder *card* any more — 126 products are on the store. |
 | Only the Availability facet exists | The rail renders it, and the Shop nav, the hero CTA and New arrivals' "View all" all point at `?filter.v.availability=1` so the catalogue opens on what can actually be bought. Product type, size and colourway are still undefined; the rail says where they are configured instead of inventing facet values. |
-| No `about` page in Shopify | `/pages/about` 404s. Creating the page in Content → Pages is the whole fix; `main-page` is written and waiting. |
-| `custom.material` and `custom.care` metafields | Product cards and the Fabric & care tab show labelled placeholders. |
+| **Three Shopify pages do not exist** — `about`, `custom`, `contact` | All three 404. Creating them in Content → Pages is the whole fix, and `custom` and `contact` need their template suffix set (`page.custom`, `page.contact`). The nav, the hero's second CTA, the home page's custom band and the footer already point at them. |
+| **Five metafield definitions** — `custom.material`, `care`, `size_chart`, `fit`, `shopee_url` | Product cards, the Fabric & care tab and the Size & fit tab show labelled placeholders; "Buy on Shopee" does not render at all. |
+| **No WhatsApp number** in Theme settings → Custom & business | `quote-form` renders at full size with a **disabled** submit and an alert saying the number is not set. This is the whole B2B conversion path. |
+| **No category collections** | `/collections` renders its own "no collections yet" notice, and `category-mosaic` stays off the home page — every tile has to point at something that matches. |
+| **No B2B photography** | `custom-band` and all three `custom-services` cards draw labelled placeholders at final size. By instruction, 2026-08-31. |
+| **No contact details** | Email, studio address and opening hours are blank blocks rendering labelled placeholders. By instruction, 2026-08-31. |
 
 `sections/main-stub.liquid` still backs the templates the design never covered —
-blog, article, search, list-collections, gift card, customer pages.
+blog, article, gift card, customer pages. `search` and `list-collections` no longer
+use it: both got real sections when the brief asked for them.
 
 ## Copy
 
@@ -203,7 +230,12 @@ One changes behaviour the design drew:
 
 ## Home page sequence
 
-hero → new arrivals → customer voices → service band → Instagram strip
+hero → new arrivals → **Wear Label Custom** → customer voices → service band →
+Instagram strip
+
+The custom band went in on 2026-08-31, directly after the product section, because
+brief §7 puts it there — and because the hero's second CTA has to land somewhere on
+the same page for a reader who scrolls rather than clicking.
 
 The wall was moved ahead of the arrivals grid on 2026-08-20 and moved back on
 2026-08-21, on the client's call. The reasoning for moving it — the reviews are
@@ -212,13 +244,26 @@ page: the catalogue has since been imported, so the arrivals grid is photography
 rather than 3,760px of placeholder, and leading with the wall no longer buys what
 it was meant to buy.
 
-Three blocks exist and are deliberately **not** placed:
+**One block exists and is deliberately not placed:**
 
 | Block | Why it is off the page | May it go back? |
 |---|---|---|
-| `category-mosaic` | Removed on request, 2026-08-20 | Yes — it has a preset, so it goes back from the theme editor. Keep it **above** the service band: the blocks below the voices wall exist to keep the wall and the Instagram strip out of one viewport. |
-| Limited-run band | Cut from the design's sequence | Yes, once there is a real run and an end date. A countdown that is really a fixed string is worse than no countdown. |
-| Made to order | The studio does not offer the service (confirmed 2026-08-20, PRODUCT.md) | **No.** Every line of it is a promise nobody can keep. |
+| `category-mosaic` | Removed on request 2026-08-20 — **and brief §6 Section 3 now asks for it back as "Shop by Category"**. It stays out until the category collections exist on the store: `/collections/pants` is a 404 today, and `?filter.p.product_type=Pants` silently returns the whole catalogue because that facet is not defined. A tile that looks like it filtered and did not is worse than a 404. | Yes, and it is expected to — the moment the collections exist. It has a preset, so it goes back from the theme editor. Keep it **above** the service band: the blocks below the voices wall exist to keep the wall and the Instagram strip out of one viewport. Change its labels and its links in the same edit — the preset still carries the *cut* vocabulary (Culottes, Straight cut) and the brief wants the *garment* one (Pants, Tops, Outerwear). |
+
+**The limited-run band, the countdown and the made-to-order section are no longer in
+this repo** — checked 2026-08-31. Earlier versions of this table and of CLAUDE.md
+said they were kept and unplaced; there are no such files in `sections/`. The
+made-to-order *rule* still stands: the studio does not offer per-shopper made-to-order
+(2026-08-20, PRODUCT.md) and nothing may promise it.
+
+**The brief's B2B custom apparel does not reopen that.** Made-to-order was one
+garment cut for one shopper. Custom apparel production is a bulk run for an
+organisation, it is a real service, and it is what `/pages/custom` is for.
+
+**Selected Projects (brief §8, §9.3) is deliberately not built.** The brief wants a
+portfolio and explicitly forbids inflating it; there are no project photographs and
+no nameable clients, so there is no section rather than an empty one. Decided
+2026-08-31.
 
 This makes the theme's home page a **divergence from `app/page.tsx`**, which
 still renders the mosaic. The theme is the deliverable and the React app is the
