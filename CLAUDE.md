@@ -64,9 +64,13 @@ rather than breaking, so the theme is reviewable now:
 
    The nav, the hero's second CTA, the home page's custom band and the footer all
    point at `/pages/custom` and `/pages/contact` already.
-4. **Five product metafield definitions do not exist**, so five slots render
-   placeholders: `custom.material`, `custom.care`, `custom.size_chart`,
-   `custom.fit`, `custom.shopee_url`.
+4. **Four product metafield definitions do not exist**, so four slots render
+   placeholders: `custom.care`, `custom.size_chart`, `custom.fit`,
+   `custom.shopee_url`. **`custom.material` is now defined AND populated** —
+   verified 2026-08-31 against the store, which returns exactly one product
+   metafield definition and a real value on all eleven design pieces, so the
+   card's material line and the product page's material row draw data rather
+   than a placeholder.
 5. **Two theme settings are blank ON PURPOSE, pending the client**, both under
    Theme settings → Custom & business. Neither fails silently:
    - `whatsapp_number` — with it blank the quote form still renders at full size
@@ -649,13 +653,14 @@ Push, then read the output. It is the only validator that sees this class of bug
   them, and do not compute a price, a total, a discount depth or a shipping rate in
   Liquid. The one arithmetic that is allowed is a display-only percentage off, from
   `compare_at_price` and `price` that Shopify already gave you.
-- **Every product metafield the theme reads, and what shows without it.** All five
-  are undefined on the store, so all five slots are rendering placeholders right
-  now. Define them in Settings → Custom data → Products.
+- **Every product metafield the theme reads, and what shows without it.** Four of
+  the five are undefined on the store, so four slots are rendering placeholders
+  right now; `custom.material` is defined and carries a value on the eleven design
+  pieces. Define the rest in Settings → Custom data → Products.
 
   | Metafield | Type | Read by | Blank renders |
   |---|---|---|---|
-  | `custom.material` | single line text | `product-card`, `main-product` | labelled placeholder |
+  | `custom.material` | single line text | `product-card`, `main-product` | **defined — renders data** |
   | `custom.care` | rich text | `product-tabs` → Fabric & care | labelled placeholder |
   | `custom.size_chart` | rich text | `product-tabs` → Size & fit | labelled placeholder inside `.wl-table` |
   | `custom.fit` | rich text | `product-tabs` → Size & fit | labelled placeholder |
