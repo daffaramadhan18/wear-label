@@ -546,8 +546,9 @@ these eleven are the only products in the store that carry an image.
   their compare-at cleared — a compare-at that no longer holds draws a discount
   badge for a discount the shopper cannot get. **No product on the store carries a
   compare-at any more**, which is why nothing renders a percentage-off flash. The
-  design's "New" flags on Lilo, Milly and Moa were never modelled in Shopify and
-  still are not.
+  design's "New" flags on Lilo, Milly and Moa **are** modelled in Shopify, as the
+  tag `New` — verified 2026-08-31, and they are the only three tags on the entire
+  126-product catalogue. This file said they were not; it was wrong.
 - **`productType` is derived** — the piece's own name where it states the cut, the
   garment shot where it does not. Wide leg 8, Culottes 2, Straight cut 1.
 - **`material` and `care` become metafields** (`custom.material`, `custom.care`).
@@ -589,12 +590,23 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   are the Raya series and sets and the reject-sale linen: those names state a
   collection or a fabric, not a garment, and the rule is that a type is derived,
   never guessed.
-- **That mixes two axes into one facet, and it is not resolved.** The eleven are
-  typed by *cut* (Wide leg, Culottes, Straight cut); the 115 by *garment* (Pants,
-  Vest, Bag). So `/collections/all` will offer both alongside each other.
-  Normalising it — garment in `product_type`, cut in a tag or metafield — is a
-  taxonomy decision nobody has taken; it is one bulk field update when somebody
-  does. **Ask before picking a side.**
+- **That mixes two axes into one facet — and the overlap is SMALLER than this file
+  used to claim.** Counted against the store 2026-08-31: only **nine** of the 126
+  carry a cut where a garment belongs — `Wide leg` 8 and `Straight cut` 1.
+  **`Culottes` is a garment, not a cut**, and both imports agree on it (2 from the
+  design pieces, 3 from Shopee), so it needs no merging at all. The fix is nine
+  `productUpdate` calls, not eleven, and it is the only edit standing between the
+  catalogue and a single clean `product_type` axis.
+
+  **Do not size the collections work off the type counts alone — check stock.**
+  Of the sixteen types, **three have anything in stock**: Pants 14 of 34,
+  Cardigan 4 of 4, Culottes 2 of 5. The other thirteen are 100% sold out, which
+  matters because every entry point into the catalogue carries
+  `filter.v.availability=1`. Fifteen automated collections is still the right
+  build — they are auto-maintaining and fill themselves on restock — but a
+  "Shop by Category" mosaic drawn over them would be thirteen tiles opening on
+  nothing. Which tiles to show is a design decision; creating the collections is
+  not. Keep the two apart.
 - **Duplicates were dropped, not re-imported.** Lilo, Soso and Tara Stripe Pants
   each appeared in both the in-stock and the sold-out listing; the in-stock row
   won, and the eleven already on the store were skipped outright. `Cerra Loose
