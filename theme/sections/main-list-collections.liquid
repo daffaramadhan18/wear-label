@@ -7,13 +7,20 @@
   catalogue with a filter rail over it, Collections is the way in by category —
   the same destination reached by choosing rather than by narrowing.
 
-  EVERY LINK CARRIES THE IN-STOCK FILTER, and it is not decoration. 106 of the
-  126 products on this store are sold out, which is real data from the studio's
-  own Shopee listing rather than a state waiting to be filled in. A bare
-  collection link opens on a wall of sold-out cards; that is exactly the bug that
-  put `filter.v.availability=1` on every other entry point into the catalogue,
-  and a new entry point that forgets it re-introduces it. Shopify's Availability
-  facet is live, so the parameter is answered by the store rather than ignored.
+  THESE LINKS DELIBERATELY DO NOT CARRY THE IN-STOCK FILTER, and every other
+  entry point into the catalogue does. The difference is what the reader just
+  did. `filter.v.availability=1` is on /collections/all because a bare catalogue
+  opened on a wall of sold-out cards nobody asked for — 106 of the 126 products
+  on this store are sold out, which is real data from the studio's own Shopee
+  listing. But choosing a collection IS the narrowing; hiding that category's
+  sold-out pieces on top of it answers a question the reader did not ask.
+
+  It was also a tile that lied. The count below is the whole collection, so a
+  filtered link made the tile say "4 pieces" and open on "No pieces match these
+  filters" — which is what the store's first real collection did, `test`, all
+  four of its products sold out. Either the number follows the link or the link
+  follows the number; this section keeps the number, because the number is the
+  fact about the collection and the filter was the thing added on top.
 
   The photograph falls back from the collection's own image to its first
   product's shot to the labelled placeholder — the same three-step the category
@@ -23,10 +30,11 @@
 
   THE COUNT IS `all_products_count`, NOT the filtered size. It answers "how big
   is this collection", which is a fact about the collection; counting only the
-  in-stock ones would make the number disagree with the page the tile opens and
-  shrink as stock moves. Storefront filter counts are computed against the
-  filtered set and there is no whole-catalogue equivalent — the same platform
-  limit catalogue-filters.liquid records.
+  in-stock ones would shrink it as stock moves and would read as the category
+  itself getting smaller. With the filter off the link, it now matches what the
+  tile opens. Storefront filter counts are computed against the filtered set and
+  there is no whole-catalogue equivalent — the same platform limit
+  catalogue-filters.liquid records.
 
   Collections with nothing in them are skipped. An empty collection is a
   configuration state, not a category, and a tile promising a category the store
@@ -56,7 +64,7 @@
       -%}
 
       <li data-reveal>
-        <a href="{{ list_collection.url }}?filter.v.availability=1" class="group flex flex-col gap-4">
+        <a href="{{ list_collection.url }}" class="group flex flex-col gap-4">
           <div class="overflow-hidden rounded-sm">
             {% render 'media',
               image: tile_image,
