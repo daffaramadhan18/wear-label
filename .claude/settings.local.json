@@ -17,7 +17,36 @@
       "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"humanist grotesque sans variable ui\" --domain google-fonts -n 6)",
       "Bash(grep -nE '^#{2,3} ' /home/daffa/wear-label/node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md)",
       "Bash(grep -nE '^#{2,3} ' /home/daffa/wear-label/node_modules/next/dist/docs/01-app/01-getting-started/14-metadata-and-og-images.md)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(npx shopify store execute *)"
     ]
-  }
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f '/home/daffa/.claude/skills/impeccable/scripts/hook.mjs' ] || node '/home/daffa/.claude/skills/impeccable/scripts/hook.mjs'",
+            "timeout": 5,
+            "statusMessage": "Checking UI changes"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f '/home/daffa/.claude/skills/impeccable/scripts/hook.mjs' ] || node '/home/daffa/.claude/skills/impeccable/scripts/hook.mjs'",
+            "timeout": 30,
+            "statusMessage": "Design deep pass"
+          }
+        ]
+      }
+    ]
+  },
+  "description": "Impeccable design detector: immediate-tier checks after Edit/Write/MultiEdit on UI files, full-rule deep pass on Stop."
 }

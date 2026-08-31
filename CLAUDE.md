@@ -375,7 +375,7 @@ Shopify route names, and what the React app called them:
 | `/pages/about` | `/about` | About Us — the Shopify page's own title and content |
 | `/pages/custom` | — | **Custom & Business (B2B).** Hero, services, how it works, why Wear Label, request a quote. Template suffix `page.custom` |
 | `/pages/contact` | — | **Contact.** Placeholder detail rows plus Shopify's native contact form. Template suffix `page.contact` |
-| `/collections` | — | **Collections.** The catalogue by category. Empty until the collections are created |
+| `/collections` | — | **Collections.** The catalogue by category. **Fifteen automated collections are live**, one per `product_type`; every link carries `filter.v.availability=1` |
 | `/search` | — | **Search.** Products only; the header mark links here |
 | `/account` | `/account` | Shopify's customer routes — still `main-stub`, not designed |
 | 404 | `app/not-found.tsx` | `sections/main-404.liquid` |
@@ -488,11 +488,15 @@ product section because brief §7 puts it there, and because the hero's second C
 has to land somewhere on the same page for a reader who scrolls instead of clicking.
 
 **One block exists and is deliberately not placed: `category-mosaic`.** The brief
-asks for it back (§6 Section 3, "Shop by Category") and it stays out until the
-category collections exist on the store — every tile has to point at something that
-matches, and today `/collections/pants` is a 404 while
-`?filter.p.product_type=Pants` silently returns the whole catalogue because that
-facet is not defined. The section's own comment carries the full reasoning.
+asks for it back (§6 Section 3, "Shop by Category"). **The reason it stays out
+changed on 2026-08-31 and the new one is weaker, so re-read it before assuming
+the block is still blocked.** It used to be that no collection existed and
+`/collections/pants` was a 404; fifteen now exist and that URL returns 200. What
+stops it now is stock: twelve of the fifteen categories are entirely sold out, and
+every entry point carries `filter.v.availability=1`, so a mosaic over all of them
+is twelve tiles opening on an empty grid. Three tiles — Pants, Cardigan, Culottes
+— would work today. Whether three is a section or an embarrassment is a design
+call nobody has made. The section's own comment carries the full reasoning.
 
 **Two blocks are gone from the repo, and CLAUDE.md used to claim they were kept.**
 `made-to-order.liquid`, `promo-band.liquid`, `countdown.liquid` and `limited-run`
@@ -590,23 +594,41 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   are the Raya series and sets and the reject-sale linen: those names state a
   collection or a fabric, not a garment, and the rule is that a type is derived,
   never guessed.
-- **That mixes two axes into one facet — and the overlap is SMALLER than this file
-  used to claim.** Counted against the store 2026-08-31: only **nine** of the 126
-  carry a cut where a garment belongs — `Wide leg` 8 and `Straight cut` 1.
-  **`Culottes` is a garment, not a cut**, and both imports agree on it (2 from the
-  design pieces, 3 from Shopee), so it needs no merging at all. The fix is nine
-  `productUpdate` calls, not eleven, and it is the only edit standing between the
-  catalogue and a single clean `product_type` axis.
+- **The two axes are MERGED, 2026-08-31.** They used to be mixed: the design
+  pieces typed by *cut*, the Shopee ones by *garment*. The overlap was smaller
+  than this file once claimed — only **nine** of the 126 carried a cut where a
+  garment belongs (`Wide leg` 8, `Straight cut` 1), because **`Culottes` is a
+  garment and both imports independently agreed on it** (2 design pieces, 3 from
+  Shopee).
 
-  **Do not size the collections work off the type counts alone — check stock.**
-  Of the sixteen types, **three have anything in stock**: Pants 14 of 34,
-  Cardigan 4 of 4, Culottes 2 of 5. The other thirteen are 100% sold out, which
-  matters because every entry point into the catalogue carries
-  `filter.v.availability=1`. Fifteen automated collections is still the right
-  build — they are auto-maintaining and fill themselves on restock — but a
-  "Shop by Category" mosaic drawn over them would be thirteen tiles opening on
-  nothing. Which tiles to show is a design decision; creating the collections is
-  not. Keep the two apart.
+  Those nine are now `Pants`, and **the cut moved to a tag rather than being
+  thrown away** — `Wide leg` 8 and `Straight cut` 1 are tags now, alongside the
+  three `New` tags. Nothing was lost, and a cut facet can be built from them
+  later. `product_type` is a single clean garment axis: Pants 34, Vest 31,
+  Shirt 16, Bag 7, Skirt 6, Culottes 5, Tunik 4, Cardigan 4, Knitwear 3, Outer 3,
+  Set 2, Blouse 2, Top 2, Blazer 1, Dress 1, and five deliberately blank.
+
+- **Fifteen automated collections are live**, one per type, rule `TYPE EQUALS`,
+  all published to the Online Store. Automated rather than manual on purpose: a
+  new product joins its collection with no developer, which is what brief §15
+  asks for. **The five blank-typed products get no collection** — the Raya series,
+  Pesona Raya and the reject-sale linen name a season or a fabric, not a garment,
+  and a type is derived, never guessed. A "Raya" collection would be an occasion
+  collection off a tag, and it is the client's call whether that season is still
+  selling.
+
+  **TWELVE OF THE FIFTEEN ARE ENTIRELY SOLD OUT**, verified against the rendered
+  storefront: only Pants, Cardigan (4 of 4) and Culottes (2 of 5) have anything
+  in stock. That is why `category-mosaic` is still not placed — every entry point
+  carries `filter.v.availability=1`, so a mosaic over these would be twelve tiles
+  opening on an empty grid. Creating the collections was mechanical; choosing
+  which tiles to show is a design decision. Keep the two apart.
+
+  **Rolling these up into the brief's example tiles — Tops, Outerwear — was
+  deliberately NOT done.** Merging Vest, Cardigan, Outer, Blazer and Knitwear
+  into "Outerwear" is a claim about what the client's product line means, which
+  is the class of invention this repo refuses. Brief §6 writes those four as
+  *"Contoh"*, an example, so nothing binds them. Ask before grouping.
 - **Duplicates were dropped, not re-imported.** Lilo, Soso and Tara Stripe Pants
   each appeared in both the in-stock and the sold-out listing; the in-stock row
   won, and the eleven already on the store were skipped outright. `Cerra Loose
@@ -1093,7 +1115,7 @@ Not decided, and not to be filled in by guessing:
 | **Per-product Shopee URLs** | `custom.shopee_url` is undefined and `shopee_shop_url` is blank, so "Buy on Shopee" does not render at all. The decision taken was per-product URLs with the shop URL as a fallback; start with the eleven design pieces, which are the only ones carrying photography |
 | **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
 | **B2B photography** | None exists. `custom-band` and all three `custom-services` cards draw labelled placeholders at final size, by instruction 2026-08-31. Brief §7 wants "foto actual project Wear Label" and inventing one is out |
-| **The category taxonomy, and therefore the collections** | Decided in principle 2026-08-31 — follow the brief, garment in `product_type`, cut moved to tags — and **not yet executed on the store**. Until it is: `/collections` renders its own "no collections yet" notice and `category-mosaic` stays off the home page. See [The catalogue](#the-catalogue) for the two axes that have to be merged |
+| ~~The category taxonomy and the collections~~ | **DONE 2026-08-31.** Nine products retyped, fifteen automated collections created and published, verified against the rendered storefront. See [The catalogue](#the-catalogue). What is still open is narrower: **which tiles a "Shop by Category" mosaic should show**, given that twelve of the fifteen are entirely sold out |
 | **Selected Projects** | **Not built for v1, decided 2026-08-31.** Brief §8 and §9.3 want a portfolio and forbid inflating it; there are no project photographs and no nameable clients, so there is no section rather than an empty one. When there are projects it wants a `project` metaobject (client, category, photographs, short description) so the studio adds them in the admin |
 | Social handles | The footer has four label/URL pairs — Instagram, Shopee, TikTok and a spare — and every URL is blank, so no social link renders. Brief §19 names the three |
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Nine of twelve footer entries have no URL and render as plain text, never as a 404 link. Add the URL in the theme editor when the page exists |
