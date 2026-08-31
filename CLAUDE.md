@@ -196,6 +196,12 @@ Three things the catalogue import turned up, each of which cost a round trip:
   variant is already at 0 available, and the location id is readable through
   `variant.inventoryItem.inventoryLevels` if it is ever wanted.
 
+- **It has no `read_content` either**, so `pages` comes back "Access denied for
+  pages field" — which means **whether the three Shopify pages exist cannot be
+  checked from here.** Found 2026-08-31 while auditing the brief. The two ways
+  to answer it are a re-auth adding `read_content` to the scope list above, or
+  the storefront password and a curl. Neither is a code change; do not guess.
+
 ## Working agreement
 
 **Finish the job, then land it.** When you are asked to change something, do the
