@@ -75,7 +75,7 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 | `snippets/copy.liquid` | `components/ui/copy.tsx` |
 | `snippets/aurora.liquid` | `components/ui/aurora.tsx` |
 | `snippets/icon.liquid` | `components/ui/icons.tsx` — four of the marks so far |
-| `assets/theme.js` | `components/motion/{reveal,stagger}.tsx`, the header disclosure, the carousel, the gallery, the tabs, the stepper, the save button |
+| `assets/theme.js` | `components/motion/{reveal,stagger}.tsx`, the header disclosure, the carousel, the gallery, the size chart's cm/inch switch, the stepper, the save button |
 | `sections/hero-carousel.liquid` | `components/home/hero-carousel.tsx` — **unplaced since 2026-09-13**, replaced on the home page by `sections/hero-video.liquid`, which is ported from nothing |
 | `sections/new-arrivals.liquid` | the arrivals block in `app/page.tsx` |
 | `sections/voices-wall.liquid` | `components/home/testimonial-wall.tsx` |
@@ -93,7 +93,8 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 | `snippets/pagination.liquid` | `components/shop/pagination.tsx` |
 | `snippets/product-gallery.liquid` | `components/product/product-gallery.tsx` |
 | `snippets/product-purchase.liquid` | `components/product/product-purchase.tsx` |
-| `snippets/product-tabs.liquid` | `components/product/product-tabs.tsx` |
+| `snippets/product-detail.liquid` | `components/product/product-tabs.tsx` — ported as tabs, **flattened to one page 2026-09-13** on instruction |
+| `snippets/size-guide.liquid` | nothing — the shared size chart, built 2026-09-13 |
 | `snippets/cart-lines.liquid` | `components/cart/cart-lines.tsx` |
 | `snippets/order-summary.liquid` | `components/cart/order-summary.tsx` |
 | `snippets/media.liquid`, `price`, `badge`, `alert`, `breadcrumbs`, `save-button` | the matching `components/ui/*` |
@@ -117,7 +118,7 @@ page, so nothing about them is a translation of anything:
 
 Three existing files changed for the brief as well: the hero gained a second CTA per
 slide (§6), `product-purchase` gained `Buy now` and `Buy on Shopee` (§11 and the
-client's own note), and `product-tabs` gained a **Size & fit** panel (§11) which sits
+client's own note), and the product detail block gained a **Size & fit** section (§11) which sits
 *second*, ahead of Fabric & care, because fit is the purchase decision.
 
 **Not done, and it is store configuration rather than code:**

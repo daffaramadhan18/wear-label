@@ -580,11 +580,18 @@
  * taken out of the page rather than left there doing nothing.
  */
 @media (scripting: none) {
-  [data-tabs] [data-tab-hidden] {
-    display: block;
-  }
-
-  [data-tabs] [role="tablist"] {
+  /*
+   * The size chart's cm/inch switch goes. The numbers are typed in centimetres
+   * and the inch column is computed, so with no script there is nothing for the
+   * switch to switch — and the table is still the table, in the unit the studio
+   * measures in.
+   *
+   * The two rules that used to head this block, for the product page's tab
+   * strip, went with the tabs themselves on 2026-09-13: the four panels are
+   * sections of one page now, so there is no hidden panel to reveal and no
+   * strip to remove.
+   */
+  [data-unit-switch] {
     display: none;
   }
 

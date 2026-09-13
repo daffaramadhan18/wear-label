@@ -86,5 +86,33 @@
         "info": "The fallback for products with no custom.shopee_url metafield of their own. A per-product URL always wins, because it lands the shopper on the piece rather than on the shop."
       }
     ]
+  },
+  {
+    "name": "Size guide",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The size chart shown on every product page. It is store-wide on purpose: Wear Label has one size system, and a per-product chart would be the same table typed eleven times and eleven places to correct when one number is wrong. A product that genuinely needs its own chart can still carry a custom.size_chart metafield, and that wins over this."
+      },
+      {
+        "type": "text",
+        "id": "size_guide_columns",
+        "label": "Column headings",
+        "default": "Size, Waist, Hip, Rise, Inseam, Leg opening",
+        "info": "Comma separated. The FIRST one names the size column. These are trouser measurements because almost everything in the catalogue is trousers — change them if that changes."
+      },
+      {
+        "type": "textarea",
+        "id": "size_guide_rows",
+        "label": "Rows",
+        "info": "One size per line, values separated by | and in the same order as the headings above. For example: XS | 64 | 90 | 28 | 72 | 26. Type CENTIMETRES only — the inch column is calculated. Leave this blank and the chart renders a labelled placeholder at its final size rather than a wrong table."
+      },
+      {
+        "type": "text",
+        "id": "size_guide_note",
+        "label": "Note under the chart",
+        "info": "Optional. How the garment was measured, for example laid flat. It is what stops a shopper reading a flat measurement as a body measurement."
+      }
+    ]
   }
 ]

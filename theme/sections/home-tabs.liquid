@@ -26,9 +26,11 @@
   that no longer resolves is skipped rather than throwing.
 
   WITH SCRIPT OFF, BOTH VIEWS ARE VISIBLE AND THIS BAR IS NOT. That is the house
-  rule for every enhancement here — the tab strip in `product-tabs` does exactly
-  the same thing, and the rule is that content stays reachable while the control
+  rule for every enhancement here: content stays reachable while the control
   that would have switched it is removed rather than left there doing nothing.
+  The product page's tab strip used to be the other example of it and is not any
+  more — those four tabs became one page on 2026-09-13, which is the shape this
+  band's no-script fallback already had.
   The `scripting: none` block in theme-src/theme.css is what removes it. So the
   no-script page is the whole home page, ready-to-wear first, in DOM order.
 
@@ -44,8 +46,8 @@
   the browser hunt for an element with that id and scroll to it, and a view
   switch that also jumps the page is a bug. See assets/theme.js.
 
-  THESE ARE TOGGLE BUTTONS, NOT ARIA TABS, and the deviation from
-  `product-tabs` is forced rather than chosen. A `role="tablist"` needs each tab
+  THESE ARE TOGGLE BUTTONS, NOT ARIA TABS, and the deviation is forced rather
+  than chosen. A `role="tablist"` needs each tab
   to point at ONE `role="tabpanel"` through `aria-controls`, and a view here is
   several sections that cannot be wrapped in a single element. A tablist whose
   tabs each control the first of four sections would be a lie told in ARIA. Two

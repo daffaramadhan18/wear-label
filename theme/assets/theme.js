@@ -670,55 +670,41 @@
     });
   }
 
-  /* ---- Tabs ------------------------------------------------------------- *
-   * Real ARIA tabs, so the keyboard contract is real: arrows move between tabs,
-   * Home and End jump to the ends, and the strip is a single tab stop with Tab
-   * moving on to the panel. A row of buttons that only responds to clicks looks
-   * like this and is not this.
+  /* ---- Size chart units ------------------------------------------------- *
+   * The product page's chart is typed in centimetres and converted here, so the
+   * studio maintains one set of numbers instead of two that can disagree.
+   *
+   * It replaced the tab behaviour that used to sit at this point in the file.
+   * The four product tabs became one page on 2026-09-13 and their keyboard
+   * contract — arrows between tabs, Home and End to the ends — went with them
+   * rather than being left in the bundle unreferenced.
+   *
+   * Only cells carrying `data-cm` are touched. A cell holding a dash, a range or
+   * a note has none, so it survives the switch unchanged.
    * ---------------------------------------------------------------------- */
-  function initTabs(root) {
-    var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
-    var panels = tabs.map(function (tab) {
-      return document.getElementById(tab.getAttribute("aria-controls"));
-    });
-    if (!tabs.length) return;
+  function initUnitSwitch(root) {
+    var table = document.querySelector("[data-size-table]");
+    if (!table) return;
 
-    /* Every panel ships visible for the no-script case; this is what hides the
-       inactive ones once tabbing actually works. */
-    panels.forEach(function (panel) {
-      if (panel) panel.removeAttribute("data-tab-hidden");
-    });
+    var cells = Array.prototype.slice.call(table.querySelectorAll("[data-cm]"));
+    if (!cells.length) return;
 
-    function select(index, moveFocus) {
-      var next = (index + tabs.length) % tabs.length;
-      tabs.forEach(function (tab, i) {
-        tab.setAttribute("aria-selected", String(i === next));
-        tab.setAttribute("tabindex", i === next ? "0" : "-1");
+    function render(unit) {
+      cells.forEach(function (cell) {
+        var cm = parseFloat(cell.getAttribute("data-cm"));
+        if (isNaN(cm)) return;
+        /* One decimal place in either unit. Centimetres are echoed from the
+           attribute rather than left alone, so switching back is lossless even
+           after a rounded inch value has been painted over them. */
+        cell.textContent = unit === "in" ? (cm / 2.54).toFixed(1) : String(cm);
       });
-      panels.forEach(function (panel, i) {
-        if (panel) panel.toggleAttribute("hidden", i !== next);
-      });
-      if (moveFocus) tabs[next].focus();
     }
 
-    tabs.forEach(function (tab, i) {
-      tab.addEventListener("click", function () { select(i, false); });
+    root.addEventListener("change", function (event) {
+      var input = event.target;
+      if (!input || input.name !== "size-unit") return;
+      render(input.value);
     });
-
-    root.addEventListener("keydown", function (event) {
-      var at = tabs.indexOf(document.activeElement);
-      if (at === -1) return;
-
-      if (event.key === "ArrowRight") { select(at + 1, true); }
-      else if (event.key === "ArrowLeft") { select(at - 1, true); }
-      else if (event.key === "Home") { select(0, true); }
-      else if (event.key === "End") { select(tabs.length - 1, true); }
-      else { return; }
-
-      event.preventDefault();
-    });
-
-    select(0, false);
   }
 
   /* ---- Quantity stepper ------------------------------------------------- */
@@ -803,7 +789,7 @@
 
   function init() {
     document.querySelectorAll("[data-gallery]").forEach(initGallery);
-    document.querySelectorAll("[data-tabs]").forEach(initTabs);
+    document.querySelectorAll("[data-unit-switch]").forEach(initUnitSwitch);
     document.querySelectorAll("[data-stepper]").forEach(initStepper);
     initVariantPicker();
   }

@@ -42,16 +42,23 @@ What is missing is store *configuration* and a handful of client-supplied facts,
 code — and every one of those gaps renders a labelled placeholder at final size
 rather than breaking, so the theme is reviewable now:
 
-1. **No photography for the 115 Shopee pieces.** The eleven design pieces carry
-   their shots; the 115 imported from Shopee carry none (see [The
-   catalogue](#the-catalogue)), so most of the grid still draws placeholder cards
-   at the real card proportions.
-2. **One filter, not none.** Shopify's default **Availability** facet is live —
-   `filter.v.availability=1` (In stock) and `=0` — and every entry point into the
-   catalogue now carries it, because 106 of the 126 products are sold out and the
-   bare `/collections/all` opened on eight sold-out cards out of nine. Product
-   type, size and colourway facets are still undefined; they come from the Search
-   and Discovery app, and until then the rail says so rather than inventing them.
+1. **No photography for the nine surviving Shopee pieces.** The eleven design
+   pieces carry their shots; the nine Shopee imports still on the store carry
+   none (see [The catalogue](#the-catalogue)), so nine of twenty cards draw the
+   placeholder at the real card proportions. **This used to read "115 Shopee
+   pieces" and it was the site's largest visible gap** — the cull on 2026-09-13
+   took 106 of them off, so the ratio went from 115-of-126 to 9-of-20.
+2. **One filter, not none — and the reason it was urgent is gone.** Shopify's
+   default **Availability** facet is live (`filter.v.availability=1` / `=0`) and
+   every entry point still carries it. It was added because 106 of 126 products
+   were sold out and the bare `/collections/all` opened on eight sold-out cards
+   out of nine. **After the 2026-09-13 cull every product on the store is in
+   stock**, so the facet now filters nothing — it is kept because stock will
+   move again, not because it is load-bearing today. The `?filter.v.availability=1`
+   on every entry point is likewise harmless and no longer necessary; leave it.
+   Product type, size and colourway facets are still undefined; they come from
+   the Search and Discovery app, and until then the rail says so rather than
+   inventing them.
 3. **One Shopify page is still missing.** Checked against the live storefront
    with the password; the `custom` row was fixed on 2026-09-13:
 
@@ -226,7 +233,7 @@ read_inventory,write_inventory
 
 | Scope | Why |
 |---|---|
-| `read/write_products` | The eleven pieces, their two options, 25 variants each, and the `custom.material` / `custom.care` product metafields |
+| `read/write_products` | The eleven pieces, their two options, **35 variants each** since sizes went to 3XL, and the `custom.material` / `custom.care` product metafields. Also `productDelete` and `productOptionUpdate`, which is what the 2026-09-13 cull and the size extension used |
 | `read/write_files` | Uploading the eleven `public/products/*.webp` photographs |
 | `read/write_publications` | Publishing to the Online Store channel. **Without this the products import invisible** — they exist in admin and the storefront renders placeholders |
 | `read/write_metaobjects` | Colourway swatches. Without swatch metaobjects the picker draws five identical rectangles |
@@ -392,10 +399,12 @@ form backend or a quote calculator, it is the wrong task.
 - **Tailwind CSS v4**, precompiled to `theme/assets/theme.css`
 - **CSS-variable design tokens** in `app/tokens.css`, shared with the archived app
 - **Vanilla JS** in `theme/assets/theme.js` — ten behaviours (the header
-  disclosure, the scroll reveals, the carousel, the gallery, the product tabs, the
-  quantity stepper, save-for-later, the quote form's WhatsApp composer, the hero
-  film's reduced-motion pause, and the home page's view switch), all progressive
-  enhancement. The carousel's is still
+  disclosure, the scroll reveals, the carousel, the gallery, the **size chart's
+  cm/inch switch**, the quantity stepper, save-for-later, the quote form's
+  WhatsApp composer, the hero film's reduced-motion pause, and the home page's
+  view switch), all progressive enhancement. **The product tabs are no longer
+  one of them** — they were flattened to a single page on 2026-09-13 and the
+  behaviour was deleted rather than left in the bundle unreferenced. The carousel's is still
   shipped and still correct; nothing on any template uses it since the hero
   became a film
 - **Shopify CLI 4.x**, pinned as a devDependency so the scripts resolve it from
@@ -412,12 +421,12 @@ Shopify route names, and what the React app called them:
 |---|---|---|
 | `/` | `/` | Home — hero carousel, new arrivals, customer voices, service band, Instagram strip |
 | `/collections/all` | `/shop` | Catalogue — filter rail, sort, 3-up grid, paging |
-| `/products/<handle>` | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, tabs, related |
+| `/products/<handle>` | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, **one-page detail** (tabs were flattened 2026-09-13), related |
 | `/cart` | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
 | `/pages/about` | `/about` | About Us — the Shopify page's own title and content |
 | `/pages/custom` | — | **Custom & Business (B2B).** Hero, services, how it works, why Wear Label, request a quote. Template suffix `page.custom`. **The Shopify page exists as of 2026-09-13** and the route returns 200 |
 | `/pages/contact` | — | **Contact.** Placeholder detail rows plus Shopify's native contact form. Template suffix `page.contact` |
-| `/collections` | — | **Collections.** The catalogue by category. **Fifteen automated collections are live**, one per `product_type`; every link carries `filter.v.availability=1` |
+| `/collections` | — | **Collections.** The catalogue by category. **Three automated collections are live** — Pants 14, Cardigan 4, Culottes 2 — one per `product_type`. It was fifteen until 2026-09-13; the twelve that went empty with the cull were deleted |
 | `/search` | — | **Search.** Products only; the header mark links here |
 | `/account` | `/account` | Shopify's customer routes — still `main-stub`, not designed |
 | 404 | `app/not-found.tsx` | `sections/main-404.liquid` |
@@ -509,7 +518,8 @@ Nothing is read from the environment any more. The three `SHOPIFY_*` /
 | `sections/main-collection` · `main-product` · `main-cart` · `main-page` · `main-404` | the matching routes |
 | `snippets/product-card` | `components/shop/product-card.tsx` + `card-hover.tsx` |
 | `snippets/catalogue-filters` · `results-toolbar` · `pagination` | `components/shop/*` |
-| `snippets/product-gallery` · `product-purchase` · `product-tabs` | `components/product/*` |
+| `snippets/product-gallery` · `product-purchase` · `product-detail` | `components/product/*` — `product-detail` replaced `product-tabs` on 2026-09-13, flattened from four tabs to one page |
+| `snippets/size-guide` | nothing — the shared size chart and its cm/inch switch, 2026-09-13 |
 | `snippets/cart-lines` · `order-summary` | `components/cart/*` |
 | `snippets/copy` · `media` · `price` · `badge` · `alert` · `aurora` · `icon` · `wordmark` · `breadcrumbs` · `save-button` · `cart-badge` | `components/ui/*` |
 | `snippets/button` | nothing — extracted 2026-08-31 from the primary button's class string, which had been retyped in three sections and was about to be retyped in eight more |
@@ -600,11 +610,14 @@ asks for it back (§6 Section 3, "Shop by Category"). **The reason it stays out
 changed on 2026-08-31 and the new one is weaker, so re-read it before assuming
 the block is still blocked.** It used to be that no collection existed and
 `/collections/pants` was a 404; fifteen now exist and that URL returns 200. What
-stops it now is stock: twelve of the fifteen categories are entirely sold out, and
-every entry point carries `filter.v.availability=1`, so a mosaic over all of them
-is twelve tiles opening on an empty grid. Three tiles — Pants, Cardigan, Culottes
-— would work today. Whether three is a section or an embarrassment is a design
-call nobody has made. The section's own comment carries the full reasoning.
+stopped it was stock: twelve of the fifteen categories were sold out end to end.
+**THAT REASON EXPIRED ON 2026-09-13** — the sold-out products were deleted and the
+twelve empty collections with them, so the three that remain (Pants 14, Cardigan
+4, Culottes 2) are all fully in stock and every one of them opens on a full grid.
+What is left is the question the stock problem was hiding: **whether three tiles
+is a section or an embarrassment.** That is a design call nobody has made, and it
+is now the only thing in the way. The section's own comment carries the full
+reasoning.
 
 **A second block is unplaced as of 2026-09-13: `hero-carousel`.** It was the home
 page's hero until the film replaced it, and it is kept for the same reason
@@ -627,8 +640,33 @@ block back on a product page.
 
 ## The catalogue
 
-**126 products are on the store, all `ACTIVE` and all published to the Online
-Store.** They arrived in two imports, done deliberately differently, and the
+**TWENTY products are on the store**, all `ACTIVE`, all published to the Online
+Store and **all in stock**. It was 126 until 2026-09-13.
+
+**THE 106 SOLD-OUT PRODUCTS WERE PERMANENTLY DELETED**, on instruction — "yg out
+of stock hapus semua nya" — and the choice was made with the trade-off stated:
+archiving would have produced an identical storefront and stayed reversible, and
+deletion was picked anyway. Shopify has no undo for it.
+
+**There is a backup and it is the only way back.** Taken immediately before the
+deletion, it holds every deleted product's title, handle, productType, vendor,
+tags and variant price, plus the names of the twelve collections that went with
+them:
+
+```
+asset/_backup/deleted-products-2026-09-13.json
+```
+
+It lives under `asset/`, so it is **gitignored and not in a fresh clone** — the
+same rule as every other master. If somebody needs to restock a deleted piece,
+that file is where the data is, and if it is gone the data is gone.
+
+Twelve of the fifteen automated collections went empty with the cull and were
+deleted too, also on instruction. **Three remain: Pants 14, Cardigan 4, Culottes
+2.** They are automated on `TYPE EQUALS`, so recreating one is a single rule in
+the admin the moment a type comes back.
+
+What survives arrived in two imports, done deliberately differently, and the
 difference is what to read before adding to either.
 
 ### The eleven design pieces
@@ -652,10 +690,21 @@ these eleven are the only products in the store that carry an image.
 | `taka-flare-pants` | Taka Flare Pants | Cupro | Rp 199.000 | | | Wide leg |
 | `yora-loose-pants` | Yora Loose Pants | Cotton twill | Rp 165.000 | | | Wide leg |
 
-- **Sizes** XS–XL and **colourways** Cream, Camel, Taupe, Sage, Espresso (hexes in
-  `lib/shopify/vocabulary.ts`, taken from the design system's Colourway row) apply to
-  every piece, giving 25 variants each. That matrix is the design's, not an inference
-  from the catalogue.
+- **Sizes XS, S, M, L, XL, XXL, 3XL** and **colourways** Cream, Camel, Taupe,
+  Sage, Espresso (hexes in `lib/shopify/vocabulary.ts`, taken from the design
+  system's Colourway row) apply to every piece, giving **35 variants each**.
+
+  **The last two sizes were added on 2026-09-13**, on instruction, taking the run
+  from XS–XL to XS–3XL. `productOptionUpdate` with `variantStrategy: MANAGE`
+  created the ten new variants per product, and it **inherited the price and the
+  untracked inventory state from the existing ones** — verified afterwards, 394
+  variants across the store, none at price 0 and none tracked. Nothing had to be
+  patched up, which is worth knowing before anybody writes a follow-up mutation
+  that is not needed.
+
+  The five-colourway half of that matrix is the design's, not an inference from
+  the catalogue. **The nine Shopee survivors were deliberately NOT given sizes** —
+  see below.
 - **Stock is not modelled for these eleven.** Their inventory is *untracked*, so
   they read as available; Shopee states availability for them but never quantity,
   and inventing a number is what this repo refuses.
@@ -684,31 +733,39 @@ it is also all the listing gave: no photographs, no descriptions, no size or
 colour data, and the ratings and units-sold counts were deliberately dropped
 (a review score is the one placeholder that cannot be labelled as one).
 
-- **One default variant each, no options.** Assigning XS–XL × five colourways to a
-  tote bag would have been inventing the matrix. `snippets/product-purchase.liquid`
+- **One default variant each, no options**, and that is still true of the nine
+  that survived the cull — four cardigans and five trousers. **They were left
+  without sizes when the eleven design pieces went to 3XL on 2026-09-13**, for
+  the reason this bullet has always given: the listing states no size data, so a
+  size run here would be invented, and an XXL a shopper can add to a bag that the
+  studio cannot ship is worse than no size at all. Assigning XS–XL × five
+  colourways to a tote bag would have been inventing the matrix. `snippets/product-purchase.liquid`
   therefore guards its picker on `has_only_default_variant`: Shopify hands a
   no-option product one synthetic `Title` option whose only value is
   `Default Title`, and rendering it draws a fieldset offering a choice that does
   not exist. Both that snippet and `sections/main-product.liquid` also fall back
   to `product.variants.first` when `selected_or_first_available_variant` comes
   back nil, which is what a fully sold-out product does.
-- **Nine are in stock, 106 are sold out**, and that split is Shopee's own. The 106
-  are `ACTIVE` with inventory **tracked at 0**, which is what lights up the
-  theme's sold-out markup; the nine in stock are untracked, like the eleven above.
-  So the storefront's sold-out state is now real data, not a state waiting for
-  data.
+- **Nine survive; 106 were deleted on 2026-09-13.** The split was Shopee's own:
+  the 106 were `ACTIVE` with inventory **tracked at 0** and the nine are
+  untracked, like the eleven above. **The theme's sold-out markup is therefore
+  unexercised on the store right now** — it is correct, it is ported, and
+  nothing on the storefront reaches it until something sells out again. Do not
+  read "no sold-out card renders" as "sold-out is broken".
 - **Names are the Shopee titles with the marketing tail cut.** "Basic Pants by
   Wear Label - Celana Panjang Highwaist Wanita - Formal Casual" → `Basic Pants`.
   ALL-CAPS titles were title-cased; mixed-case ones were left alone, which is why
   `Cerra Loose Pants BIG SIZE` keeps its shout. The reject and defect runs kept
   their qualifier, because it is what the piece is: `Defect Sale Cerra Loose
   Pants`, `Minor Reject Sale Canvas Bag`, `Casa Bag Minor Reject`.
-- **`productType` is the garment the name itself states** — Vest 31, Pants 25,
-  Shirt 16, Bag 7, Skirt 6, Culottes 5, Tunik 4, Cardigan 4, Outer 3, Knitwear 3,
-  Set 2, Blouse 2, Top 2, Dress 1, Blazer 1, and five left blank. The five blanks
-  are the Raya series and sets and the reject-sale linen: those names state a
-  collection or a fabric, not a garment, and the rule is that a type is derived,
-  never guessed.
+- **`productType` is the garment the name itself states.** At import that was
+  Vest 31, Pants 25, Shirt 16, Bag 7, Skirt 6, Culottes 5, Tunik 4, Cardigan 4,
+  Outer 3, Knitwear 3, Set 2, Blouse 2, Top 2, Dress 1, Blazer 1 and five blank.
+  **Of those, only Cardigan 4 and five Pants survived 2026-09-13** — every other
+  type was sold out end to end and went with the cull, the five blank-typed ones
+  included. The rule that produced them still stands: a type is derived from the
+  name, never guessed, which is why the Raya series and the reject-sale linen had
+  no type to begin with.
 - **The two axes are MERGED, 2026-08-31.** They used to be mixed: the design
   pieces typed by *cut*, the Shopee ones by *garment*. The overlap was smaller
   than this file once claimed — only **nine** of the 126 carried a cut where a
@@ -719,12 +776,17 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   Those nine are now `Pants`, and **the cut moved to a tag rather than being
   thrown away** — `Wide leg` 8 and `Straight cut` 1 are tags now, alongside the
   three `New` tags. Nothing was lost, and a cut facet can be built from them
-  later. `product_type` is a single clean garment axis: Pants 34, Vest 31,
-  Shirt 16, Bag 7, Skirt 6, Culottes 5, Tunik 4, Cardigan 4, Knitwear 3, Outer 3,
-  Set 2, Blouse 2, Top 2, Blazer 1, Dress 1, and five deliberately blank.
+  later; all nine carried stock, so all nine survived the cull and the tags are
+  intact.
 
-- **Fifteen automated collections are live**, one per type, rule `TYPE EQUALS`,
-  all published to the Online Store. Automated rather than manual on purpose: a
+  `product_type` was a single clean garment axis of fifteen values across 126
+  products. **After 2026-09-13 it is three across twenty: Pants 14, Cardigan 4,
+  Culottes 2.**
+
+- **Three automated collections are live** — Pants, Cardigan, Culottes — one per
+  surviving type, rule `TYPE EQUALS`, all published to the Online Store. **It was
+  fifteen; the twelve that the cull emptied were deleted on 2026-09-13**, on
+  instruction, and their names are in the backup file named above. Automated rather than manual on purpose: a
   new product joins its collection with no developer, which is what brief §15
   asks for. **The five blank-typed products get no collection** — the Raya series,
   Pesona Raya and the reject-sale linen name a season or a fabric, not a garment,
@@ -732,12 +794,12 @@ colour data, and the ratings and units-sold counts were deliberately dropped
   collection off a tag, and it is the client's call whether that season is still
   selling.
 
-  **TWELVE OF THE FIFTEEN ARE ENTIRELY SOLD OUT**, verified against the rendered
-  storefront: only Pants, Cardigan (4 of 4) and Culottes (2 of 5) have anything
-  in stock. That is why `category-mosaic` is still not placed — every entry point
-  carries `filter.v.availability=1`, so a mosaic over these would be twelve tiles
-  opening on an empty grid. Creating the collections was mechanical; choosing
-  which tiles to show is a design decision. Keep the two apart.
+  **ALL THREE ARE FULLY IN STOCK**, which is new: the sentence here used to say
+  twelve of fifteen were sold out end to end, and that was the whole argument
+  against placing `category-mosaic`. **That argument is gone.** Every collection
+  on the store now opens on a full grid. What is left is the question it was
+  hiding — whether three tiles is a section or an embarrassment — and that is a
+  design call, not a data one. See `category-mosaic`'s own comment.
 
   **Rolling these up into the brief's example tiles — Tops, Outerwear — was
   deliberately NOT done.** Merging Vest, Cardigan, Outer, Blazer and Knitwear
@@ -839,15 +901,29 @@ Push, then read the output. It is the only validator that sees this class of bug
   | Metafield | Type | Read by | Blank renders |
   |---|---|---|---|
   | `custom.material` | single line text | `product-card`, `main-product` | **defined — renders data** |
-  | `custom.care` | rich text | `product-tabs` → Fabric & care | labelled placeholder |
-  | `custom.size_chart` | rich text | `product-tabs` → Size & fit | labelled placeholder inside `.wl-table` |
-  | `custom.fit` | rich text | `product-tabs` → Size & fit | labelled placeholder |
+  | `custom.care` | rich text | `product-detail` → Fabric & care | labelled placeholder |
+  | `custom.size_chart` | rich text | `product-detail` → Size & fit | **falls back to the SHARED chart** in Theme settings → Size guide, not to a placeholder. Per-product wins; see below |
+  | `custom.fit` | rich text | `product-detail` → Size & fit | labelled placeholder |
   | `custom.shopee_url` | URL | `product-purchase` | **nothing at all** — see below |
 
-  `size_chart` is styled by `.wl-table` in `theme-src/theme.css`, which exists
-  because Shopify emits a bare `<table>` and `base.css` styles nothing inside one.
-  It scrolls sideways rather than shrinking: five sizes against four measurements
-  is ~420px of unbreakable numbers and horizontal *page* scroll is forbidden.
+  `.wl-table` in `theme-src/theme.css` styles both size-chart routes — the rich
+  text one and the built one — because Shopify emits a bare `<table>` and
+  `base.css` styles nothing inside one. It scrolls sideways rather than
+  shrinking: **seven sizes against five measurements** is well past what a phone
+  can hold, and horizontal *page* scroll is forbidden. Verified at 390px: the
+  table scrolls inside its own box and the document does not.
+
+  **THE SHARED CHART IS A THEME SETTING, NOT A METAFIELD**, added 2026-09-13.
+  Theme settings → Size guide holds the column headings and one textarea of
+  rows, pipe separated, one size per line. It is store-wide because Wear Label
+  has one size system and eleven products cut to it — a metafield would be the
+  same table typed eleven times and eleven places to correct one wrong number.
+  `custom.size_chart` still wins per product for a cut that does not follow the
+  house measurements.
+
+  **Type centimetres only.** `snippets/size-guide.liquid` marks every numeric
+  cell with `data-cm` and `theme.js` computes the inch column; two typed sets
+  would be two sets that can disagree.
 
 - **The Shopee hand-off is a metafield with a setting as its fallback**, and the
   precedence is deliberate. `custom.shopee_url` per product wins; `settings.shopee_shop_url`
@@ -1284,7 +1360,8 @@ Not decided, and not to be filled in by guessing:
 | **Per-product Shopee URLs** | `custom.shopee_url` is undefined and `shopee_shop_url` is blank, so "Buy on Shopee" does not render at all. The decision taken was per-product URLs with the shop URL as a fallback; start with the eleven design pieces, which are the only ones carrying photography |
 | **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
 | **B2B photography** | None exists. `custom-band` and all three `custom-services` cards draw labelled placeholders at final size, by instruction 2026-08-31. Brief §7 wants "foto actual project Wear Label" and inventing one is out |
-| ~~The category taxonomy and the collections~~ | **DONE 2026-08-31.** Nine products retyped, fifteen automated collections created and published, verified against the rendered storefront. See [The catalogue](#the-catalogue). What is still open is narrower: **which tiles a "Shop by Category" mosaic should show**, given that twelve of the fifteen are entirely sold out |
+| ~~The category taxonomy and the collections~~ | **DONE 2026-08-31**, and cut back to three on 2026-09-13 with the sold-out cull. What is still open is narrower and no longer a data question: **whether a "Shop by Category" mosaic of only three tiles — Pants, Cardigan, Culottes — is worth having.** All three are fully in stock now, so nothing blocks it but taste |
+| **Trouser measurements for the size chart** | **The chart is built and the numbers are not in it.** Theme settings → Size guide holds the columns (Size, Waist, Hip, Rise, Inseam, Leg opening) and an empty Rows field; blank renders the labelled placeholder at final size. The studio supplied a reference table on 2026-09-13 but its columns were a TOP's — body length back, shoulder width, body width, sleeve length — and sixteen of the twenty products left are trousers or culottes, so the format was taken and the numbers were not. **Type centimetres only; the inch column is computed.** A product that needs its own chart can still carry `custom.size_chart`, which wins |
 | ~~Selected Projects~~ · **THREE CLIENT NAMES** | **The section was BUILT 2026-09-13** — the 2026-08-31 refusal rested on there being no project photographs and no nameable clients, and four pieces of real work arrived. What is still open is narrower and it is the last thing holding the section back: the studio authorised naming clients, and only **Salna** could actually be read off the photographs. The hospital programme, the institutional shirt and the tote have `client` blank in `templates/index.json`, so three of four cards render the labelled placeholder. Typing them in is a theme-editor edit. **Do not read a name off a blurry crop and publish it.** The blocks are section blocks rather than the `project` metaobject that was once sketched — the metaobject is still the right answer if the studio ever adds these from the admin rather than from a hand-over |
 | Social handles | The footer has four label/URL pairs — Instagram, Shopee, TikTok and a spare — and every URL is blank, so no social link renders. Brief §19 names the three |
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Nine of twelve footer entries have no URL and render as plain text, never as a 404 link. Add the URL in the theme editor when the page exists |

@@ -73,7 +73,7 @@
   </div>
 
   <div data-reveal class="mt-block-lg">
-    {% render 'product-tabs', product: product, shipping: section.settings.shipping %}
+    {% render 'product-detail', product: product, shipping: section.settings.shipping %}
   </div>
 </div>
 
@@ -81,10 +81,10 @@
 {
   "name": "Product",
   "settings": [
-    { "type": "paragraph", "content": "Details comes from the product description and Fabric & care from a custom.care metafield — both per product. The two lines below are store-wide policy, so they live here." },
+    { "type": "paragraph", "content": "Details comes from the product description and Fabric & care from a custom.care metafield — both per product. The size chart is shared across the store and lives in Theme settings → Size guide. The two lines below are store-wide policy, so they live here." },
     { "type": "text", "id": "note_1", "label": "Note 1", "default": "Ships from Bandung within 1–2 working days" },
     { "type": "text", "id": "note_2", "label": "Note 2", "default": "One free size exchange within 14 days" },
-    { "type": "textarea", "id": "shipping", "label": "Shipping tab copy", "default": "Ships from Bandung within 1–2 working days. One free size exchange within 14 days." }
+    { "type": "textarea", "id": "shipping", "label": "Shipping copy", "default": "Ships from Bandung within 1–2 working days. One free size exchange within 14 days." }
   ]
 }
 {% endschema %}

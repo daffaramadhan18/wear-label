@@ -1,0 +1,104 @@
+{%- comment -%}
+  Everything under the buy box, as ONE PAGE.
+
+  THIS REPLACES `product-tabs.liquid`, deleted 2026-09-13 on instruction: the
+  four tabs — Details, Size & fit, Fabric & care, Shipping — were shown in a
+  screenshot and the answer was "itu ga usah deh, dibikin 1 page aja". So the
+  panels are sections of a page now, each under its own heading, all of them
+  readable without operating anything.
+
+  It is worth knowing what was given up, because the tabs were not lazy work:
+  they were real ARIA tabs with the full keyboard contract — arrows between
+  tabs, Home and End to the ends, one tab stop for the strip. None of that is
+  needed now, which is the point. The behaviour went out of assets/theme.js with
+  them rather than being left in unused, and `[data-tabs]` went out of the
+  `scripting: none` block in theme-src/theme.css for the same reason.
+
+  What it buys, beyond the instruction: the no-script rendering and the normal
+  rendering are now the same page. The tabs had two — every panel in sequence
+  with the strip removed, for a reader without script — and a page with one
+  shape cannot drift between them.
+
+  ORDER IS UNCHANGED, and it was argued for once already. Size & fit sits
+  second, ahead of care: the brief lists the size chart before care
+  instructions, and PRODUCT.md records fit as the purchase decision itself —
+  almost every one of the twenty customer reviews names a height and a weight
+  before it names a size. Moving it down is a change to what the page
+  prioritises, not a tidy-up.
+
+  THE SIZE CHART HAS TWO SOURCES AND THE PER-PRODUCT ONE WINS. `custom.size_chart`
+  is a rich-text metafield a product can carry for a cut that does not follow the
+  house measurements; with none, `size-guide.liquid` renders the shared chart
+  from theme settings. That precedence is the same shape as the Shopee link's —
+  the specific beats the general, and the general is a courtesy rather than the
+  intended state.
+
+  Every section renders its own labelled placeholder when its copy is blank, so
+  the page keeps its height and its shape before the studio has written a word.
+  `description` and `custom.care` are both blank across this catalogue on
+  purpose: the design reused one generic paragraph for all eleven pieces, which
+  would state a wrong inseam and a wrong fabric on most of them.
+
+  Accepts: product, shipping (store-wide policy copy)
+{%- endcomment -%}
+
+{%- liquid
+  assign size_chart = product.metafields.custom.size_chart.value
+-%}
+
+<div class="flex flex-col divide-y divide-rule border-t border-rule">
+  <section class="flex flex-col gap-4 py-8" aria-labelledby="detail-details">
+    <h2 id="detail-details" class="text-micro uppercase tracking-nav text-ink-subtle">
+      {{ 'product.details' | t }}
+    </h2>
+    <div class="wl-measure text-body leading-body text-ink-body">
+      {% render 'copy', value: product.description, label: 'product details', lines: 3 %}
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-7 py-8" aria-labelledby="detail-fit">
+    <h2 id="detail-fit" class="text-micro uppercase tracking-nav text-ink-subtle">
+      {{ 'product.size_and_fit' | t }}
+    </h2>
+
+    {%- comment -%}
+      The chart is deliberately NOT inside `wl-measure`. A measure caps the line
+      length at something readable for prose, and a table of seven sizes against
+      five measurements is not prose — capping it would force the columns
+      narrower than the numbers and start the sideways scroll early.
+    {%- endcomment -%}
+    <div class="flex flex-col gap-3">
+      <h3 class="text-caption uppercase tracking-nav text-ink-muted">{{ 'product.size_chart' | t }}</h3>
+      {%- if size_chart != blank -%}
+        <div class="wl-table">{{ size_chart }}</div>
+      {%- else -%}
+        {% render 'size-guide' %}
+      {%- endif -%}
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <h3 class="text-caption uppercase tracking-nav text-ink-muted">{{ 'product.fit_information' | t }}</h3>
+      <div class="wl-measure text-body leading-body text-ink-body">
+        {% render 'copy', value: product.metafields.custom.fit.value, label: 'fit information', lines: 2 %}
+      </div>
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-4 py-8" aria-labelledby="detail-care">
+    <h2 id="detail-care" class="text-micro uppercase tracking-nav text-ink-subtle">
+      {{ 'product.fabric_and_care' | t }}
+    </h2>
+    <div class="wl-measure text-body leading-body text-ink-body">
+      {% render 'copy', value: product.metafields.custom.care.value, label: 'fabric and care', lines: 3 %}
+    </div>
+  </section>
+
+  <section class="flex flex-col gap-4 py-8" aria-labelledby="detail-shipping">
+    <h2 id="detail-shipping" class="text-micro uppercase tracking-nav text-ink-subtle">
+      {{ 'product.shipping' | t }}
+    </h2>
+    <div class="wl-measure text-body leading-body text-ink-body">
+      {% render 'copy', value: shipping, label: 'shipping', lines: 3 %}
+    </div>
+  </section>
+</div>

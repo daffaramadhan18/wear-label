@@ -1,0 +1,151 @@
+{%- comment -%}
+  The size chart — a real table built from theme settings, not a pasted blob.
+
+  Asked for 2026-09-13 with a screenshot of a competitor's size-guide panel:
+  a table from XS to 3XL and a cm/inch switch. Two things about that screenshot
+  were deliberately NOT copied, and both were agreed first:
+
+  - **The COLUMNS are trousers, not the screenshot's.** The reference table was
+    a top's — body length back, shoulder width seam to seam, body width, sleeve
+    length centre back. Sixteen of the twenty products left on this store after
+    the sold-out cull are trousers and culottes, and a shopper buying trousers
+    measures a waist, not a shoulder. Shipping a top's chart on Yora Loose Pants
+    would have been a wrong measurement stated confidently, which is the one
+    class of content this repo refuses. The studio chose the format over the
+    numbers; the numbers are theirs to send.
+  - **It is inline, not a modal.** The same instruction that asked for this chart
+    asked for the product page's four tabs to become one page. A dialog would
+    have put a second thing to open back on a page that just had one taken off.
+
+  WHERE THE DATA LIVES, and why it is a theme setting rather than a metafield.
+  `custom.size_chart` still exists and still wins where a product has its own —
+  see `product-detail.liquid`. What this renders is the SHARED chart, because
+  Wear Label has one size system and eleven products cut to it: a metafield
+  would mean the same table typed eleven times and eleven places to correct when
+  one number is wrong. A theme setting is one field, in the theme editor, where
+  every other piece of copy on this site already lives.
+
+  THE SHAPE IS ONE TEXTAREA, ONE ROW PER LINE, PIPE SEPARATED:
+
+      XS | 64 | 90 | 28 | 72 | 26
+      S  | 68 | 94 | 28 | 72 | 27
+
+  which is chosen so the studio can see the whole table at once and so that
+  adding a size is a line, not a code change. It also keeps the size names out
+  of this file — XS and 3XL are data, and a hardcoded user-visible string in a
+  snippet is the rule this theme breaks least often.
+
+  A ragged row is rendered ragged rather than padded or dropped. A missing cell
+  is a number nobody has supplied, and silently filling it with an empty string
+  the reader cannot tell from a measured zero is worse than a short row.
+
+  CM TO INCHES IS COMPUTED, NOT TYPED. Every numeric cell carries `data-cm` and
+  assets/theme.js rewrites the text when the switch moves; the studio types one
+  set of numbers. Without script the switch is removed by the `scripting: none`
+  block in theme-src/theme.css and the table stays in centimetres, which is the
+  unit the studio measures in and the one the numbers are typed in.
+
+  The wrapper is `.wl-table`, the same class the rich-text metafield route uses,
+  so a chart from either source is styled once and scrolls sideways on a phone
+  rather than forcing horizontal page scroll.
+{%- endcomment -%}
+
+{%- comment -%}
+  ROWS ARE SPLIT WITH `newline_to_br`, NOT ON A NEWLINE LITERAL, and that is not
+  a style choice. A `{% liquid %}` block is line-based: a quoted string carrying
+  a real line break inside one ends the tag early, and theme check reports it as
+  "expected end of input" pointing at the comment above rather than at the split.
+  It cost a round trip here. `newline_to_br` turns the breaks into markup that
+  can be split on a single line; both spellings are handled because the filter's
+  output has been written each way.
+{%- endcomment -%}
+
+{%- liquid
+  assign columns = settings.size_guide_columns | split: ','
+
+  assign row_source = settings.size_guide_rows | strip | newline_to_br
+  assign row_source = row_source | replace: '<br />', '|~|' | replace: '<br>', '|~|'
+  assign rows = row_source | split: '|~|'
+
+  assign has_rows = false
+  if settings.size_guide_rows != blank and rows.size > 0
+    assign has_rows = true
+  endif
+-%}
+
+{%- if has_rows -%}
+  <div class="flex flex-col gap-4">
+    {%- comment -%}
+      Radios rather than two buttons: the unit is one choice out of two, which is
+      what a radio group is, and it arrives keyboard-operable with arrow keys for
+      free. `data-unit-switch` is the hook; the fieldset is what `scripting: none`
+      removes.
+    {%- endcomment -%}
+    <fieldset data-unit-switch class="flex items-center gap-5">
+      <legend class="sr-only">{{ 'product.units' | t }}</legend>
+
+      <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 text-caption uppercase tracking-nav text-ink-muted has-checked:text-ink">
+        <input type="radio" name="size-unit" value="cm" checked class="size-4 accent-brand">
+        {{ 'product.cm' | t }}
+      </label>
+
+      <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 text-caption uppercase tracking-nav text-ink-muted has-checked:text-ink">
+        <input type="radio" name="size-unit" value="in" class="size-4 accent-brand">
+        {{ 'product.inch' | t }}
+      </label>
+    </fieldset>
+
+    <div class="wl-table">
+      <table data-size-table>
+        <thead>
+          <tr>
+            {%- for column in columns -%}
+              <th scope="col">{{ column | strip }}</th>
+            {%- endfor -%}
+          </tr>
+        </thead>
+        <tbody>
+          {%- for row in rows -%}
+            {%- assign cells = row | split: '|' -%}
+            <tr>
+              {%- for cell in cells -%}
+                {%- assign value = cell | strip -%}
+                {%- if forloop.first -%}
+                  {%- comment -%}
+                    The first cell is the size name, so it is a row header and it
+                    is never converted — "XS" is not a measurement.
+                  {%- endcomment -%}
+                  <th scope="row">{{ value }}</th>
+                {%- else -%}
+                  {%- comment -%}
+                    `data-cm` is what makes the cell convertible. A cell that is
+                    not a number keeps none, so script leaves it alone — a dash or
+                    a note in the middle of a table survives the switch.
+                  {%- endcomment -%}
+                  {%- assign as_number = value | times: 1 -%}
+                  {%- if as_number > 0 -%}
+                    <td data-cm="{{ value }}">{{ value }}</td>
+                  {%- else -%}
+                    <td>{{ value }}</td>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </tr>
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </div>
+
+    {%- if settings.size_guide_note != blank -%}
+      <p class="text-caption leading-snug text-ink-muted">{{ settings.size_guide_note }}</p>
+    {%- endif -%}
+  </div>
+{%- else -%}
+  {%- comment -%}
+    No rows typed yet. The labelled placeholder at final size, like every other
+    empty slot on this site — the layout is finished before the numbers arrive.
+  {%- endcomment -%}
+  <div class="wl-table">
+    {% render 'copy', value: blank, label: 'size chart', lines: 4 %}
+  </div>
+{%- endif -%}
