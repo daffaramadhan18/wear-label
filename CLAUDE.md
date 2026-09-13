@@ -564,14 +564,15 @@ bahasanya jangan gini) trs yang B2C itu page yg lama, B2B page yg baru". So
 
 | View | Key | Sections |
 |---|---|---|
-| **Custom & business (default)** | `custom-business` | `projects`, `custom` |
-| Ready-to-wear | `ready-to-wear` | `arrivals`, `voices`, `services`, `instagram` |
+| **Ready-to-wear (default)** | `ready-to-wear` | `arrivals`, `voices`, `services`, `instagram` |
+| Custom & business | `custom-business` | `projects`, `custom` |
 
-**THE TWO WERE SWAPPED ON 2026-09-13** — "di home ready to wear sama custom n
-business, tuker". Custom & business is what the home page now opens on, which
-is the positioning statement from earlier the same day finally reaching the
-default state rather than only the layout: legitimacy first, and the
-custom-apparel half is the one that was being under-said.
+**THE TWO WERE SWAPPED AND SWAPPED BACK ON 2026-09-13**, both on instruction and
+within the hour — "tuker", then "tuker lagi deh". Ready-to-wear leads. Record
+kept because the next person will otherwise read the positioning statement above
+and assume the default is meant to be the B2B half; it was tried that way, seen,
+and reverted. Changing it is two edits and they must move together — the block
+order in `home-tabs` AND the section order in the template.
 
 Five things to know before touching any of it:
 
@@ -889,6 +890,31 @@ bodies entirely — say "percent-brace", not the characters.
 `{% if %}`, `{% schema %}` — can still need its closer. Referring to Shopify's
 contact form in prose is safe; writing `{% form 'contact' %}` in a comment is not.
 `quote-form.liquid` says "Shopify's own contact form tag" for this reason.
+
+### A sticky element cannot leave its Shopify section wrapper
+
+`position: sticky` is constrained to its parent's box, and Shopify wraps every
+section in a `div.shopify-section` that is exactly as tall as the section. So
+`sticky top-0` on the `<header>` inside that div pinned it to the top of a 78px
+box and scrolled away with it. The stylesheet said sticky, the computed style
+said `position: sticky; top: 0px`, and the header still left the screen —
+measured on the live storefront: after scrolling 1400px its own rect top was
+**-1361**.
+
+Nothing reports this. There is no error, the property is honoured exactly as
+written, and it looks like a header that was never meant to stick.
+
+The fix is to declare it on the WRAPPER, whose parent is `body` — a box that
+spans the document. Shopify writes that div and gives no way to put a class on
+it from the section, so `:has()` is what selects it, in `theme-src/theme.css`:
+
+```css
+.shopify-section:has(> [data-site-header]) { position: sticky; top: 0; z-index: var(--z-sticky); }
+```
+
+**Test a sticky by scrolling and reading `getBoundingClientRect().top`**, never
+by reading the computed `position`. The computed value was correct the whole
+time it was broken.
 
 ### `theme check` does not check a schema's own limits
 

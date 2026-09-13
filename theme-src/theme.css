@@ -558,6 +558,28 @@
 }
 
 /*
+ * The sticky header.
+ *
+ * The rule is on the SECTION WRAPPER rather than on the <header> itself, and
+ * that is the whole reason the header sticks at all. A sticky element is
+ * constrained to its parent's box; Shopify gives every section its own
+ * `div.shopify-section`, which for the header is one header tall, so a sticky
+ * declared on the inner element pinned it to the top of a 78px box and scrolled
+ * away with it. The wrapper's parent is `body`, which spans the document, so
+ * this is the level where `top: 0` means the top of the viewport.
+ *
+ * `:has()` is what lets the wrapper be selected at all — Shopify writes that div
+ * and gives no way to put a class on it from the section. The announcement bar
+ * above is deliberately NOT sticky: it is a notice, it scrolls away once read,
+ * and two stacked sticky bars would eat 117px of a phone before any content.
+ */
+.shopify-section:has(> [data-site-header]) {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+/*
  * A hidden section is hidden.
  *
  * assets/theme.js toggles the home page's two views by setting `hidden` on the

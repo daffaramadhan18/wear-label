@@ -54,7 +54,21 @@
   element, so that pseudo-element resolves against this header without needing a
   `relative` of its own, and nothing here clips it.
 {%- endcomment -%}
-<header data-site-header class="sticky top-0 z-(--z-sticky) border-b border-rule bg-ground">
+{%- comment -%}
+  THE STICKY LIVES ON THE SECTION WRAPPER, NOT HERE, and moving it was the fix
+  for a header that was sticky in the stylesheet and not sticky on the page.
+
+  A sticky element cannot leave its parent's box. Shopify wraps every section in
+  its own `div.shopify-section`, and that div is exactly as tall as this header —
+  so `sticky top-0` here stuck the header to the top of a 78px box and then let
+  it scroll away with it. Measured on the live storefront before the fix: after
+  scrolling 1400px the header's own rect top was -1361, i.e. gone.
+
+  The rule that actually holds it is in theme-src/theme.css, on the wrapper,
+  whose parent is `body` — a box that spans the whole document. `data-site-header`
+  is what that rule selects, so do not rename it.
+{%- endcomment -%}
+<header data-site-header class="border-b border-rule bg-ground">
   <div class="mx-auto flex h-19 max-w-content items-center justify-between gap-8 px-gutter">
     <div class="flex items-center gap-2">
       <button

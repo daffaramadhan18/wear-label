@@ -31,110 +31,11 @@
         }
       },
       "block_order": [
-        "v2",
-        "v1"
+        "v1",
+        "v2"
       ],
       "settings": {
         "label": "Choose what you came for"
-      }
-    },
-    "projects": {
-      "type": "selected-projects",
-      "blocks": {
-        "p1": {
-          "type": "project",
-          "settings": {
-            "client": "",
-            "category": "Hospital uniforms",
-            "detail": "Eight uniform sets produced as one programme.",
-            "asset": "project-hospital.webp",
-            "alt": "Eight hospital uniform sets laid out flat in two rows — tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
-          }
-        },
-        "p2": {
-          "type": "project",
-          "settings": {
-            "client": "",
-            "category": "Institutional uniforms",
-            "detail": "Field shirt with an embroidered crest, a sleeve badge and a name plate.",
-            "asset": "project-institution.webp",
-            "alt": "A dark green institutional shirt photographed flat, front and back — epaulettes, buttoned chest pockets, an embroidered crest on one sleeve and a blank name plate."
-          }
-        },
-        "p3": {
-          "type": "project",
-          "settings": {
-            "client": "Salna",
-            "category": "Corporate uniforms",
-            "detail": "Two-tone shirt with the name embroidered on the chest and across the shoulders.",
-            "asset": "project-corporate.webp",
-            "alt": "A purple and cream two-tone short-sleeve shirt, front and back, the name Salna embroidered on the chest and across the shoulder yoke."
-          }
-        },
-        "p4": {
-          "type": "project",
-          "settings": {
-            "client": "",
-            "category": "Merchandise",
-            "detail": "Canvas tote with webbing handles and bound edges.",
-            "asset": "project-merchandise.webp",
-            "alt": "A canvas tote bag in off-white with navy webbing handles and navy bound edges, photographed on a plain grey ground."
-          }
-        }
-      },
-      "block_order": [
-        "p1",
-        "p2",
-        "p3",
-        "p4"
-      ],
-      "settings": {
-        "eyebrow": "Custom apparel",
-        "heading": "Selected projects",
-        "body": "Uniforms, corporate apparel and merchandise produced for organisations across Indonesia.",
-        "cta": "",
-        "href": "",
-        "tone": "page"
-      }
-    },
-    "custom": {
-      "type": "custom-band",
-      "blocks": {
-        "s1": {
-          "type": "service",
-          "settings": {
-            "label": "Custom uniform"
-          }
-        },
-        "s2": {
-          "type": "service",
-          "settings": {
-            "label": "Corporate apparel"
-          }
-        },
-        "s3": {
-          "type": "service",
-          "settings": {
-            "label": "Merchandise & community apparel"
-          }
-        }
-      },
-      "block_order": [
-        "s1",
-        "s2",
-        "s3"
-      ],
-      "settings": {
-        "eyebrow": "Custom apparel",
-        "heading": "Wear Label Custom",
-        "subheading": "Custom apparel for companies, organizations & communities.",
-        "body": "From uniforms to merchandise, Wear Label provides custom apparel production tailored to your team, organization, and brand.",
-        "asset": "custom-band-detail.webp",
-        "alt": "A close view of an institutional shirt's chest — a blank name plate above a buttoned pocket, and an embroidered badge on the sleeve.",
-        "cta": "Explore custom services",
-        "href": "/pages/custom",
-        "cta_2": "Request a quote",
-        "href_2": "/pages/custom#quote"
       }
     },
     "arrivals": {
@@ -359,16 +260,115 @@
         "heading": "Follow us on Instagram",
         "count": 11
       }
+    },
+    "projects": {
+      "type": "selected-projects",
+      "blocks": {
+        "p1": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Hospital uniforms",
+            "detail": "Eight uniform sets produced as one programme.",
+            "asset": "project-hospital.webp",
+            "alt": "Eight hospital uniform sets laid out flat in two rows — tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
+          }
+        },
+        "p2": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Institutional uniforms",
+            "detail": "Field shirt with an embroidered crest, a sleeve badge and a name plate.",
+            "asset": "project-institution.webp",
+            "alt": "A dark green institutional shirt photographed flat, front and back — epaulettes, buttoned chest pockets, an embroidered crest on one sleeve and a blank name plate."
+          }
+        },
+        "p3": {
+          "type": "project",
+          "settings": {
+            "client": "Salna",
+            "category": "Corporate uniforms",
+            "detail": "Two-tone shirt with the name embroidered on the chest and across the shoulders.",
+            "asset": "project-corporate.webp",
+            "alt": "A purple and cream two-tone short-sleeve shirt, front and back, the name Salna embroidered on the chest and across the shoulder yoke."
+          }
+        },
+        "p4": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Merchandise",
+            "detail": "Canvas tote with webbing handles and bound edges.",
+            "asset": "project-merchandise.webp",
+            "alt": "A canvas tote bag in off-white with navy webbing handles and navy bound edges, photographed on a plain grey ground."
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p3",
+        "p4"
+      ],
+      "settings": {
+        "eyebrow": "Custom apparel",
+        "heading": "Selected projects",
+        "body": "Uniforms, corporate apparel and merchandise produced for organisations across Indonesia.",
+        "cta": "",
+        "href": "",
+        "tone": "page"
+      }
+    },
+    "custom": {
+      "type": "custom-band",
+      "blocks": {
+        "s1": {
+          "type": "service",
+          "settings": {
+            "label": "Custom uniform"
+          }
+        },
+        "s2": {
+          "type": "service",
+          "settings": {
+            "label": "Corporate apparel"
+          }
+        },
+        "s3": {
+          "type": "service",
+          "settings": {
+            "label": "Merchandise & community apparel"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "settings": {
+        "eyebrow": "Custom apparel",
+        "heading": "Wear Label Custom",
+        "subheading": "Custom apparel for companies, organizations & communities.",
+        "body": "From uniforms to merchandise, Wear Label provides custom apparel production tailored to your team, organization, and brand.",
+        "asset": "custom-band-detail.webp",
+        "alt": "A close view of an institutional shirt's chest — a blank name plate above a buttoned pocket, and an embroidered badge on the sleeve.",
+        "cta": "Explore custom services",
+        "href": "/pages/custom",
+        "cta_2": "Request a quote",
+        "href_2": "/pages/custom#quote"
+      }
     }
   },
   "order": [
     "hero",
     "views",
-    "projects",
-    "custom",
     "arrivals",
     "voices",
     "services",
-    "instagram"
+    "instagram",
+    "projects",
+    "custom"
   ]
 }
