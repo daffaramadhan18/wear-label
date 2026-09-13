@@ -34,9 +34,17 @@
   brief's design direction leads with large photography and a phone should open
   this band on an image rather than on a heading, and the image is a labelled
   `media` placeholder carrying no information a reader loses by meeting it in a
-  different order than a sighted reader does. There is no B2B photography in the
-  repo yet, so today this renders the placeholder at its final size — which is
-  the state the studio asked for until they send project shots.
+  different order than a sighted reader does. It is no longer a placeholder —
+  see the next paragraph, which supersedes the sentence that used to be here
+  about there being no B2B photography in the repo.
+
+  THE PHOTOGRAPH IS A DETAIL SHOT, NOT A GARMENT, and that is deliberate now
+  that there is real B2B photography. On the home page this band sits directly
+  under `selected-projects`, which is four full flat-lays; a fifth would read as
+  a fifth project rather than as the band's own picture. custom-band-detail.webp
+  is a close crop of the institutional shirt's chest — name plate, pocket
+  stitching, sleeve badge — so the pair reads as "here is the work, here is how
+  it is made" rather than as one grid of five.
 
   Service names are blocks, not a hardcoded list, because the three the brief
   names (Custom Uniform, Corporate Apparel, Merchandise & Community Apparel) are
@@ -54,9 +62,13 @@
 
   <div class="relative z-10 mx-auto grid w-full max-w-content gap-block px-gutter py-section lg:grid-cols-2 lg:items-center lg:gap-block-lg">
     <div data-reveal class="lg:order-last">
-      {% render 'media',
+      {% render 'media-asset',
         image: section.settings.image,
+        asset: section.settings.asset,
+        alt: section.settings.alt,
         ratio: '4 / 3',
+        asset_width: 1200,
+        asset_height: 900,
         sizes: '(min-width: 1024px) 46vw, 92vw',
         label: 'Custom apparel project photo' %}
     </div>
@@ -126,7 +138,9 @@
     { "type": "text", "id": "heading", "label": "Headline", "default": "Wear Label Custom" },
     { "type": "textarea", "id": "subheading", "label": "Subheadline", "default": "Custom apparel for companies, organizations & communities." },
     { "type": "textarea", "id": "body", "label": "Description", "default": "From uniforms to merchandise, Wear Label provides custom apparel production tailored to your team, organization, and brand." },
-    { "type": "image_picker", "id": "image", "label": "Photograph", "info": "A photograph of work the studio has actually produced. Leave it empty and a labelled placeholder renders at the final size rather than a stock image standing in for a project." },
+    { "type": "image_picker", "id": "image", "label": "Photograph", "info": "A photograph of work the studio has actually produced. Overrides the shipped asset below." },
+    { "type": "text", "id": "asset", "label": "Shipped asset filename", "info": "A file in the theme's assets/. With neither this nor a photograph, a labelled placeholder renders at the final size rather than a stock image standing in for a project." },
+    { "type": "textarea", "id": "alt", "label": "Alt text", "info": "Used by the shipped asset only." },
     { "type": "header", "content": "Buttons" },
     { "type": "text", "id": "cta", "label": "Primary label", "default": "Explore custom services" },
     { "type": "url", "id": "href", "label": "Primary link" },

@@ -233,11 +233,16 @@ One changes behaviour the design drew:
 hero → new arrivals → **Wear Label Custom** → customer voices → service band →
 Instagram strip
 
-**The order changed again on 2026-09-13** and it is now: hero film → **two
-doors** → new arrivals → **selected projects** → voices → service band →
-Instagram. `custom-band` came off the page; `sections/two-ways.liquid` and
-`sections/selected-projects.liquid` took its job between them. The reason is a
-positioning statement, not a layout preference — the site's primary job is
+**The home page is TWO VIEWS behind a switch as of 2026-09-13**: hero film →
+`home-tabs` → either *Ready-to-wear* (new arrivals, voices, service band,
+Instagram) or *Custom & business* (selected projects, custom band). The switch
+swaps sections in place and puts the view in the URL as `#ready-to-wear` or
+`#custom-business`; with script off the bar is removed and every section is
+shown in template order.
+
+The two-panel split built earlier the same day, `sections/two-ways.liquid`, is
+unplaced and kept — see its comment. The reason for all of it is a positioning
+statement rather than a layout preference: the site's primary job is
 credibility and the custom-apparel half was being under-said. See CLAUDE.md.
 
 **The hero is a film as of 2026-09-13, and it carries no copy at all.** The

@@ -1,0 +1,128 @@
+{%- comment -%}
+  The home page's two views — ready-to-wear and custom & business.
+
+  Asked for 2026-09-13, after the two-panel split built the same day was seen
+  and set aside: "balik ke yang ide gw deh 2 diatasnya ada B2C atau B2B (tp
+  bahasanya jangan gini) trs yang B2C itu page yg lama, B2B page yg baru". The
+  reference was a two-tab bar with the active tab underlined.
+
+  IT SWITCHES IN PLACE AND DOES NOT NAVIGATE. That was the studio's choice over
+  the alternative of two tabs that are links to two URLs, and the trade it makes
+  is worth knowing before anybody "fixes" it: no page load, but the content has
+  to be on the home page rather than only on /pages/custom, and the switching
+  needs script. Both costs are paid deliberately below.
+
+  WHAT IT ACTUALLY TOGGLES ARE SIBLING SECTIONS, and that is the whole reason
+  this is written the way it is. Liquid cannot nest one section inside another,
+  so a "view" here is not one element — it is several `.shopify-section`
+  wrappers standing next to each other in templates/index.json. The tab
+  therefore carries a MANIFEST: each block names the template's own section keys
+  for its view, comma separated, and assets/theme.js resolves each key with
+  `[id$="__<key>"]`, which is how Shopify composes a JSON template's section id.
+
+  Rename a section key in index.json and you must rename it here too. There is
+  no way to make that link automatic without putting a setting on every section
+  on the page, which is a worse trade — this is one list in one place, and a key
+  that no longer resolves is skipped rather than throwing.
+
+  WITH SCRIPT OFF, BOTH VIEWS ARE VISIBLE AND THIS BAR IS NOT. That is the house
+  rule for every enhancement here — the tab strip in `product-tabs` does exactly
+  the same thing, and the rule is that content stays reachable while the control
+  that would have switched it is removed rather than left there doing nothing.
+  The `scripting: none` block in theme-src/theme.css is what removes it. So the
+  no-script page is the whole home page, ready-to-wear first, in DOM order.
+
+  THE VIEW IS IN THE URL, and it did not have to be. The studio picked the
+  in-place switch knowing it has no URL of its own; putting the key in the hash
+  gives it one back, so `/#custom-business` is a link the studio can send to a
+  corporate buyer and the browser's back button steps between the views. That is
+  this site's standing rule — the catalogue's filters, the variant picker and
+  the sort form are all URL state — and it would have been the one rule this
+  band broke.
+
+  `history.pushState` rather than assigning `location.hash`: assigning it makes
+  the browser hunt for an element with that id and scroll to it, and a view
+  switch that also jumps the page is a bug. See assets/theme.js.
+
+  THESE ARE TOGGLE BUTTONS, NOT ARIA TABS, and the deviation from
+  `product-tabs` is forced rather than chosen. A `role="tablist"` needs each tab
+  to point at ONE `role="tabpanel"` through `aria-controls`, and a view here is
+  several sections that cannot be wrapped in a single element. A tablist whose
+  tabs each control the first of four sections would be a lie told in ARIA. Two
+  buttons carrying `aria-pressed`, with the sections of the inactive view given
+  `hidden`, describes exactly what happens: the inactive view is not hidden from
+  sight, it is out of the document.
+
+  THE LABELS SAY WHAT THE THINGS ARE, not who they are for. The studio's own
+  instruction was that the words must not be "B2C" and "B2B" — those are how a
+  business describes its own segments, not how a reader describes what they came
+  for. "Ready-to-wear" and "Custom & business" are the words the header nav
+  already uses, so the site says one thing in one vocabulary.
+{%- endcomment -%}
+
+<section
+  data-home-tabs
+  aria-label="{{ section.settings.label }}"
+  class="border-b border-rule bg-ground"
+>
+  <div class="mx-auto flex w-full max-w-content px-gutter">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign active = false
+        if forloop.first
+          assign active = true
+        endif
+      -%}
+      {%- comment -%}
+        `-mb-px` pulls each button's own 2px rule over the section's 1px one, so
+        the active underline sits ON the line rather than under it and the two
+        do not draw as a double rule.
+
+        Both states carry a border rather than only the active one: a border
+        that appears on press would move the label by two pixels every time the
+        view changed.
+      {%- endcomment -%}
+      <button
+        type="button"
+        data-home-tab="{{ block.settings.key }}"
+        data-home-tab-sections="{{ block.settings.sections }}"
+        aria-pressed="{% if active %}true{% else %}false{% endif %}"
+        class="-mb-px flex min-h-14 flex-1 cursor-pointer items-center justify-center border-b-2 px-3 text-caption uppercase tracking-nav transition-colors duration-(--duration-base) aria-pressed:border-ink aria-pressed:text-ink border-hairline text-ink-subtle hover:text-brand"
+        {{ block.shopify_attributes }}
+      >
+        {{ block.settings.label }}
+      </button>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Home views",
+  "max_blocks": 2,
+  "settings": [
+    { "type": "paragraph", "content": "Splits the home page into two views. Each view lists the section keys it owns — the keys are the names in templates/index.json, not the section titles — and rename one there and you must rename it here. The FIRST view is the one the page opens on. With JavaScript off this bar is removed and every section is shown in template order, so keep the default view's sections first in the template." },
+    { "type": "text", "id": "label", "label": "Accessible name for the switch", "default": "Choose what you came for" }
+  ],
+  "blocks": [
+    {
+      "type": "view",
+      "name": "View",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Tab label" },
+        { "type": "text", "id": "key", "label": "URL key", "info": "Appears in the address bar as #key, so the view can be linked to. Lowercase, no spaces." },
+        { "type": "textarea", "id": "sections", "label": "Section keys in this view", "info": "Comma separated, from templates/index.json. A key that no longer exists is skipped." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home views",
+      "blocks": [
+        { "type": "view", "settings": { "label": "Ready-to-wear", "key": "ready-to-wear" } },
+        { "type": "view", "settings": { "label": "Custom & business", "key": "custom-business" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

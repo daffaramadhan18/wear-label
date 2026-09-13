@@ -72,12 +72,17 @@ rather than breaking, so the theme is reviewable now:
    metafield definition and a real value on all eleven design pieces, so the
    card's material line and the product page's material row draw data rather
    than a placeholder.
-5. **Two theme settings are blank ON PURPOSE, pending the client**, both under
-   Theme settings → Custom & business. Neither fails silently:
-   - `whatsapp_number` — with it blank the quote form still renders at full size
-     and its submit is *disabled* with an alert saying why. **This is the entire
-     B2B conversion path**; nothing else on `/pages/custom` matters until it is
-     filled in.
+5. **One theme setting is still blank, and it used to be two.**
+   - ~~`whatsapp_number`~~ — **SUPPLIED 2026-09-13: `+62 878-1654-0159`.** The
+     quote form's submit is live and its action renders
+     `https://wa.me/6287816540159`, verified against the rendered storefront.
+     **It is a DEFAULT in `config/settings_schema.json`, not a value in
+     `config/settings_data.json`** — this theme has no settings_data.json at
+     all, on the store or in the repo, so every setting resolves to its schema
+     default. That is the mechanism the brief's copy already uses, and it is the
+     right one: a default is a starting value the studio can still change in the
+     theme editor, whereas a committed settings file would silently overwrite
+     their edit on the next push. Do not add one to "fix" this.
    - `shopee_shop_url` — with it blank, "Buy on Shopee" is simply absent from
      product pages rather than linking to a search page.
 6. **Contact details are placeholders, by instruction 2026-08-31.** Email, studio
@@ -352,10 +357,11 @@ form backend or a quote calculator, it is the wrong task.
 - **Liquid**, server-rendered. No framework, no build step on Shopify's side
 - **Tailwind CSS v4**, precompiled to `theme/assets/theme.css`
 - **CSS-variable design tokens** in `app/tokens.css`, shared with the archived app
-- **Vanilla JS** in `theme/assets/theme.js` — nine behaviours (the header
-  disclosure, the scroll reveals, the carousel, the gallery, the tabs, the quantity
-  stepper, save-for-later, the quote form's WhatsApp composer, and the hero film's
-  reduced-motion pause), all progressive enhancement. The carousel's is still
+- **Vanilla JS** in `theme/assets/theme.js` — ten behaviours (the header
+  disclosure, the scroll reveals, the carousel, the gallery, the product tabs, the
+  quantity stepper, save-for-later, the quote form's WhatsApp composer, the hero
+  film's reduced-motion pause, and the home page's view switch), all progressive
+  enhancement. The carousel's is still
   shipped and still correct; nothing on any template uses it since the hero
   became a film
 - **Shopify CLI 4.x**, pinned as a devDependency so the scripts resolve it from
@@ -474,7 +480,8 @@ Nothing is read from the environment any more. The three `SHOPIFY_*` /
 | `snippets/copy` · `media` · `price` · `badge` · `alert` · `aurora` · `icon` · `wordmark` · `breadcrumbs` · `save-button` · `cart-badge` | `components/ui/*` |
 | `snippets/button` | nothing — extracted 2026-08-31 from the primary button's class string, which had been retyped in three sections and was about to be retyped in eight more |
 | `sections/custom-band` | nothing — brief §7, the B2B hook on the home page. **Unplaced 2026-09-13**, replaced by `two-ways` + `selected-projects` |
-| `sections/two-ways` | nothing — the B2B/B2C split under the hero film, asked for 2026-09-13 |
+| `sections/two-ways` | nothing — the two-panel split under the hero film, 2026-09-13. **Unplaced the same day**, see below |
+| `sections/home-tabs` | nothing — the home page's two-view switch, 2026-09-13, which replaced it |
 | `sections/selected-projects` | nothing — brief §8, built 2026-09-13 once real project photography existed |
 | `snippets/media-asset` | nothing — `media` plus a theme asset as the middle fallback, extracted when the second section needed it |
 | `sections/custom-hero` · `custom-services` · `how-it-works` · `why-wear-label` · `quote-form` | nothing — brief §9, the Custom & Business page |
@@ -500,19 +507,40 @@ makin legit … intinya mau tekenin kalo ini tuh bisa untuk B2B". New arrivals
 was judged good enough for the ready-to-wear half; the custom-apparel half was
 not being said loudly enough.
 
-So the order is now: **hero film → two doors → new arrivals → selected projects
-→ voices → service band → Instagram**, and `custom-band` is off the page. Three
-things to know before moving any of it:
+**THE HOME PAGE IS TWO VIEWS BEHIND A SWITCH, decided later the same day.** The
+two-panel split was built, seen, and set aside for the idea the studio had
+floated first: "balik ke yang ide gw deh 2 diatasnya ada B2C atau B2B (tp
+bahasanya jangan gini) trs yang B2C itu page yg lama, B2B page yg baru". So
+`sections/home-tabs.liquid` sits under the film and swaps the sections below it.
 
-- **`two-ways` is a split and not a tab strip**, and that was argued out rather
-  than assumed. A tab shows one side at a time and its default would inevitably
-  be ready-to-wear, so a visitor who never clicks would never learn the second
-  business exists — which is the problem the band was commissioned to fix.
-- **The first block in `two-ways` gets the wider column.** There is no "which
-  one is B2B" setting; block order IS the emphasis, on purpose.
-- **`custom-band` was replaced, not demoted.** Its job is now split between the
-  door and the portfolio, and putting it back alongside them would make three
-  B2B pitches on one page, which is weaker than one.
+| View | Key | Sections |
+|---|---|---|
+| Ready-to-wear (default) | `ready-to-wear` | `arrivals`, `voices`, `services`, `instagram` |
+| Custom & business | `custom-business` | `projects`, `custom` |
+
+Five things to know before touching any of it:
+
+- **The switch IS IN PLACE and does not navigate**, chosen over two tabs that
+  are links to two URLs. The cost is that the B2B content has to exist on the
+  home page rather than only on `/pages/custom`, and that switching needs
+  script. Both costs were accepted knowingly.
+- **The home tab's B2B view is a way IN, not the destination.** It is the
+  portfolio plus `custom-band`'s three service labels and its two buttons, and
+  it stops there on purpose: pulling the whole B2B page onto the home template
+  would put the same copy in two JSON templates and make every wording change a
+  two-place edit.
+- **`templates/index.json`'s DOM order is the no-script order**, which is why
+  the four ready-to-wear sections come before the two B2B ones even though the
+  switch can show them in either order. With script off the bar is removed and
+  the whole page is shown top to bottom.
+- **The section keys are duplicated into the switch's blocks.** Rename a key in
+  `index.json` and you must rename it in the `home-tabs` block too. There is no
+  way to link them automatically without putting a setting on every section on
+  the page, which is worse; a key that stops resolving is skipped, not thrown.
+- **`two-ways` is unplaced and kept**, and its own comment carries the argument
+  to re-read if the switch turns out to under-say the custom-apparel half. Two
+  words in a tab are quieter than a 58%-wide espresso panel, and that is the
+  known risk of this shape.
 
 **THE HERO IS A FILM, AND IT HAS NO COPY AND NO CTA.** Asked for 2026-09-13,
 in as many words: the two-slide photograph carousel comes off, the eyebrow,
@@ -1218,7 +1246,7 @@ Not decided, and not to be filled in by guessing:
 | Per-product Details and Fabric & care copy | `description` and `custom.care` → placeholders. The design reused one generic paragraph for all eleven pieces; it would state a wrong inseam and a wrong fabric on most of them |
 | About Us and 404 copy | Blank → placeholders. About Us is the Shopify page's own content |
 | Whether there is a limited run, and when it ends | Moot while the band is unplaced. Both the band and the countdown are ported and real |
-| **The studio's WhatsApp number** | **The B2B route's single point of failure.** Blank in Theme settings → Custom & business, deliberately, 2026-08-31. `quote-form.liquid` renders at full size with a disabled submit and an alert saying the number is not set. Nothing else on `/pages/custom` converts until it is filled in |
+| ~~The studio's WhatsApp number~~ | **DONE 2026-09-13 — `+62 878-1654-0159`**, as a schema default. The quote form's submit is live and its `wa.me` action was verified rendered. What remains is not the number: `/pages/custom` still 404s, so the form it lives on is unreachable |
 | **Per-product Shopee URLs** | `custom.shopee_url` is undefined and `shopee_shop_url` is blank, so "Buy on Shopee" does not render at all. The decision taken was per-product URLs with the shop URL as a fallback; start with the eleven design pieces, which are the only ones carrying photography |
 | **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
 | **B2B photography** | None exists. `custom-band` and all three `custom-services` cards draw labelled placeholders at final size, by instruction 2026-08-31. Brief §7 wants "foto actual project Wear Label" and inventing one is out |

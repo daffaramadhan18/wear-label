@@ -931,3 +931,110 @@
     init();
   }
 })();
+
+/* ------------------------------------------------------------------ *
+ * Home views
+ *
+ * The two-tab switch under the hero film. See sections/home-tabs.liquid for
+ * why a "view" is several sibling sections rather than one panel, and why the
+ * control is a pair of toggle buttons rather than an ARIA tablist.
+ *
+ * Everything here is enhancement. With this file blocked the bar is removed by
+ * CSS and every section stays in the page, in template order — so the failure
+ * mode is a longer home page, not a home page with half its content sealed
+ * behind a control that does nothing.
+ * ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  function initHomeViews(bar) {
+    var buttons = Array.prototype.slice.call(bar.querySelectorAll("[data-home-tab]"));
+    /* One view is not a switch. Two is the only shape this markup has, but a
+       merchant can delete a block, and half a switch is worse than none. */
+    if (buttons.length < 2) return;
+
+    var views = buttons.map(function (button) {
+      var keys = (button.getAttribute("data-home-tab-sections") || "").split(",");
+
+      return {
+        button: button,
+        key: button.getAttribute("data-home-tab") || "",
+        sections: keys
+          .map(function (key) {
+            key = key.trim();
+            /* This is how Shopify composes a JSON template's section id:
+               shopify-section-template--<theme id>__<key>. Matching the tail is
+               the only stable half. */
+            return key ? document.querySelector('[id$="__' + key + '"]') : null;
+          })
+          .filter(Boolean),
+      };
+    });
+
+    function apply(key) {
+      views.forEach(function (view) {
+        var on = view.key === key;
+        view.button.setAttribute("aria-pressed", String(on));
+        view.sections.forEach(function (section) {
+          /* `hidden` rather than a class: the inactive view should be out of
+             the accessibility tree and out of the tab order, not merely
+             invisible. A reader tabbing through a hidden view would be typing
+             into a form nobody can see. */
+          section.hidden = !on;
+        });
+      });
+    }
+
+    function known(key) {
+      return views.some(function (view) {
+        return view.key === key;
+      });
+    }
+
+    /* The hash wins over the default on load, so a link to #custom-business
+       opens on that view. Anything else in the hash is somebody else's. */
+    var initial = window.location.hash.slice(1);
+    apply(known(initial) ? initial : views[0].key);
+
+    views.forEach(function (view) {
+      view.button.addEventListener("click", function () {
+        apply(view.key);
+
+        /* pushState, not `location.hash = …`: assigning the hash makes the
+           browser look for an element with that id and scroll to it. There is
+           none here today, but a section key could collide with one tomorrow,
+           and a view switch that also jumps the page is a bug that would be
+           blamed on the switch. pushState also gives the back button something
+           to step through, which is the point of putting the view in the URL. */
+        if (window.history && window.history.pushState) {
+          window.history.pushState(null, "", "#" + view.key);
+        }
+
+        /* Switching from far down the page leaves the reader in the middle of
+           a view they have not seen the top of — the two views are different
+           heights, so the same scroll offset means nothing across the switch.
+           Only pull back when the bar has already gone past; switching while it
+           is still on screen should not move the page at all. */
+        if (bar.getBoundingClientRect().top < 0) {
+          bar.scrollIntoView({ block: "start" });
+        }
+      });
+    });
+
+    /* Back and forward move between views rather than leaving the page. */
+    window.addEventListener("popstate", function () {
+      var key = window.location.hash.slice(1);
+      apply(known(key) ? key : views[0].key);
+    });
+  }
+
+  function init() {
+    document.querySelectorAll("[data-home-tabs]").forEach(initHomeViews);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

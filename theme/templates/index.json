@@ -10,42 +10,32 @@
         "description": "A short film for Wear Label: a model walks through a sunlit courtyard in a white shirt and wide-leg trousers."
       }
     },
-    "doors": {
-      "type": "two-ways",
+    "views": {
+      "type": "home-tabs",
       "blocks": {
-        "b2b": {
-          "type": "door",
+        "v1": {
+          "type": "view",
           "settings": {
-            "tone": "invert",
-            "eyebrow": "Custom & business",
-            "heading": "Custom apparel production",
-            "body": "Uniforms, corporate apparel and merchandise for companies, hospitals, campuses and communities.",
-            "cta": "Explore custom services",
-            "href": "/pages/custom",
-            "asset": "door-custom.webp",
-            "alt": "Six hospital uniform sets photographed flat against white — tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
+            "label": "Ready-to-wear",
+            "key": "ready-to-wear",
+            "sections": "arrivals,voices,services,instagram"
           }
         },
-        "b2c": {
-          "type": "door",
+        "v2": {
+          "type": "view",
           "settings": {
-            "tone": "canvas",
-            "eyebrow": "Ready-to-wear",
-            "heading": "Women's everyday pieces",
-            "body": "Trousers, culottes, tops and outerwear, cut in small runs and sold online.",
-            "cta": "Shop collection",
-            "href": "/collections/all?filter.v.availability=1",
-            "asset": "door-shop.webp",
-            "alt": "Polaroid prints laid out on a linen backdrop — models in cream shirts and wide-leg trousers, photographed against a wood-panelled wall."
+            "label": "Custom & business",
+            "key": "custom-business",
+            "sections": "projects,custom"
           }
         }
       },
       "block_order": [
-        "b2b",
-        "b2c"
+        "v1",
+        "v2"
       ],
       "settings": {
-        "heading": "Two ways to work with Wear Label"
+        "label": "Choose what you came for"
       }
     },
     "arrivals": {
@@ -56,64 +46,6 @@
         "count": 8,
         "cta": "Shop all",
         "href": "/collections/all?filter.v.availability=1"
-      }
-    },
-    "projects": {
-      "type": "selected-projects",
-      "blocks": {
-        "p1": {
-          "type": "project",
-          "settings": {
-            "client": "",
-            "category": "Hospital uniforms",
-            "detail": "Eight uniform sets produced as one programme.",
-            "asset": "project-hospital.webp",
-            "alt": "Eight hospital uniform sets laid out flat in two rows — tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
-          }
-        },
-        "p2": {
-          "type": "project",
-          "settings": {
-            "client": "",
-            "category": "Institutional uniforms",
-            "detail": "Field shirt with an embroidered crest, a sleeve badge and a name plate.",
-            "asset": "project-institution.webp",
-            "alt": "A dark green institutional shirt photographed flat, front and back — epaulettes, buttoned chest pockets, an embroidered crest on one sleeve and a blank name plate."
-          }
-        },
-        "p3": {
-          "type": "project",
-          "settings": {
-            "client": "Salna",
-            "category": "Corporate uniforms",
-            "detail": "Two-tone shirt with the name embroidered on the chest and across the shoulders.",
-            "asset": "project-corporate.webp",
-            "alt": "A purple and cream two-tone short-sleeve shirt, front and back, the name Salna embroidered on the chest and across the shoulder yoke."
-          }
-        },
-        "p4": {
-          "type": "project",
-          "settings": {
-            "client": "",
-            "category": "Merchandise",
-            "detail": "Canvas tote with webbing handles and bound edges.",
-            "asset": "project-merchandise.webp",
-            "alt": "A canvas tote bag in off-white with navy webbing handles and navy bound edges, photographed on a plain grey ground."
-          }
-        }
-      },
-      "block_order": [
-        "p1",
-        "p2",
-        "p3",
-        "p4"
-      ],
-      "settings": {
-        "eyebrow": "Custom apparel",
-        "heading": "Selected projects",
-        "body": "Uniforms, corporate apparel and merchandise produced for organisations across Indonesia.",
-        "cta": "Discuss your project",
-        "href": "/pages/custom#quote"
       }
     },
     "voices": {
@@ -328,15 +260,115 @@
         "heading": "Follow us on Instagram",
         "count": 11
       }
+    },
+    "projects": {
+      "type": "selected-projects",
+      "blocks": {
+        "p1": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Hospital uniforms",
+            "detail": "Eight uniform sets produced as one programme.",
+            "asset": "project-hospital.webp",
+            "alt": "Eight hospital uniform sets laid out flat in two rows — tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
+          }
+        },
+        "p2": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Institutional uniforms",
+            "detail": "Field shirt with an embroidered crest, a sleeve badge and a name plate.",
+            "asset": "project-institution.webp",
+            "alt": "A dark green institutional shirt photographed flat, front and back — epaulettes, buttoned chest pockets, an embroidered crest on one sleeve and a blank name plate."
+          }
+        },
+        "p3": {
+          "type": "project",
+          "settings": {
+            "client": "Salna",
+            "category": "Corporate uniforms",
+            "detail": "Two-tone shirt with the name embroidered on the chest and across the shoulders.",
+            "asset": "project-corporate.webp",
+            "alt": "A purple and cream two-tone short-sleeve shirt, front and back, the name Salna embroidered on the chest and across the shoulder yoke."
+          }
+        },
+        "p4": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Merchandise",
+            "detail": "Canvas tote with webbing handles and bound edges.",
+            "asset": "project-merchandise.webp",
+            "alt": "A canvas tote bag in off-white with navy webbing handles and navy bound edges, photographed on a plain grey ground."
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p3",
+        "p4"
+      ],
+      "settings": {
+        "eyebrow": "Custom apparel",
+        "heading": "Selected projects",
+        "body": "Uniforms, corporate apparel and merchandise produced for organisations across Indonesia.",
+        "cta": "",
+        "href": "",
+        "tone": "page"
+      }
+    },
+    "custom": {
+      "type": "custom-band",
+      "blocks": {
+        "s1": {
+          "type": "service",
+          "settings": {
+            "label": "Custom uniform"
+          }
+        },
+        "s2": {
+          "type": "service",
+          "settings": {
+            "label": "Corporate apparel"
+          }
+        },
+        "s3": {
+          "type": "service",
+          "settings": {
+            "label": "Merchandise & community apparel"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "settings": {
+        "eyebrow": "Custom apparel",
+        "heading": "Wear Label Custom",
+        "subheading": "Custom apparel for companies, organizations & communities.",
+        "body": "From uniforms to merchandise, Wear Label provides custom apparel production tailored to your team, organization, and brand.",
+        "asset": "custom-band-detail.webp",
+        "alt": "A close view of an institutional shirt's chest — a blank name plate above a buttoned pocket, and an embroidered badge on the sleeve.",
+        "cta": "Explore custom services",
+        "href": "/pages/custom",
+        "cta_2": "Request a quote",
+        "href_2": "/pages/custom#quote"
+      }
     }
   },
   "order": [
     "hero",
-    "doors",
+    "views",
     "arrivals",
-    "projects",
     "voices",
     "services",
-    "instagram"
+    "instagram",
+    "projects",
+    "custom"
   ]
 }

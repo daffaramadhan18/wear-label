@@ -29,12 +29,19 @@
   against — padding an object shot on seamless is invisible, cropping it cut the
   handles off.
 
-  THE BAND IS CREAM AND ITS POSITION IS WHY. It sits between New arrivals, which
-  is plain page, and the voices wall, which is espresso — so cream is the step
-  that separates it from both. It cannot be espresso: the wall directly below is,
-  and two espresso bands touching read as one very long dark region with a seam
-  in it. That is the same argument `custom-band` made before this section
-  replaced it on the home page.
+  THE BAND COLOUR IS A SETTING, AND IT EXISTS BECAUSE THIS SECTION MOVES. Cream
+  is the default and it is what the section wants on its own: a step away from
+  the plain page above it and away from an espresso band below.
+
+  What forced the setting is the home page's Custom & business view, where this
+  section sits directly above `custom-band`, which is cream and argues at length
+  for staying cream. Two cream bands touching read as one long cream region with
+  a seam in it — the same rule, from the other side. So there it is set to plain
+  page and `custom-band` keeps the cream.
+
+  Neither value may be espresso. On any template where the voices wall is below,
+  espresso here would put two dark bands against each other, which is the
+  original form of the same mistake.
 
   NO COUNTS, NO YEARS, NO LOGOS. A "since 2019" or a client logo wall is the
   cheapest way to inflate a portfolio of four, and the brief forbids exactly
@@ -42,11 +49,29 @@
   nothing the photograph does not show.
 {%- endcomment -%}
 
+{%- comment -%}
+  The padding moves with the tone, and forgetting that is how this section got
+  a 180px hole under the home page's tab bar on its first build. A band pays
+  for its own top margin AND its inside padding, because the colour change is
+  what has to be separated from its neighbours. A section that is just page
+  does not: it wants one `pt-section` and nothing else, exactly like
+  `new-arrivals` directly above it in the other view.
+{%- endcomment -%}
+{%- liquid
+  if section.settings.tone == 'page'
+    assign band = 'pt-section'
+    assign pad = ''
+  else
+    assign band = 'mt-section border-y border-rule bg-canvas'
+    assign pad = 'py-section'
+  endif
+-%}
+
 <section
   aria-labelledby="projects-heading"
-  class="mt-section border-y border-rule bg-canvas"
+  class="{{ band }}"
 >
-  <div class="mx-auto flex w-full max-w-content flex-col gap-10 px-gutter py-section">
+  <div class="mx-auto flex w-full max-w-content flex-col gap-10 px-gutter {{ pad }}">
     <div data-reveal class="flex flex-col gap-4">
       <span class="text-micro uppercase tracking-eyebrow text-ink-subtle">
         {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
@@ -117,6 +142,10 @@
   "max_blocks": 8,
   "settings": [
     { "type": "paragraph", "content": "Real work only. A project here needs a photograph of something the studio actually produced — do not add an entry to lengthen the list, and do not add client counts, years or logos. The detail line should say what the photograph shows and nothing more." },
+    { "type": "select", "id": "tone", "label": "Band", "default": "cream", "options": [
+      { "value": "cream", "label": "Cream band" },
+      { "value": "page", "label": "Plain page" }
+    ], "info": "Cream unless the section directly below is also cream. Two cream bands touching read as one." },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Custom apparel" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Selected projects" },
     { "type": "textarea", "id": "body", "label": "Description", "default": "Uniforms, corporate apparel and merchandise produced for organisations across Indonesia." },

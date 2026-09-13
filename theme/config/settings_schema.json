@@ -76,7 +76,8 @@
         "type": "text",
         "id": "whatsapp_number",
         "label": "WhatsApp number",
-        "info": "In international format, e.g. 6281234567890. The + and any spaces or dashes are stripped before the link is built, so either form works. This is where every quote enquiry goes — there is no inbox behind the form."
+        "default": "+62 878-1654-0159",
+        "info": "In international format. The + and any spaces or dashes are stripped before the link is built, so either form works. This is where every quote enquiry goes — there is no inbox behind the form. Supplied by the studio 2026-09-13 and set as the schema default rather than written into config/settings_data.json, which this theme deliberately does not have: a default is a starting value the studio can still change in the theme editor, whereas a committed settings file would silently overwrite their edit on the next push."
       },
       {
         "type": "url",

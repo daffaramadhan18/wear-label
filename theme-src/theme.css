@@ -558,6 +558,19 @@
 }
 
 /*
+ * A hidden section is hidden.
+ *
+ * assets/theme.js toggles the home page's two views by setting `hidden` on the
+ * `.shopify-section` wrappers, which is the honest attribute for it — out of
+ * the accessibility tree and out of the tab order rather than merely invisible.
+ * `hidden` is only a default style, though, and any rule that sets `display` on
+ * those wrappers would beat it silently. This makes it explicit.
+ */
+.shopify-section[hidden] {
+  display: none;
+}
+
+/*
  * No-script fallbacks.
  *
  * base.css carries the one for the reveals. These two are the theme's own: a tab
@@ -581,6 +594,16 @@
 
   [data-gallery] [aria-label] > li > [data-gallery-thumb] {
     pointer-events: none;
+  }
+
+  /*
+   * The home page's view switch goes, and every section it would have toggled
+   * stays. Two buttons that cannot switch anything are worse than no buttons,
+   * and the whole home page in template order is a correct page — longer than
+   * intended, missing nothing.
+   */
+  [data-home-tabs] {
+    display: none;
   }
 
   /*
