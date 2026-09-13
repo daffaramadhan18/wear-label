@@ -564,8 +564,14 @@ bahasanya jangan gini) trs yang B2C itu page yg lama, B2B page yg baru". So
 
 | View | Key | Sections |
 |---|---|---|
-| Ready-to-wear (default) | `ready-to-wear` | `arrivals`, `voices`, `services`, `instagram` |
-| Custom & business | `custom-business` | `projects`, `custom` |
+| **Custom & business (default)** | `custom-business` | `projects`, `custom` |
+| Ready-to-wear | `ready-to-wear` | `arrivals`, `voices`, `services`, `instagram` |
+
+**THE TWO WERE SWAPPED ON 2026-09-13** — "di home ready to wear sama custom n
+business, tuker". Custom & business is what the home page now opens on, which
+is the positioning statement from earlier the same day finally reaching the
+default state rather than only the layout: legitimacy first, and the
+custom-apparel half is the one that was being under-said.
 
 Five things to know before touching any of it:
 
@@ -578,10 +584,12 @@ Five things to know before touching any of it:
   it stops there on purpose: pulling the whole B2B page onto the home template
   would put the same copy in two JSON templates and make every wording change a
   two-place edit.
-- **`templates/index.json`'s DOM order is the no-script order**, which is why
-  the four ready-to-wear sections come before the two B2B ones even though the
-  switch can show them in either order. With script off the bar is removed and
-  the whole page is shown top to bottom.
+- **`templates/index.json`'s DOM order is the no-script order**, so it follows
+  the default view: the two B2B sections come first and the four ready-to-wear
+  ones after. With script off the bar is removed and the whole page is shown top
+  to bottom, so whichever view is default must lead in the template too. Swap the
+  tabs without swapping the section order and the no-script page opens on the
+  wrong half.
 - **The section keys are duplicated into the switch's blocks.** Rename a key in
   `index.json` and you must rename it in the `home-tabs` block too. There is no
   way to link them automatically without putting a setting on every section on
@@ -1078,6 +1086,23 @@ Push, then read the output. It is the only validator that sees this class of bug
   `secondary` is unreadable on espresso — its `text-brand` is rgb(114,94,76) on
   rgb(30,26,22) — which is the same trap `footer.liquid` documents for its link
   colour. Use an `invert` variant on any inverted surface.
+
+- **ON A DARK BAND, COLOUR EVERY HEADING AND EVERY LINK EXPLICITLY. Headings do
+  not inherit colour here.** `app/base.css` gives `h1, h2` their own
+  `color: var(--color-ink)` and gives links their own colour, and a declaration
+  on the element beats anything inherited from a section's `text-ink-invert`.
+
+  This has now bitten three times, which is why it is a rule rather than three
+  comments: `footer.liquid` for its link colour, `two-ways.liquid` for the
+  espresso door's headline, and `custom-hero.liquid`, where **the page's h1 was
+  drawing espresso on espresso** — the same value, at the top of the B2B page,
+  for as long as that page has existed. It was reported as "itu terlalu gelap"
+  and fixed on 2026-09-13; the measured contrast went from about 1:1 to 15.88:1
+  by adding one class.
+
+  Nothing catches this. It renders, theme check passes, and the aurora behind it
+  leaves just enough of a ghost that it looks like a design choice. The only
+  detector is looking at the band.
 
 - **Two bands of the same colour must not touch.** The home page's B2B band is
   cream and not espresso for exactly this reason: the voices wall directly below it

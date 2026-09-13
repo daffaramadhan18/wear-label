@@ -54,7 +54,21 @@
         {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
       </span>
 
-      <h1 class="text-display leading-display tracking-display">
+      {%- comment -%}
+        `text-ink-invert` IS LOAD-BEARING, and leaving it off is how this band
+        shipped unreadable. app/base.css gives `h1, h2` their own
+        `color: var(--color-ink)` — espresso — and a declaration on the element
+        beats a colour inherited from the section's `text-ink-invert`. So the
+        page's h1 was drawing espresso on espresso: the same value, top of the
+        band, and only the aurora's wash behind it kept it from vanishing
+        outright. Reported 2026-09-13 as "itu terlalu gelap".
+
+        This is the THIRD place the trap has bitten — `footer.liquid` documents
+        it for its link colour and `two-ways.liquid` for the door headline. The
+        rule is: on an inverted surface, colour every heading explicitly. Never
+        rely on inheritance, because headings do not inherit colour here.
+      {%- endcomment -%}
+      <h1 class="text-display leading-display tracking-display text-ink-invert">
         {% render 'copy', value: section.settings.heading, label: 'heading', lines: 2 %}
       </h1>
 
