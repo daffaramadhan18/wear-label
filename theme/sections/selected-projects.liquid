@@ -22,12 +22,36 @@
   refuses. So those render the labelled placeholder until the studio types them
   in, which is a theme-editor edit and not a code change.
 
-  THE PHOTOGRAPHS ARE ALL 4:3, which took re-cropping rather than a per-block
-  ratio setting. A grid whose cards are different shapes reads as a mistake, and
-  a ratio per block is a setting that lets somebody make that mistake later. The
-  tote was square and is padded to 4:3 in the flat grey its own shoot was lit
-  against — padding an object shot on seamless is invisible, cropping it cut the
-  handles off.
+  THE PHOTOGRAPHS ARE CUT OUT, AND THAT CHANGED THE WHOLE BLOCK ON 2026-09-13.
+  They arrived as studio shots on white and light-grey sweeps, and dropped onto
+  this site they read as four foreign rectangles: the page is #fdfaf7 and the
+  band is #fbf4ef, both warm, and a cold paper white next to them looks like a
+  screenshot of somebody else's website. The studio's words were "gk masuk ke
+  theme warna shopify store kita".
+
+  So each one now carries an alpha matte and the garment sits on the site's own
+  surface. Three consequences, all of them deliberate:
+
+  - **They are `contain`, not `cover`.** A cut-out cropped to fill a box has its
+    sleeves cut off by nothing. Each object sits inside its frame whole, at its
+    own proportions — 1.62 for the institutional pair, 0.96 for the tote — and
+    the FRAME is what stays consistent, not the subject.
+  - **They sit on a PLATE, one surface step up from the band.** Not on tone,
+    which is the placeholder's colour and would put a taupe rectangle back
+    behind every garment. The plate follows the three-deep stack in CLAUDE.md:
+    cream when the band is plain page, white when the band is cream, so the
+    object always has exactly one step of separation and never flattens into
+    whatever it is sitting on.
+  - **The plate is generously padded.** A cut-out touching the edge of its own
+    box looks like a failed crop rather than an object on a surface.
+
+  How the mattes were made, because it is not the obvious way and the obvious
+  way fails: the background is flood-filled INWARDS FROM THE FRAME EDGE, so what
+  decides a pixel is whether it connects to the border, not whether it matches a
+  colour. A global colour key on these would have eaten the two white hospital
+  uniforms and the off-white canvas tote, which are the same value as the paper
+  behind them; connectivity saves them, because the navy trim and the piping
+  close the path. The masters are untouched in `asset/B2B Project/`.
 
   THE BAND COLOUR IS A SETTING, AND IT EXISTS BECAUSE THIS SECTION MOVES. Cream
   is the default and it is what the section wants on its own: a step away from
@@ -67,6 +91,17 @@
   endif
 -%}
 
+{%- comment -%}
+  The plate is one step up from whatever the band is, never the same as it.
+{%- endcomment -%}
+{%- liquid
+  if section.settings.tone == 'page'
+    assign plate = 'bg-canvas'
+  else
+    assign plate = 'bg-surface'
+  endif
+-%}
+
 <section
   aria-labelledby="projects-heading"
   class="{{ band }}"
@@ -90,15 +125,19 @@
       <ul class="grid gap-x-6 gap-y-10 sm:grid-cols-2">
         {%- for block in section.blocks -%}
           <li data-reveal class="flex flex-col gap-4" {{ block.shopify_attributes }}>
-            {% render 'media-asset',
-              image: block.settings.image,
-              asset: block.settings.asset,
-              alt: block.settings.alt,
-              ratio: '4 / 3',
-              asset_width: 1200,
-              asset_height: 900,
-              sizes: '(min-width: 640px) 46vw, 92vw',
-              label: 'Project photo' %}
+            <div class="{{ plate }} rounded-sm p-7 sm:p-9">
+              {% render 'media-asset',
+                image: block.settings.image,
+                asset: block.settings.asset,
+                alt: block.settings.alt,
+                ratio: '4 / 3',
+                fit: 'contain',
+                plate: false,
+                asset_width: 1200,
+                asset_height: 900,
+                sizes: '(min-width: 640px) 42vw, 84vw',
+                label: 'Project photo' %}
+            </div>
 
             <div class="flex flex-col gap-1.5">
               {%- comment -%}

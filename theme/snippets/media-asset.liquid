@@ -25,6 +25,13 @@
 
     - `alt`, because an uploaded image carries its own alt from the Files admin
       and an asset carries none at all, so the caller has to supply one.
+    - `fit` and `plate`, which exist for CUT-OUT artwork. A photograph with a
+      transparent background is not a photograph that should be cropped to fill
+      a box — `fit: 'contain'` lets the whole object sit inside the frame at its
+      own proportions, and `plate: false` removes the tone-filled rectangle
+      behind it so what shows through is the page's own surface. The pair is
+      what turns a picture OF a garment into the garment itself sitting on the
+      page. Default to neither and the snippet behaves exactly as it did.
     - `width` and `height`, which do NOT set the painted size. The img is
       `absolute inset-0 object-cover` inside a frame that already carries the
       aspect ratio, so its size comes from the frame either way; these exist
@@ -58,6 +65,24 @@
   endif
 -%}
 
+{%- liquid
+  assign object_fit = 'object-cover'
+  if fit == 'contain'
+    assign object_fit = 'object-contain'
+  endif
+
+  comment
+    A cut-out needs no ground of its own, and painting one behind it is the
+    whole bug this parameter exists to avoid: `bg-tone` is the PLACEHOLDER's
+    colour, so a transparent PNG over it reads as a taupe rectangle with a
+    garment stuck to it.
+  endcomment
+  assign plate_bg = 'bg-tone'
+  if plate == false
+    assign plate_bg = ''
+  endif
+-%}
+
 {%- if image != blank -%}
   {% render 'media',
     image: image,
@@ -68,7 +93,7 @@
     class: class,
     label: media_label %}
 {%- elsif asset != blank -%}
-  <div style="{{ frame }}" class="relative overflow-hidden rounded-sm bg-tone {{ box }} {{ class }}">
+  <div style="{{ frame }}" class="relative overflow-hidden rounded-sm {{ plate_bg }} {{ box }} {{ class }}">
     <img
       src="{{ asset | asset_url }}"
       alt="{{ alt | escape }}"
@@ -77,7 +102,7 @@
       loading="{{ loading_mode }}"
       fetchpriority="{{ priority_mode }}"
       decoding="async"
-      class="absolute inset-0 h-full w-full object-cover"
+      class="absolute inset-0 h-full w-full {{ object_fit }}"
     >
   </div>
 {%- else -%}

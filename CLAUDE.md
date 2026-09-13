@@ -42,12 +42,17 @@ What is missing is store *configuration* and a handful of client-supplied facts,
 code — and every one of those gaps renders a labelled placeholder at final size
 rather than breaking, so the theme is reviewable now:
 
-1. **No photography for the nine surviving Shopee pieces.** The eleven design
-   pieces carry their shots; the nine Shopee imports still on the store carry
-   none (see [The catalogue](#the-catalogue)), so nine of twenty cards draw the
-   placeholder at the real card proportions. **This used to read "115 Shopee
-   pieces" and it was the site's largest visible gap** — the cull on 2026-09-13
-   took 106 of them off, so the ratio went from 115-of-126 to 9-of-20.
+1. **Six of the twenty products have no photograph.** This item has shrunk
+   twice in one day and the numbers matter: it read "115 Shopee pieces" in the
+   morning, then nine after the cull took 106 products off, and it is **six**
+   now that the studio's drop folder was uploaded — 32 photographs across
+   eleven products, so Soso, Pipo and Cerra Loose Pants BIG SIZE went from no
+   image at all to a full gallery. **43 media on the store, all `READY`.**
+
+   What is still bare: the **four cardigans**, `barrel-pants` and
+   `tara-stripe-pants`. None of them has a folder in `asset/`, so this is not a
+   job waiting to be done — it is six shoots waiting to happen. They draw the
+   placeholder at the real card proportions meanwhile.
 2. **One filter, not none — and the reason it was urgent is gone.** Shopify's
    default **Availability** facet is live (`filter.v.availability=1` / `=0`) and
    every entry point still carries it. It was added because 106 of 126 products
@@ -674,7 +679,10 @@ difference is what to read before adding to either.
 From the design project's `CATALOG` constant. Names, materials and prices are the
 client's own data; the photographs are the client's own shots, one square `.webp`
 per piece in `public/products/`, named by handle — **and they are on Shopify**:
-these eleven are the only products in the store that carry an image.
+they were the only products in the store carrying an image until 2026-09-13,
+when the studio's drop folder was uploaded and fourteen products ended up with
+media. See [Where the client's own files land](#where-the-clients-own-files-land)
+for what came from where.
 
 | Handle | Name | Material | Price | Was | Flags | Category |
 |---|---|---|---|---|---|---|
@@ -1223,6 +1231,10 @@ The consequence to plan for: **`asset/` is not in a fresh clone.** Anything that
 needs to be re-derived from a master needs the master handed over again. Say so
 rather than re-deriving from the web copy, which is lossy twice over.
 
+**`asset/_backup/` is not a hand-over, it is ours.** It holds the export taken
+before the 2026-09-13 product cull. Do not delete it and do not treat it as
+source material.
+
 There is no ffmpeg on this machine and no root to install one. A static build
 unpacks without privileges and that is how the hero film was transcoded:
 
@@ -1230,6 +1242,30 @@ unpacks without privileges and that is how the hero film was transcoded:
 curl -sL -o ffmpeg https://github.com/eugeneware/ffmpeg-static/releases/download/b6.0/ffmpeg-linux-x64
 chmod +x ffmpeg
 ```
+
+**HEIC IS NOT DECODABLE by that build** — `asset/Pallo/IMG_0223.heic` and
+`IMG_2051.heic` return "Invalid data found when processing input". They are the
+only two files in the drop folder that have never been used. Ask for a JPEG.
+
+**THE PRODUCT PHOTOGRAPHS GO TO SHOPIFY, NOT TO `theme/assets/`.** Every folder
+in `asset/` that is named after a piece was uploaded as product media on
+2026-09-13 — 32 photographs across eleven products, at most 2000px, WebP q86.
+The route is three calls and the middle one is not GraphQL:
+`stagedUploadsCreate` → multipart POST to the returned URL → `productCreateMedia`
+with the `resourceUrl`. Alt text is derived: a filename that names a colour
+(`Soso/black.jpg`) becomes "Soso Pants — black"; an opaque camera id names
+nothing, so the alt is just the product title.
+
+**CUTTING A STUDIO SHOT OUT: flood-fill inwards from the frame edge, never a
+colour key.** What decides a pixel is whether it connects to the border, not
+whether it matches a colour. A global key on these four would have eaten the two
+white hospital uniforms and the off-white canvas tote, which are the same value
+as the paper behind them; connectivity saves them because the navy trim and the
+piping close the path. numpy is available here and PIL is not, so the matte, the
+feather and the PNG writing are all hand-rolled — the scripts are in the session
+scratchpad, and the recipe is: border-median background, tolerance plus a
+low-chroma relaxation for soft shading, 8-connected flood, box-blur feather,
+trim to the alpha bounding box.
 
 ### Assets, and how they were pulled
 
@@ -1249,7 +1285,7 @@ is how somebody's change gets quietly reverted later.
 | `theme/assets/hero-video.mp4` | `asset/Video/main video/Wear Label.mov` | **The hero film.** Derived, not byte-exact: the master is 23MB of 1920x1080 HEVC with an audio track, and this is H.264 at CRF 26 with `+faststart` and **no audio at all**, 4.5MB, 16s. H.264 because HEVC in a `<video>` is not a safe bet outside Apple's browsers; no audio because a hero autoplays and a browser only autoplays a muted one, so the track could never be heard without an unmute control nobody has asked for |
 | `theme/assets/hero-video-poster.webp` | frame 0 of the film | The `poster`. Frame zero specifically, so there is no jump when playback starts |
 | `theme/assets/door-custom.webp` · `door-shop.webp` | `asset/B2B Project/rs.jpeg` · `theme/assets/hero-1.webp` | The two doors. Both square, both 1100px — the panels differ in width and must not differ in shape. The B2B one is a crop of six of the eight hospital sets; the B2C one is a square centre crop of the polaroid composition that led the old hero carousel |
-| `theme/assets/project-*.webp` (4) | `asset/B2B Project/` | The portfolio. All four re-cropped to 4:3, because a grid of mixed shapes reads as a mistake. The tote was square: it is scaled to height and its background **smeared** sideways with ffmpeg's `fillborders`, not padded with a flat colour — the shot is lit on a gradient, so a flat pad left two visible bands down the card |
+| `theme/assets/project-*.webp` (4) | `asset/B2B Project/` | The portfolio, **CUT OUT TO TRANSPARENCY 2026-09-13**. They came as studio shots on white and light-grey sweeps and read as four foreign rectangles against this site's warm surfaces — "gk masuk ke theme warna shopify store kita". Each now carries an alpha matte, is trimmed to its subject, and is `object-contain` on a cream plate, so the garment sits on the page instead of a picture of it. **They are no longer all 4:3** — a cut-out keeps its own proportions and the FRAME is what stays consistent |
 | `theme/assets/hero-video-still.webp` | frame at 12s | The reduced-motion still, and a **different frame from the poster on purpose** — it is the whole hero for that reader, so it is composed (model centre-frame, full length, wordmark above her) rather than transitional |
 | `app/icon.png`, `app/apple-icon.png` | the monogram | Per the design system's "monogram for favicons" rule. **Still to set as the store's favicon** |
 
@@ -1359,7 +1395,7 @@ Not decided, and not to be filled in by guessing:
 | ~~The studio's WhatsApp number~~ | **DONE 2026-09-13 — `+62 878-1654-0159`**, as a schema default, and `/pages/custom` now exists to render it on. Verified on the unpublished theme: `action="https://wa.me/6287816540159"`, submit enabled, no alert. **On the LIVE theme the same form still renders `action="https://wa.me/"` with the submit `disabled`**, because the default ships in `config/settings_schema.json` and that file has not been pushed to live. The B2B route is reachable on live; it cannot convert until the push |
 | **Per-product Shopee URLs** | `custom.shopee_url` is undefined and `shopee_shop_url` is blank, so "Buy on Shopee" does not render at all. The decision taken was per-product URLs with the shop URL as a fallback; start with the eleven design pieces, which are the only ones carrying photography |
 | **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
-| **B2B photography** | None exists. `custom-band` and all three `custom-services` cards draw labelled placeholders at final size, by instruction 2026-08-31. Brief §7 wants "foto actual project Wear Label" and inventing one is out |
+| ~~B2B photography~~ · **three `custom-services` cards** | **Four pieces of real work arrived 2026-09-13** and are live: `selected-projects` carries all four and `custom-band` a detail crop. They are **cut out to transparency** — see the assets table — because the studio's shots are on white and grey sweeps and this site's surfaces are warm. What is still open is only the three `custom-services` cards on `/pages/custom`, and that is a content call — which photograph stands for which service — not a missing asset |
 | ~~The category taxonomy and the collections~~ | **DONE 2026-08-31**, and cut back to three on 2026-09-13 with the sold-out cull. What is still open is narrower and no longer a data question: **whether a "Shop by Category" mosaic of only three tiles — Pants, Cardigan, Culottes — is worth having.** All three are fully in stock now, so nothing blocks it but taste |
 | **Trouser measurements for the size chart** | **The chart is built and the numbers are not in it.** Theme settings → Size guide holds the columns (Size, Waist, Hip, Rise, Inseam, Leg opening) and an empty Rows field; blank renders the labelled placeholder at final size. The studio supplied a reference table on 2026-09-13 but its columns were a TOP's — body length back, shoulder width, body width, sleeve length — and sixteen of the twenty products left are trousers or culottes, so the format was taken and the numbers were not. **Type centimetres only; the inch column is computed.** A product that needs its own chart can still carry `custom.size_chart`, which wins |
 | ~~Selected Projects~~ · **THREE CLIENT NAMES** | **The section was BUILT 2026-09-13** — the 2026-08-31 refusal rested on there being no project photographs and no nameable clients, and four pieces of real work arrived. What is still open is narrower and it is the last thing holding the section back: the studio authorised naming clients, and only **Salna** could actually be read off the photographs. The hospital programme, the institutional shirt and the tote have `client` blank in `templates/index.json`, so three of four cards render the labelled placeholder. Typing them in is a theme-editor edit. **Do not read a name off a blurry crop and publish it.** The blocks are section blocks rather than the `project` metaobject that was once sketched — the metaobject is still the right answer if the studio ever adds these from the admin rather than from a hand-over |
