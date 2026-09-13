@@ -52,19 +52,41 @@ rather than breaking, so the theme is reviewable now:
    bare `/collections/all` opened on eight sold-out cards out of nine. Product
    type, size and colourway facets are still undefined; they come from the Search
    and Discovery app, and until then the rail says so rather than inventing them.
-3. **Two Shopify pages do not exist**, and every route to them 404s until they
-   do. Checked against the live storefront 2026-08-31, with the password:
+3. **One Shopify page is still missing.** Checked against the live storefront
+   with the password; the `custom` row was fixed on 2026-09-13:
 
    | Handle | Title | Template | State |
    |---|---|---|---|
-   | `custom` | Custom & Business | `page.custom` | **404 — create it** |
-   | `about` | About Us | *(default `page`)* | **404 — create it** |
-   | `contact` | Contact | `page.contact` | **200, and correct** — the page exists and its suffix is set; `contact-details` renders, native form and all four placeholder rows included |
+   | `custom` | Custom & Business | `page.custom` | **200 — created 2026-09-13**, `gid://shopify/Page/743343489310`. All five sections render and the B2B route is reachable at last |
+   | `about` | About Us | *(default `page`)* | **404 — create it.** The header nav links to it from every page |
+   | `contact` | Contact | `page.contact` | **200, and correct** |
 
-   `/pages/custom` is the urgent one and it outranks the missing WhatsApp number.
-   The nav, the hero's second CTA, the home page's custom band and the footer all
-   point at it, so **the entire B2B route is unreachable** — and filling in the
-   number changes nothing while the page it lives on 404s. Create the page first.
+   **Creating a page needs an interactive login and the CLI cannot open a
+   browser here.** `shopify store auth` prints "Shopify CLI will open the app
+   authorization page in your browser" and then hangs forever: there is no
+   `xdg-open` under WSL, and the PowerShell fallback it tries is invoked with
+   `–ExecutionPolicy` — **an EN DASH, not a hyphen** — which PowerShell rejects
+   silently. Nothing is logged and no URL is printed.
+
+   The way through, which cost most of an afternoon the first time:
+
+   ```bash
+   # 1. hook child_process so the URL is captured whatever opener the CLI picks
+   cat > /tmp/hook.cjs <<'EOF'
+   const cp=require("child_process"),fs=require("fs");
+   for (const f of ["spawn","exec","execFile"]) { const o=cp[f];
+     cp[f]=function(c,a,...r){ try{fs.appendFileSync("/tmp/spawns.txt",c+" :: "+JSON.stringify(a||[])+"\n")}catch(e){}
+       return o.call(this,c,a,...r); }; }
+   EOF
+   NODE_OPTIONS="--require /tmp/hook.cjs" npx shopify store auth --store … --scopes … &
+
+   # 2. the URL is inside the PowerShell -EncodedCommand payload, UTF-16LE base64
+   # 3. open it yourself, and the waiting CLI takes the callback on 127.0.0.1:13387
+   powershell.exe -NoProfile -NonInteractive -Command "Start-Process '<url>'"
+   ```
+
+   Then `shopify store execute` — and note **`--allow-mutations` is required**,
+   or every mutation is refused with "Mutations are disabled by default".
 4. **Four product metafield definitions do not exist**, so four slots render
    placeholders: `custom.care`, `custom.size_chart`, `custom.fit`,
    `custom.shopee_url`. **`custom.material` is now defined AND populated** —
@@ -90,9 +112,14 @@ rather than breaking, so the theme is reviewable now:
    blank values, so each renders a labelled placeholder at final size. They are
    variable facts nobody has supplied and an address is the one string a reader
    acts on. Filling them in is a theme-editor edit.
-7. **There is no B2B photography**, by the same instruction. `custom-band` and all
-   three `custom-services` cards draw labelled placeholders at final size. The
-   B2B hero is the exception and needs no photograph — see its own comment.
+7. **B2B photography EXISTS NOW and three slots still do not use it.** Four
+   pieces of real work arrived 2026-09-13 (see [The catalogue](#the-catalogue)
+   and the assets table). `custom-band` has a real photograph and
+   `selected-projects` has four. What still draws labelled placeholders is the
+   **three `custom-services` cards on `/pages/custom`** — filling them means
+   deciding which photograph stands for which service, which is a content call
+   nobody has made. The B2B hero is the exception and needs no photograph — see
+   its own comment.
 8. **Copy.** Brand voice is unsettled. Blank theme settings render a labelled
    placeholder, so filling them in is the whole change. The brief's own strings
    are in as section-setting *defaults*, so the client edits them in the theme
@@ -223,12 +250,19 @@ Three things the catalogue import turned up, each of which cost a round trip:
   variant is already at 0 available, and the location id is readable through
   `variant.inventoryItem.inventoryLevels` if it is ever wanted.
 
-- **It has no `read_content` either**, so `pages` comes back "Access denied for
-  pages field". Found 2026-08-31 while auditing the brief. It stopped mattering
-  the same day: the storefront password is now in [The store](#the-store), so the
-  question "does this page exist" is a curl, and that is how the table in item 3
-  above was filled in. Add `read_content` to the scope list and re-auth only if
-  you need page *contents* from the Admin API rather than a status code.
+- ~~**It has no `read_content` either**~~ — **it does now.** The token was
+  re-issued 2026-09-13 with `read_content,write_content` added to the list
+  above, which is what let `pageCreate` run. `pages` answers, and creating or
+  editing a page no longer needs anybody in the Shopify admin.
+
+  Two things that cost a round trip each and are not in any error message:
+
+  - **`shopify store execute` refuses mutations unless you pass
+    `--allow-mutations`.** Reads work without it.
+  - **`shopify store auth` cannot open a browser here and does not say so.**
+    See item 3 of the status list for the hook-and-decode workaround; the short
+    version is that the CLI's PowerShell fallback is invoked with an en dash
+    instead of a hyphen, so it fails silently and the CLI waits forever.
 
 ## Working agreement
 
@@ -381,7 +415,7 @@ Shopify route names, and what the React app called them:
 | `/products/<handle>` | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, tabs, related |
 | `/cart` | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
 | `/pages/about` | `/about` | About Us — the Shopify page's own title and content |
-| `/pages/custom` | — | **Custom & Business (B2B).** Hero, services, how it works, why Wear Label, request a quote. Template suffix `page.custom` |
+| `/pages/custom` | — | **Custom & Business (B2B).** Hero, services, how it works, why Wear Label, request a quote. Template suffix `page.custom`. **The Shopify page exists as of 2026-09-13** and the route returns 200 |
 | `/pages/contact` | — | **Contact.** Placeholder detail rows plus Shopify's native contact form. Template suffix `page.contact` |
 | `/collections` | — | **Collections.** The catalogue by category. **Fifteen automated collections are live**, one per `product_type`; every link carries `filter.v.availability=1` |
 | `/search` | — | **Search.** Products only; the header mark links here |
@@ -1246,7 +1280,7 @@ Not decided, and not to be filled in by guessing:
 | Per-product Details and Fabric & care copy | `description` and `custom.care` → placeholders. The design reused one generic paragraph for all eleven pieces; it would state a wrong inseam and a wrong fabric on most of them |
 | About Us and 404 copy | Blank → placeholders. About Us is the Shopify page's own content |
 | Whether there is a limited run, and when it ends | Moot while the band is unplaced. Both the band and the countdown are ported and real |
-| ~~The studio's WhatsApp number~~ | **DONE 2026-09-13 — `+62 878-1654-0159`**, as a schema default. The quote form's submit is live and its `wa.me` action was verified rendered. What remains is not the number: `/pages/custom` still 404s, so the form it lives on is unreachable |
+| ~~The studio's WhatsApp number~~ | **DONE 2026-09-13 — `+62 878-1654-0159`**, as a schema default, and `/pages/custom` now exists to render it on. Verified on the unpublished theme: `action="https://wa.me/6287816540159"`, submit enabled, no alert. **On the LIVE theme the same form still renders `action="https://wa.me/"` with the submit `disabled`**, because the default ships in `config/settings_schema.json` and that file has not been pushed to live. The B2B route is reachable on live; it cannot convert until the push |
 | **Per-product Shopee URLs** | `custom.shopee_url` is undefined and `shopee_shop_url` is blank, so "Buy on Shopee" does not render at all. The decision taken was per-product URLs with the shop URL as a fallback; start with the eleven design pieces, which are the only ones carrying photography |
 | **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
 | **B2B photography** | None exists. `custom-band` and all three `custom-services` cards draw labelled placeholders at final size, by instruction 2026-08-31. Brief §7 wants "foto actual project Wear Label" and inventing one is out |
