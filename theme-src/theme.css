@@ -558,6 +558,41 @@
 }
 
 /*
+ * The header's height, and why it is a variable.
+ *
+ * The home page's view switch sticks directly under the header, so it needs to
+ * know how tall the header is. This is the measured value at both widths (77px
+ * desktop, 78px phone) and assets/theme.js overwrites it from the real element
+ * on load and on resize — so a longer nav, a bigger type scale or a translated
+ * label cannot leave a gap under the header or slide the bar behind it.
+ *
+ * It is declared on `:root` rather than in tokens.css because it is a measured
+ * fact about the rendered page, not a design token, and tokens.css is shared
+ * with the archived app, which has no Liquid header at all.
+ */
+:root {
+  --wl-header-h: 78px;
+}
+
+/*
+ * The view switch sticks under the header.
+ *
+ * Asked for 2026-09-13. Same wrapper trick as the header and for the same
+ * reason — a sticky element cannot leave its `div.shopify-section`, and this
+ * section's div is one bar tall. `top` is the header's height rather than 0,
+ * because 0 would park it behind the header.
+ *
+ * `z-index` is one BELOW the header's `--z-sticky`: the two overlap for a few
+ * pixels while the switch travels up to its resting place, and the header has
+ * to be the one in front.
+ */
+.shopify-section:has(> [data-home-tabs]) {
+  position: sticky;
+  top: var(--wl-header-h);
+  z-index: calc(var(--z-sticky) - 1);
+}
+
+/*
  * The sticky header.
  *
  * The rule is on the SECTION WRAPPER rather than on the <header> itself, and
@@ -577,6 +612,126 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
+}
+
+/*
+ * THE VOICES WALL SLIDES SIDEWAYS ON A PHONE, asked for 2026-09-13: "ini tolong
+ * dibikin animasi geser2 ke samping". Below `md` it used to be a rail the reader
+ * had to swipe, and nothing said it could be swiped.
+ *
+ * WHY TWO ROWS AND NOT FOUR, which is the trade worth knowing. A seamless
+ * marquee needs its content duplicated and translated by exactly -50%, and the
+ * only element here whose two halves are identical is a TRACK: each one carries
+ * its five reviews twice (see sections/voices-wall.liquid). The plane is not —
+ * it is four different tracks — so translating the plane lands on a different
+ * card and the loop visibly jumps. So the tracks become rows, and each row runs
+ * its own exact -50%.
+ *
+ * Four rows of unclamped quotes measured past 1100px on a 390px screen, which
+ * is the "footer takes a whole page" complaint arriving somewhere else. Two rows
+ * hold the section at roughly the height it already had. The cost is that a
+ * phone sees ten of the twenty reviews rather than all twenty; the desktop wall
+ * still carries every one, and no review is edited, shortened or paraphrased —
+ * which is the rule that actually matters.
+ *
+ * Opposite directions, because two rows travelling together read as one block
+ * sliding and the eye stops seeing individual cards.
+ *
+ * IT PAUSES ON TOUCH. A quote moving past cannot be read, and these quotes are
+ * the purchase argument — a reader who puts a finger on the row stops it.
+ */
+@media (width < 48rem) {
+  .wl-voices-stage {
+    overflow-x: hidden;
+    scroll-snap-type: none;
+    padding-inline: 0;
+  }
+
+  .wl-voices-plane {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Rows three and four are the ten reviews the phone does not show. */
+  .wl-voices-plane > .wl-voices-track:nth-child(n + 3) {
+    display: none;
+  }
+
+  .wl-voices-track {
+    width: max-content;
+    animation: wl-voices-x var(--voices-duration) linear infinite;
+  }
+
+  .wl-voices-track[data-reverse] {
+    animation-direction: reverse;
+  }
+
+  /* The duplicate copy is what makes -50% land on an identical frame, so on
+     this breakpoint it comes back. It stays `aria-hidden`, so a screen reader
+     still hears each review once. */
+  .wl-voices-track > [aria-hidden="true"] {
+    display: flex;
+  }
+
+  .wl-voices-stage:hover .wl-voices-track,
+  .wl-voices-stage:active .wl-voices-track,
+  .wl-voices-stage:focus-within .wl-voices-track {
+    animation-play-state: paused;
+  }
+
+  /* The card can no longer be snapped to, so the snap alignment goes with it. */
+  .wl-voices-track figure {
+    scroll-snap-align: none;
+  }
+
+  /*
+   * THE QUOTE IS CLAMPED AGAIN ON THE MARQUEE, at eight lines, and this partly
+   * reverses the decision recorded further up this file — so here is the
+   * measurement that moved it.
+   *
+   * Unclamping was right when the phone rail was STATIC: the tallest review set
+   * a single row and the reader could stop on any card. Sliding, the tallest
+   * review sets a row that every other card has to match, and two rows came out
+   * at 856px — a section taller than the phone it is on, mostly empty cream.
+   *
+   * Eight lines at this width is about 320 characters, which still carries the
+   * review this rule was written for: the customer reporting fit against her own
+   * body at six months pregnant runs ~230. So the reason for unclamping survives
+   * and the dead space does not. Six, the desktop wall's number, does cut it —
+   * that is why this is eight and not a revert.
+   */
+  .wl-voices-track blockquote {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 8;
+    overflow: hidden;
+  }
+}
+
+@keyframes wl-voices-x {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/*
+ * Reduced motion keeps the phone rail rather than the marquee: nothing moves,
+ * and the reader swipes. The stage has to get its scrolling back with it.
+ */
+@media (prefers-reduced-motion: reduce) and (width < 48rem) {
+  .wl-voices-track {
+    animation: none;
+  }
+
+  .wl-voices-stage {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-inline: var(--spacing-gutter);
+  }
+
+  .wl-voices-track > [aria-hidden="true"] {
+    display: none;
+  }
 }
 
 /*

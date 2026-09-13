@@ -55,16 +55,106 @@
   endfor
 -%}
 
+{%- comment -%}
+  CATEGORY IS A ROW OF COLLECTION LINKS, NOT A SHOPIFY FACET, and the difference
+  is worth stating because it looks like one.
+
+  Asked for 2026-09-13: "di menu shop, tlg tambahin filter by category". A real
+  `filter.p.product_type` facet has to be switched on inside the Search and
+  Discovery app — it is store configuration and there is no Admin API for it, so
+  the theme cannot create one. What the theme CAN do is what the store already
+  has: three automated collections, one per garment type, each of which is a URL.
+
+  So this row links to `/collections/<handle>` and marks the current one with
+  `aria-current`. It behaves like a filter to a reader, it is a link to the
+  browser, and it needs nothing turned on anywhere. The on/off classes are
+  written out LONGHAND in a Liquid `if`, exactly as the size chips below do —
+  an `aria-[current]:` variant is assembled at runtime as far as Tailwind's
+  scanner is concerned, so no CSS is generated for it and the chip renders
+  unstyled. That is the first trap in CLAUDE.md and it caught this on the way in. When the real facet is
+  enabled this row should come out — two category controls on one rail is worse
+  than either.
+
+  It renders above the facets and only when there is more than one collection to
+  choose between, because a single category is not a choice.
+{%- endcomment -%}
+
+{%- capture category_rail -%}
+  {%- assign category_count = 0 -%}
+  {%- for c in collections -%}
+    {%- if c.all_products_count > 0 and c.handle != 'all' -%}
+      {%- assign category_count = category_count | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- if category_count > 1 -%}
+    <div class="flex flex-col gap-3.5">
+      <h2 class="font-body text-micro uppercase tracking-label text-ink-subtle">{{ 'catalogue.category' | t }}</h2>
+
+      <ul class="flex flex-wrap gap-2">
+        {%- comment -%}
+          "All pieces" carries the availability facet the rest of the site's
+          entry points carry, so leaving a category does not silently widen the
+          grid to include anything sold out.
+        {%- endcomment -%}
+        {%- liquid
+          assign all_url = routes.all_products_collection_url | append: '?filter.v.availability=1'
+          assign on_all = true
+          if collection.handle and collection.handle != 'all'
+            assign on_all = false
+          endif
+        -%}
+        <li>
+          <a
+            href="{{ all_url }}"
+            {% if on_all %}aria-current="true"{% endif %}
+            class="wl-tap inline-flex min-h-11 items-center rounded-pill border px-4 text-caption transition-colors duration-(--duration-base) {% if on_all %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
+          >
+            {{ 'catalogue.all_pieces' | t }}
+          </a>
+        </li>
+
+        {%- for c in collections -%}
+          {%- if c.all_products_count > 0 and c.handle != 'all' -%}
+            <li>
+              <a
+                href="{{ c.url }}?filter.v.availability=1"
+                {% if collection.handle == c.handle %}aria-current="true"{% endif %}
+                class="wl-tap inline-flex min-h-11 items-center rounded-pill border px-4 text-caption transition-colors duration-(--duration-base) {% if collection.handle == c.handle %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
+              >
+                {{ c.title }}
+                {%- comment -%}
+                  `catalogue.pieces` is a PLURALISED key: `count:` picks the word
+                  and does NOT print the number, so the number is written beside
+                  it — the same shape `main-list-collections` and
+                  `results-toolbar` use. Without `count:` Liquid renders the rule
+                  object itself, and the chip read
+                  `Cardigan, 4 {"one"=>"piece", "other"=>"pieces"}`.
+                {%- endcomment -%}
+                <span class="sr-only">, {{ c.all_products_count }} {{ 'catalogue.pieces' | t: count: c.all_products_count }}</span>
+              </a>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
+
 {%- capture filter_panel -%}
+  {{ category_rail }}
+
   {%- if collection.filters.size == 0 -%}
     {% render 'alert', body: 'Catalogue filters are set up in Shopify, under the Search and Discovery app. Once category, size, colourway and availability are enabled there, this rail fills itself in.' %}
   {%- else -%}
     {%- for filter in collection.filters -%}
       {%- liquid
+        comment
+          Every group carries the rule now, including the first: the category
+          rail above it is a group too, and the first facet has to be separated
+          from it the same way the facets are separated from each other.
+        endcomment
         assign group_classes = 'flex flex-col gap-3.5 border-t border-hairline pt-7'
-        if forloop.first
-          assign group_classes = 'flex flex-col gap-3.5'
-        endif
 
         assign is_colour = false
         assign lowered = filter.label | downcase

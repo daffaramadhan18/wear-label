@@ -122,12 +122,18 @@
                     not a number keeps none, so script leaves it alone — a dash or
                     a note in the middle of a table survives the switch.
                   {%- endcomment -%}
-                  {%- assign as_number = value | times: 1 -%}
-                  {%- if as_number > 0 -%}
-                    <td data-cm="{{ value }}">{{ value }}</td>
-                  {%- else -%}
-                    <td>{{ value }}</td>
-                  {%- endif -%}
+                  {%- comment -%}
+                    EVERY measurement cell carries `data-cm`, and the decision
+                    about whether it converts is left to script. The first pass
+                    gated this on `value | times: 1 > 0`, which looks right and
+                    silently breaks a RANGE: "62-90" casts to 62, so the cell
+                    would have been relabelled 24.4 in inches and the range would
+                    have been thrown away. theme.js rewrites each number it finds
+                    inside the string instead, so "62-90" becomes "24.4-35.4" and
+                    a cell holding a dash or a note is left alone because it
+                    holds no digits at all.
+                  {%- endcomment -%}
+                  <td data-cm="{{ value }}">{{ value }}</td>
                 {%- endif -%}
               {%- endfor -%}
             </tr>

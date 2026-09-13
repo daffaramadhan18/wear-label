@@ -18,7 +18,7 @@
           "settings": {
             "label": "Ready-to-wear",
             "key": "ready-to-wear",
-            "sections": "arrivals,voices,services,instagram"
+            "sections": "arrivals,voices,instagram"
           }
         },
         "v2": {
@@ -218,41 +218,6 @@
         "heading": "From our customers"
       }
     },
-    "services": {
-      "type": "service-band",
-      "blocks": {
-        "service-1": {
-          "type": "service",
-          "settings": {
-            "icon": "shipping",
-            "title": "Free shipping",
-            "body": "On orders over Rp 750.000"
-          }
-        },
-        "service-2": {
-          "type": "service",
-          "settings": {
-            "icon": "support",
-            "title": "Studio support",
-            "body": "Fit advice over WhatsApp"
-          }
-        },
-        "service-3": {
-          "type": "service",
-          "settings": {
-            "icon": "exchange",
-            "title": "Easy exchange",
-            "body": "One free swap in 14 days"
-          }
-        }
-      },
-      "block_order": [
-        "service-1",
-        "service-2",
-        "service-3"
-      ],
-      "settings": {}
-    },
     "instagram": {
       "type": "instagram-strip",
       "settings": {
@@ -357,7 +322,7 @@
         "cta": "Explore custom services",
         "href": "/pages/custom",
         "cta_2": "Request a quote",
-        "href_2": "/pages/custom#quote"
+        "href_2": ""
       }
     }
   },
@@ -366,7 +331,6 @@
     "views",
     "arrivals",
     "voices",
-    "services",
     "instagram",
     "projects",
     "custom"

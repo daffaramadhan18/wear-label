@@ -3,8 +3,8 @@
     "main": {
       "type": "main-product",
       "settings": {
-        "note_1": "Ships from Bandung within 1–2 working days",
-        "note_2": "One free size exchange within 14 days",
+        "note_1": "",
+        "note_2": "",
         "shipping": "Ships from Bandung within 1–2 working days. One free size exchange within 14 days."
       }
     },

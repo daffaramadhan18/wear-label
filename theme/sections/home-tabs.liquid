@@ -62,6 +62,22 @@
   already uses, so the site says one thing in one vocabulary.
 {%- endcomment -%}
 
+{%- comment -%}
+  IT STICKS UNDER THE HEADER, asked for 2026-09-13. The rule is in
+  theme-src/theme.css and it is on the SECTION WRAPPER, not here, for the reason
+  `header.liquid` documents at length: a sticky element cannot leave its
+  `div.shopify-section`, and this section's own div is one bar tall.
+
+  Its `top` is the header's height, kept in `--wl-header-h`. The CSS carries a
+  measured default and assets/theme.js corrects it from the real element, so a
+  longer nav or a bigger type scale cannot leave a gap or an overlap.
+
+  THE LABELS ARE SMALLER BELOW `sm` AND DO NOT WRAP. At `text-caption` with nav
+  tracking, "CUSTOM & BUSINESS" broke onto two lines on a 390px screen and the
+  bar grew to 78px — reported as "tulisan ini kegedean". `whitespace-nowrap` is
+  what guarantees one line; the smaller step is what makes that fit.
+{%- endcomment -%}
+
 <section
   data-home-tabs
   aria-label="{{ section.settings.label }}"
@@ -89,7 +105,7 @@
         data-home-tab="{{ block.settings.key }}"
         data-home-tab-sections="{{ block.settings.sections }}"
         aria-pressed="{% if active %}true{% else %}false{% endif %}"
-        class="-mb-px flex min-h-14 flex-1 cursor-pointer items-center justify-center border-b-2 px-3 text-caption uppercase tracking-nav transition-colors duration-(--duration-base) aria-pressed:border-ink aria-pressed:text-ink border-hairline text-ink-subtle hover:text-brand"
+        class="-mb-px flex min-h-13 flex-1 cursor-pointer items-center justify-center border-b-2 px-2 text-center text-micro uppercase tracking-label whitespace-nowrap transition-colors duration-(--duration-base) aria-pressed:border-ink aria-pressed:text-ink border-hairline text-ink-subtle hover:text-brand sm:min-h-14 sm:px-3 sm:text-caption sm:tracking-nav"
         {{ block.shopify_attributes }}
       >
         {{ block.settings.label }}

@@ -691,12 +691,16 @@
 
     function render(unit) {
       cells.forEach(function (cell) {
-        var cm = parseFloat(cell.getAttribute("data-cm"));
-        if (isNaN(cm)) return;
-        /* One decimal place in either unit. Centimetres are echoed from the
-           attribute rather than left alone, so switching back is lossless even
-           after a rounded inch value has been painted over them. */
-        cell.textContent = unit === "in" ? (cm / 2.54).toFixed(1) : String(cm);
+        var cm = cell.getAttribute("data-cm") || "";
+        /* EVERY NUMBER IN THE STRING is converted, not the cell's value, because
+           a waist column is written as a range — "62-90" — and parsing that as
+           one float silently keeps 62 and discards 90. Centimetres are echoed
+           back from the attribute rather than left alone, so switching back is
+           lossless after a rounded inch value has been painted over them. A cell
+           holding no digits is left exactly as it is. */
+        cell.textContent = unit === "in"
+          ? cm.replace(/\d+(?:\.\d+)?/g, function (n) { return (parseFloat(n) / 2.54).toFixed(1); })
+          : cm;
       });
     }
 
@@ -909,6 +913,42 @@
     listen(function () {
       Array.prototype.forEach.call(videos, apply);
     });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+/* ------------------------------------------------------------------ *
+ * Header height
+ *
+ * The home page's view switch sticks directly under the header, so its `top` is
+ * the header's height. theme-src/theme.css carries a measured default in
+ * `--wl-header-h` and this keeps it true: a longer nav, a bigger type scale or a
+ * translated label all change that height, and a stale number shows up either
+ * as a gap under the header or as the bar sliding behind it.
+ *
+ * Pure enhancement. With this file blocked the CSS default still holds, and it
+ * is right at both widths today.
+ * ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  function sync() {
+    var header = document.querySelector("[data-site-header]");
+    if (!header) return;
+    var h = Math.round(header.getBoundingClientRect().height);
+    if (h > 0) document.documentElement.style.setProperty("--wl-header-h", h + "px");
+  }
+
+  function init() {
+    sync();
+    /* Resize covers rotation and the desktop/phone crossover; both change the
+       nav's layout and therefore its height. */
+    window.addEventListener("resize", sync);
   }
 
   if (document.readyState === "loading") {

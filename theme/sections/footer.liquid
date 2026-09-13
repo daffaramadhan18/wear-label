@@ -29,7 +29,7 @@
 <footer class="relative isolate overflow-hidden bg-invert text-ink-invert-muted">
   {% render 'aurora', tone: 'invert', origin: 'top-left' %}
 
-  <div class="relative z-10 mx-auto max-w-content px-gutter py-block lg:py-section">
+  <div class="relative z-10 mx-auto max-w-content px-gutter py-8 lg:py-section">
     {%- comment -%}
       MOBILE. Stacked one-per-row this footer measured 1053px on a 390x844
       viewport — 1.25 screenfuls, and 23% of the whole home page. So below `lg`
@@ -39,8 +39,8 @@
       cell empty, and an empty cell reads as a missing column rather than as
       space. Measured on the store, not estimated.
     {%- endcomment -%}
-    <div class="grid grid-cols-2 gap-x-5 gap-y-7 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))] lg:gap-block-lg">
-      <div class="col-span-2 flex flex-col gap-4 lg:col-span-1">
+    <div class="grid grid-cols-2 gap-x-5 gap-y-5 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))] lg:gap-block-lg">
+      <div class="col-span-2 flex flex-col gap-3 lg:col-span-1 lg:gap-4">
         {% render 'wordmark', on_dark: true, height: 30 %}
 
         <p class="wl-measure text-caption leading-snug">
@@ -55,7 +55,7 @@
             {% render 'copy', value: section.settings.newsletter_body, label: 'newsletter body', lines: 2 %}
           </p>
 
-          {%- form 'customer', class: 'mt-4 flex flex-wrap gap-2 lg:max-w-md' -%}
+          {%- form 'customer', class: 'mt-3 flex items-center gap-2 lg:mt-4 lg:max-w-md' -%}
             <input type="hidden" name="contact[tags]" value="newsletter">
             <label class="sr-only" for="newsletter-email">{{ 'general.email' | t }}</label>
             <input
@@ -64,7 +64,7 @@
               name="contact[email]"
               required
               placeholder="{{ section.settings.newsletter_placeholder }}"
-              class="min-h-11 min-w-0 basis-full rounded-sm bg-canvas px-4 text-caption text-ink placeholder:text-ink-subtle lg:flex-1 lg:basis-auto"
+              class="min-h-11 min-w-0 flex-1 rounded-sm bg-canvas px-4 text-caption text-ink placeholder:text-ink-subtle"
             >
             {%- comment -%}
               `max-w-md` is 448px and the footer is `overflow-hidden`, so on a
@@ -73,7 +73,7 @@
             {%- endcomment -%}
             <button
               type="submit"
-              class="min-h-11 basis-full cursor-pointer rounded-sm bg-brand px-6 text-label uppercase tracking-label text-on-brand transition-colors duration-(--duration-base) hover:bg-brand-hover lg:basis-auto"
+              class="min-h-11 shrink-0 cursor-pointer rounded-sm bg-brand px-5 text-label uppercase tracking-label text-on-brand transition-colors duration-(--duration-base) hover:bg-brand-hover lg:px-6"
             >
               {{ section.settings.newsletter_cta }}
             </button>
@@ -82,9 +82,9 @@
       </div>
 
       {%- for block in section.blocks -%}
-        <nav class="flex flex-col gap-3 {% if forloop.last %}col-span-2 lg:col-span-1{% endif %}" {{ block.shopify_attributes }}>
+        <nav class="flex flex-col gap-2.5 lg:gap-3 {% if forloop.last %}col-span-2 lg:col-span-1{% endif %}" {{ block.shopify_attributes }}>
           <h2 class="text-micro uppercase tracking-nav text-ink-invert">{{ block.settings.title }}</h2>
-          <ul class="flex flex-col gap-2 {% if forloop.last %}max-lg:grid max-lg:grid-cols-2 max-lg:gap-x-5{% endif %}">
+          <ul class="flex flex-col gap-1.5 lg:gap-2 {% if forloop.last %}max-lg:grid max-lg:grid-cols-2 max-lg:gap-x-5{% endif %}">
             {%- for i in (1..4) -%}
               {%- liquid
                 assign label_key = 'link_' | append: i | append: '_label'
@@ -132,7 +132,7 @@
       depends on how many entries have URLs — one entry and a two-column grid
       leaves a gap where the missing ones were.
     {%- endcomment -%}
-    <div class="flex flex-wrap items-center justify-between gap-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 lg:gap-4">
       <p class="text-micro uppercase tracking-nav">{{ section.settings.copyright }}</p>
 
       {%- assign social_count = 0 -%}

@@ -64,6 +64,14 @@ rather than breaking, so the theme is reviewable now:
    Product type, size and colourway facets are still undefined; they come from
    the Search and Discovery app, and until then the rail says so rather than
    inventing them.
+
+   **There IS a category row on the rail as of 2026-09-13, and it is not a
+   facet.** Asked for — "di menu shop, tlg tambahin filter by category". A real
+   `filter.p.product_type` has to be switched on inside Search and Discovery and
+   there is no Admin API for it, so `catalogue-filters.liquid` links to the three
+   automated collections instead and marks the current one with `aria-current`.
+   It behaves like a filter and is navigation. **When the real facet is enabled,
+   take this row out** — two category controls on one rail is worse than either.
 3. **One Shopify page is still missing.** Checked against the live storefront
    with the password; the `custom` row was fixed on 2026-09-13:
 
@@ -403,11 +411,12 @@ form backend or a quote calculator, it is the wrong task.
 - **Liquid**, server-rendered. No framework, no build step on Shopify's side
 - **Tailwind CSS v4**, precompiled to `theme/assets/theme.css`
 - **CSS-variable design tokens** in `app/tokens.css`, shared with the archived app
-- **Vanilla JS** in `theme/assets/theme.js` — ten behaviours (the header
+- **Vanilla JS** in `theme/assets/theme.js` — eleven behaviours (the header
   disclosure, the scroll reveals, the carousel, the gallery, the **size chart's
   cm/inch switch**, the quantity stepper, save-for-later, the quote form's
-  WhatsApp composer, the hero film's reduced-motion pause, and the home page's
-  view switch), all progressive enhancement. **The product tabs are no longer
+  WhatsApp composer, the hero film's reduced-motion pause, the home page's view
+  switch, and the measured header height the sticky switch offsets against), all
+  progressive enhancement. **The product tabs are no longer
   one of them** — they were flattened to a single page on 2026-09-13 and the
   behaviour was deleted rather than left in the bundle unreferenced. The carousel's is still
   shipped and still correct; nothing on any template uses it since the hero
@@ -564,8 +573,24 @@ bahasanya jangan gini) trs yang B2C itu page yg lama, B2B page yg baru". So
 
 | View | Key | Sections |
 |---|---|---|
-| **Ready-to-wear (default)** | `ready-to-wear` | `arrivals`, `voices`, `services`, `instagram` |
+| **Ready-to-wear (default)** | `ready-to-wear` | `arrivals`, `voices`, `instagram` |
 | Custom & business | `custom-business` | `projects`, `custom` |
+
+**`service-band` came off the home page on 2026-09-13** — "ini ga usah". The
+section is still in the repo and still correct; it is simply not placed, like
+`category-mosaic`, `hero-carousel` and `two-ways`.
+
+**THE SWITCH IS STICKY**, asked for the same day. It pins under the header at
+`top: var(--wl-header-h)` — a measured default in theme-src/theme.css that
+assets/theme.js keeps true from the real element, because a longer nav or a
+bigger type scale would otherwise leave a gap or hide the bar. Its `z-index` is
+one below the header's so the two cross correctly, and like the header's, the
+rule is on the **section wrapper** — see the sticky trap for why that is not
+optional.
+
+**ON A PHONE THE LABELS ARE ONE STEP SMALLER AND NEVER WRAP.** At `text-caption`
+with nav tracking, "CUSTOM & BUSINESS" broke onto two lines at 390px and the bar
+grew to 78px.
 
 **THE TWO WERE SWAPPED AND SWAPPED BACK ON 2026-09-13**, both on instruction and
 within the hour — "tuker", then "tuker lagi deh". Ready-to-wear leads. Record
@@ -1448,7 +1473,7 @@ Not decided, and not to be filled in by guessing:
 | **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
 | ~~B2B photography~~ · **three `custom-services` cards** | **Four pieces of real work arrived 2026-09-13** and are live: `selected-projects` carries all four and `custom-band` a detail crop. They are **cut out to transparency** — see the assets table — because the studio's shots are on white and grey sweeps and this site's surfaces are warm. What is still open is only the three `custom-services` cards on `/pages/custom`, and that is a content call — which photograph stands for which service — not a missing asset |
 | ~~The category taxonomy and the collections~~ | **DONE 2026-08-31**, and cut back to three on 2026-09-13 with the sold-out cull. What is still open is narrower and no longer a data question: **whether a "Shop by Category" mosaic of only three tiles — Pants, Cardigan, Culottes — is worth having.** All three are fully in stock now, so nothing blocks it but taste |
-| **Trouser measurements for the size chart** | **The chart is built and the numbers are not in it.** Theme settings → Size guide holds the columns (Size, Waist, Hip, Rise, Inseam, Leg opening) and an empty Rows field; blank renders the labelled placeholder at final size. The studio supplied a reference table on 2026-09-13 but its columns were a TOP's — body length back, shoulder width, body width, sleeve length — and sixteen of the twenty products left are trousers or culottes, so the format was taken and the numbers were not. **Type centimetres only; the inch column is computed.** A product that needs its own chart can still carry `custom.size_chart`, which wins |
+| ~~Trouser measurements~~ · **FOUR SIZES HAVE NO ROW** | **Supplied and live, 2026-09-13** — Size / Length / Waist / Hip / Thigh, in Theme settings → Size guide. What is still open: the studio sent **M, L and XL only**, and every trouser on the store offers **XS, S, M, L, XL, XXL and 3XL**. So four of the seven sizes a shopper can add to a bag have no measurements, and the gap is invisible — the table simply has three rows. **Ask for XS, S, XXL and 3XL.** Column headings are English because the site is; the studio wrote them in Indonesian and swapping them back is one field. Type centimetres only — the inch column is computed, and a range like `62-90` converts to `24.4-35.4` |
 | ~~Selected Projects~~ · **THREE CLIENT NAMES** | **The section was BUILT 2026-09-13** — the 2026-08-31 refusal rested on there being no project photographs and no nameable clients, and four pieces of real work arrived. What is still open is narrower and it is the last thing holding the section back: the studio authorised naming clients, and only **Salna** could actually be read off the photographs. The hospital programme, the institutional shirt and the tote have `client` blank in `templates/index.json`, so three of four cards render the labelled placeholder. Typing them in is a theme-editor edit. **Do not read a name off a blurry crop and publish it.** The blocks are section blocks rather than the `project` metaobject that was once sketched — the metaobject is still the right answer if the studio ever adds these from the admin rather than from a hand-over |
 | Social handles | The footer has four label/URL pairs — Instagram, Shopee, TikTok and a spare — and every URL is blank, so no social link renders. Brief §19 names the three |
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Nine of twelve footer entries have no URL and render as plain text, never as a 404 link. Add the URL in the theme editor when the page exists |

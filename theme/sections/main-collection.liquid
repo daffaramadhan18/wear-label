@@ -45,7 +45,7 @@
         {% render 'results-toolbar', collection: collection, count: collection.products_count, filter_label: filter_label %}
 
         {%- if collection.products.size > 0 -%}
-          <div class="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-7 sm:gap-y-10 xl:grid-cols-3">
+          <div class="grid grid-cols-1 gap-x-4 gap-y-10 min-[26rem]:grid-cols-2 sm:gap-x-7 sm:gap-y-10 xl:grid-cols-3">
             {%- for product in collection.products -%}
               <div data-reveal>
                 {% render 'product-card', product: product, heading_level: 'h2', sizes: card_sizes %}
@@ -72,7 +72,7 @@
             and card proportions are reviewable now — the same rule the content
             module uses for unwritten copy.
           {%- endcomment -%}
-          <div class="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-7 sm:gap-y-10 xl:grid-cols-3">
+          <div class="grid grid-cols-1 gap-x-4 gap-y-10 min-[26rem]:grid-cols-2 sm:gap-x-7 sm:gap-y-10 xl:grid-cols-3">
             {%- for i in (1..9) -%}
               <div data-reveal>{% render 'product-card', heading_level: 'h2', sizes: card_sizes %}</div>
             {%- endfor -%}

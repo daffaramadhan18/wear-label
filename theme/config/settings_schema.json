@@ -98,14 +98,15 @@
         "type": "text",
         "id": "size_guide_columns",
         "label": "Column headings",
-        "default": "Size, Waist, Hip, Rise, Inseam, Leg opening",
+        "default": "Size, Length, Waist, Hip, Thigh",
         "info": "Comma separated. The FIRST one names the size column. These are trouser measurements because almost everything in the catalogue is trousers — change them if that changes."
       },
       {
         "type": "textarea",
         "id": "size_guide_rows",
         "label": "Rows",
-        "info": "One size per line, values separated by | and in the same order as the headings above. For example: XS | 64 | 90 | 28 | 72 | 26. Type CENTIMETRES only — the inch column is calculated. Leave this blank and the chart renders a labelled placeholder at its final size rather than a wrong table."
+        "info": "One size per line, values separated by | and in the same order as the headings above. For example: XS | 64 | 90 | 28 | 72 | 26. Type CENTIMETRES only — the inch column is calculated. Leave this blank and the chart renders a labelled placeholder at its final size rather than a wrong table.",
+        "default": "M | 98 | 62-90 | 115 | 60\nL | 100 | 66-92 | 125 | 66\nXL | 101 | 72-98 | 130 | 72"
       },
       {
         "type": "text",
