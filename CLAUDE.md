@@ -2,6 +2,23 @@
 
 # CLAUDE.md
 
+> ## ▶ READ [`HANDOVER.md`](./HANDOVER.md) FIRST
+>
+> **Every session starts there, before this file and before any code.** It is
+> the state of play — what is live right now, what the client still owes and in
+> what order it hurts, what was built and reverted the same day, and the five
+> traps here that render fine, pass every check and are still wrong.
+>
+> This file is the manual and it is long. HANDOVER.md is what tells you which
+> parts of it you need today, and it is where the deletion backup and the open
+> questions are recorded. Read it even when the task looks small — four of the
+> nine changes on 2026-09-13 were reversals of something decided hours earlier,
+> and the record of that is there rather than here.
+>
+> **Keep it current.** When you finish a session, update HANDOVER.md the way you
+> update this file: what landed, what is now blocked, what the client owes. A
+> handover that describes last week is worse than none.
+
 ## Project
 
 Company profile + product catalogue + commerce storefront for **Wear Label**, a
@@ -210,6 +227,12 @@ resolution is:
   search work — that authorisation was for that push, not standing. The password is
   now the only thing keeping the store private, so a push to live is a change to the
   thing the client looks at, and one they should know is coming.
+
+  **Authorised again, repeatedly, on 2026-09-13** — "lgsg push ke live theme gw
+  kl udah", then "just go" on the turns after it. Three pushes landed on live
+  that day. Read that as an authorisation for a working session with the owner
+  present, not as a standing one: it was given while they were watching the
+  result each time. If nobody is watching, ask.
 - **To verify without touching live, use a scratch unpublished theme.**
   `npx shopify theme push --path theme --store kbysza-bk.myshopify.com --unpublished
   --theme "<name>" --json` creates one and prints its id and preview URL. Push there,
@@ -291,9 +314,16 @@ work, get it onto the store, and get it into `origin/main` in the same turn. Do 
 stop to ask whether to commit or push, and do not leave the change sitting in the
 working tree.
 
+**And update [`HANDOVER.md`](./HANDOVER.md) with it.** It is the first thing the
+next session reads, so a session that changes what is live, what is blocked or
+what the client owes and leaves that file describing yesterday has not finished.
+It is not a changelog — `git log` is the changelog. It is the state of play.
+
 The pipeline, in order:
 
 ```bash
+# 0. HANDOVER.md — read it at the start, update it at the end
+
 # 1. verify first — a broken commit is worse than an unfinished one
 npm run theme:css                    # rebuild assets/theme.css
 npm run theme:check                  # shopify theme check; runs offline
