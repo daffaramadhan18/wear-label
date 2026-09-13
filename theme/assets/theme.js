@@ -876,3 +876,58 @@
     init();
   }
 })();
+
+/* ------------------------------------------------------------------ *
+ * Hero film
+ *
+ * One job, and it is not the one that matters most. The film is hidden from
+ * readers who have asked for reduced motion by CSS in theme-src/theme.css, not
+ * by this — a reader who asked for less motion must not have to run script to
+ * be obeyed. What script adds is that a hidden film is also a paused one, so
+ * the 4.5MB it would otherwise stream is never fetched.
+ *
+ * It listens for the query changing as well as reading it once, because the
+ * setting can be flipped while the page is open and a film that carried on
+ * playing after that would be the bug this exists to prevent.
+ * ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function apply(video) {
+    if (reduce.matches) {
+      video.pause();
+      /* Dropping the attribute stops a later source change or a bfcache
+         restore from starting it up again behind the still. */
+      video.removeAttribute("autoplay");
+    } else if (video.paused) {
+      /* Safari rejects the promise when it decides not to autoplay. There is
+         nothing to do about that — the poster stays up — so the rejection is
+         swallowed rather than left unhandled. */
+      var played = video.play();
+      if (played && played.catch) played.catch(function () {});
+    }
+  }
+
+  function init() {
+    var videos = document.querySelectorAll("[data-hero-video] video");
+    if (!videos.length) return;
+
+    Array.prototype.forEach.call(videos, apply);
+
+    var listen = reduce.addEventListener
+      ? reduce.addEventListener.bind(reduce, "change")
+      : reduce.addListener.bind(reduce);
+
+    listen(function () {
+      Array.prototype.forEach.call(videos, apply);
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

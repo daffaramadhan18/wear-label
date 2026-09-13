@@ -505,6 +505,58 @@
   }
 }
 
+
+/*
+ * The hero film.
+ *
+ * The video element carries no classes of its own because one of the two
+ * branches in sections/hero-video.liquid is `video_tag`, which writes the
+ * element itself — so the sizing has to come from the wrapper's selector or it
+ * would only apply to the branch we hand-write. The wrapper owns the 16:9 box;
+ * the video fills it.
+ */
+[data-hero-video] video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*
+ * The still is in the markup for every reader and shown to almost none of
+ * them. See the reduced-motion block below for the one case that shows it.
+ */
+[data-hero-still] {
+  display: none;
+}
+
+/*
+ * Reduced motion, for the hero film.
+ *
+ * A 16-second loop is not a transition that can be shortened to nothing — the
+ * only honest way to obey the setting is to stop playing it. So the film is
+ * taken out and a composed frame OF the film is shown instead, which leaves
+ * the band at exactly the size it would have had. That frame is deliberately
+ * not the poster — see sections/hero-video.liquid for why the two differ.
+ *
+ * The wrapper is left in flow rather than hidden with it: the wrapper is what
+ * holds the 16:9 box open, and the still is absolutely positioned against the
+ * section. Hide the wrapper and the band collapses to nothing.
+ *
+ * theme.js additionally pauses the hidden video, which is what actually saves
+ * the download. That is the enhancement; this is the fallback, and it is the
+ * one that runs with script off.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-hero-video] video {
+    display: none;
+  }
+
+  [data-hero-still] {
+    display: block;
+  }
+}
+
 /*
  * No-script fallbacks.
  *

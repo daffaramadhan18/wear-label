@@ -55,3 +55,9 @@ __pycache__/
 
 # Claude Code machine state
 /.claude/worktrees/
+
+# Client asset masters — the drop folder the studio's originals land in.
+# 81MB of camera-original JPEGs and .mov films, and it grows every hand-over.
+# What ships is the DERIVED copy in theme/assets/, which is committed; the
+# masters stay out of git and out of a public repo. See CLAUDE.md → Assets.
+/asset/

@@ -76,7 +76,7 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 | `snippets/aurora.liquid` | `components/ui/aurora.tsx` |
 | `snippets/icon.liquid` | `components/ui/icons.tsx` — four of the marks so far |
 | `assets/theme.js` | `components/motion/{reveal,stagger}.tsx`, the header disclosure, the carousel, the gallery, the tabs, the stepper, the save button |
-| `sections/hero-carousel.liquid` | `components/home/hero-carousel.tsx` |
+| `sections/hero-carousel.liquid` | `components/home/hero-carousel.tsx` — **unplaced since 2026-09-13**, replaced on the home page by `sections/hero-video.liquid`, which is ported from nothing |
 | `sections/new-arrivals.liquid` | the arrivals block in `app/page.tsx` |
 | `sections/voices-wall.liquid` | `components/home/testimonial-wall.tsx` |
 | `sections/category-mosaic.liquid` | `components/home/category-mosaic.tsx` |
@@ -233,9 +233,18 @@ One changes behaviour the design drew:
 hero → new arrivals → **Wear Label Custom** → customer voices → service band →
 Instagram strip
 
+**The hero is a film as of 2026-09-13, and it carries no copy at all.** The
+two-slide photograph carousel and all of its text came off on request — "hapus
+semua trs ganti dgn video … simplicity dulu" — and `sections/hero-video.liquid`
+loops one 16-second film in the whole band instead. The page's h1 moved onto that
+band as a screen-reader-only heading, because the band has no visible heading any
+more and the next one down is an h2.
+
 The custom band went in on 2026-08-31, directly after the product section, because
-brief §7 puts it there — and because the hero's second CTA has to land somewhere on
-the same page for a reader who scrolls rather than clicking.
+brief §7 puts it there — and because the hero's second CTA had to land somewhere on
+the same page for a reader who scrolls rather than clicking. That CTA is gone with
+the carousel, so this band is now the only route to `/pages/custom` on the home
+page, which makes its position matter more rather than less.
 
 The wall was moved ahead of the arrivals grid on 2026-08-20 and moved back on
 2026-08-21, on the client's call. The reasoning for moving it — the reviews are

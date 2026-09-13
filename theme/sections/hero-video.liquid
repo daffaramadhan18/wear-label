@@ -1,0 +1,214 @@
+{%- comment -%}
+  The hero — a single looping film, full bleed, and nothing over it.
+
+  This REPLACES the two-slide photograph carousel on the home page, asked for
+  2026-09-13: "hapus semua trs ganti dgn video … video dulu skrg, simplicity
+  dulu". So there is no eyebrow, no heading, no body copy and no CTA pair here.
+  `sections/hero-carousel.liquid` is still in the repo and still works; it is
+  simply not placed on any template any more. See its own comment for why it is
+  kept rather than deleted.
+
+  WHAT CARRIES THE PAGE'S h1 NOW. The carousel put an h1 on every slide, and
+  taking the copy out would have left the home page with no h1 at all — the
+  next heading down is New arrivals, which is an h2 inside its own section. So
+  this band carries a screen-reader-only h1. It is not a copy slot in disguise:
+  the film already has the words "Wear Label" rendered into it about a third of
+  the way in, so the h1 is the text equivalent of something a sighted reader
+  actually sees, and it defaults to the shop's own name rather than to a
+  sentence somebody invented. Do not style it visible to "fix" an empty-looking
+  band — the band is not empty, it is a film.
+
+  THE BAND'S HEIGHT IS DECIDED BY WHERE THE WORDMARK IS. The film is 1920x1080
+  and it renders the words "Wear Label" into the top 7% of its own frame, so
+  the rule is: never crop the top.
+
+  That reads differently at each end of the range, and it is why the band is
+  not one shape:
+
+    - `md` and up the band is 16:9 exactly, so nothing is cropped at all. A
+      fixed 600px band on a 1440px screen would have taken 105px off the top
+      and the wordmark with it, which is the one thing in the film that says
+      whose film it is. The price is a tall hero — 1440 wide is 810 tall — and
+      it is paid on purpose: a film asked to be the whole first screen.
+    - Below `md` the band is 60svh instead, and `object-cover` crops it
+      SIDEWAYS rather than vertically. Covering a 390x506 box from a 16:9
+      source scales the frame to 900px wide and trims the left and right edges,
+      so the full height survives — wordmark included — and so does the model,
+      who is near the centre of frame throughout. 16:9 at 390px wide would have
+      been a 219px strip, which is a band, not a hero.
+
+  svh rather than vh, for the same reason the carousel used it: hiding the
+  browser's URL bar must not resize the hero mid-scroll.
+
+  A portrait cut of the film would beat the sideways crop and there is not one.
+  Ask for one rather than reaching for a different aspect here.
+
+  THREE SOURCES, in precedence order, and each one is a different kind of
+  answer to "where does the film live":
+
+    1. `video` — a file the merchant picked in the theme editor, hosted by
+       Shopify. This is the one to grow into: Shopify transcodes it, serves
+       HLS, and `video_tag` writes the markup. It is empty today because the
+       film was handed over as a file in the repo, not uploaded to the store.
+    2. `asset` — a file in the theme's own assets/. This is what ships:
+       hero-video.mp4, 1920x1080, 16s, H.264, 4.5MB, audio stripped.
+    3. neither — the labelled placeholder at the band's exact size, like every
+       other empty slot on this site.
+
+  NO SOUND, and it is not an oversight. A hero film autoplays, and a browser
+  will only autoplay a muted one, so the audio track would never be heard
+  without a control to unmute it — and an unmute button is a decision nobody
+  has made. The track was therefore dropped at encode, which is also 250KB off
+  the file. The master still has it: asset/Video/main video/Wear Label.mov.
+
+  REDUCED MOTION. A 16-second loop is exactly the kind of motion the setting
+  exists to stop, and it cannot be stopped by shortening a duration. So the
+  video is hidden and a still — the film's own first frame — is shown in its
+  place, in CSS, in theme-src/theme.css. CSS rather than script because a
+  reader who asked for less motion must not have to run JavaScript to be
+  obeyed. theme.js then pauses the hidden video as well, which is the part that
+  saves the download; that is the enhancement, and the swap is the fallback.
+
+  TWO STILLS, and they are different frames on purpose — this was got wrong
+  once and caught in a screenshot, so it is worth the paragraph.
+
+  The POSTER is frame zero. It shows while the file is still arriving and then
+  gives way to playback, so it has to be the frame playback starts on; any
+  better-composed frame would put a visible jump at the moment the film begins.
+  Frame zero is a wide shot of a white stair with the model entering at the
+  right edge — a fine opening frame and a poor photograph.
+
+  The REDUCED-MOTION STILL is not transitional. It is the whole hero, for as
+  long as that reader is on the page, so it is a composed frame from about
+  twelve seconds in: the model centre-frame, full length, with the film's own
+  wordmark above her. Centre-frame matters twice over, because below `md` the
+  band crops sideways (see above) — a frame with the model against the right
+  edge would crop her out of her own hero.
+{%- endcomment -%}
+
+{%- liquid
+  assign heading = section.settings.heading | default: shop.name
+  assign poster_url = section.settings.poster | asset_url
+  assign still_name = section.settings.still | default: section.settings.poster
+  assign still_url = still_name | asset_url
+  assign video_url = section.settings.asset | asset_url
+-%}
+
+<section class="relative w-full overflow-hidden bg-tone">
+  <h1 class="sr-only">{{ heading }}</h1>
+
+  <div data-hero-video class="relative h-[60svh] min-h-80 w-full md:h-auto md:aspect-video">
+    {%- if section.settings.video != blank -%}
+      {{
+        section.settings.video
+        | video_tag:
+          image_size: '1920x',
+          autoplay: true,
+          loop: true,
+          muted: true,
+          controls: false,
+          preload: 'metadata'
+      }}
+    {%- elsif section.settings.asset != blank -%}
+      {%- comment -%}
+        `playsinline` is what keeps iOS from taking the film fullscreen the
+        moment it autoplays; `muted` is what lets it autoplay at all. Both are
+        required, not stylistic.
+
+        `preload="metadata"` rather than `auto`: autoplay starts the download
+        anyway, and `auto` additionally tells a browser that has suppressed
+        autoplay — a data-saver mode, a background tab — to fetch 4.5MB nobody
+        is going to watch.
+      {%- endcomment -%}
+      <video
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="{{ poster_url }}"
+        width="1920"
+        height="1080"
+        {% if section.settings.description != blank %}
+          aria-label="{{ section.settings.description | escape }}"
+        {% endif %}
+      >
+        <source src="{{ video_url }}" type="video/mp4">
+      </video>
+    {%- else -%}
+      {% render 'media', image: nil, fill: true, sizes: '100vw', label: 'Hero film', class: 'rounded-none' %}
+    {%- endif -%}
+  </div>
+
+  {%- comment -%}
+    The reduced-motion still. It is in the markup for everyone and hidden for
+    everyone but the readers who asked for it — there is no media query in
+    Liquid, and a still that only script can produce is a still that reduced
+    motion does not reliably get. `alt` is deliberately empty: the h1 above
+    already carries the name, so a second announcement of the same film is
+    noise rather than information.
+
+    It falls back to the poster when no still of its own is set, which is the
+    right failure: a transitional frame shown permanently is worse than the
+    composed one and far better than an empty band.
+  {%- endcomment -%}
+  {%- if still_name != blank -%}
+    <img
+      data-hero-still
+      src="{{ still_url }}"
+      alt=""
+      width="1920"
+      height="1080"
+      class="absolute inset-0 h-full w-full object-cover"
+    >
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Hero video",
+  "settings": [
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Film",
+      "info": "A video uploaded to the store. Overrides the shipped file below and is served by Shopify."
+    },
+    {
+      "type": "text",
+      "id": "asset",
+      "label": "Shipped film filename",
+      "default": "hero-video.mp4",
+      "info": "A file in the theme's assets/. Used when no film is uploaded above."
+    },
+    {
+      "type": "text",
+      "id": "poster",
+      "label": "Poster filename",
+      "default": "hero-video-poster.webp",
+      "info": "A file in the theme's assets/. Shown while the film loads, and shown instead of it for readers who have asked for reduced motion."
+    },
+    {
+      "type": "text",
+      "id": "still",
+      "label": "Reduced-motion still filename",
+      "default": "hero-video-still.webp",
+      "info": "A file in the theme's assets/. Shown instead of the film to readers who have asked for reduced motion. A composed frame, not the poster — it is the whole hero for them. Blank falls back to the poster."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Screen-reader heading",
+      "info": "The page's h1. It is not painted — the film carries the wordmark. Blank falls back to the store name."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Film description",
+      "default": "A short film for Wear Label: a model walks through a sunlit courtyard in a white shirt and wide-leg trousers.",
+      "info": "Read out in place of the film by a screen reader."
+    }
+  ],
+  "presets": [{ "name": "Hero video" }]
+}
+{% endschema %}

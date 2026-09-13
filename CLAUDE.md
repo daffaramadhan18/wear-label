@@ -352,10 +352,12 @@ form backend or a quote calculator, it is the wrong task.
 - **Liquid**, server-rendered. No framework, no build step on Shopify's side
 - **Tailwind CSS v4**, precompiled to `theme/assets/theme.css`
 - **CSS-variable design tokens** in `app/tokens.css`, shared with the archived app
-- **Vanilla JS** in `theme/assets/theme.js` — eight behaviours (the header
+- **Vanilla JS** in `theme/assets/theme.js` — nine behaviours (the header
   disclosure, the scroll reveals, the carousel, the gallery, the tabs, the quantity
-  stepper, save-for-later, and the quote form's WhatsApp composer), all progressive
-  enhancement
+  stepper, save-for-later, the quote form's WhatsApp composer, and the hero film's
+  reduced-motion pause), all progressive enhancement. The carousel's is still
+  shipped and still correct; nothing on any template uses it since the hero
+  became a film
 - **Shopify CLI 4.x**, pinned as a devDependency so the scripts resolve it from
   `node_modules/.bin` — a bare `shopify` is not on `PATH` here
 
@@ -457,7 +459,8 @@ Nothing is read from the environment any more. The three `SHOPIFY_*` /
 |---|---|
 | `layout/theme.liquid` | `app/layout.tsx` |
 | `sections/announcement-bar` · `header` · `footer` | `components/layout/*` |
-| `sections/hero-carousel` | `components/home/hero-carousel.tsx` |
+| `sections/hero-video` | nothing — the home page hero, asked for 2026-09-13: the two photographs and all of the copy off, one looping film in their place |
+| `sections/hero-carousel` | `components/home/hero-carousel.tsx` — **unplaced**, see below |
 | `sections/new-arrivals` | the arrivals block in `app/page.tsx` |
 | `sections/voices-wall` | `components/home/testimonial-wall.tsx` |
 | `sections/service-band` | `components/home/service-band.tsx` |
@@ -475,7 +478,7 @@ Nothing is read from the environment any more. The three `SHOPIFY_*` /
 | `sections/contact-details` | nothing — brief §5 put Contact in the nav and specified nothing else |
 | `sections/main-search` | nothing — brief §5 asked for search; the route was `main-stub` |
 | `sections/main-list-collections` | nothing — brief §5 asked for Collections; the route was `main-stub` |
-| `assets/theme.js` | the header disclosure, the reveals, the carousel, the gallery, the tabs, the stepper, the save button, the quote form's WhatsApp composer |
+| `assets/theme.js` | the header disclosure, the reveals, the carousel, the gallery, the tabs, the stepper, the save button, the quote form's WhatsApp composer, the hero film's reduced-motion pause |
 
 Two of those are **generated from the React source, not retyped**, and must stay
 that way: `snippets/icon.liquid` (all twelve paths verified byte-exact against
@@ -485,7 +488,26 @@ that way: `snippets/icon.liquid` (all twelve paths verified byte-exact against
 **Home page sequence:** hero → new arrivals → **Wear Label Custom** → customer
 voices → service band → Instagram strip. The custom band went in directly after the
 product section because brief §7 puts it there, and because the hero's second CTA
-has to land somewhere on the same page for a reader who scrolls instead of clicking.
+had to land somewhere on the same page for a reader who scrolls instead of clicking.
+
+**THE HERO IS A FILM NOW, AND IT HAS NO COPY AND NO CTA.** Asked for 2026-09-13,
+in as many words: the two-slide photograph carousel comes off, the eyebrow,
+heading, body and both buttons come off with it, and `sections/hero-video.liquid`
+plays one 16-second loop in the whole band instead. "Video dulu skrg, simplicity
+dulu." Three things follow from it that are easy to undo by accident:
+
+- **The page's h1 is screen-reader-only now**, on the film's band. It has to be
+  somewhere — the next heading down is New arrivals, which is an h2 — and the
+  film renders the words "Wear Label" into its own frame, so the h1 is the text
+  equivalent of something a sighted reader sees. Do not make it visible to "fix"
+  an empty-looking band.
+- **The custom band is the only route to `/pages/custom` on this page now.** It
+  used to be reachable from the hero's second CTA as well. That makes the
+  argument for its position stronger, not weaker.
+- **The band's height is decided by the film's own wordmark**, which sits in the
+  top 7% of the frame: 16:9 at `md` and up so nothing is cropped, 60svh below it
+  so the crop happens sideways instead. The section's comment has the full
+  reasoning, and it is the paragraph to read before changing either number.
 
 **One block exists and is deliberately not placed: `category-mosaic`.** The brief
 asks for it back (§6 Section 3, "Shop by Category"). **The reason it stays out
@@ -497,6 +519,13 @@ every entry point carries `filter.v.availability=1`, so a mosaic over all of the
 is twelve tiles opening on an empty grid. Three tiles — Pants, Cardigan, Culottes
 — would work today. Whether three is a section or an embarrassment is a design
 call nobody has made. The section's own comment carries the full reasoning.
+
+**A second block is unplaced as of 2026-09-13: `hero-carousel`.** It was the home
+page's hero until the film replaced it, and it is kept for the same reason
+`category-mosaic` is: it is finished and correct, what unplaced it was a content
+decision, and re-placing it is one edit to `theme/templates/index.json`. Its two
+photographs, `hero-1.webp` and `hero-2.webp`, are referenced from nowhere else in
+the theme — do not tidy them away without putting the section back.
 
 **Two blocks are gone from the repo, and CLAUDE.md used to claim they were kept.**
 `made-to-order.liquid`, `promo-band.liquid`, `countdown.liquid` and `limited-run`
@@ -997,6 +1026,32 @@ silently pick either side. Deviations already taken are recorded at the top of t
 section or snippet that took them, and the port's own deviations are listed in
 `theme/README.md`.
 
+### Where the client's own files land
+
+**`asset/` in the repo root is the studio's drop folder**, recorded here by
+instruction 2026-09-13: "skrg semua file asset gw taro sini". It is the camera
+originals and the master films, arranged by piece — `Cerra/`, `Lilo/`, `Yora/`,
+`B2B Project/`, `Video/main video/` and so on — plus the `Zone.Identifier`
+stubs Windows leaves behind when files cross into WSL. Ignore those.
+
+**It is gitignored, on purpose, and the reasoning is worth keeping.** It is 81MB
+today and it grows with every hand-over; this repository is public; and none of
+it is what the store serves. What ships is the DERIVED file in `theme/assets/` —
+transcoded, resized, committed — and that is the copy every rule below is about.
+So: masters in `asset/`, out of git; web copies in `theme/assets/`, in git.
+
+The consequence to plan for: **`asset/` is not in a fresh clone.** Anything that
+needs to be re-derived from a master needs the master handed over again. Say so
+rather than re-deriving from the web copy, which is lossy twice over.
+
+There is no ffmpeg on this machine and no root to install one. A static build
+unpacks without privileges and that is how the hero film was transcoded:
+
+```bash
+curl -sL -o ffmpeg https://github.com/eugeneware/ffmpeg-static/releases/download/b6.0/ffmpeg-linux-x64
+chmod +x ffmpeg
+```
+
 ### Assets, and how they were pulled
 
 Everything came out of the design project byte-exact — nothing was redrawn,
@@ -1011,14 +1066,23 @@ is how somebody's change gets quietly reverted later.
 | `public/products/*.webp` (11) | `assets/products/` | The catalogue shots. Square, 639–1024px, named by handle. **Upload these to Shopify with the products** |
 | `theme/assets/*.png` (7) | `assets/` | `wordmark`, `stacked`, `mark`, each with a cream variant, plus `wordmark-taupe` |
 | `theme/assets/hero-1.webp` | **the studio, not the design** | Slide 1 — the polaroids. 2730x1536, the studio's own higher-resolution render of the same composition, replacing the design's soft 1200x675 export on 2026-08-21. It does **not** carry the wordmark the design's export had across its top |
-| `theme/assets/hero-2.webp` | the design's `sf-hero-1` image slot | Slide 2 — the order-notes card. Byte-exact, 1200x675 |
+| `theme/assets/hero-2.webp` | the design's `sf-hero-1` image slot | Slide 2 — the order-notes card. Byte-exact, 1200x675. **Unreferenced since 2026-09-13**, with the carousel |
+| `theme/assets/hero-video.mp4` | `asset/Video/main video/Wear Label.mov` | **The hero film.** Derived, not byte-exact: the master is 23MB of 1920x1080 HEVC with an audio track, and this is H.264 at CRF 26 with `+faststart` and **no audio at all**, 4.5MB, 16s. H.264 because HEVC in a `<video>` is not a safe bet outside Apple's browsers; no audio because a hero autoplays and a browser only autoplays a muted one, so the track could never be heard without an unmute control nobody has asked for |
+| `theme/assets/hero-video-poster.webp` | frame 0 of the film | The `poster`. Frame zero specifically, so there is no jump when playback starts |
+| `theme/assets/hero-video-still.webp` | frame at 12s | The reduced-motion still, and a **different frame from the poster on purpose** — it is the whole hero for that reader, so it is composed (model centre-frame, full length, wordmark above her) rather than transitional |
 | `app/icon.png`, `app/apple-icon.png` | the monogram | Per the design system's "monogram for favicons" rule. **Still to set as the store's favicon** |
 
 The icon set is not a file anywhere: `snippets/icon.liquid` carries the path data,
 generated from `components/ui/icons.tsx`, which took it verbatim from
 `assets/icons/*.svg`.
 
-**The hero leads with the photograph, which is not the design's order.** The
+**Everything from here to the end of this section is about the photograph
+carousel, which is no longer on any template.** It is kept because the carousel
+is kept, and because the reasoning is the reasoning to re-read if it ever goes
+back. Nothing in it describes what the home page does today — see [The
+theme](#the-theme).
+
+**The hero led with the photograph, which is not the design's order.** The
 design puts the studio's Indonesian order-notes card first (`sf-hero-1`, shipped
 as `hero-2.webp`) and the polaroids second (`sf-hero-2`, `hero-1.webp`). **The
 theme runs them the other way round, on request, 2026-08-21.** Two reasons, and
@@ -1121,6 +1185,7 @@ Not decided, and not to be filled in by guessing:
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Nine of twelve footer entries have no URL and render as plain text, never as a 404 link. Add the URL in the theme editor when the page exists |
 | A review system | The design's star rating is still deliberately absent — a fabricated score is the one placeholder that cannot be labelled as one. Real quotations are a separate matter and are live in the voices wall; there is no feed behind them, so new reviews mean editing the section's blocks |
 | Whether the studio ships from Bandung or Bekasi | The hero's order-notes card says "Pengiriman dari Kota Bekasi"; the footer note says the studio is in Bandung. Both are live. Nothing picks a side |
+| **The store's NAME** | **It is still Shopify's default, `My Store`.** Found 2026-09-13: `<title>` on the home page reads "My Store", and so does anything else `shop.name` feeds — order emails and the browser tab included. It is one field in Settings → Store details and nothing in the theme can fix it. The hero's screen-reader h1 is pinned to the literal "Wear Label" in `templates/index.json` precisely so the page's one heading did not inherit it; remove that pin once the field is right |
 | The store's own domain | `kbysza-bk.myshopify.com` until a domain is connected |
 | Whether the storefront password comes off | The theme is live; the password is what is still keeping the store private. Taking it off is the actual launch decision now, not publishing |
 
