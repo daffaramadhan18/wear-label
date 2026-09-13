@@ -1,0 +1,210 @@
+{%- comment -%}
+  Two doors — the split directly under the hero film. Asked for 2026-09-13.
+
+  WHAT THIS SECTION IS FOR, because it decides every choice below. The studio's
+  own words: "tujuan website ini tuh utamanya bukan untuk jualan, tapi untuk
+  biar wear label ini makin legit … intinya mau tekenin kalo ini tuh bisa untuk
+  B2B". The site is a credibility surface first and a till second, and the thing
+  it has never said loudly enough is that Wear Label produces custom apparel for
+  organisations as well as trousers for shoppers. This band says both at once,
+  in the first screenful after the film.
+
+  IT IS TWO DOORS AND NOT A TAB STRIP, and that was argued out before it was
+  built. A tab shows one side at a time, and the default tab would inevitably be
+  ready-to-wear, because that is what most visitors arrive for — so a visitor who
+  never thinks to click would never learn the second business exists. That is
+  precisely the problem this band was commissioned to fix, moved somewhere else.
+  Two panels side by side are read without being operated. They also need no
+  script, have no state to keep in step, and survive a phone, where a tab strip
+  would still be showing one side at a time.
+
+  THE SPLIT IS 58/42 AND THE FIRST BLOCK GETS THE 58. That is not a claim that
+  B2B is the bigger business — it is the smaller one. It is a correction for
+  what the rest of the page already does: ready-to-wear has New arrivals, the
+  voices wall and the Instagram strip below this band, three sections of proof,
+  and custom apparel has one. The wider panel is what stops the first screenful
+  from agreeing with the rest of the page instead of balancing it.
+
+  So block order is load-bearing here in a way it usually is not. Reorder the
+  blocks in the theme editor and the emphasis moves with them; there is no
+  "which one is B2B" setting to get out of step with the order, on purpose.
+
+  TONE IS A SETTING, NOT A POSITION, and the two available values are the two
+  that can sit next to each other. Below `lg` the panels stack, and the repo's
+  rule is that two bands of the same colour must not touch — so a build with
+  both doors set to the same tone would read as one tall band with a seam in it.
+  Espresso and cream is the pairing that carries the split down to a phone.
+  `custom-band` documents the same trap from the other direction.
+
+  THE PHOTOGRAPHS ARE SQUARE, both of them, and that is what lets two panels of
+  different widths look deliberate rather than mismatched: the frames differ in
+  size but not in shape. door-custom.webp is a crop of the studio's own hospital
+  uniform shoot — six of the eight sets — and door-shop.webp is a square centre
+  crop of hero-1.webp, the polaroid composition that led the old hero carousel
+  and has had nothing pointing at it since the film replaced it.
+
+  EACH PANEL IS ONE STRETCHED LINK, the pattern `product-card` uses: the anchor
+  is on the heading and its `::after` covers the panel. A whole-panel `<a>` would
+  have given the link an accessible name made of the eyebrow, the heading, the
+  sentence and the button label read out as one run-on string. This way the
+  pointer gets the whole panel and a screen reader gets the heading.
+
+  The arrow slides on hover and the photograph scales a hair inside its own
+  clipping frame. Both are transforms, so both are composited, which is the rule
+  for any motion on this site.
+
+  NO PRICE, NO PRODUCT COUNT AND NO CLIENT COUNT anywhere in here. The brief is
+  explicit that the B2B side must not be inflated, and a number is the easiest
+  way to inflate one.
+{%- endcomment -%}
+
+<section
+  aria-labelledby="two-ways-heading"
+  class="border-y border-rule"
+>
+  {%- comment -%}
+    The band's own heading is not painted. The two panel headings are what a
+    reader sees, and a third heading above them would be a label on a thing that
+    already labels itself — but the section still needs a name in the
+    accessibility tree, and `aria-labelledby` needs something real to point at.
+  {%- endcomment -%}
+  <h2 id="two-ways-heading" class="sr-only">
+    {% render 'copy', value: section.settings.heading, label: 'section heading', inline: true %}
+  </h2>
+
+  <div class="grid lg:grid-cols-[58fr_42fr]">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign tone = block.settings.tone
+
+        if tone == 'invert'
+          assign panel_bg = 'bg-invert'
+          assign eyebrow_ink = 'text-ink-invert-muted'
+          assign link_ink = 'text-ink-invert hover:text-ink-invert-muted'
+          assign body_ink = 'text-ink-invert-muted'
+          assign cta_ink = 'text-ink-invert'
+        else
+          assign panel_bg = 'bg-canvas'
+          assign eyebrow_ink = 'text-ink-subtle'
+          assign link_ink = 'text-ink hover:text-brand'
+          assign body_ink = 'text-ink-muted'
+          assign cta_ink = 'text-brand'
+        endif
+
+        assign door_href = block.settings.href | default: routes.all_products_collection_url
+      -%}
+
+      <div
+        class="group relative flex flex-col p-7 sm:p-10 lg:p-12 {{ panel_bg }} {% unless forloop.last %}border-b border-rule lg:border-b-0 lg:border-r{% endunless %}"
+        {{ block.shopify_attributes }}
+      >
+        {%- comment -%}
+          THE CONTENT COLUMN IS CAPPED AND THE PANEL IS NOT. Without the cap the
+          58% panel's square photograph is 835px on a 1440px screen against the
+          42% panel's 605px, and the 230px of height that buys goes nowhere —
+          it becomes a hole between the shorter panel's sentence and its link.
+          Capping both columns at 640px makes the two photographs 640 and 605,
+          which is near enough to level that the two links sit on the same line,
+          while the panels themselves keep the widths that carry the emphasis.
+          The difference a reader is supposed to see is the ground either side
+          of the column, not the size of the picture.
+        {%- endcomment -%}
+        <div class="flex w-full max-w-160 flex-1 flex-col gap-6">
+        <div class="overflow-hidden rounded-sm">
+          {% render 'media-asset',
+            image: block.settings.image,
+            asset: block.settings.asset,
+            alt: block.settings.alt,
+            ratio: '1 / 1',
+            asset_width: 1100,
+            asset_height: 1100,
+            sizes: '(min-width: 1024px) 46vw, 92vw',
+            label: 'Photo',
+            class: 'transition-transform duration-(--duration-lead) ease-(--ease-entrance) motion-safe:group-hover:scale-[1.03]' %}
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <span class="text-micro uppercase tracking-eyebrow {{ eyebrow_ink }}">
+            {% render 'copy', value: block.settings.eyebrow, label: 'eyebrow', inline: true %}
+          </span>
+
+          {%- comment -%}
+            THE COLOUR IS ON THE ANCHOR, NOT ON THE HEADING, and that is not a
+            tidy-up. base.css gives a link its own colour, which wins over a
+            colour inherited from the h3 — so with the class on the heading the
+            espresso panel drew its headline in brand taupe, rgb(114,94,76) on
+            rgb(30,26,22). It rendered, it passed every check, and it was
+            unreadable. footer.liquid and snippets/button.liquid both document
+            the same trap; this is the third place it has bitten.
+          {%- endcomment -%}
+          <h3 class="text-h2 leading-h2">
+            <a
+              href="{{ door_href }}"
+              class="transition-colors duration-(--duration-base) after:absolute after:inset-0 after:content-[''] {{ link_ink }}"
+            >{% render 'copy', value: block.settings.heading, label: 'heading', inline: true %}</a>
+          </h3>
+
+          <p class="wl-measure text-body leading-body {{ body_ink }}">
+            {% render 'copy', value: block.settings.body, label: 'description', lines: 2 %}
+          </p>
+        </div>
+
+        {%- comment -%}
+          A span and not a button, and not a second anchor either: the panel is
+          already one link, and an `<a>` inside an `<a>` is invalid markup that
+          browsers repair by closing the outer one early. This is the affordance
+          for the link that is already there.
+        {%- endcomment -%}
+        {%- if block.settings.cta != blank -%}
+          <span class="mt-auto inline-flex items-center gap-2.5 text-label uppercase tracking-nav {{ cta_ink }}">
+            {{ block.settings.cta }}
+            <span class="inline-flex transition-transform duration-(--duration-base) ease-(--ease-entrance) motion-safe:group-hover:translate-x-1">
+              {% render 'icon', icon: 'arrow-right', class: 'size-4' %}
+            </span>
+          </span>
+        {%- endif -%}
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Two ways",
+  "max_blocks": 2,
+  "settings": [
+    { "type": "paragraph", "content": "The split under the hero. The FIRST door gets the wider column — that is how the emphasis is set, so reorder the blocks rather than looking for a setting. Give the two doors different tones: they stack on a phone, and two panels of the same colour touching read as one band." },
+    { "type": "text", "id": "heading", "label": "Section heading", "default": "Two ways to work with Wear Label", "info": "Not painted — it names the section for screen readers only. The two panel headings are what a reader sees." }
+  ],
+  "blocks": [
+    {
+      "type": "door",
+      "name": "Door",
+      "settings": [
+        { "type": "select", "id": "tone", "label": "Tone", "default": "invert", "options": [
+          { "value": "invert", "label": "Espresso" },
+          { "value": "canvas", "label": "Cream" }
+        ] },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "textarea", "id": "body", "label": "Description" },
+        { "type": "text", "id": "cta", "label": "Link label" },
+        { "type": "url", "id": "href", "label": "Link" },
+        { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped asset below." },
+        { "type": "text", "id": "asset", "label": "Shipped asset filename", "info": "A file in the theme's assets/. Square crops — the two panels differ in width and must not differ in shape." },
+        { "type": "textarea", "id": "alt", "label": "Alt text", "info": "Used by the shipped asset only. An uploaded photograph carries its own alt from the Files admin." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Two ways",
+      "blocks": [
+        { "type": "door", "settings": { "tone": "invert" } },
+        { "type": "door", "settings": { "tone": "canvas" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

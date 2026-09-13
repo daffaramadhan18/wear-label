@@ -233,6 +233,13 @@ One changes behaviour the design drew:
 hero → new arrivals → **Wear Label Custom** → customer voices → service band →
 Instagram strip
 
+**The order changed again on 2026-09-13** and it is now: hero film → **two
+doors** → new arrivals → **selected projects** → voices → service band →
+Instagram. `custom-band` came off the page; `sections/two-ways.liquid` and
+`sections/selected-projects.liquid` took its job between them. The reason is a
+positioning statement, not a layout preference — the site's primary job is
+credibility and the custom-apparel half was being under-said. See CLAUDE.md.
+
 **The hero is a film as of 2026-09-13, and it carries no copy at all.** The
 two-slide photograph carousel and all of its text came off on request — "hapus
 semua trs ganti dgn video … simplicity dulu" — and `sections/hero-video.liquid`
@@ -242,9 +249,10 @@ more and the next one down is an h2.
 
 The custom band went in on 2026-08-31, directly after the product section, because
 brief §7 puts it there — and because the hero's second CTA had to land somewhere on
-the same page for a reader who scrolls rather than clicking. That CTA is gone with
-the carousel, so this band is now the only route to `/pages/custom` on the home
-page, which makes its position matter more rather than less.
+the same page for a reader who scrolls rather than clicking. Both of those reasons
+are now spent: the CTA went with the carousel, and the two doors sit directly under
+the film, which is earlier than the band ever was. The band is kept in the repo and
+off every template.
 
 The wall was moved ahead of the arrivals grid on 2026-08-20 and moved back on
 2026-08-21, on the client's call. The reasoning for moving it — the reviews are

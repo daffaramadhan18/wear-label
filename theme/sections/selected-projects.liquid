@@ -1,0 +1,143 @@
+{%- comment -%}
+  Selected projects — the B2B proof. Brief §8 and §9.3.
+
+  THIS SECTION WAS REFUSED ONCE, AND THE REASON IT IS BUILT NOW IS THAT THE
+  REASON CHANGED. On 2026-08-31 it was decided not to build it for v1: the brief
+  asks for a portfolio and forbids inflating one, and there were no project
+  photographs and no nameable clients, so an empty portfolio was worse than no
+  portfolio. On 2026-09-13 the studio handed over four pieces of real work —
+  a hospital uniform programme, an institutional shirt, a corporate two-tone
+  shirt and a canvas tote — and the objection went with them.
+
+  What has NOT changed is the rule underneath it. There is still no "trusted by
+  hundreds of companies", no invented client list, and no project here that the
+  studio did not make. Adding a fifth means adding a photograph, not a sentence.
+
+  CLIENT NAMES ARE A SETTING AND THREE OF THEM ARE BLANK ON PURPOSE. The studio
+  authorised naming clients on 2026-09-13. Only one name could actually be read
+  off the photographs with certainty — Salna, embroidered front and back on the
+  corporate shirt. The hospital programme and the institutional shirt carry their
+  clients' names in embroidery a few pixels tall, and a client name guessed from
+  a blurry crop and then published is exactly the class of invention this repo
+  refuses. So those render the labelled placeholder until the studio types them
+  in, which is a theme-editor edit and not a code change.
+
+  THE PHOTOGRAPHS ARE ALL 4:3, which took re-cropping rather than a per-block
+  ratio setting. A grid whose cards are different shapes reads as a mistake, and
+  a ratio per block is a setting that lets somebody make that mistake later. The
+  tote was square and is padded to 4:3 in the flat grey its own shoot was lit
+  against — padding an object shot on seamless is invisible, cropping it cut the
+  handles off.
+
+  THE BAND IS CREAM AND ITS POSITION IS WHY. It sits between New arrivals, which
+  is plain page, and the voices wall, which is espresso — so cream is the step
+  that separates it from both. It cannot be espresso: the wall directly below is,
+  and two espresso bands touching read as one very long dark region with a seam
+  in it. That is the same argument `custom-band` made before this section
+  replaced it on the home page.
+
+  NO COUNTS, NO YEARS, NO LOGOS. A "since 2019" or a client logo wall is the
+  cheapest way to inflate a portfolio of four, and the brief forbids exactly
+  that. The detail line under each project says what is in the photograph and
+  nothing the photograph does not show.
+{%- endcomment -%}
+
+<section
+  aria-labelledby="projects-heading"
+  class="mt-section border-y border-rule bg-canvas"
+>
+  <div class="mx-auto flex w-full max-w-content flex-col gap-10 px-gutter py-section">
+    <div data-reveal class="flex flex-col gap-4">
+      <span class="text-micro uppercase tracking-eyebrow text-ink-subtle">
+        {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
+      </span>
+
+      <h2 id="projects-heading" class="text-h1 leading-h1">
+        {% render 'copy', value: section.settings.heading, label: 'heading' %}
+      </h2>
+
+      <p class="wl-measure text-body leading-body text-ink-muted">
+        {% render 'copy', value: section.settings.body, label: 'description', lines: 2 %}
+      </p>
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="grid gap-x-6 gap-y-10 sm:grid-cols-2">
+        {%- for block in section.blocks -%}
+          <li data-reveal class="flex flex-col gap-4" {{ block.shopify_attributes }}>
+            {% render 'media-asset',
+              image: block.settings.image,
+              asset: block.settings.asset,
+              alt: block.settings.alt,
+              ratio: '4 / 3',
+              asset_width: 1200,
+              asset_height: 900,
+              sizes: '(min-width: 640px) 46vw, 92vw',
+              label: 'Project photo' %}
+
+            <div class="flex flex-col gap-1.5">
+              {%- comment -%}
+                The client's name is the heading, not the category. A portfolio
+                entry titled "Hospital uniforms" is a service; one titled with
+                the hospital's name is a job somebody actually commissioned, and
+                that difference is the entire reason this section exists.
+              {%- endcomment -%}
+              <h3 class="text-h3 leading-h3">
+                {% render 'copy', value: block.settings.client, label: 'client', inline: true %}
+              </h3>
+
+              <p class="text-caption uppercase tracking-nav text-ink-subtle">
+                {% render 'copy', value: block.settings.category, label: 'category', inline: true %}
+              </p>
+
+              <p class="text-body leading-body text-ink-muted">
+                {% render 'copy', value: block.settings.detail, label: 'detail', inline: true %}
+              </p>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if section.settings.cta != blank -%}
+      <div data-reveal class="flex flex-wrap gap-3">
+        {% render 'button',
+          label: section.settings.cta,
+          href: section.settings.href,
+          variant: 'primary',
+          class: 'max-sm:w-full px-6 sm:px-11' %}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Selected projects",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "paragraph", "content": "Real work only. A project here needs a photograph of something the studio actually produced — do not add an entry to lengthen the list, and do not add client counts, years or logos. The detail line should say what the photograph shows and nothing more." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Custom apparel" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Selected projects" },
+    { "type": "textarea", "id": "body", "label": "Description", "default": "Uniforms, corporate apparel and merchandise produced for organisations across Indonesia." },
+    { "type": "header", "content": "Button" },
+    { "type": "text", "id": "cta", "label": "Label", "default": "Discuss your project" },
+    { "type": "url", "id": "href", "label": "Link" }
+  ],
+  "blocks": [
+    {
+      "type": "project",
+      "name": "Project",
+      "settings": [
+        { "type": "text", "id": "client", "label": "Client", "info": "The organisation the work was made for. Type it only if the studio has their agreement to name them — leave it blank and a labelled placeholder renders rather than a guess." },
+        { "type": "text", "id": "category", "label": "Category" },
+        { "type": "text", "id": "detail", "label": "Detail", "info": "One line about what the photograph shows." },
+        { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped asset below." },
+        { "type": "text", "id": "asset", "label": "Shipped asset filename" },
+        { "type": "textarea", "id": "alt", "label": "Alt text", "info": "Used by the shipped asset only." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Selected projects" }]
+}
+{% endschema %}

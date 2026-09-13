@@ -16,13 +16,30 @@
 
   body {
     /*
-     * White, not cream. The design's page shell is #FFFFFF and cream is a band
-     * colour on it — the made-to-order block, the hero panel, every filled chip,
-     * input and stepper. Painting the shell cream instead flattens all of those
-     * into the page, so this one token is what keeps the whole site's figure and
-     * ground the right way round.
+     * NOT white and NOT cream — a third colour between them, `--color-ground`
+     * (#fdfaf7), added 2026-09-13 on request: "gw mau background nya ga putih
+     * polos tp ada warna tipis2".
+     *
+     * The reason it is a third token rather than a new value for an existing
+     * one is the trap this comment used to describe, and the trap is still
+     * real. The design's stack is three deep: the page, the white things on it
+     * (the header, every input, every chip, the stepper, the icon discs), and
+     * the cream things on those (the band grounds, the review cards). Before
+     * today the page and the white things shared one token, so warming that
+     * token would have warmed all of them together and moved nothing relative
+     * to anything. Cream would then have flattened into the page and the whole
+     * site's figure and ground would have gone the wrong way round.
+     *
+     * So: ground is the page, `--color-surface` stays #ffffff for the things on
+     * it, `--color-canvas` stays cream for the things on those. The steps are
+     * small on purpose — a quarter of the way from white to cream — and the
+     * order is what carries the depth, not the distance.
+     *
+     * The header is the one full-bleed element painted `bg-ground` rather than
+     * `bg-surface`, because it is part of the shell rather than something
+     * sitting on it. Everything else that was white is still white.
      */
-    background-color: var(--color-surface);
+    background-color: var(--color-ground);
     color: var(--color-ink-body);
     font-family: var(--font-body);
     font-size: var(--text-body);

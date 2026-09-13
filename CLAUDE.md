@@ -473,7 +473,10 @@ Nothing is read from the environment any more. The three `SHOPIFY_*` /
 | `snippets/cart-lines` · `order-summary` | `components/cart/*` |
 | `snippets/copy` · `media` · `price` · `badge` · `alert` · `aurora` · `icon` · `wordmark` · `breadcrumbs` · `save-button` · `cart-badge` | `components/ui/*` |
 | `snippets/button` | nothing — extracted 2026-08-31 from the primary button's class string, which had been retyped in three sections and was about to be retyped in eight more |
-| `sections/custom-band` | nothing — brief §7, the B2B hook on the home page |
+| `sections/custom-band` | nothing — brief §7, the B2B hook on the home page. **Unplaced 2026-09-13**, replaced by `two-ways` + `selected-projects` |
+| `sections/two-ways` | nothing — the B2B/B2C split under the hero film, asked for 2026-09-13 |
+| `sections/selected-projects` | nothing — brief §8, built 2026-09-13 once real project photography existed |
+| `snippets/media-asset` | nothing — `media` plus a theme asset as the middle fallback, extracted when the second section needed it |
 | `sections/custom-hero` · `custom-services` · `how-it-works` · `why-wear-label` · `quote-form` | nothing — brief §9, the Custom & Business page |
 | `sections/contact-details` | nothing — brief §5 put Contact in the nav and specified nothing else |
 | `sections/main-search` | nothing — brief §5 asked for search; the route was `main-stub` |
@@ -490,7 +493,28 @@ voices → service band → Instagram strip. The custom band went in directly af
 product section because brief §7 puts it there, and because the hero's second CTA
 had to land somewhere on the same page for a reader who scrolls instead of clicking.
 
-**THE HERO IS A FILM NOW, AND IT HAS NO COPY AND NO CTA.** Asked for 2026-09-13,
+**THE SEQUENCE CHANGED AGAIN ON 2026-09-13, and the reason is a positioning
+statement rather than a layout preference.** The studio's own words: "tujuan
+website ini tuh utamanya bukan untuk jualan, tapi untuk biar wear label ini
+makin legit … intinya mau tekenin kalo ini tuh bisa untuk B2B". New arrivals
+was judged good enough for the ready-to-wear half; the custom-apparel half was
+not being said loudly enough.
+
+So the order is now: **hero film → two doors → new arrivals → selected projects
+→ voices → service band → Instagram**, and `custom-band` is off the page. Three
+things to know before moving any of it:
+
+- **`two-ways` is a split and not a tab strip**, and that was argued out rather
+  than assumed. A tab shows one side at a time and its default would inevitably
+  be ready-to-wear, so a visitor who never clicks would never learn the second
+  business exists — which is the problem the band was commissioned to fix.
+- **The first block in `two-ways` gets the wider column.** There is no "which
+  one is B2B" setting; block order IS the emphasis, on purpose.
+- **`custom-band` was replaced, not demoted.** Its job is now split between the
+  door and the portfolio, and putting it back alongside them would make three
+  B2B pitches on one page, which is weaker than one.
+
+**THE HERO IS A FILM, AND IT HAS NO COPY AND NO CTA.** Asked for 2026-09-13,
 in as many words: the two-slide photograph carousel comes off, the eyebrow,
 heading, body and both buttons come off with it, and `sections/hero-video.liquid`
 plays one 16-second loop in the whole band instead. "Video dulu skrg, simplicity
@@ -501,9 +525,9 @@ dulu." Three things follow from it that are easy to undo by accident:
   film renders the words "Wear Label" into its own frame, so the h1 is the text
   equivalent of something a sighted reader sees. Do not make it visible to "fix"
   an empty-looking band.
-- **The custom band is the only route to `/pages/custom` on this page now.** It
-  used to be reachable from the hero's second CTA as well. That makes the
-  argument for its position stronger, not weaker.
+- **The hero no longer carries any route at all.** It used to have a second CTA
+  to `/pages/custom`. The two doors directly beneath it are what replaced that,
+  and they are the first thing on the page a reader can act on.
 - **The band's height is decided by the film's own wordmark**, which sits in the
   top 7% of the frame: 16:9 at `md` and up so nothing is cropped, 60svh below it
   so the crop happens sideways instead. The section's comment has the full
@@ -945,10 +969,27 @@ Push, then read the output. It is the only validator that sees this class of bug
 - **Palette, spacing, radius and motion are NOT theme settings.** Exposing them in
   the editor would let one edit break the system. Only copy and the type pairing
   are editable.
-- **The page is white; cream is a band colour.** `body` resolves to
-  `--color-surface`. Cream (`--color-canvas`) is what fills things *on* it — the
-  hero panel, every chip, input, stepper and review card. Paint the shell cream and
-  all of those flatten into it.
+- **THE SURFACE STACK IS THREE DEEP, and this rule changed on 2026-09-13.** It
+  used to read "the page is white; cream is a band colour". The page is no
+  longer white: `body` resolves to **`--color-ground`** (`#fdfaf7`), a faint
+  warm tint added on request — "gw mau background nya ga putih polos tp ada
+  warna tipis2".
+
+  What did NOT change is the reason the old rule existed, and it is why this is
+  a **third token** rather than a new value for an old one:
+
+  | Layer | Token | What it paints |
+  |---|---|---|
+  | the page | `--color-ground` `#fdfaf7` | `body`, and the header, which is shell rather than something on it |
+  | on the page | `--color-surface` `#ffffff` | every input, chip, stepper, icon disc, the invert button's off-state |
+  | on those | `--color-canvas` `#fbf4ef` | band grounds, the review cards, the cream door |
+
+  Before this the page and the white things shared one token, so warming it
+  would have warmed both together and moved nothing relative to anything —
+  cream would have flattened into the page and the site's figure and ground
+  would have gone the wrong way round. The steps are a few percent each on
+  purpose: the ORDER carries the depth, not the distance. Do not close the gaps
+  and do not paint anything else `bg-ground`.
 - **The aurora is two CSS classes, not inline styles.** `.wl-aurora` in `base.css`
   assembles the wash; the stop lists are tokens. `snippets/aurora.liquid` only picks
   a tone, an origin and an intensity. **The veil layer MUST be painted in the colour
@@ -1069,6 +1110,8 @@ is how somebody's change gets quietly reverted later.
 | `theme/assets/hero-2.webp` | the design's `sf-hero-1` image slot | Slide 2 — the order-notes card. Byte-exact, 1200x675. **Unreferenced since 2026-09-13**, with the carousel |
 | `theme/assets/hero-video.mp4` | `asset/Video/main video/Wear Label.mov` | **The hero film.** Derived, not byte-exact: the master is 23MB of 1920x1080 HEVC with an audio track, and this is H.264 at CRF 26 with `+faststart` and **no audio at all**, 4.5MB, 16s. H.264 because HEVC in a `<video>` is not a safe bet outside Apple's browsers; no audio because a hero autoplays and a browser only autoplays a muted one, so the track could never be heard without an unmute control nobody has asked for |
 | `theme/assets/hero-video-poster.webp` | frame 0 of the film | The `poster`. Frame zero specifically, so there is no jump when playback starts |
+| `theme/assets/door-custom.webp` · `door-shop.webp` | `asset/B2B Project/rs.jpeg` · `theme/assets/hero-1.webp` | The two doors. Both square, both 1100px — the panels differ in width and must not differ in shape. The B2B one is a crop of six of the eight hospital sets; the B2C one is a square centre crop of the polaroid composition that led the old hero carousel |
+| `theme/assets/project-*.webp` (4) | `asset/B2B Project/` | The portfolio. All four re-cropped to 4:3, because a grid of mixed shapes reads as a mistake. The tote was square: it is scaled to height and its background **smeared** sideways with ffmpeg's `fillborders`, not padded with a flat colour — the shot is lit on a gradient, so a flat pad left two visible bands down the card |
 | `theme/assets/hero-video-still.webp` | frame at 12s | The reduced-motion still, and a **different frame from the poster on purpose** — it is the whole hero for that reader, so it is composed (model centre-frame, full length, wordmark above her) rather than transitional |
 | `app/icon.png`, `app/apple-icon.png` | the monogram | Per the design system's "monogram for favicons" rule. **Still to set as the store's favicon** |
 
@@ -1180,7 +1223,7 @@ Not decided, and not to be filled in by guessing:
 | **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
 | **B2B photography** | None exists. `custom-band` and all three `custom-services` cards draw labelled placeholders at final size, by instruction 2026-08-31. Brief §7 wants "foto actual project Wear Label" and inventing one is out |
 | ~~The category taxonomy and the collections~~ | **DONE 2026-08-31.** Nine products retyped, fifteen automated collections created and published, verified against the rendered storefront. See [The catalogue](#the-catalogue). What is still open is narrower: **which tiles a "Shop by Category" mosaic should show**, given that twelve of the fifteen are entirely sold out |
-| **Selected Projects** | **Not built for v1, decided 2026-08-31.** Brief §8 and §9.3 want a portfolio and forbid inflating it; there are no project photographs and no nameable clients, so there is no section rather than an empty one. When there are projects it wants a `project` metaobject (client, category, photographs, short description) so the studio adds them in the admin |
+| ~~Selected Projects~~ · **THREE CLIENT NAMES** | **The section was BUILT 2026-09-13** — the 2026-08-31 refusal rested on there being no project photographs and no nameable clients, and four pieces of real work arrived. What is still open is narrower and it is the last thing holding the section back: the studio authorised naming clients, and only **Salna** could actually be read off the photographs. The hospital programme, the institutional shirt and the tote have `client` blank in `templates/index.json`, so three of four cards render the labelled placeholder. Typing them in is a theme-editor edit. **Do not read a name off a blurry crop and publish it.** The blocks are section blocks rather than the `project` metaobject that was once sketched — the metaobject is still the right answer if the studio ever adds these from the admin rather than from a hand-over |
 | Social handles | The footer has four label/URL pairs — Instagram, Shopee, TikTok and a spare — and every URL is blank, so no social link renders. Brief §19 names the three |
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Nine of twelve footer entries have no URL and render as plain text, never as a 404 link. Add the URL in the theme editor when the page exists |
 | A review system | The design's star rating is still deliberately absent — a fabricated score is the one placeholder that cannot be labelled as one. Real quotations are a separate matter and are live in the voices wall; there is no feed behind them, so new reviews mean editing the section's blocks |
@@ -1203,6 +1246,14 @@ Not decided, and not to be filled in by guessing:
   not one garment cut for one shopper. The made-to-order section is no longer in the
   repo at all; `sections/category-mosaic` is, and is unplaced for a data reason
   rather than a promise reason.
+- ~~Which of the two halves the home page leads with~~ — **restated 2026-09-13,
+  and it sharpens rather than reverses the entry below.** The studio: "tujuan
+  website ini tuh utamanya bukan untuk jualan, tapi untuk biar wear label ini
+  makin legit … intinya mau tekenin kalo ini tuh bisa untuk B2B". So the till is
+  still being built and is still a launch blocker, but **legitimacy is the
+  primary job and custom apparel is the half that was being under-said.** That
+  is what the two doors and the portfolio are for, and it is the reason to
+  re-read before anybody rebalances the home page back toward the catalogue.
 - ~~Whether the site is a till or only a credibility surface~~ — **both, 2026-08-31.**
   Brief §19 makes web checkout, payment and shipping Must Have for B2C, and the
   client's own note adds a Shopee hand-off beside it rather than instead of it. The

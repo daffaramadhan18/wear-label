@@ -48,8 +48,9 @@
   --wl-taupe-800: #3d3128;
   --wl-taupe-900: #1e1a16; /* Espresso — primary text */
 
-  --wl-cream: #fbf4ef; /* page background */
+  --wl-cream: #fbf4ef; /* band colour */
   --wl-white: #ffffff; /* card surface */
+  --wl-ground: #fdfaf7; /* page background */
 
   /* Blush ramp — promotional areas, badges, editorial backgrounds */
   --wl-blush-100: #ffe8dd;
@@ -154,7 +155,13 @@
 @theme {
   /* === Layer 2 — semantic colour ======================================= */
 
-  /* Surfaces */
+  /* Surfaces.
+   *
+   * THREE of these are page-level and the order matters: `ground` is the page
+   * itself, `surface` is what sits on the page, `canvas` is what sits on both.
+   * They are only a few percent apart and that is deliberate — see the note in
+   * app/base.css on the body rule for why they cannot be collapsed into one. */
+  --color-ground: var(--wl-ground);
   --color-canvas: var(--wl-cream);
   --color-surface: var(--wl-white);
   --color-surface-muted: var(--wl-taupe-100);

@@ -1,0 +1,91 @@
+{%- comment -%}
+  `media`, plus a theme asset as the middle fallback.
+
+  Three sources, and the precedence is the same one the hero film uses:
+
+    1. `image` — a photograph the merchant uploaded in the theme editor. Wins,
+       and is the only branch that gets a responsive srcset, because `image_url`
+       can resize a Shopify-hosted file and `asset_url` cannot resize anything.
+    2. `asset` — a file in the theme's own assets/, shipped with the code. This
+       is the branch that exists for photography that arrived as files in the
+       repo rather than as an upload to the store.
+    3. neither — `media`'s labelled placeholder, at the exact final size.
+
+  WHY THIS IS A SNIPPET RATHER THAN THREE BRANCHES COPIED INTO A SECTION. It was
+  written the second time a section needed it, which is the point at which
+  `snippets/button.liquid` was extracted for the same reason. The asset branch is
+  not one line: it has to reproduce `media`'s frame arithmetic exactly, or a
+  section that falls back to an asset gets a different box from the same section
+  showing its placeholder, and the layout moves when the photograph arrives. That
+  arithmetic is duplicated here once, deliberately, and it is the thing to keep
+  in step if `media` ever changes its frame.
+
+  Accepts everything `media` accepts — image, asset, ratio, sizes, fill,
+  priority, class, label — plus three the asset branch alone needs:
+
+    - `alt`, because an uploaded image carries its own alt from the Files admin
+      and an asset carries none at all, so the caller has to supply one.
+    - `width` and `height`, which do NOT set the painted size. The img is
+      `absolute inset-0 object-cover` inside a frame that already carries the
+      aspect ratio, so its size comes from the frame either way; these exist
+      because theme check's ImgWidthAndHeight requires them, and they should
+      still be the file's real pixel dimensions rather than a pair of numbers
+      that satisfies the rule. `hero-carousel.liquid` explains the same thing
+      about its own pair.
+{%- endcomment -%}
+
+{%- liquid
+  assign media_label = label | default: 'Photo'
+
+  if priority
+    assign loading_mode = 'eager'
+    assign priority_mode = 'high'
+  else
+    assign loading_mode = 'lazy'
+    assign priority_mode = 'auto'
+  endif
+
+  if fill
+    assign box = 'absolute inset-0 h-full w-full'
+    assign frame = ''
+  else
+    assign box = 'w-full'
+    if ratio
+      assign frame = 'aspect-ratio:' | append: ratio
+    else
+      assign frame = 'aspect-ratio:1 / 1'
+    endif
+  endif
+-%}
+
+{%- if image != blank -%}
+  {% render 'media',
+    image: image,
+    ratio: ratio,
+    sizes: sizes,
+    fill: fill,
+    priority: priority,
+    class: class,
+    label: media_label %}
+{%- elsif asset != blank -%}
+  <div style="{{ frame }}" class="relative overflow-hidden rounded-sm bg-tone {{ box }} {{ class }}">
+    <img
+      src="{{ asset | asset_url }}"
+      alt="{{ alt | escape }}"
+      width="{{ asset_width | default: 1200 }}"
+      height="{{ asset_height | default: 1200 }}"
+      loading="{{ loading_mode }}"
+      fetchpriority="{{ priority_mode }}"
+      decoding="async"
+      class="absolute inset-0 h-full w-full object-cover"
+    >
+  </div>
+{%- else -%}
+  {% render 'media',
+    image: nil,
+    ratio: ratio,
+    sizes: sizes,
+    fill: fill,
+    class: class,
+    label: media_label %}
+{%- endif -%}

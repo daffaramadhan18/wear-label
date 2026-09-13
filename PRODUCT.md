@@ -69,7 +69,21 @@ a reseller", it is still out of scope.
 Wear Label's own web presence: company profile, the full catalogue, and a
 storefront. An apparel label in Bandung, Indonesia.
 
-**It is now a till as well as a credibility surface. Revised 2026-08-31**, and the
+**The credibility half is the PRIMARY job, and the B2B half is the one that was
+being under-said. Restated by the studio 2026-09-13:** "tujuan website ini tuh
+utamanya bukan untuk jualan, tapi untuk biar wear label ini makin legit, bukan
+untuk e commerce sebenernya, tapi juga ya … intinya mau tekenin kalo ini tuh
+bisa untuk B2B."
+
+Read that against the 2026-08-31 revision below rather than instead of it: the
+checkout is still Must Have and still a launch blocker, and nothing about the
+ready-to-wear route changes. What changes is which half the site is *for*. The
+home page was rebuilt around it on the same day — a two-door split under the
+hero that says both businesses exist before a reader scrolls, and a Selected
+Projects portfolio of real work, with New arrivals left alone because the
+ready-to-wear half was judged to be carrying its weight already.
+
+**It is a till as well as a credibility surface. Revised 2026-08-31**, and the
 2026-08-20 position — "credibility, not conversion; the Shopee marketplace remains
 the till" — no longer holds on its own. The client's brief makes homepage, shop,
 product, cart, checkout, payment and shipping all Must Have for v1 (§19), and the
