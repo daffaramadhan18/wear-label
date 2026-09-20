@@ -18,9 +18,7 @@
           "settings": {
             "tone": "invert",
             "heading": "Ready to Wear",
-            "body": "Thoughtfully designed womenswear for everyday life. Comfortable, versatile, and easy to style — made to become pieces you'll reach for again and again.",
-            "asset": "door-shop.webp",
-            "alt": "A model in the polaroid composition that led the earlier hero, cropped square."
+            "body": "Thoughtfully designed womenswear for everyday life. Comfortable, versatile, and easy to style — made to become pieces you'll reach for again and again."
           }
         },
         "d2": {
@@ -29,15 +27,12 @@
             "tone": "canvas",
             "heading": "Custom & Business",
             "body": "Custom apparel and merchandise solutions for companies, organizations, communities, and events. From uniforms to special projects, we create pieces tailored to your needs.",
-            "href": "/pages/custom",
-            "asset": "door-custom.webp",
-            "alt": "A crop of the studio's hospital uniform shoot, six of the eight sets."
+            "href": "/pages/custom"
           }
         }
       },
       "block_order": ["d1", "d2"],
       "settings": {
-        "eyebrow": "Ready-to-wear & custom apparel",
         "heading": "What We Do",
         "body": "We design for everyday wear and beyond. From versatile ready-to-wear collections to custom apparel and merchandise, Wear Label creates thoughtful pieces for individuals, businesses, and communities."
       }
