@@ -88,14 +88,22 @@
     </div>
 
     <nav aria-label="Primary" class="hidden md:block">
+      {%- comment -%}
+        EXACT PATH MATCH, NOT `contains`. This used to be `request.path
+        contains nav_url`, which lit up "Collections" (`/collections`)
+        whenever "Shop" (`/collections/all`) was the actual current page,
+        since one URL is a literal substring of the other — reported as
+        "klik Shop, kelihatannya kayak Collections yang aktif". `nav_path`
+        strips Shop's own `?filter.v.availability=1` before comparing, since
+        `request.path` never carries a query string.
+      {%- endcomment -%}
       <ul class="flex items-center">
         {%- for block in section.blocks -%}
           {%- liquid
             assign nav_url = block.settings.href | default: routes.root_url
+            assign nav_path = nav_url | split: '?' | first
             assign current = false
-            if nav_url == routes.root_url and request.path == routes.root_url
-              assign current = true
-            elsif nav_url != routes.root_url and request.path contains nav_url
+            if request.path == nav_path
               assign current = true
             endif
           -%}
@@ -166,10 +174,9 @@
         {%- for block in section.blocks -%}
           {%- liquid
             assign nav_url = block.settings.href | default: routes.root_url
+            assign nav_path = nav_url | split: '?' | first
             assign current = false
-            if nav_url == routes.root_url and request.path == routes.root_url
-              assign current = true
-            elsif nav_url != routes.root_url and request.path contains nav_url
+            if request.path == nav_path
               assign current = true
             endif
           -%}
