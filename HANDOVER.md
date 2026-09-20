@@ -48,8 +48,8 @@ the remaining 20 afterward.
 |---|---|
 | Store | `kbysza-bk.myshopify.com` |
 | Live theme | `205197312286` |
-| Products now | 17, all **DRAFT** (not published to Online Store — see §2.1) |
-| Collections | Pants, Cardigan, Culottes (survived), **Vest (new this session)** |
+| Products now | 17, all **ACTIVE and published** (see §2.1 — priced from the client's own live Shopee listing) |
+| Collections | **Pants, Tops** — Cardigan/Culottes/Vest all deleted same session, see §2.1 |
 
 Two stale scratch themes (`SCRATCH hero-video verify`, and a first failed attempt
 from this session) were deleted. No scratch theme should exist right now —
@@ -59,19 +59,46 @@ if `shopify theme list` shows one, it's someone's in-progress work, not litter.
 
 ## 2. What the client still owes, in the order it hurts
 
-### 2.1 Prices for all 17 new products — nothing goes live without this
+### 2.1 RESOLVED SAME SESSION — prices came from the client's own live Shopee listing
 
-The client sent a full catalogue replacement (docx + two colour/material lists)
-with **no prices anywhere**. This repo's own rule is never to invent commercial
-data, so all 17 new products were created as **DRAFT** and were **never published**
-to the Online Store channel — they exist in Admin only. The moment the client
-sends prices: `productVariantsBulkUpdate` per product, then `publishablePublish`
-against `gid://shopify/Publication/377657065758`. Until then the storefront
-correctly shows an empty-looking catalogue, which is honest, not broken.
+The client pasted their actual live Shopee storefront listing later the same
+session, with real current prices for every one of the 17 products. Per their
+instruction, the **non-discounted** price was used for the 8 products currently
+showing a Shopee -20% badge (159.200 ÷ 0.8 = 199.000), and the plain listed price
+for the other 9. All 17 products are now **ACTIVE and published** to the Online
+Store — verified live: `/collections/all`, `/collections/pants` and
+`/collections/tops` all render real product cards with real prices, and
+individual product pages (e.g. `/products/nori-cardigan`) show the correct price.
 
-The 17 products, their materials and sizes are all live in Shopify Admin now —
-see `CLAUDE.md`'s catalogue section (needs updating — this session's product data
-is not written up there yet, only here and in git history).
+| Product | Price (Rp) | Product | Price (Rp) |
+|---|---|---|---|
+| Miu Cardigan | 350.000 | Dalia Wide Pants | 175.000 |
+| Nori Cardigan | 350.000 | Milly Stripe Pants | 199.000 |
+| Rui Cardigan | 325.000 | Tara Stripe Pants | 199.000 |
+| Darla Vest | 199.000 | Moa Pants | 199.000 |
+| Basic Linen Culotte | 165.000 | Pallo Pants | 199.000 |
+| Pipo Pants | 199.000 | Soso Pants | 199.000 |
+| Casual Culotte Zipper | 165.000 | Yora Loose Pants | 165.000 |
+| Lilo Pants | 199.000 | Cerra Loose Pants | 159.000 |
+| Cerra Loose Pants BIG SIZE | 165.000 | | |
+
+**Categories were also simplified to 2, on instruction** — "keep it simple for
+now": every product's `productType` is now either **Tops** (Miu, Nori, Rui,
+Darla) or **Pants** (the other 13, including the former Culottes). The
+`Cardigan`, `Culottes` and `Vest` automated collections created earlier this
+session were all **deleted**; a single new `Tops` collection replaces them,
+alongside the surviving `Pants` collection. `snippets/catalogue-filters.liquid`
+needed no code change — its category rail iterates live `collections`, so it
+picked up the new 2-collection state automatically. The footer's "Tops" link
+was repointed from `/collections/cardigan` (deleted) to `/collections/tops`.
+
+**Casual Culotte Zipper vs Casual Culotte Linen — reconfirmed as "Zipper".**
+The client's live Shopee listing actually shows "Casual Culotte Linen" as the
+current title there, which reopened the question asked earlier — the client
+re-confirmed keeping "Zipper" anyway (matching the old store handle), so this is
+now settled twice over. `CLAUDE.md` still needs this whole catalogue rewritten
+into its own section — it currently describes the pre-2026-09-21 20/126-product
+history.
 
 ### 2.2 Lilo Pants' fifth colour — the client flagged this as unfinished
 
@@ -136,10 +163,11 @@ string instead of inheriting the shop name.
 ## 3. The new catalogue — full replacement, 17 products
 
 The client sent `katalog product wear label.docx` (a colour-swatch reference, not
-a priced catalogue) plus two chat messages of materials. All 17 are live in Admin
-as DRAFT, vendor `Wear Label`, with `custom.material` set and Colour (+ Size where
-applicable, M/L/XL except Cerra BIG SIZE which is XXL only) options generating the
-full variant matrix — **302 variants total**.
+a priced catalogue) plus two chat messages of materials, then later their live
+Shopee listing for pricing (see §2.1). All 17 are **ACTIVE and published**, vendor
+`Wear Label`, `productType` Tops or Pants (see §2.1), with `custom.material` set
+and Colour (+ Size where applicable, M/L/XL except Cerra BIG SIZE which is XXL
+only) options generating the full variant matrix — **302 variants total**.
 
 | Product | Type | Material | Photo reused from |
 |---|---|---|---|
