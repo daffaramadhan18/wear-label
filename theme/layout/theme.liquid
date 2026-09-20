@@ -1,0 +1,97 @@
+<!doctype html>
+{%- comment -%}
+  Root layout — port of app/layout.tsx.
+
+  The type pairing is the design system's: Playfair Display for the editorial
+  voice, Poppins for the interface. next/font self-hosted both; here Shopify's
+  font_face filter does the same job off Shopify's CDN, so there is still no
+  third-party request. The weights are the ones the system documents and the
+  components actually use — Playfair 400/500/600 plus italic, Poppins
+  300/400/500/600.
+
+  --font-playfair and --font-poppins are what app/tokens.css resolves
+  --font-display and --font-body through, so setting the two variables here is
+  the whole integration; the token file is untouched.
+{%- endcomment -%}
+
+{%- liquid
+  assign display_400 = settings.font_display
+  assign display_500 = display_400 | font_modify: 'weight', '500'
+  assign display_600 = display_400 | font_modify: 'weight', '600'
+  assign display_italic = display_400 | font_modify: 'style', 'italic'
+
+  assign body_400 = settings.font_body
+  assign body_300 = body_400 | font_modify: 'weight', '300'
+  assign body_500 = body_400 | font_modify: 'weight', '500'
+  assign body_600 = body_400 | font_modify: 'weight', '600'
+-%}
+
+{%- comment -%}
+  Next 16 no longer overrides scroll-behavior on navigation unless asked, and a
+  Liquid theme navigates by full page load either way — but in-page anchors are
+  still smooth, so the attribute is kept for parity with the React app.
+{%- endcomment -%}
+<html lang="{{ request.locale.iso_code }}" data-scroll-behavior="smooth" class="h-full antialiased">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+
+    <title>
+      {{- page_title -}}
+      {%- if current_tags %} &ndash; {{ 'general.meta.tags' | t: tags: current_tags | join: ', ' }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.page' | t }} {{ current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &mdash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {%- if page_description != blank -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {{ content_for_header }}
+
+    {%- comment -%} The design system's stylesheet — tokens.css + base.css + Tailwind. {%- endcomment -%}
+    {{ 'theme.css' | asset_url | stylesheet_tag }}
+
+    <style>
+      {{ display_400 | font_face: font_display: 'swap' }}
+      {{ display_500 | font_face: font_display: 'swap' }}
+      {{ display_600 | font_face: font_display: 'swap' }}
+      {%- if display_italic %}{{ display_italic | font_face: font_display: 'swap' }}{% endif %}
+      {%- if body_300 %}{{ body_300 | font_face: font_display: 'swap' }}{% endif %}
+      {{ body_400 | font_face: font_display: 'swap' }}
+      {%- if body_500 %}{{ body_500 | font_face: font_display: 'swap' }}{% endif %}
+      {%- if body_600 %}{{ body_600 | font_face: font_display: 'swap' }}{% endif %}
+
+      :root {
+        --font-playfair: {{ display_400.family }}, {{ display_400.fallback_families }};
+        --font-poppins: {{ body_400.family }}, {{ body_400.fallback_families }};
+      }
+    </style>
+  </head>
+
+  <body class="flex min-h-full flex-col">
+    {%- comment -%}
+      `fixed`, not `absolute`: shift-tabbing back to this link after scrolling
+      must bring it into view, not park it at the top of the document where the
+      focused control would be invisible.
+    {%- endcomment -%}
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-(--z-modal) focus:rounded-sm focus:bg-brand focus:px-6 focus:py-4 focus:text-label focus:uppercase focus:tracking-label focus:text-on-brand"
+    >
+      {{ 'general.skip_to_content' | t }}
+    </a>
+
+    {% sections 'header-group' %}
+
+    <main id="main" class="flex-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    <script src="{{ 'theme.js' | asset_url }}" defer></script>
+  </body>
+</html>

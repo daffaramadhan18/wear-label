@@ -1,0 +1,45 @@
+{%- comment -%}
+  Save for later — port of components/ui/save-button.tsx.
+
+  BROWSER-LOCAL, deliberately. Whether the storefront has customer accounts at
+  all is still an open decision, and a wishlist that outlives the browser is a
+  customer record — which belongs in Shopify, not in the theme. So this keeps a
+  list of handles in localStorage under the same `wl:saved` key the React app
+  used, and nothing else: no request, no account, nothing to migrate but the key
+  name if the decision goes the other way.
+
+  `aria-pressed` carries the state, so it is never colour alone. The initial
+  value is "false" because the server cannot know what a browser has saved —
+  assets/theme.js corrects it on load and keeps every button for the same handle
+  in step, including across tabs via the `storage` event.
+
+  Like the React version this is inert without JavaScript. In placeholder mode
+  (no product) it is inert too, and says so with `aria-disabled`, rather than
+  offering to save a piece that does not exist.
+
+  Accepts: product, class
+{%- endcomment -%}
+
+{%- liquid
+  assign save_class = class | default: 'wl-tap size-9.5 rounded-xs bg-canvas/95 hover:bg-canvas'
+-%}
+
+<button
+  type="button"
+  {% if product %}
+    data-save="{{ product.handle }}"
+    data-title="{{ product.title | escape }}"
+    data-save-on="{{ 'product.saved' | t | escape }}"
+    data-save-off="{{ 'product.save' | t | escape }}"
+    aria-pressed="false"
+  {% else %}
+    aria-disabled="true"
+    tabindex="-1"
+  {% endif %}
+  class="inline-flex cursor-pointer items-center justify-center text-ink-muted transition-colors duration-(--duration-base) hover:text-brand aria-pressed:text-brand {{ save_class }}"
+>
+  {% render 'icon', icon: 'heart', class: 'size-4.5' %}
+  <span class="sr-only" data-save-label>
+    {{ 'product.save' | t }}{% if product %}: {{ product.title }}{% endif %}
+  </span>
+</button>

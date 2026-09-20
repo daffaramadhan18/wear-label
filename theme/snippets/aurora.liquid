@@ -1,0 +1,58 @@
+{%- comment -%}
+  The aurora band — port of components/ui/aurora.tsx.
+
+  A slow gradient wash for low-density bands with no photography — the bag
+  summary and the footer. The technique is two CSS classes (.wl-aurora in
+  base.css) with the stop list in tokens.css, so it recolours with the palette
+  instead of carrying colours of its own.
+
+  `tone` HAS to match the surface underneath: the veil layer is painted in the
+  surface colour, and a mismatch shows up as a visible rectangle. That is the
+  bug this effect always has.
+
+  Never place it behind photography or the logotype — the clear-space and
+  contrast rules in the design system apply to whatever sits on top.
+
+  The parent must carry `relative isolate overflow-hidden`. `isolate` is not
+  optional: it is what keeps soft-light blending against the band rather than
+  against the page. And never wrap the parent in anything that animates opacity
+  — that makes the wrapper a stacking context and draws a visible rectangle.
+
+  Accepts: tone ('canvas' | 'muted' | 'inert' | 'invert'),
+           origin ('bottom-left' | 'top-right' | 'top-left'),
+           intensity (0-1), class
+{%- endcomment -%}
+
+{%- liquid
+  case tone
+    when 'invert'
+      assign veil = 'var(--wl-taupe-900)'
+      assign stops = 'var(--wl-aurora-stops-invert)'
+    when 'muted'
+      assign veil = 'var(--wl-taupe-100)'
+      assign stops = 'var(--wl-aurora-stops)'
+    when 'inert'
+      assign veil = 'var(--wl-inert-100)'
+      assign stops = 'var(--wl-aurora-stops)'
+    else
+      assign veil = 'var(--wl-cream)'
+      assign stops = 'var(--wl-aurora-stops)'
+  endcase
+
+  case origin
+    when 'top-right'
+      assign origin_position = '100% 0%'
+    when 'top-left'
+      assign origin_position = '20% 0%'
+    else
+      assign origin_position = '0% 100%'
+  endcase
+
+  assign aurora_intensity = intensity | default: 1
+-%}
+
+<div
+  aria-hidden="true"
+  class="wl-aurora {{ class }}"
+  style="opacity:{{ aurora_intensity }};--aurora-veil:{{ veil }};--aurora-stops:{{ stops }};--aurora-origin:{{ origin_position }}"
+></div>

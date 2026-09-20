@@ -1,0 +1,119 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Wear Label",
+    "theme_version": "0.1.0",
+    "theme_author": "Wear Label",
+    "theme_documentation_url": "https://github.com/",
+    "theme_support_url": "https://github.com/"
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Palette, spacing, radius and motion are NOT theme settings. They live in the design system and resolve through assets/theme.css — exposing them here would let one edit break the whole system. Only copy and the type pairing are editable."
+      },
+      {
+        "type": "text",
+        "id": "brand_name",
+        "label": "Brand name",
+        "default": "Wear Label"
+      },
+      {
+        "type": "textarea",
+        "id": "brand_description",
+        "label": "Brand description",
+        "info": "Used for the meta description and Open Graph. Leave blank and no tag is emitted rather than an empty one.",
+        "default": "Handwoven linen and cotton, sewn in small runs in Bandung."
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The design system's pairing: Playfair Display carries the editorial voice, Poppins is the interface. Changing either is a design-system decision, not a shop decision."
+      },
+      {
+        "type": "font_picker",
+        "id": "font_display",
+        "label": "Display",
+        "default": "playfair_display_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "Interface",
+        "default": "poppins_n4"
+      }
+    ]
+  },
+  {
+    "name": "Announcement bar",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The espresso strip above the header. Nothing in it is interactive — a bar that carries a link competes with the nav directly underneath it. Leave blank and the whole band is not rendered."
+      },
+      {
+        "type": "text",
+        "id": "announcement",
+        "label": "Message",
+        "default": "Free shipping on orders over Rp 750.000"
+      }
+    ]
+  },
+  {
+    "name": "Custom & business",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The two values the B2B route and the Shopee hand-off depend on. Both are blank today, and both fail visibly rather than silently: with no WhatsApp number the quote form's button is unavailable and says why, and with no Shopee URL the 'Buy on Shopee' link is simply absent instead of landing on a search page."
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_number",
+        "label": "WhatsApp number",
+        "default": "+62 878-1654-0159",
+        "info": "In international format. The + and any spaces or dashes are stripped before the link is built, so either form works. This is where every quote enquiry goes — there is no inbox behind the form. Supplied by the studio 2026-09-13 and set as the schema default rather than written into config/settings_data.json, which this theme deliberately does not have: a default is a starting value the studio can still change in the theme editor, whereas a committed settings file would silently overwrite their edit on the next push."
+      },
+      {
+        "type": "url",
+        "id": "shopee_shop_url",
+        "label": "Shopee shop URL",
+        "info": "The fallback for products with no custom.shopee_url metafield of their own. A per-product URL always wins, because it lands the shopper on the piece rather than on the shop."
+      }
+    ]
+  },
+  {
+    "name": "Size guide",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The size chart shown on every product page. It is store-wide on purpose: Wear Label has one size system, and a per-product chart would be the same table typed eleven times and eleven places to correct when one number is wrong. A product that genuinely needs its own chart can still carry a custom.size_chart metafield, and that wins over this."
+      },
+      {
+        "type": "text",
+        "id": "size_guide_columns",
+        "label": "Column headings",
+        "default": "Size, Length, Waist, Hip, Thigh",
+        "info": "Comma separated. The FIRST one names the size column. These are trouser measurements because almost everything in the catalogue is trousers — change them if that changes."
+      },
+      {
+        "type": "textarea",
+        "id": "size_guide_rows",
+        "label": "Rows",
+        "info": "One size per line, values separated by | and in the same order as the headings above. For example: XS | 64 | 90 | 28 | 72 | 26. Type CENTIMETRES only — the inch column is calculated. Leave this blank and the chart renders a labelled placeholder at its final size rather than a wrong table.",
+        "default": "M | 98 | 62-90 | 115 | 60\nL | 100 | 66-92 | 125 | 66\nXL | 101 | 72-98 | 130 | 72"
+      },
+      {
+        "type": "text",
+        "id": "size_guide_note",
+        "label": "Note under the chart",
+        "info": "Optional. How the garment was measured, for example laid flat. It is what stops a shopper reading a flat measurement as a body measurement."
+      }
+    ]
+  }
+]

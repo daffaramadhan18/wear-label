@@ -1,0 +1,81 @@
+{%- comment -%}
+  The Instagram strip — one row of square crops, scrolling. Port of
+  components/home/instagram-strip.tsx.
+
+  The track holds the run twice and travels exactly -50%, so the loop is seamless
+  (.wl-marquee in base.css). It runs continuously — hovering does not stop it —
+  and prefers-reduced-motion stops it altogether, which is why the rail is
+  overflow-x-auto rather than hidden: with the animation off, the strip has to
+  stay reachable by scrolling. The scrollbar chrome is taken off by .wl-rail, so
+  that fallback costs the design nothing.
+
+  This section costs no JavaScript. Keep it that way, and do NOT wrap it in
+  anything that animates opacity.
+
+  The images are the catalogue's own, since the studio's posts are not wired up.
+  There are no links on them for the same reason — a post needs a permalink, and
+  inventing one would send readers nowhere.
+
+  DEVIATION — the heading is a label, not a section head. The design gave it the
+  same centred H2 treatment as New arrivals and the voices wall, which billed it
+  as a peer section; it has no links and no studio posts, only the catalogue's
+  own photographs. It is now --text-label uppercase, which states what the strip
+  is without claiming to be a destination. The element and its id stay put:
+  aria-labelledby="instagram-heading" is the section's accessible name.
+{%- endcomment -%}
+
+{%- liquid
+  assign source = collections[section.settings.collection]
+  assign shown = section.settings.count
+-%}
+
+<section aria-labelledby="instagram-heading" class="flex flex-col gap-7 py-section">
+  <h2 id="instagram-heading" class="px-gutter text-center font-body text-label uppercase tracking-nav text-ink-subtle">
+    {% render 'copy', value: section.settings.heading, label: 'heading' %}
+  </h2>
+
+  <div class="wl-marquee wl-rail overflow-x-auto [mask-image:linear-gradient(90deg,transparent,#000_5%,#000_95%,transparent)]">
+    <ul class="wl-marquee-track">
+      {%- comment -%} Two runs, so translateX(-50%) lands exactly where it started. {%- endcomment -%}
+      {%- comment -%}
+        A partially stocked collection is a THIRD fact, and neither branch used to
+        handle it. The old shape was "any products at all -> render them, otherwise
+        render `shown` placeholders", so a collection holding one piece drew exactly
+        one tile and the rest of the rail was empty. On the marquee that also killed
+        the motion: a two-tile track is narrower than the viewport, so translateX(-50%)
+        had nothing to travel over and the strip sat still looking broken. It will
+        happen again on the real import, which lands eleven pieces one at a time.
+        So: render what exists, then top up with labelled placeholders to `shown`.
+      {%- endcomment -%}
+      {%- for copy in (0..1) -%}
+        {%- assign real = source.products.size -%}
+        {%- if real > shown -%}{%- assign real = shown -%}{%- endif -%}
+        {%- assign pad = shown | minus: real -%}
+        {%- for product in source.products limit: shown -%}
+          <li class="w-58 shrink-0" {% if copy == 1 %}aria-hidden="true"{% endif %}>
+            {% render 'media', image: product.featured_image, sizes: '232px', ratio: '1 / 1', label: 'Studio post', class: 'rounded-none' %}
+          </li>
+        {%- endfor -%}
+        {%- if pad > 0 -%}
+          {%- for i in (1..pad) -%}
+            <li class="w-58 shrink-0" {% if copy == 1 %}aria-hidden="true"{% endif %}>
+              {% render 'media', image: nil, sizes: '232px', ratio: '1 / 1', label: 'Studio post', class: 'rounded-none' %}
+            </li>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Instagram strip",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "Photograph source" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Follow us on Instagram" },
+    { "type": "range", "id": "count", "label": "Photographs", "min": 6, "max": 16, "step": 1, "default": 11 }
+  ],
+  "presets": [{ "name": "Instagram strip" }]
+}
+{% endschema %}

@@ -1,0 +1,70 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# Windows NTFS zone-identifier stubs, left behind whenever a file crosses
+# into WSL from a Windows download/copy. Pure metadata, never real content.
+*Zone.Identifier
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Python bytecode from bundled skill scripts
+__pycache__/
+
+# design-sync (claude.ai/design) — staged scripts, generated bundle, machine state
+/.ds-sync/
+/ds-bundle/
+/.design-sync/.cache/
+/.design-sync/learnings/
+/.design-sync/node_modules
+
+# graphify — generated knowledge graph, rebuilt with `graphify update .`
+/graphify-out/
+
+# Claude Code / Codex machine state — installed skills and local settings,
+# not project source.
+/.claude/
+/.agents/
+/.codex/
+
+# Client asset masters — the drop folder the studio's originals land in.
+# 81MB of camera-original JPEGs and .mov films, and it grows every hand-over.
+# What ships is the DERIVED copy in theme/assets/, which is committed; the
+# masters stay out of git and out of a public repo. See CLAUDE.md → Assets.
+/asset/

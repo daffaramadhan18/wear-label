@@ -1,0 +1,55 @@
+{
+  "sections": {
+    "main": {
+      "type": "contact-details",
+      "blocks": {
+        "whatsapp": {
+          "type": "detail",
+          "settings": {
+            "label": "WhatsApp",
+            "value": "Customer Care & Order Assistance — +62 87816540159",
+            "url": "https://wa.me/6287816540159"
+          }
+        },
+        "email": {
+          "type": "detail",
+          "settings": {
+            "label": "Email",
+            "value": "wearlabel.business@gmail.com",
+            "url": "mailto:wearlabel.business@gmail.com"
+          }
+        },
+        "studio": {
+          "type": "detail",
+          "settings": {
+            "label": "Studio",
+            "value": "Wear Label Studio, Jatibening, Indonesia",
+            "url": ""
+          }
+        },
+        "hours": {
+          "type": "detail",
+          "settings": {
+            "label": "Studio Visits",
+            "value": "By appointment only.",
+            "url": ""
+          }
+        }
+      },
+      "block_order": [
+        "whatsapp",
+        "email",
+        "studio",
+        "hours"
+      ],
+      "settings": {
+        "heading": "Contact",
+        "body": "We'd love to hear from you. Whether you need help with an order, sizing, or a custom business project, our team is here to help.",
+        "form_heading": "Send us a message"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

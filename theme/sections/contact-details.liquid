@@ -1,0 +1,136 @@
+{%- comment -%}
+  Contact. Brief §5 puts it in the main navigation and specifies nothing else, so
+  the shape here is the smallest honest thing: where the studio is, how to reach
+  it, and a form that goes somewhere real.
+
+  EVERY DETAIL IS A BLOCK WITH A BLANK VALUE TODAY. Email, address and opening
+  hours are variable facts nobody has supplied, and this repo does not invent
+  those — an address on a contact page is the one string a reader will act on. So
+  each row renders its labelled placeholder at final size, the layout is final,
+  and filling a row in is a theme-editor edit rather than a code change. Two of
+  them are also still open questions in CLAUDE.md: the hero's order-notes card
+  says the studio ships from Bekasi and the footer note says Bandung, and nothing
+  has picked a side.
+
+  A row with a URL renders as a link and a row without renders as plain text —
+  the same rule the footer columns follow, for the same reason. A `tel:` or
+  `mailto:` that goes nowhere is worse than a line of text.
+
+  THE FORM IS SHOPIFY'S OWN `contact` FORM, and unlike the quote form it posts.
+  That is a deliberate split. A quote is a negotiation and the studio answers
+  those on WhatsApp, so quote-form.liquid hands the reader straight there; a
+  general enquiry needs no negotiation and benefits from a record, and Shopify
+  mails a contact submission to the store's own address with no configuration at
+  all. One channel each, chosen by what happens after the message is sent.
+
+  `form.posted_successfully?` replaces the fields with a confirmation rather than
+  re-rendering an empty form, which is the difference between "sent" and "did
+  that work?". The error branch is Shopify's own `default_errors`, so a message
+  the platform generates is not paraphrased here.
+{%- endcomment -%}
+
+<div class="mx-auto w-full max-w-content px-gutter pb-section pt-block-lg">
+  <div class="wl-measure">
+    <h1 class="text-h1 leading-h1">
+      {% render 'copy', value: section.settings.heading, label: 'page heading' %}
+    </h1>
+
+    <p class="mt-5 text-body leading-body text-ink-muted">
+      {% render 'copy', value: section.settings.body, label: 'intro', lines: 2 %}
+    </p>
+  </div>
+
+  <div class="mt-block grid gap-block lg:grid-cols-2 lg:gap-block-lg">
+    <dl class="flex flex-col divide-y divide-line border-y border-line">
+      {%- for block in section.blocks -%}
+        <div class="flex flex-col gap-1.5 py-5 sm:flex-row sm:gap-6" {{ block.shopify_attributes }}>
+          <dt class="text-micro uppercase tracking-nav text-ink-subtle sm:w-36 sm:shrink-0">
+            {% render 'copy', value: block.settings.label, label: 'field', inline: true %}
+          </dt>
+          <dd class="text-body leading-body text-ink-body">
+            {%- if block.settings.value != blank and block.settings.url != blank -%}
+              <a href="{{ block.settings.url }}" class="transition-colors duration-(--duration-base) hover:text-brand">{{ block.settings.value }}</a>
+            {%- else -%}
+              {% render 'copy', value: block.settings.value, label: 'detail', inline: true %}
+            {%- endif -%}
+          </dd>
+        </div>
+      {%- endfor -%}
+    </dl>
+
+    <div class="rounded-sm bg-canvas p-7 sm:p-block">
+      <h2 class="text-h2 leading-h2 tracking-h2">
+        {% render 'copy', value: section.settings.form_heading, label: 'form heading' %}
+      </h2>
+
+      {%- form 'contact', class: 'mt-6 flex flex-col gap-4.5' -%}
+        {%- if form.posted_successfully? -%}
+          {%- assign sent = 'contact.sent' | t -%}
+          {% render 'alert', tone: 'success', body: sent %}
+        {%- else -%}
+          {%- if form.errors -%}
+            {%- assign problem = form.errors | default_errors -%}
+            {% render 'alert', tone: 'error', body: problem %}
+          {%- endif -%}
+
+          <div class="flex flex-col gap-2">
+            <label for="contact-name" class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'contact.name' | t }}</label>
+            <input id="contact-name" type="text" name="contact[name]" required autocomplete="name"
+              class="min-h-13 rounded-sm border border-line bg-surface px-4 text-body text-ink">
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="contact-email" class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'general.email' | t }}</label>
+            <input id="contact-email" type="email" name="contact[email]" required autocomplete="email"
+              class="min-h-13 rounded-sm border border-line bg-surface px-4 text-body text-ink">
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="contact-body" class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'contact.message' | t }}</label>
+            <textarea id="contact-body" name="contact[body]" rows="5" required
+              class="rounded-sm border border-line bg-surface px-4 py-3 text-body leading-body text-ink"></textarea>
+          </div>
+
+          {%- assign send = 'contact.send' | t -%}
+          {% render 'button', label: send, variant: 'primary', type: 'submit', class: 'w-full px-6 sm:px-11' %}
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Contact",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "paragraph", "content": "Leave a detail's value empty and it renders a labelled placeholder at final size — do not put a stand-in address or number here. Add the URL and the value becomes a link; leave it and the value is plain text." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Contact" },
+    { "type": "textarea", "id": "body", "label": "Intro" },
+    { "type": "header", "content": "Form" },
+    { "type": "text", "id": "form_heading", "label": "Form heading", "default": "Send us a message" }
+  ],
+  "blocks": [
+    {
+      "type": "detail",
+      "name": "Detail",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "text", "id": "value", "label": "Value" },
+        { "type": "url", "id": "url", "label": "Link", "info": "Optional. A wa.me, mailto: or maps URL. Empty renders the value as plain text." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact",
+      "blocks": [
+        { "type": "detail", "settings": { "label": "WhatsApp" } },
+        { "type": "detail", "settings": { "label": "Email" } },
+        { "type": "detail", "settings": { "label": "Studio" } },
+        { "type": "detail", "settings": { "label": "Opening hours" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

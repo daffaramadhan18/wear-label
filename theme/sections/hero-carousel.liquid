@@ -1,0 +1,355 @@
+{%- comment -%}
+  UNPLACED SINCE 2026-09-13. This is no longer on the home page and is not on
+  any other template either. `sections/hero-video.liquid` took the slot, asked
+  for in as many words: the two photographs and all of the copy come off and a
+  film goes in its place, simplicity first.
+
+  It is kept rather than deleted for the same reason `category-mosaic` is kept:
+  it is finished, ported and correct, the decision that unplaced it was a
+  content decision rather than a fault in the code, and re-placing it is one
+  edit to theme/templates/index.json. Its two photographs, hero-1.webp and
+  hero-2.webp, are still in assets/ and are referenced from nowhere else — do
+  not tidy them away without putting this section back.
+
+  Everything below describes how it works if it is placed again.
+
+  The hero — port of components/home/hero-carousel.tsx.
+
+  The design's 600px band with a cream card over the photograph, and as many
+  slides as there are blocks.
+
+  Slides travel sideways rather than crossfading: every slide is parked one band
+  width away on the side it will arrive from, and only the offset changes. The
+  band already clips, so nothing extra is needed to hide the parked ones.
+
+  Rotation rules, in the order they matter (all in assets/theme.js):
+    - It stops on hover and on keyboard focus, so a reader can finish the
+      sentence they are on and reach the CTA without it moving.
+    - A touch stops it FOR GOOD. There is no hover on a phone, so the pause above
+      does not exist there; the first touch, or any use of the arrows or dots,
+      ends rotation for the rest of the visit. A slide that slid back out from
+      under a thumb is worse than one that stopped.
+    - prefers-reduced-motion turns rotation off entirely rather than shortening
+      it. An auto-advancing carousel is motion the reader did not ask for.
+    - Inactive slides are `inert`, so their heading and CTA are out of the tab
+      order and out of the accessibility tree instead of being invisible tab
+      stops.
+
+  DRAG. The band is draggable too: pointer down, move, release, and the slide
+  nearest where the pointer let go becomes the active one (see assets/theme.js).
+  That was added deliberately and it amends the rules above — sideways travel is
+  no longer only the script's to command, the reader can push the strip. The
+  argument is the same one that stops rotation at the first touch: on a phone
+  there is no hover, and the arrows sit in a row under the card that a thumb has
+  to reach for, while the band itself is most of the screen. A drag is the
+  control already under the thumb. It ends rotation for good exactly as a tap on
+  an arrow does, for the same reason — a slide that slid back out from under a
+  thumb is worse than one that stopped.
+
+  `touch-pan-y` on the band is what keeps that from costing a vertical scroll:
+  sideways belongs to the carousel, up and down stays the page's, and the reader
+  never has to find a gap between slides to scroll past the hero. It sits on the
+  band rather than on a slide because touch-action is resolved up the hit-test
+  chain — one declaration on the clipping band covers every slide, the copy card
+  and the controls inside it.
+
+  A drag finishes in the same render pass every other advance finishes in, so the
+  parked slides keep their `inert` and their `aria-hidden` throughout. A slide
+  dragged half into view is therefore visible but still out of the tab order and
+  out of the accessibility tree, which is what keeps "one h1 per page" true
+  mid-drag as well as at rest.
+
+  One slide renders as a still band with no arrows and no dots — the controls are
+  derived from the block count, not drawn in. A single slide has nothing to drag
+  to, and theme.js leaves it alone.
+
+  Each slide is parked at its own offset in the markup rather than all at zero, so
+  the band is correct before script runs instead of relying on the active slide
+  covering the others. With scripting off the controls are removed altogether —
+  see the `scripting: none` block in theme-src/theme.css — because arrows that
+  cannot advance anything are worse than a still band.
+
+  NARROW SCREENS. The band is 600px at `md` and up, and 70svh below it (svh, not
+  vh, so hiding the browser's URL bar does not resize the hero mid-scroll). The
+  copy card fills the width there, which the design's controls do not allow for:
+  arrows parked at the band's edges land on the heading and the CTA. So below
+  `md` the arrows and dots gather into one row under the card, and their wrapper
+  becomes `display: contents` at `md` — one set of markup, each control exactly
+  where the design draws it on a wide screen.
+
+  ARTWORK. Both shots ship as theme assets, and hero-1.webp leads with
+  hero-2.webp following. `image` overrides the asset once the merchant uploads
+  their own; with neither, the labelled placeholder fills the band at its exact
+  size, so a missing shot never breaks it.
+
+  ORDER. That is NOT the design's order, and the deviation was asked for. The
+  design maps its slots (slotId 'sf-hero-' + i+1) and puts the studio's
+  Indonesian order-notes card first; this band puts the polaroid photograph
+  first and the card second. Two things fall out of it and both are
+  improvements, which is why it was not argued with:
+
+    - Below `md` the card is dropped, because it is `text_art` (see below). With
+      the card leading, a phone opened on the band's bare surface; with the
+      photograph leading it opens on a photograph.
+    - The card is full-bleed Indonesian type. It reads as a notice, and it was
+      the first thing a first-time visitor met.
+
+  The filenames now match the positions — slide 1 is hero-1.webp, slide 2 is
+  hero-2.webp — which they did not before this swap. That is a coincidence of
+  the reorder, not a rename: each file was named for the slide it first sat on,
+  the two were swapped once already, and swapping them back put every name back
+  over its own slide. Nothing in the theme reads the number in a filename, so do
+  not start now — `theme/templates/index.json` is where the order lives.
+
+  hero-2.webp is still the design's own export at 1200x675. hero-1.webp is NOT
+  — it was replaced with the studio's own higher-resolution render of the same
+  polaroid composition, 2730x1536, because the design's export was soft on a
+  wide screen: the band is 100vw, so a 1200px shot is upscaled on anything
+  larger than a small laptop and doubly so at 2x. The render does not carry the
+  "Wear Label" wordmark the design's export had across its top, which is fine —
+  the header already says the name a few hundred pixels above it. The alt text
+  was written about the composition, not the wordmark, so it still describes
+  what is there.
+
+  LCP. Leading with the photograph moves `fetchpriority="high"` onto it, so the
+  first paint now pulls 249KB instead of the card's 172KB. That is the price of
+  the reorder and it is paid knowingly. It cannot be trimmed from here: Shopify
+  serves a theme asset at its own size, and `asset_url` takes no width — the
+  responsive srcset only exists down the `image` branch above, so the way to get
+  one is for the merchant to upload the shot as an image setting rather than
+  ship it as an asset.
+
+  The width/height below stay 1200x675 for both. They reserve the aspect ratio
+  before the shot loads and nothing else — the img is `absolute inset-0
+  object-cover`, so its painted size comes from the band. Both assets are 16:9,
+  so one pair of numbers is right for both.
+
+  `text_art` marks a slide whose artwork is an image OF text — here, the second
+  slide's order-notes card. It cannot be cropped, so it is dropped below `md` and
+  the band's own surface shows instead: the band is taller than it is wide there
+  and object-cover keeps under half the card's width, which reads as a mistake.
+  The words belong in the alt text.
+{%- endcomment -%}
+
+{%- liquid
+  assign slide_count = section.blocks.size
+  assign many = false
+  if slide_count > 1
+    assign many = true
+  endif
+-%}
+
+<section
+  aria-roledescription="carousel"
+  aria-label="{{ 'carousel.label' | t }}"
+  data-carousel
+  data-interval="{{ section.settings.interval }}"
+  class="relative h-[70svh] min-h-112 touch-pan-y overflow-hidden bg-surface-muted md:h-150"
+>
+  {%- for block in section.blocks -%}
+    {%- liquid
+      assign active = false
+      if forloop.first
+        assign active = true
+      endif
+
+      assign slide_image = block.settings.image
+      assign asset_name = block.settings.asset
+    -%}
+
+    <div
+      data-slide
+      {% unless active %}aria-hidden="true" inert{% endunless %}
+      aria-roledescription="slide"
+      aria-label="{{ forloop.index }} of {{ slide_count }}"
+      style="transform:translateX({{ forloop.index0 | times: 100 }}%);z-index:{% if active %}2{% else %}1{% endif %}"
+      class="absolute inset-0 motion-safe:transition-transform motion-safe:duration-(--duration-lead) motion-safe:ease-(--ease-entrance)"
+      {{ block.shopify_attributes }}
+    >
+      <div class="absolute inset-0 {% if block.settings.text_art %}hidden md:block{% endif %}">
+        {%- if slide_image -%}
+          {% render 'media', image: slide_image, fill: true, sizes: '100vw', label: 'Hero photo', class: 'rounded-none' %}
+        {%- elsif asset_name != blank -%}
+          <div class="absolute inset-0 h-full w-full overflow-hidden bg-tone">
+            <img
+              src="{{ asset_name | asset_url }}"
+              alt="{{ block.settings.alt | escape }}"
+              width="1200"
+              height="675"
+              {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+              class="absolute inset-0 h-full w-full object-cover"
+            >
+          </div>
+        {%- else -%}
+          {% render 'media', image: nil, fill: true, sizes: '100vw', label: 'Hero photo', class: 'rounded-none' %}
+        {%- endif -%}
+      </div>
+
+      {%- comment -%}
+        The bottom padding is the room the mobile control row sits in; at `md`
+        the arrows move to the sides and the card recentres, and with one slide
+        there is no row to leave room for.
+      {%- endcomment -%}
+      <div class="absolute inset-0 flex items-center md:pb-0 {% if many %}pb-16{% endif %}">
+        <div class="mx-auto w-full max-w-content px-gutter">
+          <div class="flex max-w-130 flex-col gap-4 bg-canvas/92 p-6 md:gap-5 md:px-11 md:py-12">
+            <span class="text-micro uppercase tracking-nav text-ink-subtle">
+              {% render 'copy', value: block.settings.eyebrow, label: 'eyebrow', inline: true %}
+            </span>
+
+            {%- comment -%}
+              Every slide carries an h1. Only the active slide is in the
+              accessibility tree, so the page still has exactly one.
+            {%- endcomment -%}
+            <h1 class="text-display leading-display tracking-display">
+              {% render 'copy', value: block.settings.heading, label: 'heading' %}
+            </h1>
+
+            <p class="text-body leading-body text-ink-muted">
+              {% render 'copy', value: block.settings.body, label: 'body', lines: 2 %}
+            </p>
+
+            {%- comment -%}
+              TWO CTAs, and the second one is the point of the whole band.
+
+              The brief's first screen has to say that Wear Label does two
+              things — ready-to-wear and custom apparel production — before the
+              reader scrolls. So the primary button shops and the secondary one
+              goes to the B2B page, and the pair sits on every slide rather than
+              only the first: any slide can be the one a reader lands on, and a
+              slide that drops the custom route is a slide where the second
+              business does not exist.
+
+              `flex-wrap` rather than a two-column grid because these labels are
+              set at 0.22em tracking and `px-11`: SHOP COLLECTION and CUSTOM
+              APPAREL side by side need 430px, and the card is 100% of a 390px
+              screen minus the gutter. They wrap to one per row there and sit in
+              a row from about `sm` up, which is the width at which they fit.
+              Both are `min-h-13` so a wrapped pair is still two 52px targets.
+            {%- endcomment -%}
+            {%- if block.settings.cta != blank or block.settings.cta_2 != blank -%}
+              {%- comment -%}
+                Assigned rather than filtered inline: theme check's
+                UnsupportedFilterArguments forbids a filter on a `render`
+                argument, so `href | default: ...` has to resolve first.
+              {%- endcomment -%}
+              {%- assign slide_href = block.settings.href | default: routes.all_products_collection_url -%}
+              <div class="flex flex-wrap gap-3">
+                {%- if block.settings.cta != blank -%}
+                  {% render 'button',
+                    label: block.settings.cta,
+                    href: slide_href,
+                    variant: 'primary',
+                    class: 'max-sm:w-full' %}
+                {%- endif -%}
+
+                {%- if block.settings.cta_2 != blank -%}
+                  {% render 'button',
+                    label: block.settings.cta_2,
+                    href: block.settings.href_2,
+                    variant: 'secondary',
+                    class: 'max-sm:w-full' %}
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- endfor -%}
+
+  {%- if many -%}
+    {%- comment -%}
+      One row under the card on a phone; at `md` the wrapper stops being a box at
+      all (`contents`) and its three children take the positions the design draws
+      — arrows against the band's edges, dots along its bottom.
+    {%- endcomment -%}
+    <div class="absolute inset-x-0 bottom-4 z-10 flex items-center justify-center gap-3 md:contents">
+      {%- comment -%}
+        The arrows are painted at 52px, over the 44px minimum, so the press is
+        `.wl-press-soft` (0.98) rather than `.wl-tap` (0.95) — five percent of a
+        control this size reads as a lurch. See app/base.css.
+
+        Which is also why they are no longer centred with `md:top-1/2
+        md:-translate-y-1/2`. The press state sets `transform: scale(...)`
+        outright, and it wins over the utility, so a press at `md` would have
+        dropped the arrow half its own height. `md:inset-y-0 md:my-auto` centres
+        it with margins instead — a definite height between a top and a bottom of
+        zero splits the leftover space — leaving `transform` free for the press.
+      {%- endcomment -%}
+      <button
+        type="button"
+        data-carousel-prev
+        class="wl-press-soft z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:inset-y-0 md:left-7 md:my-auto"
+      >
+        {% render 'icon', icon: 'chevron-left', class: 'size-5.5' %}
+        <span class="sr-only">{{ 'carousel.previous_slide' | t }}</span>
+      </button>
+
+      <div class="z-10 flex items-center justify-center md:absolute md:inset-x-0 md:bottom-7">
+        {%- for block in section.blocks -%}
+          <button
+            type="button"
+            data-carousel-dot="{{ forloop.index0 }}"
+            {% if forloop.first %}aria-current="true"{% endif %}
+            {%- comment -%}
+              The bar is the artwork; .wl-tap is the 44px target around it, so the
+              design keeps its 4px rule and a thumb still lands.
+            {%- endcomment -%}
+            class="wl-tap inline-flex h-11 cursor-pointer items-center px-3 md:px-1.25"
+          >
+            <span data-carousel-bar class="h-1 w-4.5 bg-ink/35 transition-[width,background-color] duration-(--duration-base) hover:bg-brand/60"></span>
+            <span class="sr-only">{{ 'carousel.go_to_slide' | t }} {{ forloop.index }}</span>
+          </button>
+        {%- endfor -%}
+      </div>
+
+      <button
+        type="button"
+        data-carousel-next
+        class="wl-press-soft z-10 inline-flex size-13 shrink-0 cursor-pointer items-center justify-center bg-canvas/90 text-ink transition-colors duration-(--duration-base) hover:bg-canvas md:absolute md:inset-y-0 md:right-7 md:my-auto"
+      >
+        {% render 'icon', icon: 'chevron-right', class: 'size-5.5' %}
+        <span class="sr-only">{{ 'carousel.next_slide' | t }}</span>
+      </button>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Hero carousel",
+  "settings": [
+    {
+      "type": "range",
+      "id": "interval",
+      "label": "Seconds per slide",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "default": 3,
+      "info": "The design rotates at 6s; 3 is what this build asked for. Rotation is off entirely for readers who have asked for reduced motion."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "textarea", "id": "body", "label": "Body" },
+        { "type": "text", "id": "cta", "label": "Button label" },
+        { "type": "url", "id": "href", "label": "Button link" },
+        { "type": "text", "id": "cta_2", "label": "Second button label", "info": "The custom-apparel route. Leave blank and only the first button renders." },
+        { "type": "url", "id": "href_2", "label": "Second button link" },
+        { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped artwork below." },
+        { "type": "text", "id": "asset", "label": "Shipped asset filename", "info": "A file in the theme's assets/. Used when no photograph is uploaded." },
+        { "type": "textarea", "id": "alt", "label": "Alt text" },
+        { "type": "checkbox", "id": "text_art", "label": "Artwork is an image of text", "default": false, "info": "Hides the artwork below md, where cropping would slice the words mid-sentence." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Hero carousel" }]
+}
+{% endschema %}

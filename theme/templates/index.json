@@ -1,0 +1,372 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-video",
+      "settings": {
+        "asset": "hero-video.mp4",
+        "poster": "hero-video-poster.webp",
+        "still": "hero-video-still.webp",
+        "heading": "Wear Label",
+        "description": "A short film for Wear Label: a model walks through a sunlit courtyard in a white shirt and wide-leg trousers."
+      }
+    },
+    "what-we-do": {
+      "type": "two-ways",
+      "blocks": {
+        "d1": {
+          "type": "door",
+          "settings": {
+            "tone": "invert",
+            "heading": "Ready to Wear",
+            "body": "Thoughtfully designed womenswear for everyday life. Comfortable, versatile, and easy to style — made to become pieces you'll reach for again and again.",
+            "asset": "door-shop.webp",
+            "alt": "A model in the polaroid composition that led the earlier hero, cropped square."
+          }
+        },
+        "d2": {
+          "type": "door",
+          "settings": {
+            "tone": "canvas",
+            "heading": "Custom & Business",
+            "body": "Custom apparel and merchandise solutions for companies, organizations, communities, and events. From uniforms to special projects, we create pieces tailored to your needs.",
+            "href": "/pages/custom",
+            "asset": "door-custom.webp",
+            "alt": "A crop of the studio's hospital uniform shoot, six of the eight sets."
+          }
+        }
+      },
+      "block_order": ["d1", "d2"],
+      "settings": {
+        "eyebrow": "Ready-to-wear & custom apparel",
+        "heading": "What We Do",
+        "body": "We design for everyday wear and beyond. From versatile ready-to-wear collections to custom apparel and merchandise, Wear Label creates thoughtful pieces for individuals, businesses, and communities."
+      }
+    },
+    "views": {
+      "type": "home-tabs",
+      "blocks": {
+        "v1": {
+          "type": "view",
+          "settings": {
+            "label": "Ready-to-wear",
+            "key": "ready-to-wear",
+            "sections": "arrivals,voices,instagram"
+          }
+        },
+        "v2": {
+          "type": "view",
+          "settings": {
+            "label": "Custom & business",
+            "key": "custom-business",
+            "sections": "projects,custom"
+          }
+        }
+      },
+      "block_order": [
+        "v1",
+        "v2"
+      ],
+      "settings": {
+        "label": "Choose what you came for"
+      }
+    },
+    "arrivals": {
+      "type": "new-arrivals",
+      "settings": {
+        "collection": "all",
+        "heading": "Everyday, the Wear Label Way",
+        "subheading": "Thoughtfully designed pieces that bring comfort, versatility, and effortless style into your everyday wardrobe.",
+        "count": 8,
+        "cta": "Shop all",
+        "href": "/collections/all?filter.v.availability=1"
+      }
+    },
+    "voices": {
+      "type": "voices-wall",
+      "blocks": {
+        "review-1": {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "My 2nd and 3rd yora pants.. Bagus cutting dan bahannya.. Super pewe dan ringan.. I know my photos are not doing the pants justice, but trust me, its worth to buy!"
+          }
+        },
+        "review-2": {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "yayy makasii bgtt celananya udah nyampe, pengemasan sm sellernya juga cepet bgtt langsung dikirim. sumph si celananya se pw itu, sebelum2nya kalo beli celana gapernah ga dikecilin(always) kali ini celananya bnr2 fit di aku dan se pw itu celananya kao dipake."
+          }
+        },
+        "review-3": {
+          "type": "review",
+          "settings": {
+            "user": "y*****p",
+            "body": "bagusss banget tolong, selama ini susah cari celana ukuran oke, seneng banget nemu brand ini. Bahan jg bagus dan harganya murah. Langsung pengen beli warna lain😍"
+          }
+        },
+        "review-4": {
+          "type": "review",
+          "settings": {
+            "user": "r*****a",
+            "body": "warna putih nya bagus ga terlalu nerawang, sehari langsung nyampe pake same day 🥰😍"
+          }
+        },
+        "review-5": {
+          "type": "review",
+          "settings": {
+            "user": "r*****u",
+            "body": "WORTH IT BANGET!🥰🥰😍 Mau repurchase lagi nunggu yang warna putih restock, ini bener2 bagus ga panas, aku udah langsung try on jalan-jalan soalnya tadi siang di tempat panas, linennya ga gatel sama sekali, buat ibu hamil 6 bulan muat uk L , bb ku 55,7 kg tinggi 160cm."
+          }
+        },
+        "review-6": {
+          "type": "review",
+          "settings": {
+            "user": "s*****b",
+            "body": "keren bgt, UK nya juga pas biasanya kalo dari toko sebelumnya itu terlalu gede kalo ini tuh pas bgt, sukak, next time order lagi!"
+          }
+        },
+        "review-7": {
+          "type": "review",
+          "settings": {
+            "user": "p*****_",
+            "body": "packingan bagus aman dan rapih. celananya pas banget size nya, ga kegedean atau kekecilan, bahannya juga adem. adminnya baik responsif, btw maaf ya videonya ini tp paket nyampe dengan selamat dan barangnya bagus"
+          }
+        },
+        "review-8": {
+          "type": "review",
+          "settings": {
+            "user": "r*****u",
+            "body": "Bahan linen produk lokal yang bagus! Udh 2x order ~ hamil 8 bulan masi muat dan suka bgt !!! ✨😍❤️ ga sesak sama sekali"
+          }
+        },
+        "review-9": {
+          "type": "review",
+          "settings": {
+            "user": "nadonaddd",
+            "body": "Satisfying! Bahannya halus, ringan, lingkar pinggang pas sama panjang ukuran M juga passs buat aku TB 155 / BB 47, plus respon seller oke banget dan bantu bangettt awalnya keabisan choco yg M pas chat seller lgsg dibales dan ternyata masih ada 1! Aaaa pas banget lagi cari celana gini, thanks a lot!"
+          }
+        },
+        "review-10": {
+          "type": "review",
+          "settings": {
+            "user": "ruthfelisa",
+            "body": "Bahannya bagus dan cuttingan nya pas, ga yg terlalu lebar. Ini celana ke 2 aku beli di wear label. Biar ga nerawang pakai daleman warna netral atau short pants"
+          }
+        },
+        "review-11": {
+          "type": "review",
+          "settings": {
+            "user": "g*****i",
+            "body": "Cakepp bangettt pliss!!! Ga nyesel beli di sini, worth it banget dengan harga segitu, kualitasnya beneran bagus. Sempet ragu karna takut kebesaran dipinggang (BB 38/155), tapi ternyata pas bangettt huhu🥺 senangggg. Pengemasan dan pengirimannya juga cepat sekali. Kmrn checkout, hari ini udah nyampe."
+          }
+        },
+        "review-12": {
+          "type": "review",
+          "settings": {
+            "user": "l*****l",
+            "body": "celananya realpict, bagus, panjang pas di aku tb 167 cm, BB 60. puas sih. cuma kalo aku pake agak jdi keliatan gendut hehe. tpi keseluruhan mantap bahannya sesuai deskripsi. penting buat lihat detail produk, sebelum membeli gaiss..❤️❤️"
+          }
+        },
+        "review-13": {
+          "type": "review",
+          "settings": {
+            "user": "k*****_",
+            "body": "bagusss bangettt uu😍 realpict, no minus, cuttingnya rapii, packingnya cakep, buat bb/tb 43/162 cocok bgt pake uk M panjang n bagian pinggangnya pas👍 recommended banget sih ini🥰"
+          }
+        },
+        "review-14": {
+          "type": "review",
+          "settings": {
+            "user": "satyairada",
+            "body": "Produk ini oke bgt, aku pesen wrna white dan gak nerawang, oke si buat hijabers2 yg pengen pake kulot putih n ga nerawang, kesan hw jg bikin kt terlihat lbh jenjang, good job kak! Produknya oke bgt ❤️"
+          }
+        },
+        "review-15": {
+          "type": "review",
+          "settings": {
+            "user": "d*****a",
+            "body": "Aku suka celananya tipis tapi ga nerawang gitu bahannya juga lembut nyaman dipakai beraktifitas seharian bahkan dipake buat liburan pun oke banget sih ini"
+          }
+        },
+        "review-16": {
+          "type": "review",
+          "settings": {
+            "user": "a*****0",
+            "body": "Sumpah ini tipe celana yg udh lama aku cari 🥺😢 Akhirnya menemukan merk ini. Mantap banget pokoknya. Suka bgttt 🫰🫰 Admin super ramah, informatif. Celananya oke, panjang nya pas, bahan bagus. Bakalan repurchaseeee😍🥰"
+          }
+        },
+        "review-17": {
+          "type": "review",
+          "settings": {
+            "user": "j*****y",
+            "body": "Pertama kali beli dan langsung suka sama produknya wear label❤️ bahannya jatuh dan adem, jahitan super rapih, packingnya jg super rapih per produk pakai kardus sendiri-sendiri👍👍👍"
+          }
+        },
+        "review-18": {
+          "type": "review",
+          "settings": {
+            "user": "tinnayumiko05",
+            "body": "Masya Allah ini keren banget...BB aq 57 TB 155 masih muat dong...sebagus itu dan nyaman di pake.next aq mau order lagi ..packing nya juga super rapi banget dan cepet sampai nya ..makasih ya,sumpah gak nyesel beli disini ..🤩🤩🥳"
+          }
+        },
+        "review-19": {
+          "type": "review",
+          "settings": {
+            "user": "y*****1",
+            "body": "bagussss bangettt sukaaaa udah repeat order 3x selalu puas beli di wear labell , untuk cewe tinggi kea aku gini ga ngantung sama sekali celana nyaa😭👍 buat tb 165 aman bgtt pake yora loose panta size L😭😍 tcakeuppppp bgtt!!!! bakal order lagii yora loose pants ketagihan bahannya enakk jatuh😍"
+          }
+        },
+        "review-20": {
+          "type": "review",
+          "settings": {
+            "user": "e*****i",
+            "body": "Proses packing cepat, packaging juga aman tebal gak worry produk cacat karna pengiriman. Pengiriman juga cepet. Total dah punya 5 koleksi cerra pants ku saking love nya, thankyou"
+          }
+        }
+      },
+      "block_order": [
+        "review-1",
+        "review-2",
+        "review-3",
+        "review-4",
+        "review-5",
+        "review-6",
+        "review-7",
+        "review-8",
+        "review-9",
+        "review-10",
+        "review-11",
+        "review-12",
+        "review-13",
+        "review-14",
+        "review-15",
+        "review-16",
+        "review-17",
+        "review-18",
+        "review-19",
+        "review-20"
+      ],
+      "settings": {
+        "heading": "From our customers"
+      }
+    },
+    "instagram": {
+      "type": "instagram-strip",
+      "settings": {
+        "collection": "all",
+        "heading": "Follow us on Instagram",
+        "count": 11
+      }
+    },
+    "projects": {
+      "type": "selected-projects",
+      "blocks": {
+        "p1": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Hospital uniforms",
+            "detail": "Eight uniform sets produced as one programme.",
+            "asset": "project-hospital.webp",
+            "alt": "Eight hospital uniform sets laid out flat in two rows — tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
+          }
+        },
+        "p2": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Institutional uniforms",
+            "detail": "Field shirt with an embroidered crest, a sleeve badge and a name plate.",
+            "asset": "project-institution.webp",
+            "alt": "A dark green institutional shirt photographed flat, front and back — epaulettes, buttoned chest pockets, an embroidered crest on one sleeve and a blank name plate."
+          }
+        },
+        "p3": {
+          "type": "project",
+          "settings": {
+            "client": "Salna",
+            "category": "Corporate uniforms",
+            "detail": "Two-tone shirt with the name embroidered on the chest and across the shoulders.",
+            "asset": "project-corporate.webp",
+            "alt": "A purple and cream two-tone short-sleeve shirt, front and back, the name Salna embroidered on the chest and across the shoulder yoke."
+          }
+        },
+        "p4": {
+          "type": "project",
+          "settings": {
+            "client": "",
+            "category": "Merchandise",
+            "detail": "Canvas tote with webbing handles and bound edges.",
+            "asset": "project-merchandise.webp",
+            "alt": "A canvas tote bag in off-white with navy webbing handles and navy bound edges, photographed on a plain grey ground."
+          }
+        }
+      },
+      "block_order": [
+        "p1",
+        "p2",
+        "p3",
+        "p4"
+      ],
+      "settings": {
+        "eyebrow": "Custom apparel",
+        "heading": "Selected projects",
+        "body": "Custom apparel created for companies, institutions, organizations, and communities.",
+        "cta": "",
+        "href": "",
+        "tone": "page"
+      }
+    },
+    "custom": {
+      "type": "custom-band",
+      "blocks": {
+        "s1": {
+          "type": "service",
+          "settings": {
+            "label": "Custom uniform"
+          }
+        },
+        "s2": {
+          "type": "service",
+          "settings": {
+            "label": "Corporate apparel"
+          }
+        },
+        "s3": {
+          "type": "service",
+          "settings": {
+            "label": "Merchandise & community apparel"
+          }
+        }
+      },
+      "block_order": [
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "settings": {
+        "eyebrow": "Custom apparel",
+        "heading": "Wear Label Custom",
+        "subheading": "Custom apparel for companies, organizations & communities.",
+        "body": "From uniforms to merchandise, Wear Label provides custom apparel production tailored to your team, organization, and brand.",
+        "asset": "custom-band-detail.webp",
+        "alt": "A close view of an institutional shirt's chest — a blank name plate above a buttoned pocket, and an embroidered badge on the sleeve.",
+        "cta": "Explore custom services",
+        "href": "/pages/custom",
+        "cta_2": "Request a quote",
+        "href_2": ""
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "what-we-do",
+    "views",
+    "arrivals",
+    "voices",
+    "instagram",
+    "projects",
+    "custom"
+  ]
+}

@@ -1,0 +1,304 @@
+{%- comment -%}
+  Size, colourway, quantity, add to bag — port of
+  components/product/product-purchase.tsx.
+
+  Shopify holds a variant per combination of option values, so the option grids
+  resolve to a single variant id, which is the only thing the form posts. Price,
+  stock and availability are all read from that variant and never computed here —
+  the same rule the React version worked to, except that here the variant is
+  Shopify's own object rather than one found in a fixture.
+
+  THE ONE ARCHITECTURAL CHANGE, and it is an improvement. React held the
+  selection in useState, so the picker did not work without JavaScript. Here each
+  option value is a LINK to ?variant=<id> — the same "URL is the state" rule the
+  catalogue filters follow. That makes the picker work with script off, makes a
+  chosen variant shareable, and makes the back button undo exactly one choice.
+  Shopify resolves `product.selected_or_first_available_variant` from that param,
+  so there is no state to keep in step.
+
+  A combination with no stock does not silently do nothing: the value is rendered
+  disabled and struck through, and where the pair itself is the problem the action
+  is disabled and says so in words. Sold out is never communicated by colour
+  alone.
+
+  THREE ROUTES OUT OF THIS BLOCK, and they are deliberately not three buttons.
+
+  `Add to bag` and `Buy now` are the brief's two CTAs and they are the same POST
+  to /cart/add — `Buy now` is a second submit carrying `name="return_to"
+  value="/checkout"`, so only the button the shopper actually pressed adds that
+  parameter. Exactly the pattern cart-lines.liquid uses for its two quantities.
+  It is NOT Shopify's dynamic checkout button: `{{ form | payment_button }}`
+  needs Shopify Payments, which does not exist in Indonesia (see CLAUDE.md,
+  Platform constraints). So `Buy now` reaches checkout through the cart in one
+  silent hop rather than accelerating past it, which is the whole difference.
+
+  `Buy on Shopee` is the third route and it is a LINK, not a button. It is a
+  channel choice rather than a purchase intent — the same piece, bought
+  somewhere else — and giving it a third button would put the marketplace at
+  parity with the store's own checkout on the store's own product page. It stays
+  visible on a sold-out product on purpose: this catalogue's stock data came
+  from Shopee, but that was a snapshot, and hiding the link would assert a
+  restock has not happened when nothing here knows that.
+
+  The link renders only where `custom.shopee_url` is set, falling back to the
+  shop-wide URL in theme settings. With neither it is absent — a marketplace
+  button that lands on a search page is the dead link this repo refuses.
+
+  Accepts: product
+{%- endcomment -%}
+
+{%- liquid
+  assign current = product.selected_or_first_available_variant
+  unless current
+    assign current = product.variants.first
+  endunless
+  assign purchasable = false
+  if current and current.available
+    assign purchasable = true
+  endif
+
+  assign shopee_url = product.metafields.custom.shopee_url.value | default: settings.shopee_shop_url
+
+  # `render` takes a variable or a literal, never an expression — writing
+  # `disabled: purchasable == false` is a parse error, not a falsy value. The
+  # negation has to exist as its own variable before the two calls below can
+  # use it. (And inside a liquid tag a comment is a `#` line, not a comment
+  # block — a stray percent-brace in here closes the tag early.)
+  assign unavailable = true
+  if purchasable
+    assign unavailable = false
+  endif
+-%}
+
+<form method="post" action="{{ routes.cart_add_url }}" id="options" class="flex flex-col gap-5.5">
+  <input type="hidden" name="form_type" value="product">
+  <input type="hidden" name="utf8" value="✓">
+  <input type="hidden" name="id" value="{{ current.id }}">
+
+  {%- comment -%}
+    A product with no real options still reports one — Shopify's synthetic
+    "Title" option, whose single value is "Default Title". Rendering it draws a
+    fieldset labelled Title holding one chip that says Default Title, which is
+    an option the shopper does not have. Every piece imported from the Shopee
+    catalogue is in that state, so the picker has to sit behind this guard.
+  {%- endcomment -%}
+  {%- unless product.has_only_default_variant -%}
+  {%- for option in product.options_with_values -%}
+    {%- liquid
+      assign option_index = forloop.index
+      assign lowered = option.name | downcase
+      assign is_colour = false
+      if lowered contains 'colour' or lowered contains 'color'
+        assign is_colour = true
+      endif
+      assign selected_value = current.options[forloop.index0]
+    -%}
+
+    <fieldset
+      data-variant-field
+      class="flex flex-col gap-3 {% if forloop.first %}border-t border-hairline pt-5.5{% endif %}"
+    >
+      {%- if is_colour -%}
+        {%- comment -%}
+          The chosen colourway gets its own line at h3, not a 14px caption tucked
+          beside the label: the reviews argue about colour BY NAME, so the name is
+          what the shopper is reading, and a 40px disc cannot say "Espresso". No
+          `font-display` — base.css sets h3 and below in the interface face. The
+          line is height-held so swapping variants never shifts the swatch row.
+        {%- endcomment -%}
+        <div class="flex flex-col gap-1">
+          <legend class="text-micro uppercase tracking-nav text-ink-subtle">{{ option.name }}</legend>
+          <span class="min-h-7 text-h3 leading-h3 text-ink">{{ selected_value }}</span>
+        </div>
+      {%- else -%}
+        <legend class="text-micro uppercase tracking-nav text-ink-subtle">{{ option.name }}</legend>
+      {%- endif -%}
+
+      <div class="flex flex-wrap {% if is_colour %}gap-3.5{% else %}gap-2.5{% endif %}">
+        {%- for value in option.values -%}
+          {%- comment -%}
+            The variant this value would land on: the current selection with just
+            this one option swapped. Nothing is guessed — if no such variant
+            exists the value is rendered unavailable rather than linked.
+          {%- endcomment -%}
+          {%- liquid
+            assign target = nil
+            for candidate in product.variants
+              assign matches = true
+              for other in product.options_with_values
+                assign other_index = forloop.index
+                if other_index == option_index
+                  if candidate.options[forloop.index0] != value
+                    assign matches = false
+                  endif
+                else
+                  if candidate.options[forloop.index0] != current.options[forloop.index0]
+                    assign matches = false
+                  endif
+                endif
+              endfor
+              if matches
+                assign target = candidate
+                break
+              endif
+            endfor
+
+            assign is_selected = false
+            if value == selected_value
+              assign is_selected = true
+            endif
+
+            assign is_available = false
+            if target and target.available
+              assign is_available = true
+            endif
+          -%}
+
+          {%- if is_colour -%}
+            {%- assign swatch = value.swatch.color -%}
+            {%- if is_available -%}
+              <a
+                href="{{ product.url }}?variant={{ target.id }}"
+                data-variant-link
+                {% if is_selected %}aria-current="true"{% endif %}
+                title="{{ value }}"
+                {% if swatch %}style="background-color:{{ swatch }}"{% endif %}
+                class="wl-tap size-10 rounded-pill border border-line transition-shadow duration-(--duration-base) {% if is_selected %}ring-2 ring-brand ring-offset-2{% else %}hover:ring-1 hover:ring-line{% endif %} {% unless swatch %}bg-tone{% endunless %}"
+              ><span class="sr-only">{{ value }}</span></a>
+            {%- else -%}
+              <span
+                aria-disabled="true"
+                title="{{ value }}"
+                {% if swatch %}style="background-color:{{ swatch }}"{% endif %}
+                class="wl-tap inline-block size-10 rounded-pill border border-line opacity-40 {% unless swatch %}bg-tone{% endunless %}"
+              ><span class="sr-only">{{ value }} — {{ 'product.sold_out' | t }}</span></span>
+            {%- endif -%}
+
+          {%- else -%}
+            {%- if is_available -%}
+              <a
+                href="{{ product.url }}?variant={{ target.id }}"
+                data-variant-link
+                {% if is_selected %}aria-current="true"{% endif %}
+                class="wl-press-soft inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border px-3 text-caption tracking-wide transition-colors duration-(--duration-base) {% if is_selected %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
+              >{{ value }}</a>
+            {%- else -%}
+              <span
+                aria-disabled="true"
+                class="inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border border-inert-border bg-inert px-3 text-caption tracking-wide text-on-inert line-through"
+              >{{ value }}<span class="sr-only"> — {{ 'product.sold_out' | t }}</span></span>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </fieldset>
+  {%- endfor -%}
+  {%- endunless -%}
+
+  <div class="flex flex-wrap items-stretch gap-3.5">
+    {%- comment -%}
+      The stepper's two buttons are an enhancement; the number input underneath
+      them is what actually carries the value, so quantity still works with
+      script off. That is why they are type="button" and not submits.
+    {%- endcomment -%}
+    <div class="inline-flex items-center rounded-xs border border-line bg-canvas" data-stepper>
+      <button
+        type="button"
+        data-stepper-down
+        class="h-14 w-12 cursor-pointer text-h3 text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted disabled:cursor-not-allowed disabled:text-on-inert"
+      >−<span class="sr-only">{{ 'product.decrease' | t }}</span></button>
+
+      <input
+        type="number"
+        name="quantity"
+        value="1"
+        min="1"
+        max="10"
+        step="1"
+        aria-label="{{ 'product.quantity' | t }}"
+        data-numeric
+        data-stepper-value
+        class="w-13 border-0 bg-transparent text-center text-body text-ink [appearance:textfield] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      >
+
+      <button
+        type="button"
+        data-stepper-up
+        class="h-14 w-12 cursor-pointer text-h3 text-brand transition-colors duration-(--duration-base) hover:bg-surface-muted disabled:cursor-not-allowed disabled:text-on-inert"
+      >+<span class="sr-only">{{ 'product.increase' | t }}</span></button>
+    </div>
+
+    {%- assign add_label = 'product.add_to_bag' | t -%}
+    {% render 'button',
+      label: add_label,
+      variant: 'primary',
+      type: 'submit',
+      disabled: unavailable,
+      class: 'flex-1 px-6 sm:px-11' %}
+
+    {%- comment -%}
+      `class` here REPLACES save-button's own default, which is where its press
+      classes live — so they have to be restated or this is the one control on the
+      site that does not answer a tap. Painted 56px, so wl-press-soft's 0.98 is
+      the right depth; wl-tap comes along because it is what the default carries
+      and it is a no-op above 44px.
+    {%- endcomment -%}
+    {% render 'save-button', product: product, class: 'wl-tap wl-press-soft size-14 rounded-xs border border-ink-subtle hover:bg-inert' %}
+  </div>
+
+  {%- comment -%}
+    `Buy now` takes its own full-width row rather than sharing one with the bag.
+    Side by side at 0.22em tracking the pair needs about 430px and the purchase
+    column is 390px minus the gutter on a phone, so they would wrap anyway — and
+    a wrapped pair puts the secondary action level with the stepper, where it
+    reads as part of the quantity control.
+
+    It carries the same `purchasable` guard as the bag. A checkout button that
+    posts a sold-out variant fails at Shopify's end with an error the shopper
+    has to read to understand, which is worse than a control that says up front
+    it cannot be used.
+  {%- endcomment -%}
+  {%- assign buy_label = 'product.buy_now' | t -%}
+  {% render 'button',
+    label: buy_label,
+    variant: 'secondary',
+    type: 'submit',
+    name: 'return_to',
+    value: '/checkout',
+    disabled: unavailable,
+    class: 'w-full px-6 sm:px-11' %}
+
+  {%- comment -%}
+    Present from first render, so a message is an update to a region that already
+    exists rather than a new one appearing.
+  {%- endcomment -%}
+  <p aria-live="polite" class="min-h-5 text-caption text-ink-muted">
+    {%- if purchasable -%}
+      {{ form.errors | default_errors }}
+    {%- else -%}
+      {{ 'product.unavailable_variant' | t }}
+    {%- endif -%}
+  </p>
+
+  {%- if shopee_url != blank -%}
+    {%- comment -%}
+      An off-site destination, so it says so: `target="_blank"` keeps the
+      shopper's place on this page, `rel="noopener"` is required with it, and the
+      screen-reader-only suffix is what stops "Buy on Shopee" from being a link
+      that silently replaces the page for someone who cannot see the new tab
+      open. `noreferrer` is deliberately NOT here — Shopee is the studio's own
+      shop and the referrer is how their analytics attribute a visit the site
+      sent them.
+    {%- endcomment -%}
+    <a
+      href="{{ shopee_url }}"
+      target="_blank"
+      rel="noopener"
+      class="inline-flex min-h-11 items-center gap-1.5 self-start text-caption uppercase tracking-nav text-ink-muted transition-colors duration-(--duration-base) hover:text-brand"
+    >
+      {{ 'product.buy_on_shopee' | t }}
+      {% render 'icon', icon: 'arrow-right', class: 'size-4' %}
+      <span class="sr-only">{{ 'general.opens_new_tab' | t }}</span>
+    </a>
+  {%- endif -%}
+</form>

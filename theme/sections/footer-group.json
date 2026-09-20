@@ -1,0 +1,69 @@
+{
+  "name": "Footer",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "column-1": {
+          "type": "column",
+          "settings": {
+            "title": "Company",
+            "link_1_label": "About Wear Label",
+            "link_1_url": "",
+            "link_2_label": "Custom & Business",
+            "link_2_url": "/pages/custom",
+            "link_3_label": "Contact",
+            "link_3_url": "/pages/contact",
+            "link_4_label": "",
+            "link_4_url": ""
+          }
+        },
+        "column-2": {
+          "type": "column",
+          "settings": {
+            "title": "Shop",
+            "link_1_label": "New Arrivals",
+            "link_1_url": "/collections/all?filter.v.availability=1",
+            "link_2_label": "Pants",
+            "link_2_url": "/collections/pants",
+            "link_3_label": "Tops",
+            "link_3_url": "/collections/cardigan",
+            "link_4_label": "Collections",
+            "link_4_url": "/collections"
+          }
+        },
+        "column-3": {
+          "type": "column",
+          "settings": {
+            "title": "Customer Care",
+            "link_1_label": "Size Guide",
+            "link_1_url": "",
+            "link_2_label": "Shipping & Delivery",
+            "link_2_url": "",
+            "link_3_label": "Returns & Exchanges",
+            "link_3_url": "",
+            "link_4_label": "Contact Us",
+            "link_4_url": "/pages/contact"
+          }
+        }
+      },
+      "block_order": [
+        "column-1",
+        "column-2",
+        "column-3"
+      ],
+      "settings": {
+        "note": "Taxes included.",
+        "newsletter_heading": "Stay in the loop.",
+        "newsletter_body": "New arrivals, restocks, events, and notes from Wear Label.",
+        "newsletter_placeholder": "Enter your email",
+        "newsletter_cta": "Subscribe",
+        "copyright": "© 2026 Wear Label."
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

@@ -1,0 +1,44 @@
+{%- comment -%}
+  Copy renderer + placeholder — port of components/ui/copy.tsx.
+
+  Brand copy is still unwritten, so a blank theme setting must not collapse the
+  layout. Wherever text belongs, this renders either the real string or a
+  labelled placeholder sized in `em` — a heading placeholder is heading-sized, a
+  caption placeholder caption-sized — so the page's rhythm is already the final
+  one. Filling the setting in replaces the block with text; no section changes,
+  no layout shift.
+
+  The block is exposed as an image with the field name as its accessible label,
+  so assistive tech announces "heading placeholder" rather than silence.
+
+  Accepts:
+    value  - the string to render
+    label  - field name shown on the placeholder, e.g. "heading"
+    lines  - placeholder line count (default 1)
+    inline - bar and label side by side, for short strings inside a control
+    class  - extra classes on the wrapper
+{%- endcomment -%}
+
+{%- liquid
+  assign line_count = lines | default: 1
+  assign line_widths = '100%,92%,68%,84%,56%' | split: ','
+-%}
+
+{%- if value != blank -%}
+  {{- value -}}
+
+{%- elsif inline -%}
+  <span role="img" aria-label="{{ label }} placeholder" class="inline-flex items-center gap-2 {{ class }}">
+    <span aria-hidden="true" class="block h-[0.7em] w-12 rounded-xs bg-current opacity-30"></span>
+    <span aria-hidden="true" class="font-body text-micro font-normal uppercase tracking-nav opacity-70">{{ label }}</span>
+  </span>
+
+{%- else -%}
+  <span role="img" aria-label="{{ label }} placeholder" class="inline-flex w-full flex-col gap-[0.4em] align-middle {{ class }}">
+    {%- for i in (1..line_count) -%}
+      {%- assign width_index = forloop.index0 | modulo: 5 -%}
+      <span aria-hidden="true" class="block h-[0.7em] rounded-xs bg-surface-muted" style="width:{{ line_widths[width_index] }}"></span>
+    {%- endfor -%}
+    <span aria-hidden="true" class="font-body text-micro font-normal uppercase tracking-nav text-ink-subtle">{{ label }}</span>
+  </span>
+{%- endif -%}

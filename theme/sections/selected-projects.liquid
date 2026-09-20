@@ -1,0 +1,211 @@
+{%- comment -%}
+  Selected projects — the B2B proof. Brief §8 and §9.3.
+
+  THIS SECTION WAS REFUSED ONCE, AND THE REASON IT IS BUILT NOW IS THAT THE
+  REASON CHANGED. On 2026-08-31 it was decided not to build it for v1: the brief
+  asks for a portfolio and forbids inflating one, and there were no project
+  photographs and no nameable clients, so an empty portfolio was worse than no
+  portfolio. On 2026-09-13 the studio handed over four pieces of real work —
+  a hospital uniform programme, an institutional shirt, a corporate two-tone
+  shirt and a canvas tote — and the objection went with them.
+
+  What has NOT changed is the rule underneath it. There is still no "trusted by
+  hundreds of companies", no invented client list, and no project here that the
+  studio did not make. Adding a fifth means adding a photograph, not a sentence.
+
+  CLIENT NAMES ARE A SETTING AND THREE OF THEM ARE BLANK ON PURPOSE. The studio
+  authorised naming clients on 2026-09-13. Only one name could actually be read
+  off the photographs with certainty — Salna, embroidered front and back on the
+  corporate shirt. The hospital programme and the institutional shirt carry their
+  clients' names in embroidery a few pixels tall, and a client name guessed from
+  a blurry crop and then published is exactly the class of invention this repo
+  refuses. So those render the labelled placeholder until the studio types them
+  in, which is a theme-editor edit and not a code change.
+
+  THE PHOTOGRAPHS ARE CUT OUT, AND THAT CHANGED THE WHOLE BLOCK ON 2026-09-13.
+  They arrived as studio shots on white and light-grey sweeps, and dropped onto
+  this site they read as four foreign rectangles: the page is #fdfaf7 and the
+  band is #fbf4ef, both warm, and a cold paper white next to them looks like a
+  screenshot of somebody else's website. The studio's words were "gk masuk ke
+  theme warna shopify store kita".
+
+  So each one now carries an alpha matte and the garment sits on the site's own
+  surface. Three consequences, all of them deliberate:
+
+  - **They are `contain`, not `cover`.** A cut-out cropped to fill a box has its
+    sleeves cut off by nothing. Each object sits inside its frame whole, at its
+    own proportions — 1.62 for the institutional pair, 0.96 for the tote — and
+    the FRAME is what stays consistent, not the subject.
+  - **They sit on a PLATE, one surface step up from the band.** Not on tone,
+    which is the placeholder's colour and would put a taupe rectangle back
+    behind every garment. The plate follows the three-deep stack in CLAUDE.md:
+    cream when the band is plain page, white when the band is cream, so the
+    object always has exactly one step of separation and never flattens into
+    whatever it is sitting on.
+  - **The plate is generously padded.** A cut-out touching the edge of its own
+    box looks like a failed crop rather than an object on a surface.
+
+  How the mattes were made, because it is not the obvious way and the obvious
+  way fails: the background is flood-filled INWARDS FROM THE FRAME EDGE, so what
+  decides a pixel is whether it connects to the border, not whether it matches a
+  colour. A global colour key on these would have eaten the two white hospital
+  uniforms and the off-white canvas tote, which are the same value as the paper
+  behind them; connectivity saves them, because the navy trim and the piping
+  close the path. The masters are untouched in `asset/B2B Project/`.
+
+  THE BAND COLOUR IS A SETTING, AND IT EXISTS BECAUSE THIS SECTION MOVES. Cream
+  is the default and it is what the section wants on its own: a step away from
+  the plain page above it and away from an espresso band below.
+
+  What forced the setting is the home page's Custom & business view, where this
+  section sits directly above `custom-band`, which is cream and argues at length
+  for staying cream. Two cream bands touching read as one long cream region with
+  a seam in it — the same rule, from the other side. So there it is set to plain
+  page and `custom-band` keeps the cream.
+
+  Neither value may be espresso. On any template where the voices wall is below,
+  espresso here would put two dark bands against each other, which is the
+  original form of the same mistake.
+
+  NO COUNTS, NO YEARS, NO LOGOS. A "since 2019" or a client logo wall is the
+  cheapest way to inflate a portfolio of four, and the brief forbids exactly
+  that. The detail line under each project says what is in the photograph and
+  nothing the photograph does not show.
+{%- endcomment -%}
+
+{%- comment -%}
+  The padding moves with the tone, and forgetting that is how this section got
+  a 180px hole under the home page's tab bar on its first build. A band pays
+  for its own top margin AND its inside padding, because the colour change is
+  what has to be separated from its neighbours. A section that is just page
+  does not: it wants one `pt-section` and nothing else, exactly like
+  `new-arrivals` directly above it in the other view.
+{%- endcomment -%}
+{%- liquid
+  if section.settings.tone == 'page'
+    assign band = 'pt-section'
+    assign pad = ''
+  else
+    assign band = 'mt-section border-y border-rule bg-canvas'
+    assign pad = 'py-section'
+  endif
+-%}
+
+{%- comment -%}
+  The plate is one step up from whatever the band is, never the same as it.
+{%- endcomment -%}
+{%- liquid
+  if section.settings.tone == 'page'
+    assign plate = 'bg-canvas'
+  else
+    assign plate = 'bg-surface'
+  endif
+-%}
+
+<section
+  aria-labelledby="projects-heading"
+  class="{{ band }}"
+>
+  <div class="mx-auto flex w-full max-w-content flex-col gap-10 px-gutter {{ pad }}">
+    <div data-reveal class="flex flex-col gap-4">
+      <span class="text-micro uppercase tracking-eyebrow text-ink-subtle">
+        {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
+      </span>
+
+      <h2 id="projects-heading" class="text-h1 leading-h1">
+        {% render 'copy', value: section.settings.heading, label: 'heading' %}
+      </h2>
+
+      <p class="wl-measure text-body leading-body text-ink-muted">
+        {% render 'copy', value: section.settings.body, label: 'description', lines: 2 %}
+      </p>
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="grid gap-x-6 gap-y-10 sm:grid-cols-2">
+        {%- for block in section.blocks -%}
+          <li data-reveal class="flex flex-col gap-4" {{ block.shopify_attributes }}>
+            <div class="{{ plate }} rounded-sm p-7 sm:p-9">
+              {% render 'media-asset',
+                image: block.settings.image,
+                asset: block.settings.asset,
+                alt: block.settings.alt,
+                ratio: '4 / 3',
+                fit: 'contain',
+                plate: false,
+                asset_width: 1200,
+                asset_height: 900,
+                sizes: '(min-width: 640px) 42vw, 84vw',
+                label: 'Project photo' %}
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              {%- comment -%}
+                The client's name is the heading, not the category. A portfolio
+                entry titled "Hospital uniforms" is a service; one titled with
+                the hospital's name is a job somebody actually commissioned, and
+                that difference is the entire reason this section exists.
+              {%- endcomment -%}
+              <h3 class="text-h3 leading-h3">
+                {% render 'copy', value: block.settings.client, label: 'client', inline: true %}
+              </h3>
+
+              <p class="text-caption uppercase tracking-nav text-ink-subtle">
+                {% render 'copy', value: block.settings.category, label: 'category', inline: true %}
+              </p>
+
+              <p class="text-body leading-body text-ink-muted">
+                {% render 'copy', value: block.settings.detail, label: 'detail', inline: true %}
+              </p>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if section.settings.cta != blank -%}
+      <div data-reveal class="flex flex-wrap gap-3">
+        {% render 'button',
+          label: section.settings.cta,
+          href: section.settings.href,
+          variant: 'primary',
+          class: 'max-sm:w-full px-6 sm:px-11' %}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Selected projects",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "paragraph", "content": "Real work only. A project here needs a photograph of something the studio actually produced — do not add an entry to lengthen the list, and do not add client counts, years or logos. The detail line should say what the photograph shows and nothing more." },
+    { "type": "select", "id": "tone", "label": "Band", "default": "cream", "options": [
+      { "value": "cream", "label": "Cream band" },
+      { "value": "page", "label": "Plain page" }
+    ], "info": "Cream unless the section directly below is also cream. Two cream bands touching read as one." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Custom apparel" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Selected projects" },
+    { "type": "textarea", "id": "body", "label": "Description", "default": "Custom apparel created for companies, institutions, organizations, and communities." },
+    { "type": "header", "content": "Button" },
+    { "type": "text", "id": "cta", "label": "Label", "default": "Discuss your project" },
+    { "type": "url", "id": "href", "label": "Link" }
+  ],
+  "blocks": [
+    {
+      "type": "project",
+      "name": "Project",
+      "settings": [
+        { "type": "text", "id": "client", "label": "Client", "info": "The organisation the work was made for. Type it only if the studio has their agreement to name them — leave it blank and a labelled placeholder renders rather than a guess." },
+        { "type": "text", "id": "category", "label": "Category" },
+        { "type": "text", "id": "detail", "label": "Detail", "info": "One line about what the photograph shows." },
+        { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped asset below." },
+        { "type": "text", "id": "asset", "label": "Shipped asset filename" },
+        { "type": "textarea", "id": "alt", "label": "Alt text", "info": "Used by the shipped asset only." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Selected projects" }]
+}
+{% endschema %}

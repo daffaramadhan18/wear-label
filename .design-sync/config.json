@@ -1,0 +1,122 @@
+{
+  "projectId": "096a4d56-a7d8-49ce-9d7a-4fe26ac82b54",
+  "shape": "package",
+  "pkg": "wear-label",
+  "globalName": "WearLabel",
+  "buildCmd": "bash .design-sync/prepare.sh",
+  "srcDir": "../../components",
+  "tsconfig": "./tsconfig.bundle.json",
+  "cssEntry": "./styles.css",
+  "tokensGlob": "tokens.css",
+  "extraFonts": [
+    "./fonts/fonts.css"
+  ],
+  "overrides": {
+    "CatalogueFilters": {
+      "cardMode": "column"
+    },
+    "ProductCard": {
+      "cardMode": "column"
+    },
+    "PageHeading": {
+      "cardMode": "column"
+    },
+    "SectionHeading": {
+      "cardMode": "column"
+    },
+    "Copy": {
+      "cardMode": "column"
+    },
+    "Media": {
+      "cardMode": "column"
+    },
+    "Section": {
+      "cardMode": "column"
+    },
+    "Container": {
+      "cardMode": "column"
+    },
+    "SiteHeader": {
+      "cardMode": "column"
+    },
+    "SiteFooter": {
+      "cardMode": "column"
+    },
+    "CardHover": {
+      "cardMode": "column"
+    },
+    "CardMedia": {
+      "cardMode": "column"
+    },
+    "Wordmark": {
+      "cardMode": "column"
+    },
+    "Button": {
+      "cardMode": "column"
+    },
+    "CartLines": {
+      "cardMode": "column"
+    },
+    "AnnouncementBar": {
+      "cardMode": "column"
+    },
+    "AuroraBand": {
+      "cardMode": "column"
+    },
+    "HeroCarousel": {
+      "cardMode": "column"
+    },
+    "PromoBand": {
+      "cardMode": "column"
+    },
+    "CategoryMosaic": {
+      "cardMode": "column"
+    },
+    "ServiceBand": {
+      "cardMode": "column"
+    },
+    "MadeToOrder": {
+      "cardMode": "column"
+    },
+    "InstagramStrip": {
+      "cardMode": "column"
+    },
+    "TestimonialWall": {
+      "cardMode": "column"
+    },
+    "ShopPromos": {
+      "cardMode": "column"
+    },
+    "ResultsToolbar": {
+      "cardMode": "column"
+    },
+    "ProductGallery": {
+      "cardMode": "column"
+    },
+    "ProductPurchase": {
+      "cardMode": "column"
+    },
+    "ProductTabs": {
+      "cardMode": "column"
+    },
+    "OrderSummary": {
+      "cardMode": "column"
+    },
+    "NoticeForm": {
+      "cardMode": "column"
+    }
+  },
+  "docsDir": "../../.design-sync/docs",
+  "dtsPropsFor": {
+    "Button": "variant?: \"primary\" | \"outline\" | \"ghost\" | \"link\" | \"checkout\";\nsize?: \"sm\" | \"md\" | \"lg\" | \"full\";\nchildren: React.ReactNode;\ntype?: \"button\" | \"submit\" | \"reset\";\ndisabled?: boolean;\nclassName?: string;",
+    "ButtonLink": "href: string;\nvariant?: \"primary\" | \"outline\" | \"ghost\" | \"link\" | \"checkout\";\nsize?: \"sm\" | \"md\" | \"lg\" | \"full\";\nchildren: React.ReactNode;\nclassName?: string;\ntarget?: string;\nrel?: string;",
+    "Wordmark": "className?: string;\n/** Use the cream artwork, for espresso and taupe surfaces. */\nonDark?: boolean;\n/** Horizontal is the default everywhere; stacked is for narrow or square space. */\nvariant?: \"horizontal\" | \"stacked\";\n/** Rendered height in px; the lockup keeps its ratio. */\nheight?: number;",
+    "Price": "price: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null;\n/** The was-price, when the piece is marked down. */\ncompareAt?: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null;\nclassName?: string;\n/** `display` is the product page's Playfair treatment. */\nsize?: \"small\" | \"display\";",
+    "Media": "image: { url: string | null; altText: string; width: number; height: number };\n/** Responsive sizes string the layout uses; required for real images. */\nsizes: string;\n/** CSS aspect ratio, e.g. \"1 / 1\". Defaults to the image's own. */\nratio?: string;\n/** Fill the positioned ancestor instead of holding a ratio. */\nfill?: boolean;\npriority?: boolean;\nclassName?: string;\n/** Caption shown on the placeholder block. */\nlabel?: string;",
+    "ProductCard": "product: {\n  id: string;\n  handle: string;\n  title: string;\n  material: string;\n  description: string;\n  care: string;\n  productType: string;\n  tags: string[];\n  featuredImage: { url: string | null; altText: string; width: number; height: number };\n  images: { url: string | null; altText: string; width: number; height: number }[];\n  priceRange: { minVariantPrice: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null };\n  compareAtPrice: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null;\n  options: { name: string; values: { name: string; available: boolean; swatch?: string }[] }[];\n  variants: {\n    id: string;\n    title: string;\n    selectedOptions: { name: string; value: string }[];\n    availableForSale: boolean;\n    price: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null;\n    compareAtPrice: { amount: string; currencyCode: \"IDR\" | \"USD\" } | null;\n  }[];\n  availableForSale: boolean;\n};\nsizes: string;\n/** Set so the card's name never skips a heading level on the page it sits on. */\nheadingLevel?: \"h2\" | \"h3\";",
+    "CatalogueFilters": "facets: {\n  categories: { name: string; count: number }[];\n  sizes: string[];\n  colours: { name: string; swatch?: string }[];\n  madeToOrderCount: number;\n  total: number;\n};\nquery: {\n  /** Category is single-select, the way the design's sidebar reads. */\n  category: string | null;\n  sizes: string[];\n  colours: string[];\n  madeToOrder: boolean;\n  inStockOnly: boolean;\n  sort: \"featured\" | \"price-asc\" | \"price-desc\";\n  page: number;\n};",
+    "SiteHeader": "/** The bag count, rendered by the layout so the cookie read stays server-side. */\ncartBadge?: React.ReactNode;"
+  },
+  "readmeHeader": ".design-sync/conventions.md",
+  "tokensPkg": "wear-label"
+}

@@ -1,0 +1,96 @@
+{%- comment -%}
+  Catalogue and editorial imagery — port of components/ui/media.tsx.
+
+  Per the design system's product card, an image that does not exist renders as
+  a tone-filled block with a small uppercase caption at the bottom — at the exact
+  ratio the real photo will occupy, so adding the photography later causes no
+  reflow (CLS stays 0). That is the whole reason the catalogue can be previewed
+  before the store has a single product in it.
+
+  `ratio` overrides the frame the image is cropped into, which is how the
+  design's fixed-height crops are expressed: one source photograph is cropped
+  differently by a card, a mosaic tile and a bag thumbnail. `fill` drops the
+  frame altogether and takes the size of the nearest positioned ancestor, for the
+  bands whose height is set by the layout rather than by the photograph.
+
+  `priority` marks the one image the page is judged on — the product page's main
+  shot — and is the only thing that decides how the browser fetches it.
+
+  Accepts: image (Shopify image or nil), sizes, ratio, fill, priority, class, label
+{%- endcomment -%}
+
+{%- comment -%}
+  FIXED: `loading` and `fetchpriority` were read from `loading_mode` and
+  `priority_mode`, and NEITHER WAS EVER ASSIGNED — here or anywhere else in the
+  theme. So `image_tag` got nil for both: no image on the site ever carried
+  loading="lazy" (an eleven-card grid fetched every photograph eagerly), and the
+  product page's LCP image never carried fetchpriority="high" even though its
+  caller passes `priority: true` and the header above documents the parameter.
+  A silently-ignored parameter is the bug that comes back, so both values now
+  derive from `priority` in one place, right here.
+
+  The non-priority case sends the spec's own default, `auto`, rather than a blank
+  string: a Liquid filter cannot take a conditional argument, and passing nil
+  risks emitting `fetchpriority=""`, which is not a valid value.
+{%- endcomment -%}
+
+{%- comment -%}
+  RULE 3 DEBT, left as-is deliberately: `media_label` is a hardcoded English
+  string, and every caller passes a hardcoded English `label:` too — so the
+  placeholder's caption and its aria-label are the one user-visible copy in this
+  snippet that is not translatable. It wants two interface keys, which only the
+  integrator may add: `product.media_placeholder` ("Product photo") for this
+  default, and `product.media_angle` ("Angle") for the gallery thumbnails. Not
+  invented here.
+{%- endcomment -%}
+
+{%- liquid
+  assign media_label = label | default: 'Product photo'
+
+  if priority
+    assign loading_mode = 'eager'
+    assign priority_mode = 'high'
+  else
+    assign loading_mode = 'lazy'
+    assign priority_mode = 'auto'
+  endif
+
+  if fill
+    assign box = 'absolute inset-0 h-full w-full'
+    assign frame = ''
+  else
+    assign box = 'w-full'
+    if ratio
+      assign frame = 'aspect-ratio:' | append: ratio
+    elsif image
+      assign frame = 'aspect-ratio:' | append: image.width | append: ' / ' | append: image.height
+    else
+      assign frame = 'aspect-ratio:1 / 1'
+    endif
+  endif
+-%}
+
+{%- if image == blank -%}
+  <div
+    role="img"
+    aria-label="{{ media_label }} placeholder"
+    style="{{ frame }}"
+    class="flex items-end justify-center rounded-sm bg-tone p-4.5 {{ box }} {{ class }}"
+  >
+    <span class="text-micro uppercase tracking-nav text-white/75">{{ media_label }}</span>
+  </div>
+{%- else -%}
+  <div style="{{ frame }}" class="relative overflow-hidden rounded-sm bg-tone {{ box }} {{ class }}">
+    {{
+      image
+      | image_url: width: 1200
+      | image_tag:
+        sizes: sizes,
+        widths: '256, 384, 512, 640, 768, 1024, 1200',
+        loading: loading_mode,
+        fetchpriority: priority_mode,
+        class: 'absolute inset-0 h-full w-full object-cover',
+        alt: image.alt
+    }}
+  </div>
+{%- endif -%}

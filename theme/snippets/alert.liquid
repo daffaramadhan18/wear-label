@@ -1,0 +1,25 @@
+{%- comment -%}
+  Inline message — port of components/ui/alert.tsx.
+
+  Per the design system's Feedback section: a warm surface with a 2px rule down
+  the left edge. Tone is carried by text as well as colour, so the meaning never
+  depends on hue alone — pass a `label` for anything but info.
+
+  Accepts: tone ('info' | 'success' | 'error'), label, body, class
+{%- endcomment -%}
+
+{%- liquid
+  case tone
+    when 'success'
+      assign tone_classes = 'bg-success-surface text-on-success-surface border-success-line'
+    when 'error'
+      assign tone_classes = 'bg-error-surface text-on-error-surface border-error'
+    else
+      assign tone_classes = 'bg-info-surface text-on-info-surface border-info-line'
+  endcase
+-%}
+
+<p {% if tone == 'error' %}role="alert"{% endif %} class="rounded-sm border-l-2 px-5 py-4.5 text-small leading-snug {{ tone_classes }} {{ class }}">
+  {%- if label != blank -%}<span class="sr-only">{{ label }}: </span>{%- endif -%}
+  {{ body }}
+</p>

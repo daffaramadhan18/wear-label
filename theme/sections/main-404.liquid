@@ -1,0 +1,40 @@
+{%- comment -%}
+  Not found — port of app/not-found.tsx.
+
+  The copy is unwritten, so every slot renders its labelled placeholder. That is
+  deliberate: a 404 is where a reader is already lost, and filler prose would be
+  worse than a block that admits nothing has been written yet.
+{%- endcomment -%}
+
+<div class="mx-auto w-full max-w-content px-gutter">
+  <div class="flex flex-col items-center gap-5 py-section text-center">
+    <p class="text-micro uppercase tracking-eyebrow text-ink-subtle" data-numeric>404</p>
+
+    <h1 class="font-display text-h1 leading-h1 text-ink">
+      {% render 'copy', value: section.settings.heading, label: 'heading' %}
+    </h1>
+
+    <p class="wl-measure text-small text-ink-muted">
+      {% render 'copy', value: section.settings.body, label: 'body', lines: 2 %}
+    </p>
+
+    {%- if section.settings.cta != blank -%}
+      <a
+        href="{{ routes.all_products_collection_url }}"
+        class="mt-2 inline-flex min-h-13 cursor-pointer items-center justify-center gap-2 rounded-sm border border-brand bg-brand px-11 text-caption uppercase tracking-[0.22em] text-on-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand-hover hover:bg-brand-hover active:translate-y-px"
+      >{{ section.settings.cta }}</a>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "404",
+  "settings": [
+    { "type": "paragraph", "content": "Leave these blank until the copy is written. A labelled placeholder is more honest on a 404 than filler prose." },
+    { "type": "text", "id": "heading", "label": "Heading" },
+    { "type": "textarea", "id": "body", "label": "Body" },
+    { "type": "text", "id": "cta", "label": "Button" }
+  ]
+}
+{% endschema %}

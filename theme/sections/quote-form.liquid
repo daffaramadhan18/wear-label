@@ -1,0 +1,169 @@
+{%- comment -%}
+  Request a quote. Brief §9.6, and the decision behind its shape was taken
+  explicitly: B2B does not use the ecommerce checkout, it goes straight to
+  WhatsApp (brief §16, "-> langsung ke WA").
+
+  So this is NOT a form that posts anywhere. It is three fields and a link: the
+  fields are composed into a WhatsApp message and the submit hands the reader to
+  wa.me with it already typed. Nothing is stored, nothing is emailed, and there
+  is no inbox to check — the conversation starts in the place the studio already
+  answers enquiries, which is what the reviews describe them being good at.
+
+  WHY NOT SHOPIFY'S OWN CONTACT FORM. It would give a record, and it was
+  considered and rejected for this section: an enquiry that lands in an email
+  nobody has set up to watch is worse than no form, and the studio's answer to
+  every other enquiry channel is WhatsApp. The contact page carries the native
+  form for the general case; the quote route is deliberately one channel.
+
+  HOW IT WORKS WITHOUT JAVASCRIPT — and it does, which is the whole reason it is
+  shaped this way rather than as a click handler on a button.
+
+  The element is a real `<form method="get">` whose action is the wa.me URL. The
+  three visible fields have NO `name` attribute, so they are never serialised;
+  the only named control is the hidden `text` input the script fills in. With
+  script off, submitting sends `?text=` empty and WhatsApp opens the chat with
+  the studio and nothing typed — the reader is exactly where they were trying to
+  get to, and types their question themselves. With script on they arrive with
+  their answers already in the message box. Enhancement, not a requirement.
+
+  `required` still works in the no-script case: native validation does not care
+  whether a field has a name.
+
+  THE FIELD LABELS ARE PASSED TO THE SCRIPT AS DATA ATTRIBUTES, never hardcoded
+  in theme.js. `data-quote-field` on each input carries the label the message
+  should use, exactly as save-button.liquid passes its two states. That keeps
+  every user-visible string in the locale file where it can be translated, and it
+  is why the composed message reads "Name: ..." in the site's language rather
+  than in whatever language somebody typed into a JavaScript file.
+
+  NO FILE UPLOAD, and the brief asked for one ("Upload Design / Reference jika
+  memungkinkan"). It is not possible down this route: a wa.me deep link carries
+  text and nothing else, and Shopify's own contact form tag accepts no file input
+  either. Rather than drop the requirement silently, the note under the
+  fields says where to send a reference — which is the next message in a chat
+  that is already open. If a real upload is wanted, it needs the Shopify Forms
+  app and this section is replaced, not extended.
+
+  WITH NO WHATSAPP NUMBER SET the form still renders at full size and the submit
+  is unavailable rather than absent, with an alert saying why. That is the
+  placeholder rule applied to a control: the layout is final before the setting
+  is filled in, and a disabled button that explains itself beats a button that
+  opens a broken wa.me URL. The number is a theme setting and is blank today.
+{%- endcomment -%}
+
+{%- liquid
+  assign wa_number = settings.whatsapp_number | strip
+  # wa.me wants digits only — no +, no spaces, no dashes. Doing it here rather
+  # than asking the studio to remember the format is one less way for the one
+  # link the B2B page depends on to be silently wrong.
+  assign wa_digits = wa_number | remove: '+' | remove: ' ' | remove: '-' | remove: '(' | remove: ')'
+  assign wa_ready = false
+  if wa_digits != blank
+    assign wa_ready = true
+  endif
+  assign wa_missing = true
+  if wa_ready
+    assign wa_missing = false
+  endif
+-%}
+
+<section
+  id="quote"
+  aria-labelledby="quote-heading"
+  class="relative isolate scroll-mt-(--scroll-offset) overflow-hidden border-y border-rule bg-canvas"
+>
+  {% render 'aurora', tone: 'canvas', origin: 'bottom-left' %}
+
+  <div class="relative z-10 mx-auto grid w-full max-w-content gap-block px-gutter py-section lg:grid-cols-2 lg:gap-block-lg">
+    <div class="flex flex-col gap-4">
+      <h2 id="quote-heading" class="text-h1 leading-h1">
+        {% render 'copy', value: section.settings.heading, label: 'heading' %}
+      </h2>
+
+      <p class="wl-measure text-body leading-body text-ink-muted">
+        {% render 'copy', value: section.settings.body, label: 'body', lines: 3 %}
+      </p>
+    </div>
+
+    <form
+      method="get"
+      action="https://wa.me/{{ wa_digits }}"
+      data-quote-form
+      class="flex flex-col gap-4.5"
+    >
+      <input type="hidden" name="text" data-quote-text value="">
+
+      <div class="flex flex-col gap-2">
+        <label for="quote-name" class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'quote.name' | t }}</label>
+        <input
+          id="quote-name"
+          type="text"
+          required
+          autocomplete="name"
+          data-quote-field="{{ 'quote.name' | t }}"
+          class="min-h-13 rounded-sm border border-line bg-surface px-4 text-body text-ink placeholder:text-ink-subtle"
+        >
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="quote-whatsapp" class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'quote.whatsapp' | t }}</label>
+        {%- comment -%}
+          `type="tel"` rather than `number`: a phone number is a string of digits
+          with a leading zero or a country code, and a number input strips the
+          zero, offers a spinner and rejects the `+`. `inputmode="tel"` is what
+          actually brings up the phone keypad.
+        {%- endcomment -%}
+        <input
+          id="quote-whatsapp"
+          type="tel"
+          inputmode="tel"
+          required
+          autocomplete="tel"
+          data-quote-field="{{ 'quote.whatsapp' | t }}"
+          class="min-h-13 rounded-sm border border-line bg-surface px-4 text-body text-ink placeholder:text-ink-subtle"
+        >
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="quote-description" class="text-micro uppercase tracking-nav text-ink-subtle">{{ 'quote.description' | t }}</label>
+        <textarea
+          id="quote-description"
+          rows="5"
+          required
+          data-quote-field="{{ 'quote.description' | t }}"
+          class="rounded-sm border border-line bg-surface px-4 py-3 text-body leading-body text-ink placeholder:text-ink-subtle"
+        ></textarea>
+      </div>
+
+      {%- if section.settings.note != blank -%}
+        <p class="text-caption leading-snug text-ink-muted">{{ section.settings.note }}</p>
+      {%- endif -%}
+
+      {%- if wa_missing -%}
+        {%- assign missing_body = 'quote.no_number' | t -%}
+        {% render 'alert', tone: 'info', body: missing_body %}
+      {%- endif -%}
+
+      {% render 'button',
+        label: section.settings.cta,
+        variant: 'primary',
+        type: 'submit',
+        disabled: wa_missing,
+        class: 'w-full px-6 sm:px-11' %}
+    </form>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Request a quote",
+  "settings": [
+    { "type": "paragraph", "content": "The submit hands the reader to WhatsApp with their answers already typed. Set the number under Theme settings → Custom & business; until it is set the button is unavailable and says so. There is no inbox behind this form — the conversation happens in WhatsApp." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Request a quote" },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "Tell us what your organisation needs and we will come back with a price against the specification and the quantity." },
+    { "type": "textarea", "id": "note", "label": "Note under the fields", "default": "Have a design or a reference? Send it in the chat once WhatsApp opens — the form itself cannot carry a file." },
+    { "type": "text", "id": "cta", "label": "Button", "default": "Request a quote" }
+  ],
+  "presets": [{ "name": "Request a quote" }]
+}
+{% endschema %}

@@ -1,0 +1,97 @@
+{%- comment -%}
+  The site's one button.
+
+  Extracted because the primary button's class string had been retyped in three
+  places (hero-carousel, product-purchase, new-arrivals) and the B2B pages need
+  it in eight more. A 400-character class list copied twelve times is a design
+  token that drifts: the first divergence is a hover colour nobody notices, and
+  after that the buttons on two pages are simply different buttons.
+
+  Four variants, and the two `invert` ones exist because the B2B hero and the
+  footer are espresso grounds. `secondary` on espresso reads as a disabled
+  control — its `text-brand` is rgb(114,94,76) on rgb(30,26,22) — which is the
+  same trap footer.liquid documents for its link colour.
+
+  RENDERS EITHER ELEMENT. With `href` it is an `<a>`; without, a `<button>`.
+  That matters for the cart and the quote form, where the control is a real
+  submit, and for the hero, where it is navigation. A `<button>` that navigates
+  and an `<a>` that submits are both wrong and both look like this.
+
+  THE DISABLED LISTS ARE WRITTEN OUT TWICE ON PURPOSE, once bare for the anchor
+  branch and once `disabled:`-prefixed for the button branch. Composing the
+  second from the first — `off_classes | replace: ' ', ' disabled:'` — reads
+  better and does not work: theme-src/theme.css scans these files as TEXT
+  (`@source "../theme/snippets/*.liquid"`), so a class name that only exists
+  after Liquid has run is a class name Tailwind never generates. Every utility
+  in this file has to be literal here. That is the rule for the whole theme, and
+  it is the one that fails silently.
+
+  `aria-disabled` rather than `disabled` on the anchor branch: an anchor has no
+  disabled state, and hiding it would remove the only clue about why the action
+  is unavailable. The classes are applied directly there because `disabled:`
+  variants do not match an attribute they cannot see.
+
+  Accepts:
+    label    - visible text
+    href     - renders an <a>; omit for a <button>
+    variant  - 'primary' (default) | 'secondary' | 'invert' | 'invert-outline'
+    icon     - a mark from snippets/icon.liquid, drawn after the label
+    type     - <button> type, default 'submit'
+    name, value - <button> name and value, for a form with two submits
+    form_id  - id of a form elsewhere in the document, for a button outside it
+    disabled - unavailable; also drops the press
+    class    - extra classes on the control
+    attrs    - raw extra attributes, emitted verbatim
+{%- endcomment -%}
+
+{%- liquid
+  assign btn_variant = variant | default: 'primary'
+  assign btn_type = type | default: 'submit'
+
+  assign base = 'inline-flex min-h-13 items-center justify-center gap-2 rounded-sm border px-11 text-caption uppercase tracking-[0.22em] transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out'
+
+  case btn_variant
+    when 'secondary'
+      assign tone_classes = 'border-ink-subtle bg-transparent text-brand hover:border-brand hover:bg-brand hover:text-on-brand'
+      assign off_classes = 'border-inert-border bg-inert text-on-inert'
+      assign off_variants = 'disabled:border-inert-border disabled:bg-inert disabled:text-on-inert'
+    when 'invert'
+      assign tone_classes = 'border-surface bg-surface text-brand hover:border-canvas hover:bg-canvas'
+      assign off_classes = 'border-ink-invert-muted bg-transparent text-ink-invert-muted'
+      assign off_variants = 'disabled:border-ink-invert-muted disabled:bg-transparent disabled:text-ink-invert-muted'
+    when 'invert-outline'
+      assign tone_classes = 'border-ink-invert-muted bg-transparent text-ink-invert hover:border-ink-invert hover:bg-surface hover:text-brand'
+      assign off_classes = 'border-ink-invert-muted bg-transparent text-ink-invert-muted'
+      assign off_variants = 'disabled:border-ink-invert-muted disabled:bg-transparent disabled:text-ink-invert-muted'
+    else
+      assign tone_classes = 'border-brand bg-brand text-on-brand hover:border-brand-hover hover:bg-brand-hover'
+      assign off_classes = 'border-disabled-border bg-disabled text-on-disabled'
+      assign off_variants = 'disabled:border-disabled-border disabled:bg-disabled disabled:text-on-disabled'
+  endcase
+-%}
+
+{%- if href != blank and disabled != true -%}
+  <a
+    href="{{ href }}"
+    class="{{ base }} cursor-pointer active:translate-y-px {{ tone_classes }} {{ class }}"
+    {{ attrs }}
+  >{{ label }}{% if icon != blank %}{% render 'icon', icon: icon, class: 'size-5' %}{% endif %}</a>
+
+{%- elsif href != blank -%}
+  <span
+    aria-disabled="true"
+    class="{{ base }} cursor-not-allowed {{ off_classes }} {{ class }}"
+    {{ attrs }}
+  >{{ label }}{% if icon != blank %}{% render 'icon', icon: icon, class: 'size-5' %}{% endif %}</span>
+
+{%- else -%}
+  <button
+    type="{{ btn_type }}"
+    {% if name != blank %}name="{{ name }}"{% endif %}
+    {% if value != blank %}value="{{ value }}"{% endif %}
+    {% if form_id != blank %}form="{{ form_id }}"{% endif %}
+    {% if disabled %}disabled{% endif %}
+    class="{{ base }} cursor-pointer active:translate-y-px {{ tone_classes }} disabled:cursor-not-allowed disabled:translate-y-0 {{ off_variants }} {{ class }}"
+    {{ attrs }}
+  >{{ label }}{% if icon != blank %}{% render 'icon', icon: icon, class: 'size-5' %}{% endif %}</button>
+{%- endif -%}

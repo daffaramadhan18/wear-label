@@ -1,0 +1,1560 @@
+@AGENTS.md
+
+# CLAUDE.md
+
+> ## ▶ READ [`HANDOVER.md`](./HANDOVER.md) FIRST
+>
+> **Every session starts there, before this file and before any code.** It is
+> the state of play — what is live right now, what the client still owes and in
+> what order it hurts, what was built and reverted the same day, and the five
+> traps here that render fine, pass every check and are still wrong.
+>
+> This file is the manual and it is long. HANDOVER.md is what tells you which
+> parts of it you need today, and it is where the deletion backup and the open
+> questions are recorded. Read it even when the task looks small — four of the
+> nine changes on 2026-09-13 were reversals of something decided hours earlier,
+> and the record of that is there rather than here.
+>
+> **Keep it current.** When you finish a session, update HANDOVER.md the way you
+> update this file: what landed, what is now blocked, what the client owes. A
+> handover that describes last week is worse than none.
+
+## Project
+
+Company profile + product catalogue + commerce storefront for **Wear Label**, a
+fashion/apparel brand in Bandung, Indonesia.
+
+**Wear Label is TWO businesses and the site now says so.** `BRIEF.pdf` in the repo
+root is the client's own website brief and it is the current authority on scope:
+
+1. **Ready-to-wear / B2C** — women's trousers, tops, cardigans, outerwear. Browse,
+   add to bag, check out on the web, *or* be handed to the studio's Shopee listing.
+2. **Custom apparel / B2B** — uniforms, corporate apparel and merchandise for
+   companies, hospitals, universities, organisations, communities and event
+   organisers. **No ecommerce checkout on this route** — brief §16 sends it
+   straight to WhatsApp, and that is what `sections/quote-form.liquid` does.
+
+B2B is the newer focus and the smaller book of work. The brief is explicit that the
+portfolio must not be inflated to look otherwise: no "trusted by hundreds of
+companies", no invented client list, and "Selected Projects" is **deliberately not
+built** for v1 because there are no project photographs or nameable clients yet.
+Read `BRIEF.pdf` before changing anything on the `/pages/custom` route.
+
+**The deliverable is a Shopify theme, in [`theme/`](./theme/README.md).** Work
+happens there and in the Shopify admin. The Next.js app at the repo root is the
+reference the theme was ported from — see [The Next.js app is an
+archive](#the-nextjs-app-is-an-archive) before touching it.
+
+**Who this is for and what it is for: [`PRODUCT.md`](./PRODUCT.md).** The primary
+buyer, what she decides on, and the customer evidence behind each claim are recorded
+there. Read it before proposing anything that changes what the site claims — and
+note that the brief moved two of its entries: the site is becoming a till as well as
+a credibility surface, and B2B custom-apparel buyers are now an audience it serves
+rather than one it turns away.
+
+**Status: the store exists, the theme is on it, and the theme is LIVE behind the
+storefront password.** All six original routes are ported and four more have landed
+for the brief — `/pages/custom`, `/pages/contact`, `/collections` and `/search`.
+What is missing is store *configuration* and a handful of client-supplied facts, not
+code — and every one of those gaps renders a labelled placeholder at final size
+rather than breaking, so the theme is reviewable now:
+
+1. **Six of the twenty products have no photograph.** This item has shrunk
+   twice in one day and the numbers matter: it read "115 Shopee pieces" in the
+   morning, then nine after the cull took 106 products off, and it is **six**
+   now that the studio's drop folder was uploaded — 32 photographs across
+   eleven products, so Soso, Pipo and Cerra Loose Pants BIG SIZE went from no
+   image at all to a full gallery. **43 media on the store, all `READY`.**
+
+   What is still bare: the **four cardigans**, `barrel-pants` and
+   `tara-stripe-pants`. None of them has a folder in `asset/`, so this is not a
+   job waiting to be done — it is six shoots waiting to happen. They draw the
+   placeholder at the real card proportions meanwhile.
+2. **One filter, not none — and the reason it was urgent is gone.** Shopify's
+   default **Availability** facet is live (`filter.v.availability=1` / `=0`) and
+   every entry point still carries it. It was added because 106 of 126 products
+   were sold out and the bare `/collections/all` opened on eight sold-out cards
+   out of nine. **After the 2026-09-13 cull every product on the store is in
+   stock**, so the facet now filters nothing — it is kept because stock will
+   move again, not because it is load-bearing today. The `?filter.v.availability=1`
+   on every entry point is likewise harmless and no longer necessary; leave it.
+   Product type, size and colourway facets are still undefined; they come from
+   the Search and Discovery app, and until then the rail says so rather than
+   inventing them.
+
+   **There IS a category row on the rail as of 2026-09-13, and it is not a
+   facet.** Asked for — "di menu shop, tlg tambahin filter by category". A real
+   `filter.p.product_type` has to be switched on inside Search and Discovery and
+   there is no Admin API for it, so `catalogue-filters.liquid` links to the three
+   automated collections instead and marks the current one with `aria-current`.
+   It behaves like a filter and is navigation. **When the real facet is enabled,
+   take this row out** — two category controls on one rail is worse than either.
+3. **One Shopify page is still missing.** Checked against the live storefront
+   with the password; the `custom` row was fixed on 2026-09-13:
+
+   | Handle | Title | Template | State |
+   |---|---|---|---|
+   | `custom` | Custom & Business | `page.custom` | **200 — created 2026-09-13**, `gid://shopify/Page/743343489310`. All five sections render and the B2B route is reachable at last |
+   | `about` | About Us | *(default `page`)* | **404 — create it.** The header nav links to it from every page |
+   | `contact` | Contact | `page.contact` | **200, and correct** |
+
+   **Creating a page needs an interactive login and the CLI cannot open a
+   browser here.** `shopify store auth` prints "Shopify CLI will open the app
+   authorization page in your browser" and then hangs forever: there is no
+   `xdg-open` under WSL, and the PowerShell fallback it tries is invoked with
+   `–ExecutionPolicy` — **an EN DASH, not a hyphen** — which PowerShell rejects
+   silently. Nothing is logged and no URL is printed.
+
+   The way through, which cost most of an afternoon the first time:
+
+   ```bash
+   # 1. hook child_process so the URL is captured whatever opener the CLI picks
+   cat > /tmp/hook.cjs <<'EOF'
+   const cp=require("child_process"),fs=require("fs");
+   for (const f of ["spawn","exec","execFile"]) { const o=cp[f];
+     cp[f]=function(c,a,...r){ try{fs.appendFileSync("/tmp/spawns.txt",c+" :: "+JSON.stringify(a||[])+"\n")}catch(e){}
+       return o.call(this,c,a,...r); }; }
+   EOF
+   NODE_OPTIONS="--require /tmp/hook.cjs" npx shopify store auth --store … --scopes … &
+
+   # 2. the URL is inside the PowerShell -EncodedCommand payload, UTF-16LE base64
+   # 3. open it yourself, and the waiting CLI takes the callback on 127.0.0.1:13387
+   powershell.exe -NoProfile -NonInteractive -Command "Start-Process '<url>'"
+   ```
+
+   Then `shopify store execute` — and note **`--allow-mutations` is required**,
+   or every mutation is refused with "Mutations are disabled by default".
+4. **Four product metafield definitions do not exist**, so four slots render
+   placeholders: `custom.care`, `custom.size_chart`, `custom.fit`,
+   `custom.shopee_url`. **`custom.material` is now defined AND populated** —
+   verified 2026-08-31 against the store, which returns exactly one product
+   metafield definition and a real value on all eleven design pieces, so the
+   card's material line and the product page's material row draw data rather
+   than a placeholder.
+5. **One theme setting is still blank, and it used to be two.**
+   - ~~`whatsapp_number`~~ — **SUPPLIED 2026-09-13: `+62 878-1654-0159`.** The
+     quote form's submit is live and its action renders
+     `https://wa.me/6287816540159`, verified against the rendered storefront.
+     **It is a DEFAULT in `config/settings_schema.json`, not a value in
+     `config/settings_data.json`** — this theme has no settings_data.json at
+     all, on the store or in the repo, so every setting resolves to its schema
+     default. That is the mechanism the brief's copy already uses, and it is the
+     right one: a default is a starting value the studio can still change in the
+     theme editor, whereas a committed settings file would silently overwrite
+     their edit on the next push. Do not add one to "fix" this.
+   - `shopee_shop_url` — with it blank, "Buy on Shopee" is simply absent from
+     product pages rather than linking to a search page.
+6. **Contact details are placeholders, by instruction 2026-08-31.** Email, studio
+   address and opening hours are blocks on `templates/page.contact.json` with
+   blank values, so each renders a labelled placeholder at final size. They are
+   variable facts nobody has supplied and an address is the one string a reader
+   acts on. Filling them in is a theme-editor edit.
+7. **B2B photography EXISTS NOW and three slots still do not use it.** Four
+   pieces of real work arrived 2026-09-13 (see [The catalogue](#the-catalogue)
+   and the assets table). `custom-band` has a real photograph and
+   `selected-projects` has four. What still draws labelled placeholders is the
+   **three `custom-services` cards on `/pages/custom`** — filling them means
+   deciding which photograph stands for which service, which is a content call
+   nobody has made. The B2B hero is the exception and needs no photograph — see
+   its own comment.
+8. **Copy.** Brand voice is unsettled. Blank theme settings render a labelled
+   placeholder, so filling them in is the whole change. The brief's own strings
+   are in as section-setting *defaults*, so the client edits them in the theme
+   editor.
+9. **The decisions under [Still open](#still-open).** Nothing in that list may be
+   guessed at; ask.
+
+Everything else — palette, type, layout, motion, accessibility, the catalogue
+itself — is settled and sourced. If you are about to invent a price, a stock
+number, a review, a category or a shipping rate, stop: that is the one class of
+change this repo refuses.
+
+## The store
+
+| | |
+|---|---|
+| Store | `kbysza-bk.myshopify.com` |
+| Shop ID | `gid://shopify/Shop/108822364446` |
+| Admin | https://admin.shopify.com/store/kbysza-bk |
+| Theme | `205197312286` — "Wear Label", role **`live`** |
+| Preview | https://kbysza-bk.myshopify.com?preview_theme_id=205197312286 |
+| Editor | https://kbysza-bk.myshopify.com/admin/themes/205197312286/editor |
+
+The storefront is password-protected, as new stores are — `/` still redirects to
+`/password`. `theme push` does **not** need that password; `theme dev` does, and so
+does fetching a rendered page to verify it. It is in Online Store → Preferences.
+
+**The storefront password is `1234`.** It is written down here by the repo owner's
+explicit instruction, 2026-08-31, after being told that this repository is public
+on GitHub and that a commit is permanent: "i accept the risk". That is a decision
+already taken — do not re-litigate it, and do not quietly remove the value.
+
+What it does and does not open, so nobody overestimates it: it is the pre-launch
+gate on the storefront and nothing else. It is not the Shopify admin, not a
+payment credential, and it grants no write access of any kind. **The rule it
+replaces still applies to every other secret** — an admin token, a gateway key or
+a courier API key must never be written to a file in this repo.
+
+Authenticating from a script, which is how step 4 of the working agreement gets
+done:
+
+```bash
+curl -s -c cj.txt -b cj.txt -o /dev/null -X POST \
+  https://kbysza-bk.myshopify.com/password \
+  --data-urlencode form_type=storefront_password \
+  --data-urlencode password=1234
+# then reuse cj.txt: curl -s -b cj.txt https://kbysza-bk.myshopify.com/pages/custom
+```
+
+**THE THEME IS LIVE. It was `unpublished` and somebody published it**, discovered
+2026-08-31 when `theme:push` prompted "Push theme files to the live theme on
+kbysza-bk.myshopify.com?". Nothing is publicly reachable — the storefront password
+is still on — but two instructions that used to agree now conflict, and the
+resolution is:
+
+- **`npm run theme:push` CANNOT COMPLETE non-interactively any more.** It pins
+  `--theme 205197312286`, which was the safe target and is now the live one, and the
+  CLI stops with "Failed to prompt: Push theme files to the live theme…". The flag
+  that gets past it is **`--allow-live`** (`-a`), which exists for exactly this and
+  is not the same as `--force`. Confirmed working 2026-08-31:
+
+  ```bash
+  npx shopify theme push --path theme --store kbysza-bk.myshopify.com \
+    --theme 205197312286 --allow-live --json
+  ```
+
+- **Ask before you use it.** Authorised once, 2026-08-31, for the brief's B2B and
+  search work — that authorisation was for that push, not standing. The password is
+  now the only thing keeping the store private, so a push to live is a change to the
+  thing the client looks at, and one they should know is coming.
+
+  **Authorised again, repeatedly, on 2026-09-13** — "lgsg push ke live theme gw
+  kl udah", then "just go" on the turns after it. Three pushes landed on live
+  that day. Read that as an authorisation for a working session with the owner
+  present, not as a standing one: it was given while they were watching the
+  result each time. If nobody is watching, ask.
+- **To verify without touching live, use a scratch unpublished theme.**
+  `npx shopify theme push --path theme --store kbysza-bk.myshopify.com --unpublished
+  --theme "<name>" --json` creates one and prints its id and preview URL. Push there,
+  read the rendered output, then land it. **Delete it when done** —
+  `npx shopify theme delete --store … --theme <id> --force` — it costs a theme slot
+  and the next person will mistake it for the real one.
+- **`theme push` reports errors `theme check` cannot see.** The `--json` output
+  carries a per-file `errors` map from the store's own validator. That is how a
+  `max_blocks` violation surfaces: the six-item nav the brief asks for was pushed
+  against `header.liquid`'s `"max_blocks": 5`, the push *completed*, and the store
+  returned "Block count exceeds maximum of 5 for section 'header'" while silently
+  dropping the extra blocks. `theme check` passed on it. **Read the push output.**
+
+Some Admin API work still needs store-level auth run interactively — importing the
+catalogue, for one. `shopify auth login` alone is enough for theme commands.
+
+Two things about that command, both of which have cost a round trip:
+
+- **`shopify` is not on `PATH`.** The CLI is a pinned devDependency, so it is
+  `npx shopify …` or nothing.
+- **`--scopes` is required**, and CLI 4.7's error for omitting it is just
+  `Missing required flag scopes`. It takes a comma-separated list of Admin API
+  scopes and stores an online access token; re-run it if the token expires or if
+  you need a scope it was not granted.
+
+The invocation for a catalogue import, with why each scope is there:
+
+```bash
+npx shopify store auth --store kbysza-bk.myshopify.com \
+  --scopes read_products,write_products,read_files,write_files,\
+read_publications,write_publications,read_metaobjects,write_metaobjects,\
+read_inventory,write_inventory
+```
+
+| Scope | Why |
+|---|---|
+| `read/write_products` | The eleven pieces, their two options, **35 variants each** since sizes went to 3XL, and the `custom.material` / `custom.care` product metafields. Also `productDelete` and `productOptionUpdate`, which is what the 2026-09-13 cull and the size extension used |
+| `read/write_files` | Uploading the eleven `public/products/*.webp` photographs |
+| `read/write_publications` | Publishing to the Online Store channel. **Without this the products import invisible** — they exist in admin and the storefront renders placeholders |
+| `read/write_metaobjects` | Colourway swatches. Without swatch metaobjects the picker draws five identical rectangles |
+| `read/write_inventory` | To set each variant's tracking. *Untracked* is the honest state where there is no stock data — inventing a stock number is exactly what this repo refuses. *Tracked at 0* is the honest state where the source says sold out, and it is what lights up the theme's sold-out markup |
+
+Then `npx shopify store execute` runs the GraphQL mutations.
+
+Three things the catalogue import turned up, each of which cost a round trip:
+
+- **`ProductCreateInput` has no publications field.** Publishing is a second
+  mutation — `publishablePublish` against
+  `gid://shopify/Publication/377657065758` (Online Store). Skip it and the
+  product exists in admin while the storefront still draws a placeholder.
+- **`productSet` rejects a variant without `optionValues`**, so a product with no
+  real options is `productCreate` (which makes the default variant on its own)
+  followed by `productVariantsBulkUpdate` for price and inventory tracking. Two
+  calls, not one.
+- **The stored token has neither `read_locations` nor `read_product_listings`**,
+  so `locations`, `Location.name` and `publishedOnCurrentPublication` all come
+  back `ACCESS_DENIED`. Neither scope is needed: a freshly created *tracked*
+  variant is already at 0 available, and the location id is readable through
+  `variant.inventoryItem.inventoryLevels` if it is ever wanted.
+
+- ~~**It has no `read_content` either**~~ — **it does now.** The token was
+  re-issued 2026-09-13 with `read_content,write_content` added to the list
+  above, which is what let `pageCreate` run. `pages` answers, and creating or
+  editing a page no longer needs anybody in the Shopify admin.
+
+  Two things that cost a round trip each and are not in any error message:
+
+  - **`shopify store execute` refuses mutations unless you pass
+    `--allow-mutations`.** Reads work without it.
+  - **`shopify store auth` cannot open a browser here and does not say so.**
+    See item 3 of the status list for the hook-and-decode workaround; the short
+    version is that the CLI's PowerShell fallback is invoked with an en dash
+    instead of a hyphen, so it fails silently and the CLI waits forever.
+
+## Working agreement
+
+**Finish the job, then land it.** When you are asked to change something, do the
+work, get it onto the store, and get it into `origin/main` in the same turn. Do not
+stop to ask whether to commit or push, and do not leave the change sitting in the
+working tree.
+
+**And update [`HANDOVER.md`](./HANDOVER.md) with it.** It is the first thing the
+next session reads, so a session that changes what is live, what is blocked or
+what the client owes and leaves that file describing yesterday has not finished.
+It is not a changelog — `git log` is the changelog. It is the state of play.
+
+The pipeline, in order:
+
+```bash
+# 0. HANDOVER.md — read it at the start, update it at the end
+
+# 1. verify first — a broken commit is worse than an unfinished one
+npm run theme:css                    # rebuild assets/theme.css
+npm run theme:check                  # shopify theme check; runs offline
+npx tsc --noEmit && npx eslint app components lib theme
+
+# 2. land it on the store. THE PINNED THEME IS THE LIVE ONE NOW — see The store.
+#    npm run theme:push stops with "Failed to prompt" and needs --allow-live,
+#    which is a decision to ask about, not a flag to add.
+npx shopify theme push --path theme --store kbysza-bk.myshopify.com \
+  --theme 205197312286 --allow-live --json
+
+# 3. READ THE PUSH OUTPUT. Its per-file `errors` map carries what theme check
+#    cannot see — a max_blocks violation pushes "successfully" and silently
+#    drops the extra blocks.
+
+# 4. verify against what the store actually rendered, not against intent
+#    (curl the preview URL and grep for the markers you changed).
+#    NEEDS THE STOREFRONT PASSWORD — everything else redirects to /password.
+#    It is `1234`, and The store has the curl that logs in. No excuse now.
+
+# 5. stage exactly what you changed, never `git add -A` blind
+git add <the files you touched>
+
+# 6. commit straight onto main — no feature branch
+git commit          # message: what changed and WHY, in the imperative
+
+# 7. push, then keep the graph current
+git push origin main
+graphify update .
+```
+
+**Step 4 is not optional.** `theme check` proves the Liquid parses; it does not
+prove the page renders what you meant. Every claim about this theme's output in git
+history was checked by fetching the rendered HTML and counting what came back.
+
+It was skipped once, knowingly — the brief's B2B commit, 2026-08-31, because the
+password was not supplied and the client chose to review in the theme editor
+instead. The commit message says so in as many words. **If you skip it, say you
+skipped it**; a verification that did not happen must never be reported as one
+that did.
+
+**`theme/` HAS UNTRACKED FILES THAT ARE NOT YOURS.** A parallel session is working
+on a scroll-driven sequence and has left `sections/scroll-sequence.liquid`,
+`assets/scroll-sequence.js`, `assets/gsap.min.js`,
+`assets/gsap-scrolltrigger.min.js` and 55 `assets/sequence-*.webp` untracked in the
+working tree. They are not referenced by any committed template. **Do not commit
+them, do not delete them, and do not "fix" the eslint errors in the two GSAP
+files** — those 10 errors are the vendored minified builds and they are the only
+eslint errors in the repo, so a clean run means "10 errors, all in GSAP", not zero.
+The branch `worktree-integrate-floating-paths` is that session's; leave it alone.
+
+The end state after every task, without being asked:
+
+- **No branches.** `git branch` shows `main` and nothing else. Do not create a
+  working branch and do not leave one behind. A branch checked out in another
+  worktree belongs to another session — leave it alone and say so.
+- **No uncommitted changes.** `git status` is clean, apart from files that are
+  deliberately untracked.
+- **Nothing unpushed.** `git status -sb` shows no `ahead` marker.
+
+Two things this does **not** license: committing work you have not verified, and
+sweeping unrelated staged files into your commit. Stage by path — a previous session
+may have left something staged that is not yours to land.
+
+Commit messages carry the reasoning, not just the change. Anything decided,
+derived or deliberately not done belongs in the message; the next person's first
+question is always "why is it like this".
+
+## Architecture
+
+```
+Customer
+   |
+Shopify (Liquid theme)   <- we build this, in theme/
+   |-- sections, snippets, templates, settings
+   |
+Shopify                  <- configured in admin, not in code
+   |-- products, variants, inventory, metafields
+   |-- cart, orders, customers
+   |-- checkout, payment, shipping, discounts
+   |-- storefront filters (Search and Discovery)
+```
+
+There is no API client, because there is no API call. Liquid reads Shopify's own
+objects. That is what the port deleted: `lib/shopify/` was ~850 lines standing in
+for `collection.filters`, `cart.items`, `paginate` and the `money` filter.
+
+### Responsibility boundary
+
+The theme is **presentation only**. No commerce logic lives here.
+
+| In the theme | In Shopify admin |
+|---|---|
+| Sections, snippets, templates, layout | Products, variants, pricing, stock, metafields |
+| Which blocks are on a page, and in what order | Cart and order state |
+| Design tokens, theming, the stylesheet | Checkout, payment gateway |
+| Copy, via theme and section settings | Shipping rates, couriers |
+| Storefront filter *markup* | Which filters exist (Search and Discovery) |
+| SEO markup, OG tags | Discounts, vouchers, marketing lists |
+
+If a task appears to require writing cart, order, inventory, payment, shipping-rate
+or discount logic, stop — it belongs in Shopify configuration instead.
+
+**The B2B route has no commerce logic of any kind, and that is by instruction.**
+Brief §16: "B2B tidak menggunakan ecommerce checkout -> langsung ke WA". There is no
+cart, no quote object, no stored enquiry, no inbox and no price anywhere on
+`/pages/custom` — a specification and a quantity are what a price gets quoted
+against, and that conversation happens in WhatsApp. So the whole route is
+presentation plus one link. If a task on that page appears to need a database, a
+form backend or a quote calculator, it is the wrong task.
+
+## Stack
+
+- **Shopify Online Store 2.0** — JSON templates, sections, section groups, blocks
+- **Liquid**, server-rendered. No framework, no build step on Shopify's side
+- **Tailwind CSS v4**, precompiled to `theme/assets/theme.css`
+- **CSS-variable design tokens** in `app/tokens.css`, shared with the archived app
+- **Vanilla JS** in `theme/assets/theme.js` — eleven behaviours (the header
+  disclosure, the scroll reveals, the carousel, the gallery, the **size chart's
+  cm/inch switch**, the quantity stepper, save-for-later, the quote form's
+  WhatsApp composer, the hero film's reduced-motion pause, the home page's view
+  switch, and the measured header height the sticky switch offsets against), all
+  progressive enhancement. **The product tabs are no longer
+  one of them** — they were flattened to a single page on 2026-09-13 and the
+  behaviour was deleted rather than left in the bundle unreferenced. The carousel's is still
+  shipped and still correct; nothing on any template uses it since the hero
+  became a film
+- **Shopify CLI 4.x**, pinned as a devDependency so the scripts resolve it from
+  `node_modules/.bin` — a bare `shopify` is not on `PATH` here
+
+Do **not** add a JavaScript framework, a bundler, or a second CSS pipeline. Do not
+reach for Hydrogen — it is Remix-based and this is a theme.
+
+## Routes
+
+Shopify route names, and what the React app called them:
+
+| Route | Was | What it is |
+|---|---|---|
+| `/` | `/` | Home — hero carousel, new arrivals, customer voices, service band, Instagram strip |
+| `/collections/all` | `/shop` | Catalogue — filter rail, sort, 3-up grid, paging |
+| `/products/<handle>` | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, **one-page detail** (tabs were flattened 2026-09-13), related |
+| `/cart` | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
+| `/pages/about` | `/about` | About Us — the Shopify page's own title and content |
+| `/pages/custom` | — | **Custom & Business (B2B).** Hero, services, how it works, why Wear Label, request a quote. Template suffix `page.custom`. **The Shopify page exists as of 2026-09-13** and the route returns 200 |
+| `/pages/contact` | — | **Contact.** Placeholder detail rows plus Shopify's native contact form. Template suffix `page.contact` |
+| `/collections` | — | **Collections.** The catalogue by category. **Three automated collections are live** — Pants 14, Cardigan 4, Culottes 2 — one per `product_type`. It was fifteen until 2026-09-13; the twelve that went empty with the cull were deleted |
+| `/search` | — | **Search.** Products only; the header mark links here |
+| `/account` | `/account` | Shopify's customer routes — still `main-stub`, not designed |
+| 404 | `app/not-found.tsx` | `sections/main-404.liquid` |
+
+The four routes with no React counterpart came from the brief, not from the port —
+§5 (the navigation) and §9 (the B2B page). `/pages/custom` and `/pages/contact` need
+a Shopify page to exist with the matching handle and template suffix or they 404;
+the other two are Shopify's own routes and work as soon as the theme has a section
+for them, which they now do.
+
+Filter and sort URLs are Shopify's: `?filter.p.product_type=Wide+leg`,
+`?filter.v.option.size=M`, `?sort_by=created-descending`, `?page=2`. That is the URL
+contract now, and it replaces `QUERY_KEYS` entirely.
+
+Templates the design never covered — blog, article, search, list-collections, gift
+card and all seven `customers/*` — render `sections/main-stub.liquid`, a labelled
+placeholder.
+Delete the stub from a template the moment that template's real section lands.
+
+## Repo layout
+
+```
+theme/                 THE DELIVERABLE
+  layout/              theme.liquid — the shell
+  sections/            one per block; *-group.json for header and footer
+  snippets/            primitives and composites
+  templates/           JSON templates, one per route
+  assets/              theme.css (built), theme.js, artwork
+  config/              settings_schema.json
+  locales/             en.default.json — interface chrome
+  README.md            port status, deviations, build
+theme-src/theme.css    stylesheet entry; imports app/tokens.css + app/base.css
+
+app/tokens.css         DESIGN TOKENS — single source of truth, shared
+app/base.css           base layer — shared
+
+app/                   archived Next.js routes
+components/            archived React components — the port's reference
+lib/                   archived data layer and content module
+public/                original asset exports
+.design-sync/          config for syncing components to claude.ai/design
+```
+
+## Commands
+
+```bash
+npm run theme:css          # build theme/assets/theme.css (minified)
+npm run theme:css:watch    # rebuild on change
+npm run theme:check        # shopify theme check — offline, no store needed
+npm run theme:dev          # build CSS, then shopify theme dev
+npm run theme:push         # build, check, push to theme 205197312286
+```
+
+The store and the theme id are pinned inside `theme:dev` and `theme:push`.
+**That no longer means what it used to mean.** The comment this replaces said
+"neither can wander onto the live theme by accident" — true when `205197312286`
+was unpublished, false now that it is the live theme. The pin is still worth
+having: it stops a push landing on `Horizon` or on a stray development theme. But
+`npm run theme:push` cannot complete on its own any more; see
+[The store](#the-store) for the `--allow-live` invocation and when to ask before
+using it.
+
+`theme dev` will still ask for the storefront password once.
+
+`theme/assets/theme.css` is **committed**. Shopify has no build step, so the built
+asset is what the store serves. Read `theme-src/theme.css`, `app/tokens.css` and
+`app/base.css` for the source — never hand-edit the built file.
+
+Archived-app commands (`npm run dev`, `npm run build`) still work and the build is
+still kept green, because `app/tokens.css` and `app/base.css` are shared and a
+regression there is a regression in the theme.
+
+Nothing is read from the environment any more. The three `SHOPIFY_*` /
+`NEXT_PUBLIC_SITE_URL` variables only ever fed the archived app.
+
+## The theme
+
+| File | Ported from |
+|---|---|
+| `layout/theme.liquid` | `app/layout.tsx` |
+| `sections/announcement-bar` · `header` · `footer` | `components/layout/*` |
+| `sections/hero-video` | nothing — the home page hero, asked for 2026-09-13: the two photographs and all of the copy off, one looping film in their place |
+| `sections/hero-carousel` | `components/home/hero-carousel.tsx` — **unplaced**, see below |
+| `sections/new-arrivals` | the arrivals block in `app/page.tsx` |
+| `sections/voices-wall` | `components/home/testimonial-wall.tsx` |
+| `sections/service-band` | `components/home/service-band.tsx` |
+| `sections/instagram-strip` | `components/home/instagram-strip.tsx` |
+| `sections/category-mosaic` | `components/home/category-mosaic.tsx` — **unplaced** |
+| `sections/main-collection` · `main-product` · `main-cart` · `main-page` · `main-404` | the matching routes |
+| `snippets/product-card` | `components/shop/product-card.tsx` + `card-hover.tsx` |
+| `snippets/catalogue-filters` · `results-toolbar` · `pagination` | `components/shop/*` |
+| `snippets/product-gallery` · `product-purchase` · `product-detail` | `components/product/*` — `product-detail` replaced `product-tabs` on 2026-09-13, flattened from four tabs to one page |
+| `snippets/size-guide` | nothing — the shared size chart and its cm/inch switch, 2026-09-13 |
+| `snippets/cart-lines` · `order-summary` | `components/cart/*` |
+| `snippets/copy` · `media` · `price` · `badge` · `alert` · `aurora` · `icon` · `wordmark` · `breadcrumbs` · `save-button` · `cart-badge` | `components/ui/*` |
+| `snippets/button` | nothing — extracted 2026-08-31 from the primary button's class string, which had been retyped in three sections and was about to be retyped in eight more |
+| `sections/custom-band` | nothing — brief §7, the B2B hook on the home page. **Unplaced 2026-09-13**, replaced by `two-ways` + `selected-projects` |
+| `sections/two-ways` | nothing — the two-panel split under the hero film, 2026-09-13. **Unplaced the same day**, see below |
+| `sections/home-tabs` | nothing — the home page's two-view switch, 2026-09-13, which replaced it |
+| `sections/selected-projects` | nothing — brief §8, built 2026-09-13 once real project photography existed |
+| `snippets/media-asset` | nothing — `media` plus a theme asset as the middle fallback, extracted when the second section needed it |
+| `sections/custom-hero` · `custom-services` · `how-it-works` · `why-wear-label` · `quote-form` | nothing — brief §9, the Custom & Business page |
+| `sections/contact-details` | nothing — brief §5 put Contact in the nav and specified nothing else |
+| `sections/main-search` | nothing — brief §5 asked for search; the route was `main-stub` |
+| `sections/main-list-collections` | nothing — brief §5 asked for Collections; the route was `main-stub` |
+| `assets/theme.js` | the header disclosure, the reveals, the carousel, the gallery, the tabs, the stepper, the save button, the quote form's WhatsApp composer, the hero film's reduced-motion pause |
+
+Two of those are **generated from the React source, not retyped**, and must stay
+that way: `snippets/icon.liquid` (all twelve paths verified byte-exact against
+`components/ui/icons.tsx`) and the twenty reviews in `sections/voices-wall.liquid`
+(asserted verbatim against `lib/content/site.ts`).
+
+**Home page sequence:** hero → new arrivals → **Wear Label Custom** → customer
+voices → service band → Instagram strip. The custom band went in directly after the
+product section because brief §7 puts it there, and because the hero's second CTA
+had to land somewhere on the same page for a reader who scrolls instead of clicking.
+
+**THE SEQUENCE CHANGED AGAIN ON 2026-09-13, and the reason is a positioning
+statement rather than a layout preference.** The studio's own words: "tujuan
+website ini tuh utamanya bukan untuk jualan, tapi untuk biar wear label ini
+makin legit … intinya mau tekenin kalo ini tuh bisa untuk B2B". New arrivals
+was judged good enough for the ready-to-wear half; the custom-apparel half was
+not being said loudly enough.
+
+**THE HOME PAGE IS TWO VIEWS BEHIND A SWITCH, decided later the same day.** The
+two-panel split was built, seen, and set aside for the idea the studio had
+floated first: "balik ke yang ide gw deh 2 diatasnya ada B2C atau B2B (tp
+bahasanya jangan gini) trs yang B2C itu page yg lama, B2B page yg baru". So
+`sections/home-tabs.liquid` sits under the film and swaps the sections below it.
+
+| View | Key | Sections |
+|---|---|---|
+| **Ready-to-wear (default)** | `ready-to-wear` | `arrivals`, `voices`, `instagram` |
+| Custom & business | `custom-business` | `projects`, `custom` |
+
+**`service-band` came off the home page on 2026-09-13** — "ini ga usah". The
+section is still in the repo and still correct; it is simply not placed, like
+`category-mosaic`, `hero-carousel` and `two-ways`.
+
+**THE SWITCH IS STICKY**, asked for the same day. It pins under the header at
+`top: var(--wl-header-h)` — a measured default in theme-src/theme.css that
+assets/theme.js keeps true from the real element, because a longer nav or a
+bigger type scale would otherwise leave a gap or hide the bar. Its `z-index` is
+one below the header's so the two cross correctly, and like the header's, the
+rule is on the **section wrapper** — see the sticky trap for why that is not
+optional.
+
+**ON A PHONE THE LABELS ARE ONE STEP SMALLER AND NEVER WRAP.** At `text-caption`
+with nav tracking, "CUSTOM & BUSINESS" broke onto two lines at 390px and the bar
+grew to 78px.
+
+**THE TWO WERE SWAPPED AND SWAPPED BACK ON 2026-09-13**, both on instruction and
+within the hour — "tuker", then "tuker lagi deh". Ready-to-wear leads. Record
+kept because the next person will otherwise read the positioning statement above
+and assume the default is meant to be the B2B half; it was tried that way, seen,
+and reverted. Changing it is two edits and they must move together — the block
+order in `home-tabs` AND the section order in the template.
+
+Five things to know before touching any of it:
+
+- **The switch IS IN PLACE and does not navigate**, chosen over two tabs that
+  are links to two URLs. The cost is that the B2B content has to exist on the
+  home page rather than only on `/pages/custom`, and that switching needs
+  script. Both costs were accepted knowingly.
+- **The home tab's B2B view is a way IN, not the destination.** It is the
+  portfolio plus `custom-band`'s three service labels and its two buttons, and
+  it stops there on purpose: pulling the whole B2B page onto the home template
+  would put the same copy in two JSON templates and make every wording change a
+  two-place edit.
+- **`templates/index.json`'s DOM order is the no-script order**, so it follows
+  the default view: the two B2B sections come first and the four ready-to-wear
+  ones after. With script off the bar is removed and the whole page is shown top
+  to bottom, so whichever view is default must lead in the template too. Swap the
+  tabs without swapping the section order and the no-script page opens on the
+  wrong half.
+- **The section keys are duplicated into the switch's blocks.** Rename a key in
+  `index.json` and you must rename it in the `home-tabs` block too. There is no
+  way to link them automatically without putting a setting on every section on
+  the page, which is worse; a key that stops resolving is skipped, not thrown.
+- **`two-ways` is unplaced and kept**, and its own comment carries the argument
+  to re-read if the switch turns out to under-say the custom-apparel half. Two
+  words in a tab are quieter than a 58%-wide espresso panel, and that is the
+  known risk of this shape.
+
+**THE HERO IS A FILM, AND IT HAS NO COPY AND NO CTA.** Asked for 2026-09-13,
+in as many words: the two-slide photograph carousel comes off, the eyebrow,
+heading, body and both buttons come off with it, and `sections/hero-video.liquid`
+plays one 16-second loop in the whole band instead. "Video dulu skrg, simplicity
+dulu." Three things follow from it that are easy to undo by accident:
+
+- **The page's h1 is screen-reader-only now**, on the film's band. It has to be
+  somewhere — the next heading down is New arrivals, which is an h2 — and the
+  film renders the words "Wear Label" into its own frame, so the h1 is the text
+  equivalent of something a sighted reader sees. Do not make it visible to "fix"
+  an empty-looking band.
+- **The hero no longer carries any route at all.** It used to have a second CTA
+  to `/pages/custom`. The two doors directly beneath it are what replaced that,
+  and they are the first thing on the page a reader can act on.
+- **The band's height is decided by the film's own wordmark**, which sits in the
+  top 7% of the frame: 16:9 at `md` and up so nothing is cropped, 60svh below it
+  so the crop happens sideways instead. The section's comment has the full
+  reasoning, and it is the paragraph to read before changing either number.
+
+**One block exists and is deliberately not placed: `category-mosaic`.** The brief
+asks for it back (§6 Section 3, "Shop by Category"). **The reason it stays out
+changed on 2026-08-31 and the new one is weaker, so re-read it before assuming
+the block is still blocked.** It used to be that no collection existed and
+`/collections/pants` was a 404; fifteen now exist and that URL returns 200. What
+stopped it was stock: twelve of the fifteen categories were sold out end to end.
+**THAT REASON EXPIRED ON 2026-09-13** — the sold-out products were deleted and the
+twelve empty collections with them, so the three that remain (Pants 14, Cardigan
+4, Culottes 2) are all fully in stock and every one of them opens on a full grid.
+What is left is the question the stock problem was hiding: **whether three tiles
+is a section or an embarrassment.** That is a design call nobody has made, and it
+is now the only thing in the way. The section's own comment carries the full
+reasoning.
+
+**A second block is unplaced as of 2026-09-13: `hero-carousel`.** It was the home
+page's hero until the film replaced it, and it is kept for the same reason
+`category-mosaic` is: it is finished and correct, what unplaced it was a content
+decision, and re-placing it is one edit to `theme/templates/index.json`. Its two
+photographs, `hero-1.webp` and `hero-2.webp`, are referenced from nowhere else in
+the theme — do not tidy them away without putting the section back.
+
+**Two blocks are gone from the repo, and CLAUDE.md used to claim they were kept.**
+`made-to-order.liquid`, `promo-band.liquid`, `countdown.liquid` and `limited-run`
+are **not in `theme/sections/`** — checked 2026-08-31. The made-to-order rule still
+stands as a rule (the studio does not offer per-shopper made-to-order, answered
+2026-08-20) but there is no file to not-place.
+
+**The brief's B2B service does NOT reopen that decision.** They are different
+things: made-to-order was one garment cut for one shopper, which the studio does not
+do; custom apparel production is a bulk run for an organisation, which is the
+business `/pages/custom` is about. Do not read §7 as licence to put a made-to-order
+block back on a product page.
+
+## The catalogue
+
+**TWENTY products are on the store**, all `ACTIVE`, all published to the Online
+Store and **all in stock**. It was 126 until 2026-09-13.
+
+**THE 106 SOLD-OUT PRODUCTS WERE PERMANENTLY DELETED**, on instruction — "yg out
+of stock hapus semua nya" — and the choice was made with the trade-off stated:
+archiving would have produced an identical storefront and stayed reversible, and
+deletion was picked anyway. Shopify has no undo for it.
+
+**There is a backup and it is the only way back.** Taken immediately before the
+deletion, it holds every deleted product's title, handle, productType, vendor,
+tags and variant price, plus the names of the twelve collections that went with
+them:
+
+```
+asset/_backup/deleted-products-2026-09-13.json
+```
+
+It lives under `asset/`, so it is **gitignored and not in a fresh clone** — the
+same rule as every other master. If somebody needs to restock a deleted piece,
+that file is where the data is, and if it is gone the data is gone.
+
+Twelve of the fifteen automated collections went empty with the cull and were
+deleted too, also on instruction. **Three remain: Pants 14, Cardigan 4, Culottes
+2.** They are automated on `TYPE EQUALS`, so recreating one is a single rule in
+the admin the moment a type comes back.
+
+What survives arrived in two imports, done deliberately differently, and the
+difference is what to read before adding to either.
+
+### The eleven design pieces
+
+From the design project's `CATALOG` constant. Names, materials and prices are the
+client's own data; the photographs are the client's own shots, one square `.webp`
+per piece in `public/products/`, named by handle — **and they are on Shopify**:
+they were the only products in the store carrying an image until 2026-09-13,
+when the studio's drop folder was uploaded and fourteen products ended up with
+media. See [Where the client's own files land](#where-the-clients-own-files-land)
+for what came from where.
+
+| Handle | Name | Material | Price | Was | Flags | Category |
+|---|---|---|---|---|---|---|
+| `basic-linen-cullote` | Basic Linen Culotte | Handwoven linen | Rp 165.000 | | | Culottes |
+| `casual-culotte-zipper` | Casual Culotte Zipper | Washed linen | Rp 165.000 | | | Culottes |
+| `basic-pants` | Basic Pants | Cotton poplin | Rp 165.000 | | | Straight cut |
+| `cerra-loose-pants` | Cerra Loose Pants | Cotton twill | Rp 159.000 | | | Wide leg |
+| `dalia-wide-pants` | Dalia Wide Pants | Tencel | Rp 175.000 | | | Wide leg |
+| `lilo-pants` | Lilo Pants | Viscose blend | Rp 199.000 | | | Wide leg |
+| `milly-stripe-pants` | Milly Stripe Pants | Linen blend | Rp 199.000 | | | Wide leg |
+| `moa-pants` | Moa Pants | Cotton twill | Rp 199.000 | | | Wide leg |
+| `pallo-pants` | Pallo Pants | Pinstripe linen | Rp 199.000 | | | Wide leg |
+| `taka-flare-pants` | Taka Flare Pants | Cupro | Rp 199.000 | | | Wide leg |
+| `yora-loose-pants` | Yora Loose Pants | Cotton twill | Rp 165.000 | | | Wide leg |
+
+- **Sizes XS, S, M, L, XL, XXL, 3XL** and **colourways** Cream, Camel, Taupe,
+  Sage, Espresso (hexes in `lib/shopify/vocabulary.ts`, taken from the design
+  system's Colourway row) apply to every piece, giving **35 variants each**.
+
+  **The last two sizes were added on 2026-09-13**, on instruction, taking the run
+  from XS–XL to XS–3XL. `productOptionUpdate` with `variantStrategy: MANAGE`
+  created the ten new variants per product, and it **inherited the price and the
+  untracked inventory state from the existing ones** — verified afterwards, 394
+  variants across the store, none at price 0 and none tracked. Nothing had to be
+  patched up, which is worth knowing before anybody writes a follow-up mutation
+  that is not needed.
+
+  The five-colourway half of that matrix is the design's, not an inference from
+  the catalogue. **The nine Shopee survivors were deliberately NOT given sizes** —
+  see below.
+- **Stock is not modelled for these eleven.** Their inventory is *untracked*, so
+  they read as available; Shopee states availability for them but never quantity,
+  and inventing a number is what this repo refuses.
+- **The Rp 159.200 markdown is over.** Lilo, Milly, Moa and Pallo were imported at
+  that price against a compare-at of Rp 199.000. Shopee now lists all four at
+  Rp 199.000, so on 2026-08-21 all 25 variants of each were set to 199.000 and
+  their compare-at cleared — a compare-at that no longer holds draws a discount
+  badge for a discount the shopper cannot get. **No product on the store carries a
+  compare-at any more**, which is why nothing renders a percentage-off flash. The
+  design's "New" flags on Lilo, Milly and Moa **are** modelled in Shopify, as the
+  tag `New` — verified 2026-08-31, and they are the only three tags on the entire
+  126-product catalogue. This file said they were not; it was wrong.
+- **`productType` is derived** — the piece's own name where it states the cut, the
+  garment shot where it does not. Wide leg 8, Culottes 2, Straight cut 1.
+- **`material` and `care` become metafields** (`custom.material`, `custom.care`).
+  Until they exist the card's material line and the Fabric & care tab render
+  labelled placeholders.
+- **Vendor is Shopify's default `My Store`** on these eleven, not `Wear Label`.
+  Nothing in the theme reads vendor, so it has been left rather than churned.
+
+### The 115 Shopee pieces
+
+Imported 2026-08-21 from the client's own Shopee storefront listing — the live
+one, pasted in wholesale. **Title and price only.** That was the instruction, and
+it is also all the listing gave: no photographs, no descriptions, no size or
+colour data, and the ratings and units-sold counts were deliberately dropped
+(a review score is the one placeholder that cannot be labelled as one).
+
+- **One default variant each, no options**, and that is still true of the nine
+  that survived the cull — four cardigans and five trousers. **They were left
+  without sizes when the eleven design pieces went to 3XL on 2026-09-13**, for
+  the reason this bullet has always given: the listing states no size data, so a
+  size run here would be invented, and an XXL a shopper can add to a bag that the
+  studio cannot ship is worse than no size at all. Assigning XS–XL × five
+  colourways to a tote bag would have been inventing the matrix. `snippets/product-purchase.liquid`
+  therefore guards its picker on `has_only_default_variant`: Shopify hands a
+  no-option product one synthetic `Title` option whose only value is
+  `Default Title`, and rendering it draws a fieldset offering a choice that does
+  not exist. Both that snippet and `sections/main-product.liquid` also fall back
+  to `product.variants.first` when `selected_or_first_available_variant` comes
+  back nil, which is what a fully sold-out product does.
+- **Nine survive; 106 were deleted on 2026-09-13.** The split was Shopee's own:
+  the 106 were `ACTIVE` with inventory **tracked at 0** and the nine are
+  untracked, like the eleven above. **The theme's sold-out markup is therefore
+  unexercised on the store right now** — it is correct, it is ported, and
+  nothing on the storefront reaches it until something sells out again. Do not
+  read "no sold-out card renders" as "sold-out is broken".
+- **Names are the Shopee titles with the marketing tail cut.** "Basic Pants by
+  Wear Label - Celana Panjang Highwaist Wanita - Formal Casual" → `Basic Pants`.
+  ALL-CAPS titles were title-cased; mixed-case ones were left alone, which is why
+  `Cerra Loose Pants BIG SIZE` keeps its shout. The reject and defect runs kept
+  their qualifier, because it is what the piece is: `Defect Sale Cerra Loose
+  Pants`, `Minor Reject Sale Canvas Bag`, `Casa Bag Minor Reject`.
+- **`productType` is the garment the name itself states.** At import that was
+  Vest 31, Pants 25, Shirt 16, Bag 7, Skirt 6, Culottes 5, Tunik 4, Cardigan 4,
+  Outer 3, Knitwear 3, Set 2, Blouse 2, Top 2, Dress 1, Blazer 1 and five blank.
+  **Of those, only Cardigan 4 and five Pants survived 2026-09-13** — every other
+  type was sold out end to end and went with the cull, the five blank-typed ones
+  included. The rule that produced them still stands: a type is derived from the
+  name, never guessed, which is why the Raya series and the reject-sale linen had
+  no type to begin with.
+- **The two axes are MERGED, 2026-08-31.** They used to be mixed: the design
+  pieces typed by *cut*, the Shopee ones by *garment*. The overlap was smaller
+  than this file once claimed — only **nine** of the 126 carried a cut where a
+  garment belongs (`Wide leg` 8, `Straight cut` 1), because **`Culottes` is a
+  garment and both imports independently agreed on it** (2 design pieces, 3 from
+  Shopee).
+
+  Those nine are now `Pants`, and **the cut moved to a tag rather than being
+  thrown away** — `Wide leg` 8 and `Straight cut` 1 are tags now, alongside the
+  three `New` tags. Nothing was lost, and a cut facet can be built from them
+  later; all nine carried stock, so all nine survived the cull and the tags are
+  intact.
+
+  `product_type` was a single clean garment axis of fifteen values across 126
+  products. **After 2026-09-13 it is three across twenty: Pants 14, Cardigan 4,
+  Culottes 2.**
+
+- **Three automated collections are live** — Pants, Cardigan, Culottes — one per
+  surviving type, rule `TYPE EQUALS`, all published to the Online Store. **It was
+  fifteen; the twelve that the cull emptied were deleted on 2026-09-13**, on
+  instruction, and their names are in the backup file named above. Automated rather than manual on purpose: a
+  new product joins its collection with no developer, which is what brief §15
+  asks for. **The five blank-typed products get no collection** — the Raya series,
+  Pesona Raya and the reject-sale linen name a season or a fabric, not a garment,
+  and a type is derived, never guessed. A "Raya" collection would be an occasion
+  collection off a tag, and it is the client's call whether that season is still
+  selling.
+
+  **ALL THREE ARE FULLY IN STOCK**, which is new: the sentence here used to say
+  twelve of fifteen were sold out end to end, and that was the whole argument
+  against placing `category-mosaic`. **That argument is gone.** Every collection
+  on the store now opens on a full grid. What is left is the question it was
+  hiding — whether three tiles is a section or an embarrassment — and that is a
+  design call, not a data one. See `category-mosaic`'s own comment.
+
+  **Rolling these up into the brief's example tiles — Tops, Outerwear — was
+  deliberately NOT done.** Merging Vest, Cardigan, Outer, Blazer and Knitwear
+  into "Outerwear" is a claim about what the client's product line means, which
+  is the class of invention this repo refuses. Brief §6 writes those four as
+  *"Contoh"*, an example, so nothing binds them. Ask before grouping.
+- **Duplicates were dropped, not re-imported.** Lilo, Soso and Tara Stripe Pants
+  each appeared in both the in-stock and the sold-out listing; the in-stock row
+  won, and the eleven already on the store were skipped outright. `Cerra Loose
+  Pants BIG SIZE`, `Pallo Stripe Pants` and `Milly Balloon Skirt` are separate
+  pieces from `Cerra Loose Pants`, `Pallo Pants` and `Milly Stripe Pants`, and are
+  imported as such.
+- **Vendor is `Wear Label`** on all 115.
+
+## Liquid, Tailwind and theme-check traps
+
+Every one of these cost a round trip. Four of them fail **silently** — the page
+renders, nothing errors, and the thing you wrote is simply not there.
+
+### A class name that does not exist literally in a file does not exist at all
+
+`theme-src/theme.css` scans these files as TEXT — `@source
+"../theme/sections/*.liquid"`, `snippets`, `layout`, `assets/*.js`. Tailwind reads
+the raw Liquid, not the rendered output. So **a class name assembled at runtime is
+never generated**:
+
+```liquid
+{%- comment -%} BROKEN: emits the right markup and no CSS exists for it {%- endcomment -%}
+{%- assign off = 'border-inert-border bg-inert' -%}
+class="disabled:{{ off | replace: ' ', ' disabled:' }}"
+```
+
+Write every utility out longhand, even when that means the same list twice for two
+variants. `snippets/button.liquid` carries both a bare and a `disabled:`-prefixed
+copy of each variant's off-state for exactly this reason, and says so.
+
+This also means: **after adding a section, always rebuild and grep the built CSS**
+for any unusual utility you used. `npm run theme:css` then
+`grep -c 'order-last' theme/assets/theme.css`. A zero there is a layout that
+will be wrong on the store and right in your head.
+
+### `render` takes no filters and no expressions
+
+Two separate limits with two different symptoms.
+
+**A filter on a `render` argument** is caught by theme check —
+`UnsupportedFilterArguments`, "Filters cannot be used on arguments passed to the
+'render' tag". Assign first:
+
+```liquid
+{%- assign slide_href = block.settings.href | default: routes.all_products_collection_url -%}
+{% render 'button', href: slide_href %}
+```
+
+**An expression is not caught by anything** and is a parse error at render time.
+`{% render 'button', disabled: purchasable == false %}` does not evaluate to false,
+it fails. The negation has to exist as its own variable first, which is why
+`product-purchase.liquid` assigns `unavailable` next to `purchasable`.
+
+### Inside `{% liquid %}`, a comment is `#` — and a stray `%}` closes the tag
+
+`{% comment %}` is not valid in there. Worse, the lexer closes a
+`{%- liquid … -%}` tag at the **first** `%}` it finds, so writing the words
+`{% comment %}` inside a `#` line silently truncates the block and everything after
+it becomes literal text on the page. Keep tag delimiters out of `{% liquid %}`
+bodies entirely — say "percent-brace", not the characters.
+
+### A block tag inside `{% comment %}` can still break the parse
+
+`{% comment %}` skips its body, but a block-level tag in there — `{% form %}`,
+`{% if %}`, `{% schema %}` — can still need its closer. Referring to Shopify's
+contact form in prose is safe; writing `{% form 'contact' %}` in a comment is not.
+`quote-form.liquid` says "Shopify's own contact form tag" for this reason.
+
+### A sticky element cannot leave its Shopify section wrapper
+
+`position: sticky` is constrained to its parent's box, and Shopify wraps every
+section in a `div.shopify-section` that is exactly as tall as the section. So
+`sticky top-0` on the `<header>` inside that div pinned it to the top of a 78px
+box and scrolled away with it. The stylesheet said sticky, the computed style
+said `position: sticky; top: 0px`, and the header still left the screen —
+measured on the live storefront: after scrolling 1400px its own rect top was
+**-1361**.
+
+Nothing reports this. There is no error, the property is honoured exactly as
+written, and it looks like a header that was never meant to stick.
+
+The fix is to declare it on the WRAPPER, whose parent is `body` — a box that
+spans the document. Shopify writes that div and gives no way to put a class on
+it from the section, so `:has()` is what selects it, in `theme-src/theme.css`:
+
+```css
+.shopify-section:has(> [data-site-header]) { position: sticky; top: 0; z-index: var(--z-sticky); }
+```
+
+**Test a sticky by scrolling and reading `getBoundingClientRect().top`**, never
+by reading the computed `position`. The computed value was correct the whole
+time it was broken.
+
+### `theme check` does not check a schema's own limits
+
+It validates Liquid and schema *shape*. It does not compare `"max_blocks"` against
+what a `*-group.json` or template actually holds. The store does, at push time, and
+reports it in the `--json` output's per-file `errors` map — **while the push
+completes and silently drops the extra blocks.** This is how the brief's six-item
+nav landed against `header.liquid`'s `"max_blocks": 5` with a green theme check.
+
+Push, then read the output. It is the only validator that sees this class of bug.
+
+## Conventions
+
+### Data
+
+- **Shopify's objects are the data layer.** `collection`, `product`, `cart`,
+  `paginate`, `collection.filters`, the `money` filter. Do not reimplement any of
+  them, and do not compute a price, a total, a discount depth or a shipping rate in
+  Liquid. The one arithmetic that is allowed is a display-only percentage off, from
+  `compare_at_price` and `price` that Shopify already gave you.
+- **Every product metafield the theme reads, and what shows without it.** Four of
+  the five are undefined on the store, so four slots are rendering placeholders
+  right now; `custom.material` is defined and carries a value on the eleven design
+  pieces. Define the rest in Settings → Custom data → Products.
+
+  | Metafield | Type | Read by | Blank renders |
+  |---|---|---|---|
+  | `custom.material` | single line text | `product-card`, `main-product` | **defined — renders data** |
+  | `custom.care` | rich text | `product-detail` → Fabric & care | labelled placeholder |
+  | `custom.size_chart` | rich text | `product-detail` → Size & fit | **falls back to the SHARED chart** in Theme settings → Size guide, not to a placeholder. Per-product wins; see below |
+  | `custom.fit` | rich text | `product-detail` → Size & fit | labelled placeholder |
+  | `custom.shopee_url` | URL | `product-purchase` | **nothing at all** — see below |
+
+  `.wl-table` in `theme-src/theme.css` styles both size-chart routes — the rich
+  text one and the built one — because Shopify emits a bare `<table>` and
+  `base.css` styles nothing inside one. It scrolls sideways rather than
+  shrinking: **seven sizes against five measurements** is well past what a phone
+  can hold, and horizontal *page* scroll is forbidden. Verified at 390px: the
+  table scrolls inside its own box and the document does not.
+
+  **THE SHARED CHART IS A THEME SETTING, NOT A METAFIELD**, added 2026-09-13.
+  Theme settings → Size guide holds the column headings and one textarea of
+  rows, pipe separated, one size per line. It is store-wide because Wear Label
+  has one size system and eleven products cut to it — a metafield would be the
+  same table typed eleven times and eleven places to correct one wrong number.
+  `custom.size_chart` still wins per product for a cut that does not follow the
+  house measurements.
+
+  **Type centimetres only.** `snippets/size-guide.liquid` marks every numeric
+  cell with `data-cm` and `theme.js` computes the inch column; two typed sets
+  would be two sets that can disagree.
+
+- **The Shopee hand-off is a metafield with a setting as its fallback**, and the
+  precedence is deliberate. `custom.shopee_url` per product wins; `settings.shopee_shop_url`
+  fills in; with neither, the link is **absent** rather than pointing at a search
+  page. A per-product URL lands the shopper on the piece, a shop URL lands them on
+  a shop — so the fallback is a courtesy, not the intended state.
+
+  It is a LINK and not a button, and that is a hierarchy decision worth keeping: it
+  is a channel choice, not a purchase intent. A third button on the product page
+  puts the marketplace at parity with the store's own checkout, on the store's own
+  page. It also stays visible on a sold-out product on purpose — the stock data
+  came from Shopee as a snapshot, and hiding the link would assert a restock has
+  not happened when nothing here knows that.
+
+- **Never invent commerce data.** No fabricated shipping rates, review counts,
+  stock numbers, countdowns or discount depths — not even as placeholder polish.
+  Where a number cannot be known, the UI says where it comes from ("Calculated at
+  checkout") or the block hides itself. This is why the design's star rating and
+  its "Up to 40% off" tile are absent.
+- **Quoting a customer is not inventing one.** The voices wall carries twenty real
+  Shopee reviews, verbatim. That is why it is allowed where a star rating is not:
+  it reproduces what customers wrote instead of synthesising a score. Never edit,
+  tidy or translate one, and never add a review that did not come from the store.
+- **Placeholder mode is a feature, not scaffolding.** A snippet called without its
+  object renders the labelled placeholder at final size — `product-card` with no
+  product, `media` with no image, `copy` with a blank string. That is what makes an
+  empty store reviewable. Keep it working; do not add an early return that renders
+  nothing.
+- **An empty collection and a filtered-to-nothing collection are different facts**
+  and must not look the same. The first draws placeholder cards; the second gets
+  the no-results alert.
+
+### Copy
+
+- **Two homes, and the split is deliberate.** Interface chrome lives in
+  `theme/locales/en.default.json` — it is not brand copy, and it is translatable.
+  Everything the brand *says* is a theme or section setting, so the client edits it
+  in the theme editor instead of waiting on a code change. That split is what
+  stopped "copy is unwritten" from being a code blocker.
+- **Never hardcode a user-visible string in a section or snippet.** If script needs
+  one, pass it in through a data attribute — `save-button` does for its two states,
+  and `quote-form` does for its three field labels (`data-quote-field` carries the
+  label the composed WhatsApp message uses). There is no copy in `theme.js` and
+  there must not be. This rule was broken once and fixed on 2026-08-31:
+  `main-collection.liquid` rendered a hardcoded `'No pieces match these filters.'`
+  while `catalogue.no_results` sat in the locale file holding that exact sentence,
+  referenced by nothing.
+
+- **The locale namespaces, and what each is for.** `general` · `catalogue` ·
+  `product` · `cart` · `home` · `carousel` · `customer` · `gift_card`, plus four
+  added for the brief: **`search`** (the field, the prompt, the pluralised result
+  count, the nothing-matched line), **`collections`** (the "no collections yet"
+  notice), **`quote`** (the three field labels and the no-WhatsApp-number alert)
+  and **`contact`** (the native form's labels and its success line).
+
+  `general.opens_new_tab` is the screen-reader suffix every off-site link carries —
+  the footer socials and Buy on Shopee. A link that replaces the page without
+  saying so is the bug it exists to prevent.
+- **A blank setting is a valid state.** `snippets/copy.liquid` renders a labelled,
+  correctly-sized placeholder for any blank slot, so the layout is already final
+  before the copy arrives.
+- **Site language: English**, single locale. Amounts render the way Shopify's
+  `money` filter formats them for Indonesia — `Rp 750.000`.
+- **Quoted material keeps its own language.** The customer reviews are Indonesian
+  and stay that way; translating a quotation turns it into a paraphrase. This is
+  the only exception, and it applies to quotations, never to the site's own voice.
+
+### Rendering
+
+- **Liquid renders on the server. That is the whole model.** There are no client
+  islands to reason about any more — the thirteen the React app had came down to six
+  behaviours in one file.
+- **Everything in `theme.js` is progressive enhancement, and each one is paired
+  with a fallback.** The disclosure panel ships open and script closes it. Tab
+  panels all ship visible; `scripting: none` keeps them that way and removes the
+  strip. The gallery ships showing every angle. The carousel parks each slide at
+  its own offset and loses its controls under `scripting: none`. The quantity
+  stepper's value lives in a real number input. Add a behaviour, add its fallback.
+- **The URL is the state.** Catalogue filters are links that flip one facet and
+  preserve the rest — Shopify's `url_to_add` / `url_to_remove`. The variant picker
+  is links to `?variant=<id>`. Sort is a plain `GET` form that carries the active
+  filters as hidden inputs and deliberately drops `page`. No client filtering, no
+  state to keep in step, and every result is shareable.
+- **Forms work without JavaScript.** Add to bag posts to `/cart/add`. Each bag line
+  is one form to `/cart/change` with two submit buttons carrying different
+  quantities, and remove is the same endpoint at quantity 0. Nested forms are
+  illegal — the checkout button reaches the cart form by its `form` attribute
+  instead of being wrapped in it. Do not "fix" that into a form per button.
+
+- **`Buy now` is that same two-submits pattern**, one form with a second submit
+  carrying `name="return_to" value="/checkout"`, so only the button actually
+  pressed adds the parameter. It is **not** `{{ form | payment_button }}` — see
+  [Platform constraints](#platform-constraints).
+
+- **THE QUOTE FORM IS THE PATTERN TO COPY for anything that hands off to an
+  external app**, and it is worth understanding before touching it. It is a real
+  `<form method="get">` whose `action` is the studio's `wa.me` URL. The three
+  visible fields have **no `name` attribute**, so they are never serialised; the
+  only named control is a hidden `text` input. `theme.js` fills that input on
+  `submit`, from `data-quote-field` labels in the markup.
+
+  What that buys: with script off, `text` submits empty and WhatsApp opens the
+  same chat with nothing typed — the reader is exactly where they were going and
+  types the message themselves. With script on they arrive with it composed.
+  `required` still validates either way; native validation does not care whether a
+  field has a name.
+
+  The alternative — a click handler that builds a URL and navigates — is a control
+  that does nothing with script off. **A button that only works with script is a
+  dead control; a form that only prefills with script is a form.**
+
+- **Search is a page, not a header overlay.** `header.liquid` used to argue the
+  mark should not exist at all ("an icon that does nothing is worse than one
+  absence") and the brief asked for it, so the mark is a link to `/search`. An
+  overlay would be a second disclosure in a header that already has one, would
+  need its own focus trap and escape handling, and could not work with script off —
+  which puts the magnifier straight back to doing nothing. Results are restricted
+  to products with a hidden `type=product`, because the theme has no card for a
+  page or article result.
+- **Checkout is a hand-off.** A submit named `checkout` on the cart form. Do not
+  build a custom checkout UI (see [Platform constraints](#platform-constraints)).
+- **The voices wall and the Instagram strip cost zero JavaScript** and must stay
+  that way. Both loop on CSS.
+
+### Design
+
+- **One token file: `app/tokens.css`, and it is shared.** Every colour, font,
+  radius, spacing, shadow and duration resolves to a variable there. `:root` holds
+  brand primitives (`--wl-*`, never referenced from markup); `@theme` holds the
+  semantic tokens Tailwind turns into utilities. No section or snippet contains a
+  hardcoded design value — the palette must be replaceable in one edit.
+- **`app/base.css` is shared too.** Change a rule there and both the theme and the
+  archived app get it. Theme-only rules — the ones that exist because Liquid has no
+  React — live in `theme-src/theme.css` and nowhere else. Never duplicate a rule
+  into the theme.
+- **There is ONE button: `snippets/button.liquid`.** Four variants — `primary`,
+  `secondary`, and `invert` / `invert-outline` for espresso grounds. It renders an
+  `<a>` when given `href` and a `<button>` otherwise, which matters: an `<a>` that
+  submits and a `<button>` that navigates are both wrong and both look identical.
+  Do not retype the class string; that is what this snippet was extracted to stop,
+  after it had been copied into three sections and was about to be copied into
+  eight more.
+
+  `secondary` is unreadable on espresso — its `text-brand` is rgb(114,94,76) on
+  rgb(30,26,22) — which is the same trap `footer.liquid` documents for its link
+  colour. Use an `invert` variant on any inverted surface.
+
+- **ON A DARK BAND, COLOUR EVERY HEADING AND EVERY LINK EXPLICITLY. Headings do
+  not inherit colour here.** `app/base.css` gives `h1, h2` their own
+  `color: var(--color-ink)` and gives links their own colour, and a declaration
+  on the element beats anything inherited from a section's `text-ink-invert`.
+
+  This has now bitten three times, which is why it is a rule rather than three
+  comments: `footer.liquid` for its link colour, `two-ways.liquid` for the
+  espresso door's headline, and `custom-hero.liquid`, where **the page's h1 was
+  drawing espresso on espresso** — the same value, at the top of the B2B page,
+  for as long as that page has existed. It was reported as "itu terlalu gelap"
+  and fixed on 2026-09-13; the measured contrast went from about 1:1 to 15.88:1
+  by adding one class.
+
+  Nothing catches this. It renders, theme check passes, and the aurora behind it
+  leaves just enough of a ghost that it looks like a design choice. The only
+  detector is looking at the band.
+
+- **Two bands of the same colour must not touch.** The home page's B2B band is
+  cream and not espresso for exactly this reason: the voices wall directly below it
+  is espresso, and two espresso bands adjoining read as one very long dark region
+  with a seam in it rather than as two sections. `custom-band` gets its weight from
+  the aurora, the photograph and the pair of buttons instead. `why-wear-label` is
+  cream *cards on white* for the same reason — the cream band of `how-it-works` is
+  directly above it.
+
+- **A placeholder is for a layout that DEPENDS on the missing thing.** That is the
+  limit of the rule, and `custom-hero` is the one section that deliberately draws
+  no placeholder: an espresso ground with the aurora and the type over it is
+  already a finished surface, the way the footer is. An empty photo slot there has
+  a design, not a hole, and a grey rectangle labelled "photo" would be scaffolding
+  standing in front of something finished. Every other empty slot on the site still
+  draws its placeholder at final size.
+
+- **No new icons for a service or a value.** The design direction asks for minimal
+  icons and an editorial look; three marks in circles above three headings is the
+  layout every services section has. `custom-services` uses the photograph as the
+  mark and `how-it-works` uses numerals. Only one mark has been added to
+  `icon.liquid` since the port — `search` — and it is flagged there as the single
+  exception to "generated from `components/ui/icons.tsx`, never retyped".
+
+- **A derived number is never a typed number.** `how-it-works` zero-pads its step
+  number from `forloop.index`, so inserting a step renumbers the row. A step
+  numbered by hand goes wrong the first time somebody inserts one in the middle,
+  and the block they forget to renumber is the one that ships.
+
+- **British spelling.** "Colourway" is an option name, a locale key and a filter
+  label, so the site is British throughout — which is why the B2B page says
+  "customisation" where the brief wrote "Customization". One page spelled the other
+  way is something a reader notices without being able to say why.
+
+- **Palette, spacing, radius and motion are NOT theme settings.** Exposing them in
+  the editor would let one edit break the system. Only copy and the type pairing
+  are editable.
+- **THE SURFACE STACK IS THREE DEEP, and this rule changed on 2026-09-13.** It
+  used to read "the page is white; cream is a band colour". The page is no
+  longer white: `body` resolves to **`--color-ground`** (`#fdfaf7`), a faint
+  warm tint added on request — "gw mau background nya ga putih polos tp ada
+  warna tipis2".
+
+  What did NOT change is the reason the old rule existed, and it is why this is
+  a **third token** rather than a new value for an old one:
+
+  | Layer | Token | What it paints |
+  |---|---|---|
+  | the page | `--color-ground` `#fdfaf7` | `body`, and the header, which is shell rather than something on it |
+  | on the page | `--color-surface` `#ffffff` | every input, chip, stepper, icon disc, the invert button's off-state |
+  | on those | `--color-canvas` `#fbf4ef` | band grounds, the review cards, the cream door |
+
+  Before this the page and the white things shared one token, so warming it
+  would have warmed both together and moved nothing relative to anything —
+  cream would have flattened into the page and the site's figure and ground
+  would have gone the wrong way round. The steps are a few percent each on
+  purpose: the ORDER carries the depth, not the distance. Do not close the gaps
+  and do not paint anything else `bg-ground`.
+- **The aurora is two CSS classes, not inline styles.** `.wl-aurora` in `base.css`
+  assembles the wash; the stop lists are tokens. `snippets/aurora.liquid` only picks
+  a tone, an origin and an intensity. **The veil layer MUST be painted in the colour
+  of the surface underneath** — a mismatch shows up as a visible rectangle, and that
+  is the bug this effect always has. Its parent MUST carry `relative isolate
+  overflow-hidden`; `isolate` is what keeps `soft-light` blending against the band
+  rather than the page.
+- **A background loop is CSS, not script.** `.wl-voices-*` and `.wl-marquee` in
+  `base.css` drive the voices wall and the Instagram strip, and their loop lengths
+  are tokens. **Animate `transform` or `opacity` and nothing else.** A loop that
+  animates a paint property — `background-position`, `stroke-dashoffset` — is
+  re-rasterised every frame on the main thread. A line-art wash of 36 animated
+  bezier strands sat behind New arrivals for exactly that reason and was removed.
+- **Accessibility is part of the design, not a pass afterwards.** Single `h1` per
+  page with no skipped levels — the carousel puts an `h1` on every slide and makes
+  the inactive ones `inert`, which is what keeps that true. 44px minimum control
+  height, visible focus never removed, sticky-header scroll padding, and **colour
+  never carries meaning alone**: sold out says "Sold out", an applied filter carries
+  `aria-current`, a toggle carries `aria-pressed`. Four contrast pairs fall short of
+  AA; they are implemented as specified and annotated at the top of `tokens.css`.
+- **Motion has a readable resting state.** `prefers-reduced-motion` does not merely
+  pause a loop — it has to leave the content reachable. The Instagram strip keeps a
+  scrollable rail; the voices wall drops its tilt, its offsets and its duplicate
+  copies and becomes a plain grid; the carousel never starts rotating at all.
+
+### Performance
+
+The home page carries two continuous background loops and a screenful of scroll
+reveals. Both have already cost a round of visible stutter, and the rules below are
+what came out of fixing it.
+
+- **A continuous loop animates `transform` or `opacity`. Nothing else.** Those two
+  are composited: the texture is rasterised once and the compositor moves it. Every
+  other property is re-rasterised on the main thread every frame, and the cost
+  scales with how big the element is on screen.
+- **`background-attachment: fixed` is banned.** It ties a layer's paint to scroll
+  position. It was the single worst offender on this site.
+- **Never wrap a 3D scene or a blended layer in something that animates opacity.**
+  `[data-reveal]` animates opacity, which makes its element a stacking context.
+  Around the voices wall that flattens `preserve-3d`, so the plane's
+  `translateZ(-100px)` stops holding the cards behind the stage fades and the wall
+  ends in a hard edge; around an aurora band it makes `mix-blend-mode: soft-light`
+  blend against the wrapper instead of the page, which draws a visible rectangle.
+  The voices wall and the Instagram strip are therefore deliberately **not** given
+  `data-reveal`.
+- **Skip what is off screen.** `content-visibility: auto` on the voices stage (md
+  and up, where the tilted 40-card scene exists). Give anything you add that
+  treatment a correct `contain-intrinsic-size`, or scope it to the breakpoint where
+  its height is known — reserving the wrong height puts a jump in the page.
+- **The mobile layout is the cheap one, on purpose.** Below `md` the voices wall
+  loses its perspective, its plane transform, its animations and half its cards. If
+  something is smooth on a phone and heavy on a laptop, look at what the desktop
+  layout switches back on before blaming the browser.
+- **One known cost is still there.** The aurora's `filter: blur(10px)` sits on the
+  parent while the animated layer is its child, so the blur is recomputed every
+  frame over the whole band. Moving the blur onto the moving layer, or baking a
+  pre-softened gradient, is the next step if a band still costs too much.
+
+## Design sources
+
+Two files in Claude Design project
+[`bf11a0f4-4b1c-400b-802c-b9c9c2d66673`](https://claude.ai/design/p/bf11a0f4-4b1c-400b-802c-b9c9c2d66673),
+both derived from the client's `BRAND GUIDELINE.pdf` and `Katalog Baju` upload:
+
+- **`Wear Label Design System.html`** — the authority for colour, type, radius,
+  spacing, shadow, motion and component behaviour. Ported into `app/tokens.css`.
+- **`Wear Label Storefront.dc.html`** — the four approved screens.
+
+Its `handoff/` folder holds developer copies of the aurora band and the voices wall.
+Both are ported, not dropped in; read the two READMEs there for the reasoning behind
+the measured values before changing any of them.
+
+When the design and one of these conventions disagree, say so and ask — do not
+silently pick either side. Deviations already taken are recorded at the top of the
+section or snippet that took them, and the port's own deviations are listed in
+`theme/README.md`.
+
+### Where the client's own files land
+
+**`asset/` in the repo root is the studio's drop folder**, recorded here by
+instruction 2026-09-13: "skrg semua file asset gw taro sini". It is the camera
+originals and the master films, arranged by piece — `Cerra/`, `Lilo/`, `Yora/`,
+`B2B Project/`, `Video/main video/` and so on — plus the `Zone.Identifier`
+stubs Windows leaves behind when files cross into WSL. Ignore those.
+
+**It is gitignored, on purpose, and the reasoning is worth keeping.** It is 81MB
+today and it grows with every hand-over; this repository is public; and none of
+it is what the store serves. What ships is the DERIVED file in `theme/assets/` —
+transcoded, resized, committed — and that is the copy every rule below is about.
+So: masters in `asset/`, out of git; web copies in `theme/assets/`, in git.
+
+The consequence to plan for: **`asset/` is not in a fresh clone.** Anything that
+needs to be re-derived from a master needs the master handed over again. Say so
+rather than re-deriving from the web copy, which is lossy twice over.
+
+**`asset/_backup/` is not a hand-over, it is ours.** It holds the export taken
+before the 2026-09-13 product cull. Do not delete it and do not treat it as
+source material.
+
+There is no ffmpeg on this machine and no root to install one. A static build
+unpacks without privileges and that is how the hero film was transcoded:
+
+```bash
+curl -sL -o ffmpeg https://github.com/eugeneware/ffmpeg-static/releases/download/b6.0/ffmpeg-linux-x64
+chmod +x ffmpeg
+```
+
+**HEIC IS NOT DECODABLE by that build** — `asset/Pallo/IMG_0223.heic` and
+`IMG_2051.heic` return "Invalid data found when processing input". They are the
+only two files in the drop folder that have never been used. Ask for a JPEG.
+
+**THE PRODUCT PHOTOGRAPHS GO TO SHOPIFY, NOT TO `theme/assets/`.** Every folder
+in `asset/` that is named after a piece was uploaded as product media on
+2026-09-13 — 32 photographs across eleven products, at most 2000px, WebP q86.
+The route is three calls and the middle one is not GraphQL:
+`stagedUploadsCreate` → multipart POST to the returned URL → `productCreateMedia`
+with the `resourceUrl`. Alt text is derived: a filename that names a colour
+(`Soso/black.jpg`) becomes "Soso Pants — black"; an opaque camera id names
+nothing, so the alt is just the product title.
+
+**CUTTING A STUDIO SHOT OUT: flood-fill inwards from the frame edge, never a
+colour key.** What decides a pixel is whether it connects to the border, not
+whether it matches a colour. A global key on these four would have eaten the two
+white hospital uniforms and the off-white canvas tote, which are the same value
+as the paper behind them; connectivity saves them because the navy trim and the
+piping close the path. numpy is available here and PIL is not, so the matte, the
+feather and the PNG writing are all hand-rolled — the scripts are in the session
+scratchpad, and the recipe is: border-median background, tolerance plus a
+low-chroma relaxation for soft shading, 8-connected flood, box-blur feather,
+trim to the alpha bounding box.
+
+### Assets, and how they were pulled
+
+Everything came out of the design project byte-exact — nothing was redrawn,
+re-exported or approximated, **with one exception, `hero-1.webp`, noted below.**
+`public/` holds the original exports; `theme/assets/` holds the copies the theme
+serves, and for every asset the two are byte-identical. Replace one, replace both:
+nothing copies `public/` into `theme/assets/` for you, so a stale original there
+is how somebody's change gets quietly reverted later.
+
+| Local | From | Notes |
+|---|---|---|
+| `public/products/*.webp` (11) | `assets/products/` | The catalogue shots. Square, 639–1024px, named by handle. **Upload these to Shopify with the products** |
+| `theme/assets/*.png` (7) | `assets/` | `wordmark`, `stacked`, `mark`, each with a cream variant, plus `wordmark-taupe` |
+| `theme/assets/hero-1.webp` | **the studio, not the design** | Slide 1 — the polaroids. 2730x1536, the studio's own higher-resolution render of the same composition, replacing the design's soft 1200x675 export on 2026-08-21. It does **not** carry the wordmark the design's export had across its top |
+| `theme/assets/hero-2.webp` | the design's `sf-hero-1` image slot | Slide 2 — the order-notes card. Byte-exact, 1200x675. **Unreferenced since 2026-09-13**, with the carousel |
+| `theme/assets/hero-video.mp4` | `asset/Video/main video/Wear Label.mov` | **The hero film.** Derived, not byte-exact: the master is 23MB of 1920x1080 HEVC with an audio track, and this is H.264 at CRF 26 with `+faststart` and **no audio at all**, 4.5MB, 16s. H.264 because HEVC in a `<video>` is not a safe bet outside Apple's browsers; no audio because a hero autoplays and a browser only autoplays a muted one, so the track could never be heard without an unmute control nobody has asked for |
+| `theme/assets/hero-video-poster.webp` | frame 0 of the film | The `poster`. Frame zero specifically, so there is no jump when playback starts |
+| `theme/assets/door-custom.webp` · `door-shop.webp` | `asset/B2B Project/rs.jpeg` · `theme/assets/hero-1.webp` | The two doors. Both square, both 1100px — the panels differ in width and must not differ in shape. The B2B one is a crop of six of the eight hospital sets; the B2C one is a square centre crop of the polaroid composition that led the old hero carousel |
+| `theme/assets/project-*.webp` (4) | `asset/B2B Project/` | The portfolio, **CUT OUT TO TRANSPARENCY 2026-09-13**. They came as studio shots on white and light-grey sweeps and read as four foreign rectangles against this site's warm surfaces — "gk masuk ke theme warna shopify store kita". Each now carries an alpha matte, is trimmed to its subject, and is `object-contain` on a cream plate, so the garment sits on the page instead of a picture of it. **They are no longer all 4:3** — a cut-out keeps its own proportions and the FRAME is what stays consistent |
+| `theme/assets/hero-video-still.webp` | frame at 12s | The reduced-motion still, and a **different frame from the poster on purpose** — it is the whole hero for that reader, so it is composed (model centre-frame, full length, wordmark above her) rather than transitional |
+| `app/icon.png`, `app/apple-icon.png` | the monogram | Per the design system's "monogram for favicons" rule. **Still to set as the store's favicon** |
+
+The icon set is not a file anywhere: `snippets/icon.liquid` carries the path data,
+generated from `components/ui/icons.tsx`, which took it verbatim from
+`assets/icons/*.svg`.
+
+**Everything from here to the end of this section is about the photograph
+carousel, which is no longer on any template.** It is kept because the carousel
+is kept, and because the reasoning is the reasoning to re-read if it ever goes
+back. Nothing in it describes what the home page does today — see [The
+theme](#the-theme).
+
+**The hero led with the photograph, which is not the design's order.** The
+design puts the studio's Indonesian order-notes card first (`sf-hero-1`, shipped
+as `hero-2.webp`) and the polaroids second (`sf-hero-2`, `hero-1.webp`). **The
+theme runs them the other way round, on request, 2026-08-21.** Two reasons, and
+they are the ones to re-read before anybody swaps it back: the card is
+`text_art`, so it is dropped below `md` and a phone therefore used to open on the
+band's bare surface; and a screenful of full-bleed Indonesian type reads as a
+notice, which is a great deal to hand a first-time visitor before a photograph.
+
+Since that swap the filenames happen to match their positions again — slide 1 is
+`hero-1.webp`, slide 2 is `hero-2.webp`. **Do not rely on it.** Nothing in the
+theme reads the number in a filename; the slide order lives in
+`theme/templates/index.json` and nowhere else. The archived React band at
+`components/home/hero-carousel.tsx` still runs the design's order and is
+deliberately not being kept level — see [The Next.js app is an
+archive](#the-nextjs-app-is-an-archive).
+
+## Platform constraints
+
+Fixed properties of Shopify in this market — design around them, don't retry them:
+
+- **Shopify Payments is unavailable in Indonesia.** A third-party gateway is
+  required, and Shopify adds a transaction fee on top of the gateway fee when
+  Shopify Payments is not used.
+  - **Therefore `Buy now` cannot be an accelerated checkout button.**
+    `{{ form | payment_button }}` renders Shop Pay and the wallet buttons, all of
+    which need Shopify Payments. So the brief's `BUY NOW` (§11) is a second submit
+    on the add-to-bag form carrying `name="return_to" value="/checkout"` — the
+    shopper reaches checkout in one silent hop *through* the cart rather than
+    skipping it. Same destination, one extra request, and it is the only version
+    available on this store. Do not "upgrade" it to `payment_button`.
+- **A fully custom checkout UI requires Shopify Plus.** On lower plans checkout is
+  Shopify-hosted. This is why the bag has no shipping selector and no address
+  fields, and why its total equals its subtotal.
+- **Indonesian couriers (JNE, J&T, SiCepat) are not native to Shopify** — they
+  require a RajaOngkir/Biteship app, which quotes rates *during* checkout. The bag
+  therefore says "Calculated at checkout" rather than showing a rate it cannot know.
+- **A Liquid form cannot carry a file, and neither can a WhatsApp deep link.** Brief
+  §9.6 asks the quote form for "Upload Design / Reference jika memungkinkan" and it
+  is not possible down either route: `wa.me` takes text only, and Shopify's contact
+  form tag accepts no file input. Rather than drop the requirement silently, the
+  note under the fields says to send the reference in the chat that just opened. A
+  real upload needs the Shopify Forms app, and that **replaces** `quote-form.liquid`
+  rather than extending it — the app renders its own markup.
+
+- **Discount codes are validated by Shopify at checkout and nowhere else**, so the
+  bag's promo field carries the code to checkout as `?discount=` rather than
+  applying it in place. That is a behaviour the design did not draw; the note beside
+  the field says so.
+- **Storefront filter counts are computed against the filtered set.** Shopify
+  exposes no whole-catalogue equivalent, so the React app's rule — counts from every
+  product, because a count that shrinks as you narrow tells you nothing — cannot be
+  kept. It is the port's one genuine regression and it is written into
+  `snippets/catalogue-filters.liquid`.
+
+## The Next.js app is an archive
+
+`app/`, `components/` and `lib/` are the reference the theme was ported from. They
+still build, and the build is still kept green — but they are **not the
+deliverable**, and the two are allowed to drift. The theme's home page has already
+dropped the category mosaic while `app/page.tsx` still renders it, and its hero
+leads with the polaroids while `components/home/hero-carousel.tsx` still leads
+with the order-notes card.
+
+Rules:
+
+- **Do not port a change backwards** into the React app to keep them level. Record
+  the divergence in the theme instead.
+- **Do not delete it either**, unless asked. It is the only place the ported
+  behaviour is explained at length, and several snippets say "port of <file>" and
+  mean it.
+- **`app/tokens.css` and `app/base.css` are the exception** — they are shared, live,
+  and changing them changes the theme. Treat them as theme files that happen to sit
+  in `app/`.
+- **`lib/shopify/` is dead code** for the theme's purposes, kept for the catalogue
+  fixture (which is where the eleven pieces will be read from when they are
+  imported) and the colourway hexes in `vocabulary.ts`.
+- **`.design-sync/` is behind the app and behind the theme.** It syncs `.tsx` to
+  claude.ai/design and knows nothing about Liquid.
+- `AGENTS.md` is written by `next dev` and governs the archived app only.
+
+## Still open
+
+Not decided, and not to be filled in by guessing:
+
+| Open | What happens meanwhile |
+|---|---|
+| Whether customer accounts exist, or guest checkout is enough | Every `templates/customers/*` renders `main-stub` — the design never covered them, so nothing is drawn rather than Shopify's default being dressed up. "Save for later" is `localStorage` only, in `snippets/save-button.liquid` |
+| Which payment gateway | Checkout hands off to Shopify; no gateway is configured yet |
+| Shop-banner photography | The catalogue opens straight on the pieces, as the React route did — no banner to fill |
+| Per-product Details and Fabric & care copy | `description` and `custom.care` → placeholders. The design reused one generic paragraph for all eleven pieces; it would state a wrong inseam and a wrong fabric on most of them |
+| About Us and 404 copy | Blank → placeholders. About Us is the Shopify page's own content |
+| Whether there is a limited run, and when it ends | Moot while the band is unplaced. Both the band and the countdown are ported and real |
+| ~~The studio's WhatsApp number~~ | **DONE 2026-09-13 — `+62 878-1654-0159`**, as a schema default, and `/pages/custom` now exists to render it on. Verified on the unpublished theme: `action="https://wa.me/6287816540159"`, submit enabled, no alert. **On the LIVE theme the same form still renders `action="https://wa.me/"` with the submit `disabled`**, because the default ships in `config/settings_schema.json` and that file has not been pushed to live. The B2B route is reachable on live; it cannot convert until the push |
+| **Per-product Shopee URLs** | `custom.shopee_url` is undefined and `shopee_shop_url` is blank, so "Buy on Shopee" does not render at all. The decision taken was per-product URLs with the shop URL as a fallback; start with the eleven design pieces, which are the only ones carrying photography |
+| **Contact details** — email, studio address, opening hours | Placeholder blocks on `templates/page.contact.json`, by instruction 2026-08-31. Each renders a labelled placeholder at final size. The address one also waits on the Bandung/Bekasi question below |
+| ~~B2B photography~~ · **three `custom-services` cards** | **Four pieces of real work arrived 2026-09-13** and are live: `selected-projects` carries all four and `custom-band` a detail crop. They are **cut out to transparency** — see the assets table — because the studio's shots are on white and grey sweeps and this site's surfaces are warm. What is still open is only the three `custom-services` cards on `/pages/custom`, and that is a content call — which photograph stands for which service — not a missing asset |
+| ~~The category taxonomy and the collections~~ | **DONE 2026-08-31**, and cut back to three on 2026-09-13 with the sold-out cull. What is still open is narrower and no longer a data question: **whether a "Shop by Category" mosaic of only three tiles — Pants, Cardigan, Culottes — is worth having.** All three are fully in stock now, so nothing blocks it but taste |
+| ~~Trouser measurements~~ · **FOUR SIZES HAVE NO ROW** | **Supplied and live, 2026-09-13** — Size / Length / Waist / Hip / Thigh, in Theme settings → Size guide. What is still open: the studio sent **M, L and XL only**, and every trouser on the store offers **XS, S, M, L, XL, XXL and 3XL**. So four of the seven sizes a shopper can add to a bag have no measurements, and the gap is invisible — the table simply has three rows. **Ask for XS, S, XXL and 3XL.** Column headings are English because the site is; the studio wrote them in Indonesian and swapping them back is one field. Type centimetres only — the inch column is computed, and a range like `62-90` converts to `24.4-35.4` |
+| ~~Selected Projects~~ · **THREE CLIENT NAMES** | **The section was BUILT 2026-09-13** — the 2026-08-31 refusal rested on there being no project photographs and no nameable clients, and four pieces of real work arrived. What is still open is narrower and it is the last thing holding the section back: the studio authorised naming clients, and only **Salna** could actually be read off the photographs. The hospital programme, the institutional shirt and the tote have `client` blank in `templates/index.json`, so three of four cards render the labelled placeholder. Typing them in is a theme-editor edit. **Do not read a name off a blurry crop and publish it.** The blocks are section blocks rather than the `project` metaobject that was once sketched — the metaobject is still the right answer if the studio ever adds these from the admin rather than from a hand-over |
+| Social handles | The footer has four label/URL pairs — Instagram, Shopee, TikTok and a spare — and every URL is blank, so no social link renders. Brief §19 names the three |
+| The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Nine of twelve footer entries have no URL and render as plain text, never as a 404 link. Add the URL in the theme editor when the page exists |
+| A review system | The design's star rating is still deliberately absent — a fabricated score is the one placeholder that cannot be labelled as one. Real quotations are a separate matter and are live in the voices wall; there is no feed behind them, so new reviews mean editing the section's blocks |
+| Whether the studio ships from Bandung or Bekasi | The hero's order-notes card says "Pengiriman dari Kota Bekasi"; the footer note says the studio is in Bandung. Both are live. Nothing picks a side |
+| **The store's NAME** | **It is still Shopify's default, `My Store`.** Found 2026-09-13: `<title>` on the home page reads "My Store", and so does anything else `shop.name` feeds — order emails and the browser tab included. It is one field in Settings → Store details and nothing in the theme can fix it. The hero's screen-reader h1 is pinned to the literal "Wear Label" in `templates/index.json` precisely so the page's one heading did not inherit it; remove that pin once the field is right |
+| The store's own domain | `kbysza-bk.myshopify.com` until a domain is connected |
+| Whether the storefront password comes off | The theme is live; the password is what is still keeping the store private. Taking it off is the actual launch decision now, not publishing |
+
+**Answered, and recorded so it is not reopened:**
+
+- ~~Search~~ — **built, 2026-08-31**, because brief §5 asked for it. The header mark
+  is a link to `/search` and `sections/main-search.liquid` is a real page rather than
+  an overlay: a page has a URL, works with script off, and does not put a second
+  focus trap in a header that already has a disclosure. Results are restricted to
+  products because the theme has no card for a page or article result.
+- ~~Which pieces are made to order~~ — **none, 2026-08-20. The studio does not offer
+  the service.** Every "Start an order" link is off the page and the `/shop` "Made to
+  order" filter row that counted zero is gone. **The brief's B2B custom apparel is a
+  different service and does not reopen this** — bulk production for an organisation,
+  not one garment cut for one shopper. The made-to-order section is no longer in the
+  repo at all; `sections/category-mosaic` is, and is unplaced for a data reason
+  rather than a promise reason.
+- ~~Which of the two halves the home page leads with~~ — **restated 2026-09-13,
+  and it sharpens rather than reverses the entry below.** The studio: "tujuan
+  website ini tuh utamanya bukan untuk jualan, tapi untuk biar wear label ini
+  makin legit … intinya mau tekenin kalo ini tuh bisa untuk B2B". So the till is
+  still being built and is still a launch blocker, but **legitimacy is the
+  primary job and custom apparel is the half that was being under-said.** That
+  is what the two doors and the portfolio are for, and it is the reason to
+  re-read before anybody rebalances the home page back toward the catalogue.
+- ~~Whether the site is a till or only a credibility surface~~ — **both, 2026-08-31.**
+  Brief §19 makes web checkout, payment and shipping Must Have for B2C, and the
+  client's own note adds a Shopee hand-off beside it rather than instead of it. The
+  gateway and the courier app are still unchosen, so the till is not open yet — but
+  the site is no longer *only* a shop window, and PRODUCT.md has been changed to say
+  so.
+- ~~Whether to stay headless~~ — **no, 2026-08-20.** The repo's own rule was
+  "presentation only, no commerce logic here"; with no commerce logic, headless was
+  paying for control nobody used.
+
+Brand identity, palette, typography and tone are **no longer open** — the design
+system settled them, and `app/tokens.css` is where they live. Changing them is a
+design-system decision, not a code decision.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

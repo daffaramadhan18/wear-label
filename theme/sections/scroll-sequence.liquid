@@ -1,0 +1,219 @@
+{%- comment -%}
+  Scroll-linked image sequence on a canvas.
+
+  This section has no counterpart in the React app and no counterpart in the
+  design system. It was asked for directly, in the terms Apple's product pages
+  use: preload a frame sequence, pin a canvas, map scroll position to a frame
+  index, and draw frame by frame as the reader scrolls. The driver is
+  assets/scroll-sequence.js with GSAP + ScrollTrigger; everything below is the
+  markup and the data it reads.
+
+  THE ARTWORK. 240 frames of a silk ribbon crossing a linen ground, which
+  resolves into the polaroid wall the hero also leads with. Source frames 1-19
+  and 234-240 are measurably static (mean absolute difference under 0.35 of 255)
+  and were dropped. What ships is 54 frames sampled UNEVENLY out of the
+  remaining 214, plus the poster:
+
+    - every 5th source frame from 20 to 195 — the slow drift
+    - every 2nd source frame from 197 to 233 — the reveal, which moves about
+      twice as fast per frame as anything before it
+
+  Scroll maps to the ARRAY index, not to the source timeline, so the reveal ends
+  up with a third of the scroll distance for a sixth of the original running
+  time. That is deliberate: the reveal is the only part with edges in it, and at
+  even pacing it went past in a few hundred pixels.
+
+  FEWER FRAMES THAN IT LOOKS. The driver crossfades between the two frames
+  either side of the scroll position, so 54 frames read as continuous rather
+  than as 54 steps. A 50/50 blend of two frames four apart was checked against a
+  real frame from between them and is indistinguishable — silk has no hard edges
+  to ghost. Without the crossfade this sequence would need roughly three times
+  the frames, which at this material's compression cost is not affordable.
+
+  WHY IT COSTS WHAT IT COSTS. Every frame is a full field of fine linen weave,
+  which is the worst case for any image codec — there is no flat area anywhere to
+  spend nothing on. Measured: 98KB per frame at 1120x630 webp q62, against about
+  20KB for a frame of a product on white at the same size. So:
+
+    - 54 frames + poster = 5.6MB, and there is no encoder setting that makes
+      that 1MB. Dropping to 960px wide buys 40% and costs visible sharpness;
+      going up to 1920px native costs 9.9MB.
+    - A phone loads every 2nd frame instead — 28 frames, 2.9MB — decided once at
+      init from the viewport width, never re-decided on resize, because
+      re-deciding means downloading the other half.
+    - Nothing loads at all until the section is within two viewports, and
+      nothing loads on a metered or 2G connection, or under reduced motion.
+      Those readers get the poster, which is the resolved last frame.
+
+  THE LAST FRAME IS THE POSTER, and that is not a shortcut. The sequence is
+  1120x630, which on a wide screen at 2x is about a 2.5x upscale — invisible on
+  drifting silk, visible on the polaroids, which are photographs with edges. So
+  the 55th and final entry in the frame list is sequence-poster.webp at 1600x900,
+  the same composition at a quality the resting image deserves. The crossfade
+  into it sharpens as the scrub finishes; mixing two resolutions in one dissolve
+  cannot be seen because it is the same picture.
+
+  THE FALLBACK IS THE DEFAULT STATE, which is why there is no `scripting: none`
+  block for this one. The poster ships visible and the canvas ships hidden; the
+  driver reveals the canvas and hides the poster only once every frame has
+  decoded. Script blocked, script failed, reduced motion, save-data, 2G, GSAP
+  404 — every one of those paths ends with a full-bleed photograph at the
+  section's final size and no pinning, because the pin is created by
+  ScrollTrigger and ScrollTrigger never runs. There is nothing to undo.
+
+  ACCESSIBILITY. The canvas carries `role="img"` and the poster's alt text, so
+  the sequence announces as one image rather than as nothing. It is an `h2` and
+  the page's `h1` stays in the hero. The overlay is optional: with all three copy
+  settings blank the whole card is omitted rather than drawing three placeholders
+  over the artwork — the one place in this theme where a blank setting hides
+  something instead of reserving space for it, because the artwork is the
+  content here and the copy is the decoration, not the other way round.
+
+  NOT GIVEN `data-reveal`, and not given `content-visibility`. The first
+  animates opacity, which makes a stacking context and would fight the pin; the
+  second hides the section from layout, and ScrollTrigger has to measure it.
+{%- endcomment -%}
+
+{%- liquid
+  # The frame count is the shipped asset set, not a merchant setting: a wrong
+  # number here is 54 requests for files that do not exist. Frames are
+  # sequence-001.webp .. sequence-054.webp, and the poster is the 55th entry.
+  assign frame_count = 54
+
+  assign alt = section.settings.alt
+  assign has_copy = false
+  if section.settings.eyebrow != blank or section.settings.heading != blank or section.settings.body != blank
+    assign has_copy = true
+  endif
+-%}
+
+<section
+  class="mt-section"
+  data-sequence
+  data-sequence-length="{{ section.settings.scroll_length }}"
+  {{ section.shopify_attributes }}
+>
+  <div data-sequence-stage class="relative h-[100svh] w-full overflow-hidden bg-canvas">
+    {%- comment -%}
+      The poster is the resting state, so it is a real <img> with real alt text
+      and `fetchpriority="low"` — it is well below the fold and must never
+      compete with the hero for the first paint.
+    {%- endcomment -%}
+    <img
+      data-sequence-poster
+      src="{{ 'sequence-poster.webp' | asset_url }}"
+      alt="{{ alt | escape }}"
+      width="1600"
+      height="900"
+      loading="lazy"
+      fetchpriority="low"
+      decoding="async"
+      class="absolute inset-0 h-full w-full object-cover"
+    >
+
+    {%- comment -%}
+      No width/height: the driver sets the backing store from the stage's own box
+      and the device pixel ratio, capped at 2x and 2600px, and re-sets it on
+      refresh. Sizing it here would only be overwritten.
+    {%- endcomment -%}
+    <canvas
+      data-sequence-canvas
+      role="img"
+      aria-label="{{ alt | escape }}"
+      class="absolute inset-0 h-full w-full"
+    ></canvas>
+
+    {%- if has_copy -%}
+      <div class="absolute inset-0 flex items-end md:items-center">
+        <div class="mx-auto w-full max-w-content px-gutter pb-12 md:pb-0">
+          <div class="flex max-w-130 flex-col gap-4 bg-canvas/92 p-6 md:gap-5 md:px-11 md:py-12">
+            <span class="text-micro uppercase tracking-nav text-ink-subtle">
+              {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
+            </span>
+
+            <h2 class="text-h1 leading-h2 tracking-display">
+              {% render 'copy', value: section.settings.heading, label: 'heading' %}
+            </h2>
+
+            <p class="text-body leading-body text-ink-muted">
+              {% render 'copy', value: section.settings.body, label: 'body', lines: 2 %}
+            </p>
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- comment -%}
+    Every URL is emitted rather than one URL with the number substituted in
+    script, because `asset_url` appends a per-file `?v=` hash — substituting the
+    number would ask the CDN for frame 42 under frame 1's cache key. The list is
+    about 6KB of highly repetitive text, which is almost nothing once gzipped.
+  {%- endcomment -%}
+  <script type="application/json" data-sequence-frames>
+    [
+      {%- for i in (1..frame_count) -%}
+        {%- assign padded = i | prepend: '00' | slice: -3, 3 -%}
+        {%- assign file = 'sequence-' | append: padded | append: '.webp' -%}
+        "{{ file | asset_url }}",
+      {%- endfor -%}
+      "{{ 'sequence-poster.webp' | asset_url }}"
+    ]
+  </script>
+</section>
+
+{%- comment -%}
+  GSAP is vendored as a theme asset rather than pulled from a CDN, and loaded
+  here rather than in theme.liquid, so a page without this section pays none of
+  its 117KB. `defer` keeps all three in document order and after parsing, which
+  is the order the driver needs: it reads window.gsap and window.ScrollTrigger
+  and returns quietly if either is missing.
+{%- endcomment -%}
+<script src="{{ 'gsap.min.js' | asset_url }}" defer></script>
+<script src="{{ 'gsap-scrolltrigger.min.js' | asset_url }}" defer></script>
+<script src="{{ 'scroll-sequence.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Scroll sequence",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "A pinned canvas that plays a 55-frame sequence as the reader scrolls. The frames ship with the theme and are not editable here. Readers on a metered or 2G connection, and readers who ask for reduced motion, see the last frame as a still photograph instead — so this section has to make sense as a single image too."
+    },
+    {
+      "type": "range",
+      "id": "scroll_length",
+      "label": "Scroll distance",
+      "info": "How many screens of scrolling the sequence is spread over. Lower is faster and choppier; higher means more scrolling before the page moves on.",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "unit": "x",
+      "default": 3
+    },
+    {
+      "type": "textarea",
+      "id": "alt",
+      "label": "Describe the sequence",
+      "info": "Read aloud by screen readers, and the alt text of the still fallback. Describe what is shown, not that it animates."
+    },
+    {
+      "type": "header",
+      "content": "Overlay"
+    },
+    {
+      "type": "paragraph",
+      "content": "Optional. Leave all three blank and no card is drawn — the artwork stands on its own."
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading" },
+    { "type": "textarea", "id": "body", "label": "Body" }
+  ],
+  "presets": [
+    {
+      "name": "Scroll sequence"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,11 @@
+/*
+ * Next.js entry for the stylesheet.
+ *
+ * The actual rules live in ./base.css, which the Shopify theme's own entry
+ * (theme-src/theme.css) imports as well — the two build targets must not drift,
+ * and duplicating 440 lines of base layer is exactly how they would. Tokens are
+ * still ./tokens.css, unchanged and still the single source of truth.
+ */
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./base.css";

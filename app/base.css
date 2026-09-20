@@ -1,0 +1,623 @@
+
+/*
+ * Base layer. No design values live here — everything resolves to a token from
+ * ./tokens.css, which is ported from the Wear Label Design System.
+ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+
+    /* The header is sticky, so anything scrolled to by an anchor OR by keyboard
+       focus would otherwise land underneath it. Padding the scrollport keeps the
+       focused control visible (WCAG 2.2 AA — Focus Not Obscured). */
+    scroll-padding-top: calc(var(--header-height) + var(--scroll-offset));
+  }
+
+  body {
+    /*
+     * NOT white and NOT cream — a third colour between them, `--color-ground`
+     * (#fdfaf7), added 2026-09-13 on request: "gw mau background nya ga putih
+     * polos tp ada warna tipis2".
+     *
+     * The reason it is a third token rather than a new value for an existing
+     * one is the trap this comment used to describe, and the trap is still
+     * real. The design's stack is three deep: the page, the white things on it
+     * (the header, every input, every chip, the stepper, the icon discs), and
+     * the cream things on those (the band grounds, the review cards). Before
+     * today the page and the white things shared one token, so warming that
+     * token would have warmed all of them together and moved nothing relative
+     * to anything. Cream would then have flattened into the page and the whole
+     * site's figure and ground would have gone the wrong way round.
+     *
+     * So: ground is the page, `--color-surface` stays #ffffff for the things on
+     * it, `--color-canvas` stays cream for the things on those. The steps are
+     * small on purpose — a quarter of the way from white to cream — and the
+     * order is what carries the depth, not the distance.
+     *
+     * The header is the one full-bleed element painted `bg-ground` rather than
+     * `bg-surface`, because it is part of the shell rather than something
+     * sitting on it. Everything else that was white is still white.
+     */
+    background-color: var(--color-ground);
+    color: var(--color-ink-body);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display type is Playfair; H3 and below are set in the interface face, per
+     the system's type table. */
+  h1,
+  h2 {
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: var(--tracking-h2);
+    line-height: var(--leading-h2);
+    text-wrap: balance;
+  }
+
+  h3 {
+    color: var(--color-ink);
+    font-size: var(--text-h3);
+    font-weight: 500;
+    line-height: var(--leading-h3);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /*
+   * Links are taupe with no default rule. The system's underlined treatment — a
+   * sand rule that darkens to taupe on hover — belongs to inline and prose links,
+   * so it is applied where those appear (the `link` button variant, "Clear all")
+   * rather than globally, which would also underline the nav and every card.
+   */
+  a {
+    color: var(--color-brand);
+    text-decoration: none;
+  }
+
+  /* Prices, counts and any tabular figure must not shift width. */
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * Focus. The system's ring is 2px #C9AF97 at 2px offset, which is only 1.92:1
+   * on cream — under the 3:1 a focus indicator needs. The ring colour is kept and
+   * a 1px brand-taupe edge (5.64:1) is added inside the offset gap, so the
+   * indicator reads as the system's double rule and is actually perceivable.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 1px var(--color-brand);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Taps register without the legacy 300ms click delay. */
+  a,
+  button,
+  input,
+  select,
+  summary {
+    touch-action: manipulation;
+  }
+
+  ::selection {
+    background-color: var(--color-selection);
+    color: var(--color-ink);
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+  }
+}
+
+@layer components {
+  /* Section rule — the heaviest of the three line weights. */
+  .wl-rule {
+    border: 0;
+    border-top: 1px solid var(--color-rule);
+  }
+
+  /*
+   * The aurora wash.
+   *
+   * Two stacked repeating gradients: a veil in the surface colour over a band of
+   * brand stops. The element itself holds a still frame; the `::after` copy is
+   * the one that travels, blended `soft-light` so the colour moves *through* the
+   * paper instead of sitting on it. `mix-blend-difference` and the `invert` pair
+   * the original component shipped with both turn warm neutrals cyan, which is
+   * why neither is here.
+   *
+   * `--aurora-veil`, `--aurora-stops` and `--aurora-origin` are set per band by
+   * `components/ui/aurora.tsx`. The veil MUST be the colour of the surface the
+   * band sits on; a mismatch shows up as a visible rectangle.
+   *
+   * `background-attachment: fixed` on the moving copy is deliberate — it ties the
+   * wash to the viewport, so two bands on one page never animate in lockstep.
+   */
+  .wl-aurora {
+    --aurora-veil-layer: repeating-linear-gradient(
+      100deg,
+      var(--aurora-veil) 0%,
+      var(--aurora-veil) 7%,
+      transparent 10%,
+      transparent 12%,
+      var(--aurora-veil) 16%
+    );
+
+    position: absolute;
+    /* Bleeds past the band, so the 10px blur never exposes a soft edge. */
+    inset: -10px;
+    z-index: 0;
+    pointer-events: none;
+    filter: blur(10px);
+    /* Bounds the blur's invalidation to this box, and clips the oversized moving
+       layer below. Without it a repaint here dirties the whole band. */
+    contain: paint;
+    background-image: var(--aurora-veil-layer), var(--aurora-stops);
+    background-size: 300% 200%, 200% 100%;
+    background-position: 50% 50%, 50% 50%;
+    /* Black is an alpha here, not a colour: the mask reads luminance. */
+    mask-image: radial-gradient(ellipse at var(--aurora-origin), #000 10%, transparent 70%);
+  }
+
+  /*
+   * The moving half of the wash.
+   *
+   * Two deliberate departures from the source technique, both because it flickered:
+   *
+   * 1. It animated `background-position`. That is a paint property — every frame
+   *    re-rasterised a blurred, soft-light-blended layer on the main thread, which
+   *    on a page carrying two of these (the made-to-order band and the footer) is
+   *    visible as stutter on any scroll. This layer is three tiles wide and
+   *    translates instead: `transform` is composited, so the texture is rasterised
+   *    once and the loop costs nothing per frame.
+   *
+   *    The travel is exactly one veil tile (66.667% of a 300%-wide box = two parent
+   *    widths), which is also two stop tiles, so both layers land on an identical
+   *    frame and the loop is seamless.
+   *
+   * 2. It set `background-attachment: fixed`. With a `filter` on the parent that
+   *    does not resolve against the viewport the way it reads, and it ties this
+   *    layer's paint to scroll position — the other half of the flicker. The tile
+   *    sizes here keep the density the fixed version was aiming at.
+   */
+  .wl-aurora::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 300%;
+    background-image: var(--aurora-veil-layer), var(--aurora-stops);
+    /* One veil tile = two parent widths; one stop tile = one parent width. */
+    background-size: 66.6667% 100%, 33.3333% 100%;
+    mix-blend-mode: soft-light;
+    will-change: transform;
+    animation: wl-aurora var(--duration-aurora) linear infinite;
+  }
+
+  @keyframes wl-aurora {
+    to {
+      transform: translate3d(-66.6667%, 0, 0);
+    }
+  }
+
+  /*
+   * The voices wall is forty 300x250 cards on a tilted plane with four tracks
+   * animating at once — the most expensive thing on the page. `content-visibility`
+   * lets the browser skip rendering all of it while the section is off-screen, which
+   * on a page this long is most of the time; the animations keep their clock and
+   * simply stop painting. The intrinsic size is the stage's own height (h-140), so
+   * nothing shifts when it comes back into view.
+   */
+  @media (width >= 48rem) {
+    .wl-voices-stage {
+      content-visibility: auto;
+      /* The stage's own height. Scoped to md and up on purpose: below it the wall
+         lies down into a short rail, and reserving 35rem for that would put a jump
+         in the page on the way down. */
+      contain-intrinsic-size: auto 35rem;
+    }
+  }
+
+  /*
+   * The Instagram strip's marquee.
+   *
+   * The track carries the run twice, so travelling one run's width lands on an
+   * identical frame and the loop is seamless. That distance is 50% of the track
+   * plus half a gap — the gap between the two runs belongs to neither of them.
+   *
+   * It does NOT pause on hover — the strip is set to run continuously. The
+   * focus-within rule stays: nothing in the strip is focusable today, but the
+   * moment a post gets a permalink it would be, and a track sliding out from
+   * under the caret is a different problem from a track sliding under a pointer.
+   *
+   * The rail scrolls but shows no scrollbar. `overflow-x-auto` is what keeps the
+   * strip reachable once `prefers-reduced-motion` stops the animation, so it
+   * cannot become `hidden`; the scrollbar chrome is taken off by `.wl-rail`,
+   * which the strip carries alongside this class.
+   */
+  .wl-marquee-track {
+    --marquee-gap: calc(var(--spacing) * 3);
+
+    display: flex;
+    gap: var(--marquee-gap);
+    width: max-content;
+    animation: wl-marquee var(--duration-marquee) linear infinite;
+  }
+
+  .wl-marquee:focus-within .wl-marquee-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes wl-marquee {
+    to {
+      transform: translateX(calc(-50% - var(--marquee-gap) / 2));
+    }
+  }
+
+  /*
+   * The customer-voices wall — four vertical tracks on a tilted plane.
+   *
+   * Each track carries its five reviews twice and travels exactly -50%, so the
+   * loop closes on an identical frame. The trailing 24px of padding inside each
+   * copy is what makes -50% land on the gap rather than mid-card.
+   *
+   * The offset is a variable rather than a margin utility because reduced motion
+   * has to zero it: a track parked at an offset with the animation stopped would
+   * hold its content off the bottom of the stage, where nobody can read it.
+   *
+   * The tilt lives here rather than in the component's `style` for the same
+   * reason: both the reduced-motion fallback and the narrow-screen one have to
+   * take it off, and CSS cannot override an inline transform without
+   * `!important`. The three angles are the design's, measured.
+   */
+  .wl-voices-plane {
+    transform: translateZ(-100px) rotateX(11deg) rotateY(-6deg) rotateZ(10deg);
+  }
+
+  .wl-voices-track {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--voices-offset);
+    will-change: transform;
+    animation: wl-voices var(--voices-duration) linear infinite;
+  }
+
+  .wl-voices-track[data-reverse] {
+    animation-direction: reverse;
+  }
+
+  @keyframes wl-voices {
+    to {
+      transform: translateY(-50%);
+    }
+  }
+}
+
+@layer utilities {
+  .wl-measure {
+    max-width: var(--measure);
+  }
+
+  /*
+   * A 44px hit area on a control that is painted smaller.
+   *
+   * The design draws 32px swatches, 36px steppers and a 4px-tall carousel bar;
+   * the accessibility rule this repo works to is a 44px minimum control. Both
+   * are satisfied by growing the target rather than the artwork — the
+   * pseudo-element is transparent, so nothing on screen moves.
+   *
+   * `width/height: 100%` keeps a control that is ALREADY larger than 44px at its
+   * own size; `min-*` is what lifts the small ones.
+   */
+  .wl-tap {
+    position: relative;
+  }
+
+  .wl-tap::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+    transform: translate(-50%, -50%);
+  }
+
+  /*
+   * The press state for a tappable control.
+   *
+   * Two depths, because one scale does not read the same at two sizes. A 32px
+   * swatch or a 36px stepper button needs 0.95 to be felt at all; a control
+   * already painted at 44px or more — a full-width Add to bag, a filter row the
+   * width of the rail — moves so much further at 5% that it reads as a lurch, so
+   * those carry `.wl-press-soft` and 0.98 instead. `.wl-press-soft`'s rules come
+   * after `.wl-tap`'s on purpose: a control wearing both is a large control, and
+   * the softer press has to win.
+   *
+   * `1.0526` is `1 / 0.95`. The pseudo-element above is what makes a small
+   * control a 44px target, and it scales with its parent — so an un-countered
+   * press would shrink that target to 41.8px at exactly the moment the finger is
+   * on it. The counter-scale holds it at 44px through the press.
+   *
+   * The `:not([aria-disabled="true"]):not(:disabled)` guard is not defensive
+   * tidiness: `snippets/product-purchase.liquid:116` renders a sold-out control
+   * as a `<span aria-disabled="true">` carrying `.wl-tap`, and a press state on
+   * something that will never act is a lie told at the moment of the tap.
+   *
+   * Reduced motion drops the transition and KEEPS the transform. The tween is
+   * the only part that could read as motion in the periphery; the scale itself
+   * is on the control the finger is physically resting on, which is not what
+   * triggers vestibular trouble. Removing it would hand exactly those readers a
+   * surface that never answers.
+   *
+   * The property list is longer than "transform" for a cascade reason, not a
+   * design one. This block is loaded after Tailwind, so a bare
+   * `transition: transform` here beats — and therefore erases — the
+   * `transition-colors` / `transition-shadow` utility that six of the twelve
+   * `.wl-tap` call sites carry (`pagination.liquid:24`,
+   * `catalogue-filters.liquid:91` and `:112`, `cart-lines.liquid:66` `:75` `:91`,
+   * `product-card.liquid:87`, `product-purchase.liquid:109`). Restating those
+   * properties at `--duration-base` — the duration those call sites already ask
+   * for, with `--ease-out`, which resolves to the `ease` they were already
+   * getting — keeps every hover exactly as it was and adds the press on top.
+   */
+  .wl-tap {
+    transition:
+      transform var(--duration-fast) var(--ease-out),
+      color var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .wl-tap:not([aria-disabled="true"]):not(:disabled):active {
+    transform: scale(0.95);
+  }
+
+  .wl-tap:not([aria-disabled="true"]):not(:disabled):active::after {
+    transform: translate(-50%, -50%) scale(1.0526);
+  }
+
+  .wl-press-soft {
+    transition:
+      transform var(--duration-fast) var(--ease-out),
+      color var(--duration-base) var(--ease-out),
+      background-color var(--duration-base) var(--ease-out),
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .wl-press-soft:not([aria-disabled="true"]):not(:disabled):active {
+    transform: scale(0.98);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wl-tap,
+    .wl-press-soft {
+      transition: none;
+    }
+  }
+
+  /* A rail that scrolls without showing a scrollbar. The scrolling itself is
+     never decorative here — it is the fallback that keeps a stopped marquee, and
+     every mobile rail, reachable — so this hides the chrome and nothing else. */
+  .wl-rail {
+    scrollbar-width: none;
+  }
+
+  .wl-rail::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* The strip stops entirely; its rail stays scrollable, which is why the
+     wrapper is `overflow-x-auto` rather than `hidden`. */
+  .wl-marquee-track {
+    animation: none;
+  }
+
+  .wl-aurora::after {
+    animation: none;
+  }
+
+  /*
+   * The voices wall stops AND flattens. Stopping alone is not enough here: the
+   * stage clips to 560px and the tilt pushes the far columns out of it, so a
+   * frozen wall would leave most of the reviews unreadable and some of them
+   * entirely off-screen. Without motion it becomes a plain grid of cards — the
+   * duplicate copies are the ones already hidden from assistive tech, so
+   * dropping them removes nothing a reader can reach.
+   */
+  .wl-voices-track {
+    --voices-offset: 0;
+
+    animation: none;
+  }
+
+  .wl-voices-track > [aria-hidden="true"] {
+    display: none;
+  }
+
+  .wl-voices-stage {
+    height: auto;
+  }
+
+  .wl-voices-plane {
+    transform: none;
+  }
+}
+
+/*
+ * The voices wall on a narrow screen — the same flattening as reduced motion,
+ * turned sideways.
+ *
+ * The wall is a ~1300px plane (four 300px cards and their gaps) centred in a
+ * 560px stage behind fades that eat 30% of each edge. On a 375px screen that
+ * leaves about 150px of one card readable, in 560px of vertical space. So below
+ * the `md` breakpoint the tilt comes off, the duplicate copies go, and the four
+ * columns lie down into one horizontal snap rail carrying all twenty reviews
+ * upright at full size.
+ *
+ * Unlayered on purpose, like the reduced-motion block below it: these rules have
+ * to beat Tailwind's utility layer, which is where `h-140`, `overflow-hidden` and
+ * the stage's `justify-center` come from.
+ */
+@media (width < 48rem) {
+  .wl-voices-stage {
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-content: flex-start;
+    perspective: none;
+    scroll-snap-type: x mandatory;
+    /* The rail runs edge to edge; the gutter is padding so the first card is not
+       flush to the screen and the last one can still reach the left edge. */
+    padding-inline: var(--spacing-gutter);
+  }
+
+  .wl-voices-plane {
+    align-items: stretch;
+    transform: none;
+  }
+
+  /*
+   * `--voices-offset: 0` alone does NOT clear the stagger, and this cost a
+   * measured round to find. The offset is an INLINE custom property on each
+   * track (see the style attribute in sections/voices-wall.liquid), and an
+   * inline custom property beats a stylesheet declaration — the same trap the
+   * plane's transform comment above already describes. So the variable is left
+   * declared for clarity and the CONSUMER is overridden instead: margin-top
+   * outright, which this unlayered block wins against the layered rule without
+   * needing !important.
+   *
+   * What it was doing: on a 390px viewport the four tracks began 340px below the
+   * plane's own top edge, so the rail sat at the bottom of its parent and the
+   * space between the fit table and the first review read as a slab of dead
+   * espresso. Measured, not guessed.
+   */
+  .wl-voices-track {
+    --voices-offset: 0;
+
+    margin-top: 0;
+    flex-direction: row;
+    animation: none;
+  }
+
+  /* One copy is enough once nothing is looping, and it is the copy already
+     hidden from assistive tech that goes. */
+  .wl-voices-track > [aria-hidden="true"] {
+    display: none;
+  }
+
+  /*
+   * THIS REVERSES THE `stretch` DECISION RECORDED BELOW, and the measurement is
+   * why. Stretch was chosen so the rail would not come out ragged — but with the
+   * six-line clamp lifted (see the figure rule further down) the tallest review
+   * sets every card, and on a 390px viewport that meant every card was 324px
+   * while the quotes inside them filled 67-179px. So the rail read as a row of
+   * half-empty cream boxes: the "boring" the client reported, and the reason the
+   * section showed 1.3 reviews in 472px.
+   *
+   * Top-aligned natural heights measured 223/313/246/178/313/201px — no dead
+   * space anywhere, and screenshotted before committing. Ragged bottoms on ONE
+   * upright row read as a row of notes; the raggedness stretch was protecting
+   * against was the four-track tilted wall, which does not exist below `md`.
+   */
+  .wl-voices-track > div {
+    flex-direction: row;
+    align-items: flex-start;
+    padding-bottom: 0;
+  }
+
+  /*
+   * The reviews are not clipped on the phone rail.
+   *
+   * The tilted desktop wall needs a fixed 250px card to keep its four tracks in
+   * step, so the quote is clamped to six lines there. The rail has no such
+   * constraint — it is one row of upright cards — and the longest reviews are the
+   * informative ones: on a 252px column of 14px caption text, between five and
+   * ten of the twenty overrun six lines, and every one of the overruns is a
+   * review that says something specific. The reason this rule exists is
+   * `sections/voices-wall.liquid:194`, a customer reporting the fit against her
+   * own stated body at six months pregnant — "buat ibu hamil 6 bulan muat uk L ,
+   * bb ku 55,7 kg tinggi 160cm" — which the clamp cut off before it arrived. Fit
+   * against a stated body is the purchase decision on this site, and the screen
+   * it was being cut off on is the one most of these readers are holding.
+   *
+   * `height: auto` releases the figure's `h-62.5` and lets the card grow to its
+   * quote. The row it sits in is a flex row with the default `stretch`, so every
+   * card in the rail comes out the height of the longest review rather than
+   * ragged.
+   *
+   * The stage has to be released with it, and the first pass at this rule missed
+   * why: the height below `md` is not reserved by `contain-intrinsic-size` (that
+   * one really is scoped to `md` and up) but by the plain `h-140` utility on the
+   * stage in sections/voices-wall.liquid, which applies at every width. Once the
+   * cards grew to their quotes the rail went to 762px inside a 560px stage, and
+   * because the stage is `items-center` with `overflow-y: hidden` it centred the
+   * overflow and clipped it — about 400px of dead espresso between the fit table
+   * and the first review on a phone. Measured on a 390px viewport, not guessed.
+   */
+  .wl-voices-track figure {
+    height: auto;
+    /* 300px showed 1.3 cards in a 390px rail, so the second one was a hairline
+       and nothing said the rail moved. 16rem shows 1.6 — a card cut mid-quote
+       is the affordance, and the mask below finishes the sentence. */
+    width: 16rem;
+    scroll-snap-align: start;
+  }
+
+  /*
+   * The four gradient fades in sections/voices-wall.liquid are `hidden md:block`,
+   * so below `md` the rail had NO edge treatment at all: the second card ended
+   * at a hard vertical cut flush with the screen, which reads as a clipping bug
+   * rather than as "there is more this way". A mask does the same job as those
+   * four elements for nothing — it is a static rasterisation, not an animation,
+   * so it costs no per-frame work and adds no DOM.
+   *
+   * The left stop is 2% rather than 0 so the first card is not washed out at
+   * rest; the right stop is where the peeking card starts to go.
+   */
+  .wl-voices-stage {
+    mask-image: linear-gradient(to right, transparent 0, #000 2%, #000 86%, transparent 100%);
+  }
+
+  .wl-voices-track blockquote {
+    display: block;
+    -webkit-line-clamp: unset;
+  }
+}
+
+/*
+ * No-script fallback for Motion's scroll reveals.
+ *
+ * A revealed block renders with `opacity: 0` in the server HTML and is animated
+ * to 1 once Motion hydrates. If script never runs, that content would stay
+ * invisible — so with scripting off, every reveal is forced to its final state.
+ */
+@media (scripting: none) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

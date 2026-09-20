@@ -1,0 +1,95 @@
+{%- comment -%}
+  Product gallery — port of components/product/product-gallery.tsx.
+
+  A column of thumbnails beside the main crop. Thumbnails are buttons with
+  aria-pressed, not links, because choosing an angle is not a navigation; the main
+  image gets the selected shot rather than the page scrolling to it.
+
+  Where a piece has only one shot the remaining slots are the labelled placeholder
+  at the right ratio, so the rail is already its final size and shape. A gallery
+  with one entry hides the rail altogether.
+
+  The rail is a column beside the photograph from `lg` up and a scrolling row
+  beneath it below that: 92px of thumbnails alongside leaves the main crop about
+  260px on a phone, and the main crop is the thing being bought.
+
+  Without JavaScript the first angle shows and the thumbnails are inert — the same
+  as the React version, which was a client component for exactly this state.
+
+  The main crop is 4 / 5, stated on the render call rather than left to
+  media.liquid's square source default, so the real photograph and the empty
+  state below draw the SAME proportion — which is the one thing placeholder mode
+  exists to guarantee. Trousers are judged on length, so the portrait crop is the
+  right one; it does take 10% off each side of a square source, so the eleven
+  shots want eyeballing for clipped hems once they are imported.
+
+  `priority` is the FIRST shot only, not every shot. It used to be `true` on all
+  of them, which did nothing while media.liquid was dropping the parameter on the
+  floor; now that the parameter is read, `true` on all of them would fetch an
+  eight-angle gallery eagerly at fetchpriority="high" and starve the one image
+  the page is actually judged on. The rest are lazy, and the hidden ones do not
+  fetch until the thumbnails reveal them.
+
+  The first main shot carries `view-transition-name: shot-<handle>`, the other
+  half of the pair set on the catalogue card, so a card grows into the product
+  page instead of the page swapping. Exactly one element per document may carry a
+  given name, hence `forloop.first` AND the handle guard: in placeholder mode
+  there is no product and no name is emitted at all.
+
+  Accepts: product
+{%- endcomment -%}
+
+{%- liquid
+  assign shots = product.images
+  assign shot_count = shots.size
+-%}
+
+<div class="flex flex-col-reverse gap-4 lg:flex-row" data-gallery>
+  {%- if shot_count > 1 -%}
+    <ul
+      aria-label="{{ 'product.gallery' | t }}"
+      class="wl-rail flex gap-3 overflow-x-auto lg:w-23 lg:shrink-0 lg:flex-col lg:gap-4 lg:overflow-visible"
+    >
+      {%- for shot in shots -%}
+        <li class="w-20 shrink-0 lg:w-full">
+          <button
+            type="button"
+            data-gallery-thumb="{{ forloop.index0 }}"
+            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+            class="wl-press-soft block w-full cursor-pointer overflow-hidden rounded-xs border transition-colors duration-(--duration-base) aria-pressed:border-brand border-border hover:border-line"
+          >
+            {% render 'media', image: shot, sizes: '(min-width: 1024px) 92px, 80px', ratio: '4 / 5', label: 'Angle', class: 'rounded-none' %}
+            <span class="sr-only">{{ 'product.show_image' | t }} {{ forloop.index }}</span>
+          </button>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  <div class="min-w-0 flex-1">
+    {%- for shot in shots -%}
+      <div
+        data-gallery-main="{{ forloop.index0 }}"
+        {% unless forloop.first %}hidden{% endunless %}
+        {% if forloop.first and product.handle != blank %}style="view-transition-name: shot-{{ product.handle }}"{% endif %}
+      >
+        {% render 'media', image: shot, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', priority: forloop.first, label: 'Product photo' %}
+      </div>
+    {%- endfor -%}
+
+    {%- comment -%}
+      The placeholder carries the view-transition name too, so the morph pairs
+      with the catalogue card before the photography exists. snippets/product-card
+      names its crop whenever `product` is set, not only when there is an image —
+      so without this the two guards disagree and a piece with no shot yet emits a
+      name on one page and none on the other, which is a morph that silently never
+      runs. Naming both keeps the effect reviewable on an empty store, which is
+      the whole point of placeholder mode.
+    {%- endcomment -%}
+    {%- if shot_count == 0 -%}
+      <div{% if product.handle != blank %} style="view-transition-name: shot-{{ product.handle }}"{% endif %}>
+        {% render 'media', image: nil, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', label: 'Product photo' %}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
