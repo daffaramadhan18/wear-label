@@ -155,23 +155,28 @@
           -%}
 
           {%- if is_colour -%}
-            {%- assign swatch = value.swatch.color -%}
+            {%- comment -%}
+              A LABELLED BOX, NOT A COLOUR DISC. This used to paint
+              `value.swatch.color`, but that needs a real hex per colourway —
+              maintaining one for every name (Milo, Coksu, Broken white+furing,
+              and the rest of this catalogue's ~80) is exactly the ongoing
+              hassle asked to avoid, and an unset swatch used to fall back to
+              an identical blank grey circle, which is worse: every colour
+              looked the same until a shopper hovered each one in turn. Text in
+              a chip needs no colour data to be correct, ever.
+            {%- endcomment -%}
             {%- if is_available -%}
               <a
                 href="{{ product.url }}?variant={{ target.id }}"
                 data-variant-link
                 {% if is_selected %}aria-current="true"{% endif %}
-                title="{{ value }}"
-                {% if swatch %}style="background-color:{{ swatch }}"{% endif %}
-                class="wl-tap size-10 rounded-pill border border-line transition-shadow duration-(--duration-base) {% if is_selected %}ring-2 ring-brand ring-offset-2{% else %}hover:ring-1 hover:ring-line{% endif %} {% unless swatch %}bg-tone{% endunless %}"
-              ><span class="sr-only">{{ value }}</span></a>
+                class="wl-press-soft inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border px-3 text-caption tracking-wide transition-colors duration-(--duration-base) {% if is_selected %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
+              >{{ value }}</a>
             {%- else -%}
               <span
                 aria-disabled="true"
-                title="{{ value }}"
-                {% if swatch %}style="background-color:{{ swatch }}"{% endif %}
-                class="wl-tap inline-block size-10 rounded-pill border border-line opacity-40 {% unless swatch %}bg-tone{% endunless %}"
-              ><span class="sr-only">{{ value }} — {{ 'product.sold_out' | t }}</span></span>
+                class="inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border border-inert-border bg-inert px-3 text-caption tracking-wide text-on-inert line-through"
+              >{{ value }}<span class="sr-only"> — {{ 'product.sold_out' | t }}</span></span>
             {%- endif -%}
 
           {%- else -%}

@@ -185,29 +185,19 @@
           </ul>
 
         {%- elsif is_colour -%}
-          <ul class="flex flex-wrap gap-3">
+          <ul class="flex flex-wrap gap-2">
+            {%- comment -%}
+              A LABELLED BOX, NOT A COLOUR DISC — matches the picker on the
+              product page. Painting `value.swatch.color` needs a real hex kept
+              in step for every colourway; a text chip needs none, ever.
+            {%- endcomment -%}
             {%- for value in filter.values -%}
-              {%- comment -%}
-                The swatch hex comes from the value's own swatch when Shopify has
-                one; without it the chip falls back to a named pill, because a
-                blank circle carries nothing at all.
-              {%- endcomment -%}
               <li>
-                {%- if value.swatch.color -%}
-                  <a
-                    href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
-                    {% if value.active %}aria-current="true"{% endif %}
-                    title="{{ value.label }}"
-                    style="background-color:{{ value.swatch.color }}"
-                    class="wl-tap inline-block size-8 rounded-pill border border-line transition-shadow duration-(--duration-base) {% if value.active %}ring-2 ring-brand ring-offset-2{% else %}hover:ring-1 hover:ring-line{% endif %}"
-                  ><span class="sr-only">{{ value.label }}</span></a>
-                {%- else -%}
-                  <a
-                    href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
-                    {% if value.active %}aria-current="true"{% endif %}
-                    class="inline-flex min-h-11 items-center rounded-pill border px-4 text-caption transition-colors duration-(--duration-base) {% if value.active %}border-brand bg-surface-muted text-ink{% else %}border-line bg-canvas text-ink-body hover:bg-surface-muted{% endif %}"
-                  >{{ value.label }}</a>
-                {%- endif -%}
+                <a
+                  href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+                  {% if value.active %}aria-current="true"{% endif %}
+                  class="wl-tap inline-flex h-10 min-w-11 items-center justify-center rounded-xs border px-3 text-caption tracking-wide transition-colors duration-(--duration-base) {% if value.active %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
+                >{{ value.label }}</a>
               </li>
             {%- endfor -%}
           </ul>
