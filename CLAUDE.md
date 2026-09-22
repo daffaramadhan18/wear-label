@@ -1314,6 +1314,21 @@ Its `handoff/` folder holds developer copies of the aurora band and the voices w
 Both are ported, not dropped in; read the two READMEs there for the reasoning behind
 the measured values before changing any of them.
 
+**`design/color-palette.jpg`** — supplied by the client 2026-09-22, and the
+reference to check any future colour decision against, per instruction ("kl
+warna selalu mengacu kesini"). It names four main colours (Rocky `#A48568`,
+Camel `#75604F`, Light Orange `#DCCCC0`, Light Creme `#F8F0EA`) plus a
+shades/tints ramp off each. **It is not a re-theme** — Camel and Rocky are
+near-identical to primitives already in `app/tokens.css` (`--wl-taupe-600
+#725e4c` and `--wl-taupe-500 #9c8166`), so it reads as this palette's own
+naming for colours the token file already carries, not a new direction.
+Prefer an existing token that already matches a named swatch here (`--color-brand`
+for Camel, via `bg-brand`/`text-on-brand`) over inventing a new primitive.
+Retinting a *shared* semantic token (`--color-invert`, `--color-canvas`, and
+so on) is still the design-system-wide decision the rest of this section
+describes and needs sign-off before touching — see `two-ways.liquid`'s
+`brand` tone (added 2026-09-22) for a change scoped to one panel instead.
+
 When the design and one of these conventions disagree, say so and ask — do not
 silently pick either side. Deviations already taken are recorded at the top of the
 section or snippet that took them, and the port's own deviations are listed in

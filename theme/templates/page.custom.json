@@ -17,21 +17,27 @@
           "type": "service",
           "settings": {
             "title": "Uniforms",
-            "body": "For companies, schools, and organizations."
+            "body": "For companies, schools, and organizations.",
+            "asset": "project-hospital.webp",
+            "alt": "Eight hospital uniform sets laid out flat in two rows — tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
           }
         },
         "corporate": {
           "type": "service",
           "settings": {
             "title": "Custom Apparel",
-            "body": "Tailored pieces developed around your brand and requirements."
+            "body": "Tailored pieces developed around your brand and requirements.",
+            "asset": "project-corporate.webp",
+            "alt": "A purple and cream two-tone short-sleeve shirt, front and back, the name Salna embroidered on the chest and across the shoulder yoke."
           }
         },
         "merchandise": {
           "type": "service",
           "settings": {
             "title": "Merchandise & Special Projects",
-            "body": "For events, communities, campaigns, and collaborations."
+            "body": "For events, communities, campaigns, and collaborations.",
+            "asset": "project-merchandise.webp",
+            "alt": "A canvas tote bag in off-white with navy webbing handles and navy bound edges, photographed on a plain grey ground."
           }
         }
       },

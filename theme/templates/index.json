@@ -16,7 +16,7 @@
         "d1": {
           "type": "door",
           "settings": {
-            "tone": "invert",
+            "tone": "brand",
             "heading": "Ready to Wear",
             "body": "Thoughtfully designed womenswear for everyday life. Comfortable, versatile, and easy to style — made to become pieces you'll reach for again and again."
           }

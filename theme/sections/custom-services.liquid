@@ -22,6 +22,15 @@
 
   Every card renders its labelled placeholder at final size until the studio
   sends project photography, which is the state this section ships in.
+
+  ASSET FALLBACK ADDED 2026-09-22: the studio's B2B photography (see
+  `selected-projects.liquid`) already exists and stands for these same three
+  services, so each block now carries a `Shipped asset filename` alongside
+  the image picker, rendered through `media-asset` exactly as
+  `selected-projects` does. Per-block mapping: `project-hospital.webp` for
+  Uniforms, `project-corporate.webp` (the Salna shirt) for Custom Apparel,
+  `project-merchandise.webp` (the tote) for Merchandise & Special Projects.
+  An `image` uploaded in the theme editor still overrides the shipped asset.
 {%- endcomment -%}
 
 <section aria-labelledby="custom-services-heading" class="mx-auto w-full max-w-content px-gutter py-section">
@@ -38,10 +47,24 @@
   <ul class="mt-block grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
     {%- for block in section.blocks -%}
       <li data-reveal class="flex flex-col gap-4.5" {{ block.shopify_attributes }}>
-        {% render 'media',
+        {%- comment -%}
+          `fit: 'contain'` because the shipped assets are the same alpha
+          cut-outs `selected-projects` uses — a garment trimmed to its own
+          proportions, not a 4:5 photograph. `object-cover` would crop into
+          the cut-out itself. The default `bg-tone` plate is kept (no
+          `plate: false`) so the letterboxed edges read as the same toned box
+          this card showed before the photograph existed, rather than bare
+          page behind a floating garment.
+        {%- endcomment -%}
+        {% render 'media-asset',
           image: block.settings.image,
+          asset: block.settings.asset,
+          alt: block.settings.alt,
+          fit: 'contain',
           ratio: '4 / 5',
           sizes: '(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw',
+          asset_width: 1200,
+          asset_height: 1500,
           label: 'Service photo' %}
 
         <h3 class="text-h2 leading-h2 tracking-h2">
@@ -72,7 +95,9 @@
       "settings": [
         { "type": "text", "id": "title", "label": "Name" },
         { "type": "textarea", "id": "body", "label": "Description" },
-        { "type": "image_picker", "id": "image", "label": "Photograph", "info": "A photograph of work the studio has produced. Empty renders a labelled placeholder at final size." }
+        { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped asset below. Empty with no shipped asset either renders a labelled placeholder at final size." },
+        { "type": "text", "id": "asset", "label": "Shipped asset filename" },
+        { "type": "textarea", "id": "alt", "label": "Alt text", "info": "Used by the shipped asset only." }
       ]
     }
   ],

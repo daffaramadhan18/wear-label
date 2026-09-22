@@ -29,12 +29,21 @@
   weighting. With no photograph on either side, equal columns are the neutral
   choice and the studio asked for it explicitly.
 
-  TONE IS A SETTING, NOT A POSITION, and the two available values are the two
-  that can sit next to each other. Below `lg` the panels stack, and the repo's
-  rule is that two bands of the same colour must not touch — so a build with
-  both doors set to the same tone would read as one tall band with a seam in it.
-  Espresso and cream is the pairing that carries the split down to a phone.
-  `custom-band` documents the same trap from the other direction.
+  TONE IS A SETTING, NOT A POSITION, and every value has to be one that can sit
+  next to another without the two reading as one band. Below `lg` the panels
+  stack, and the repo's rule is that two bands of the same colour must not
+  touch — so a build with both doors set to the same tone would read as one
+  tall band with a seam in it. `custom-band` documents the same trap from the
+  other direction.
+
+  THE READY-TO-WEAR DOOR WAS ESPRESSO AND IS NOW `brand` (Camel, #75604F —
+  effectively `--wl-taupe-600`, already the site's brand-action colour) —
+  changed 2026-09-22, on instruction: "yg kiri hitam jd coklat". `bg-brand` /
+  `text-on-brand` were reused rather than repointing `--color-invert`, which
+  is the footer's and the voices wall's background too — retinting that token
+  would have turned both of them brown as an unintended side effect of a
+  change asked for on one panel. See `design/color-palette.jpg` and its entry
+  in CLAUDE.md's Design sources for where this brown comes from.
 
   NO PHOTOGRAPH ON EITHER DOOR, since 2026-09-21 — see the comment on the
   panel markup below for why. `door-custom.webp` and `door-shop.webp` are no
@@ -93,6 +102,11 @@
           assign link_ink = 'text-ink-invert hover:text-ink-invert-muted'
           assign body_ink = 'text-ink-invert-muted'
           assign cta_ink = 'text-ink-invert'
+        elsif tone == 'brand'
+          assign panel_bg = 'bg-brand'
+          assign link_ink = 'text-on-brand hover:text-canvas'
+          assign body_ink = 'text-on-brand'
+          assign cta_ink = 'text-on-brand'
         else
           assign panel_bg = 'bg-canvas'
           assign link_ink = 'text-ink hover:text-brand'
@@ -175,6 +189,7 @@
       "settings": [
         { "type": "select", "id": "tone", "label": "Tone", "default": "invert", "options": [
           { "value": "invert", "label": "Espresso" },
+          { "value": "brand", "label": "Brown" },
           { "value": "canvas", "label": "Cream" }
         ] },
         { "type": "text", "id": "heading", "label": "Heading" },
@@ -193,7 +208,7 @@
       },
       "blocks": [
         { "type": "door", "settings": {
-          "tone": "invert",
+          "tone": "brand",
           "heading": "Ready to Wear",
           "body": "Thoughtfully designed womenswear for everyday life. Comfortable, versatile, and easy to style — made to become pieces you'll reach for again and again."
         } },
