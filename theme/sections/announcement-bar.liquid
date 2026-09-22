@@ -6,10 +6,18 @@
   renders nothing at all rather than an empty band, which is why this is an
   `if` and not a Copy placeholder — an announcement nobody wrote is an
   announcement that should not be on the page.
+
+  BROWNED 2026-09-22, on instruction ("warnanya masih hitam, ganti ke coklat"
+  about this bar's default "Free shipping on orders..." message). `bg-brand`
+  / `text-on-brand` (Camel, see `design/color-palette.jpg`) replace `bg-invert`
+  / `text-ink-invert` on this one strip — the same reasoning `two-ways.liquid`'s
+  `brand` tone documents: `--color-invert` is the footer's and voices wall's
+  background too, so retinting it would have browned both of those as a side
+  effect of a change asked for on this bar alone.
 {%- endcomment -%}
 
 {%- if settings.announcement != blank -%}
-  <div class="bg-invert text-ink-invert">
+  <div class="bg-brand text-on-brand">
     <p class="mx-auto max-w-content px-gutter py-2.5 text-center text-micro uppercase tracking-label">
       {{ settings.announcement }}
     </p>
