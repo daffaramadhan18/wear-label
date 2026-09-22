@@ -1,48 +1,43 @@
 {%- comment -%}
-  About Us. Brief §13: "About page dibuat singkat dan visual" — short and
-  visual, and explicitly "tidak perlu terlalu corporate". So this is one
-  section, not a page of them: a photograph, a heading, and one paragraph.
+  About Us. Brief §13 called for it "singkat dan visual" — short and
+  visual — and that shaped the first build of this section: one photograph,
+  one paragraph. NEITHER SURVIVED, on instruction 2026-09-22: "foto nya
+  gausah di page about" (drop the photo) and "copywriting nya masih kurang
+  bgt, pls generate more" (the copy needs to say more). So this is now a
+  text-only section with three short paragraphs instead of one, and the
+  `image`/`asset` render call, its schema field, and the two-column layout
+  that existed for it are gone entirely — not hidden behind a setting,
+  removed, because the client's instruction was to not have a photo here at
+  all rather than to leave one optional.
 
-  THE FOUR FACTS ARE THE BRIEF'S OWN, AND NOTHING IS ADDED TO THEM. §13 gives
-  exactly four: founded 2020, an Indonesian womenswear label, comfortable /
-  versatile / wearable as the focus, and custom apparel production alongside
-  ready-to-wear. PRODUCT.md lists "About Us history, founder or team facts,
-  production volumes" under things not to fabricate — so there is no founder
-  name, no team size, no "since 2020 we've dressed thousands of women" here,
-  and there should not be one added later without the studio supplying it.
+  THE FACTS ARE STILL ONLY THE ONES ON RECORD, EVEN THOUGH THERE IS MORE
+  COPY NOW. "More copy" was read as "say more about what is already true",
+  not "invent detail to fill space" — PRODUCT.md lists "About Us history,
+  founder or team facts, production volumes" under things not to fabricate,
+  and that rule didn't change just because the brief's "singkat" did. What's
+  new in paragraphs two and three is not new facts, it's the brief's own
+  design-direction adjectives (§14: modern, feminine, minimal, premium but
+  approachable, timeless) applied to the ready-to-wear line, and the
+  studio's documented responsiveness (PRODUCT.md's customer evidence: "Admin
+  ramah", "responsif" — "the person answering is part of the product")
+  applied to the closing line about custom apparel. Both are already-sourced
+  facts about the brand, not invented ones.
 
-  THE HEADING IS THE BRIEF'S OWN LINE, not an invented one — §6's hero
-  example, "Everyday Pieces, Made for You." It was never used when the home
-  hero became a film with no copy at all (see hero-video.liquid), so this is
-  the first place on the live site it appears rather than a duplicate.
+  THE HEADING IS STILL THE BRIEF'S OWN LINE — §6's hero example, "Everyday
+  Pieces, Made for You." — unchanged by this edit.
 
-  THE PHOTOGRAPH DEFAULTS TO `door-shop.webp`, RATHER THAN A PLACEHOLDER. It
-  is the square crop of the polaroid composition that led the old hero
-  carousel, and it has stood unreferenced since two-ways.liquid dropped its
-  photography 2026-09-21 (see that section's own comment) — reusing it here
-  answers the brief's "visual" ask with an asset that already exists instead
-  of waiting on a new shoot for a page whose brief explicitly asks for
-  "singkat", not a campaign. An image uploaded in the theme editor overrides
-  it, same precedence as `media-asset` everywhere else.
+  THREE TEXTAREAS, NOT ONE BLOB WITH BLANK-LINE BREAKS. `snippets/copy`
+  renders a `value` raw with no paragraph handling, and the theme's own
+  precedent for a multi-line settings field (`size-guide`'s row list) pipes
+  through `newline_to_br` for a table, not prose — three fields keeps each
+  paragraph independently editable and placeholder-safe on its own, which a
+  single field split on blank lines would not be.
 
-  NO CTA. A "Shop now" button here would make this page compete with the
-  hero and the two-ways doors that already carry that job. About's only job
-  is the four facts above, believably told.
+  NO CTA, still. A "Shop now" button would put this page in competition with
+  the hero and the two-ways doors that already carry that job.
 {%- endcomment -%}
 
-<div class="mx-auto flex w-full max-w-content flex-col gap-8 px-gutter pb-section pt-block-lg sm:flex-row sm:items-center sm:gap-12 lg:gap-16">
-  <div data-reveal class="sm:w-[42%] sm:shrink-0">
-    {% render 'media-asset',
-      image: section.settings.image,
-      asset: 'door-shop.webp',
-      alt: "A square crop of Wear Label's ready-to-wear polaroid campaign.",
-      ratio: '1 / 1',
-      sizes: '(min-width: 640px) 42vw, 100vw',
-      asset_width: 1100,
-      asset_height: 1100,
-      label: 'Studio photo' %}
-  </div>
-
+<div class="mx-auto flex w-full max-w-content flex-col gap-4 px-gutter pb-section pt-block-lg">
   <div data-reveal class="wl-measure flex flex-col gap-4">
     <span class="text-micro uppercase tracking-eyebrow text-ink-subtle">
       {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
@@ -51,9 +46,19 @@
     <h1 class="text-h1 leading-h1">
       {% render 'copy', value: section.settings.heading, label: 'heading', lines: 2 %}
     </h1>
+  </div>
+
+  <div data-reveal class="wl-measure mt-4 flex flex-col gap-5">
+    <p class="text-body leading-body text-ink-muted">
+      {% render 'copy', value: section.settings.body_1, label: 'paragraph 1', lines: 3 %}
+    </p>
 
     <p class="text-body leading-body text-ink-muted">
-      {% render 'copy', value: section.settings.body, label: 'body', lines: 3 %}
+      {% render 'copy', value: section.settings.body_2, label: 'paragraph 2', lines: 3 %}
+    </p>
+
+    <p class="text-body leading-body text-ink-muted">
+      {% render 'copy', value: section.settings.body_3, label: 'paragraph 3', lines: 3 %}
     </p>
   </div>
 </div>
@@ -62,11 +67,12 @@
 {
   "name": "About story",
   "settings": [
-    { "type": "paragraph", "content": "Brief §13: short and visual, not corporate. Only the four facts the brief itself gives — founding year, what Wear Label is, what it focuses on, and the custom-apparel side — belong here. No founder, team or volume claim the studio has not supplied." },
+    { "type": "paragraph", "content": "No photograph, by instruction — text only. Every paragraph should stick to facts already on record: brief §13's four (founding year, what Wear Label is, its focus, the custom-apparel side), brief §14's design-direction words, or PRODUCT.md's documented studio responsiveness. No founder, team or volume claim the studio has not itself supplied." },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "About Wear Label" },
     { "type": "textarea", "id": "heading", "label": "Heading", "default": "Everyday Pieces, Made for You." },
-    { "type": "textarea", "id": "body", "label": "Body", "default": "Wear Label is an Indonesian womenswear label, founded in 2020 around one idea: clothes should be comfortable enough for every day and versatile enough to wear again and again. Alongside our ready-to-wear collection, we also produce custom apparel — uniforms, merchandise and special projects for companies, schools, and organizations." },
-    { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped door-shop.webp default." }
+    { "type": "textarea", "id": "body_1", "label": "Paragraph 1", "default": "Wear Label is an Indonesian womenswear label, founded in 2020 around one simple idea: clothes should be comfortable enough for every day and versatile enough to wear again and again." },
+    { "type": "textarea", "id": "body_2", "label": "Paragraph 2", "default": "Our ready-to-wear collection — trousers, tops, cardigans and outerwear — is designed to be lived in, not just looked at. We keep the palette neutral, the cuts clean, and the details minimal, because a piece that's easy to style is a piece you'll actually reach for." },
+    { "type": "textarea", "id": "body_3", "label": "Paragraph 3", "default": "Alongside ready-to-wear, we also produce custom apparel — uniforms, merchandise and branded pieces for companies, schools, and organisations who want the same fit and finish for their own team. And whether you're ordering one piece or a hundred, you're talking to the studio directly: we answer our own messages, from Kota Bekasi." }
   ],
   "presets": [{ "name": "About story" }]
 }
