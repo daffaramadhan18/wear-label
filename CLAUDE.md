@@ -469,7 +469,7 @@ Shopify route names, and what the React app called them:
 | `/collections/all` | `/shop` | Catalogue — filter rail, sort, 3-up grid, paging |
 | `/products/<handle>` | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, **one-page detail** (tabs were flattened 2026-09-13), related |
 | `/cart` | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
-| `/pages/about` | `/about` | About Us. One section (`about-story`): a photograph, a heading, brief §13's four facts. Template suffix `page.about` |
+| `/pages/about` | `/about` | About Us. One section (`about-story`), text only: a heading and three paragraphs. Template suffix `page.about` |
 | `/pages/custom` | — | **Custom & Business (B2B).** Hero, services, how it works, why Wear Label, request a quote. Template suffix `page.custom`. **The Shopify page exists as of 2026-09-13** and the route returns 200 |
 | `/pages/contact` | — | **Contact.** Placeholder detail rows plus Shopify's native contact form. Template suffix `page.contact` |
 | `/collections` | — | **Collections.** The catalogue by category. **Three automated collections are live** — Pants 14, Cardigan 4, Culottes 2 — one per `product_type`. It was fifteen until 2026-09-13; the twelve that went empty with the cull were deleted |
@@ -578,7 +578,7 @@ Nothing is read from the environment any more. The three `SHOPIFY_*` /
 | `sections/contact-details` | nothing — brief §5 put Contact in the nav and specified nothing else |
 | `sections/main-search` | nothing — brief §5 asked for search; the route was `main-stub` |
 | `sections/main-list-collections` | nothing — brief §5 asked for Collections; the route was `main-stub` |
-| `sections/about-story` | nothing — brief §13, the About Us page, built 2026-09-22. `main-page`/`app/about/page.tsx`'s plain-text pattern was not reused: the brief asks for "visual", so this is a dedicated `page.about` template instead of the generic `page` one |
+| `sections/about-story` | nothing — brief §13, the About Us page, built 2026-09-22 and revised the same session to drop its photograph and expand to three paragraphs, on instruction. Still a dedicated `page.about` template rather than the generic `page` one, so a future default-template page doesn't inherit its settings |
 | `assets/theme.js` | the header disclosure, the reveals, the carousel, the gallery, the tabs, the stepper, the save button, the quote form's WhatsApp composer, the hero film's reduced-motion pause |
 
 Two of those are **generated from the React source, not retyped**, and must stay
@@ -1533,17 +1533,21 @@ Not decided, and not to be filled in by guessing:
 **Answered, and recorded so it is not reopened:**
 
 - ~~About Us copy and page~~ — **built, 2026-09-22**, on instruction to develop
-  it following brief §13 and the site's existing copywriting.
-  `sections/about-story.liquid` (one section: a photograph, a heading, a
-  paragraph) plus `templates/page.about.json`, and the Shopify page itself —
+  it following brief §13 and the site's existing copywriting, **then revised
+  within the hour** on two more instructions — "foto nya gausah" (no photo)
+  and "copywriting nya masih kurang, generate more" (more copy). Final shape:
+  `sections/about-story.liquid`, text-only, three paragraphs, plus
+  `templates/page.about.json`, and the Shopify page itself —
   `gid://shopify/Page/743676870942`, handle `about`, template suffix `about`.
-  The heading reuses brief §6's own hero example line ("Everyday Pieces, Made
-  for You.") and the body sticks to exactly brief §13's four facts (founded
-  2020, Indonesian womenswear label, comfortable/versatile/wearable, custom
-  apparel alongside ready-to-wear) — no founder, team or volume claim was
-  added, per PRODUCT.md's list of what not to fabricate. The photograph
-  reuses the previously-unplaced `door-shop.webp`. The footer's "About Wear
-  Label" link, blank since the footer copy landed, now points at it.
+  The heading is still brief §6's own hero example line ("Everyday Pieces,
+  Made for You."). Paragraph 1 keeps brief §13's founding facts; paragraphs 2
+  and 3 say more about the ready-to-wear line and the custom-apparel side
+  using brief §14's design-direction words and PRODUCT.md's documented
+  studio responsiveness — not new facts, just more said about the facts
+  already on record, per PRODUCT.md's list of what not to fabricate.
+  `door-shop.webp` was tried as the page's photograph and removed the same
+  session; it is unreferenced again. The footer's "About Wear Label" link,
+  blank since the footer copy landed, now points at the page.
 - ~~Whether the studio ships from Bandung or Bekasi~~ — **Bekasi, 2026-09-22, on
   instruction.** Consistent with the Jatibening address on `/pages/contact`
   (Jatibening is a Bekasi neighbourhood) — see `HANDOVER.md` §7, which had

@@ -405,6 +405,18 @@ file on this shell without quoting corruption — `--variables` with an inline
 `Get-Content -Raw` value silently ate the `--allow-mutations` flag that
 followed it.
 
+**About Us was revised again the same session, before anyone else even saw
+it.** The photo and single paragraph above were reversed within the hour:
+"foto nya gausah di page about" (no photo) and "copywriting nya masih
+kurang bgt, pls generate more" (write more). `about-story.liquid` is now
+text-only — the `image`/`asset` field and the two-column layout were
+removed, not hidden behind a setting — with three paragraphs instead of
+one. The extra two paragraphs are brief §14's own design-direction words
+(modern, feminine, minimal, timeless) applied to the ready-to-wear line and
+PRODUCT.md's documented studio responsiveness ("admin ramah", "responsif")
+applied to the custom-apparel close — no new fact was invented, only more
+said about facts already on record. `door-shop.webp` is unreferenced again.
+
 **Docs reconciled the same session**, not left for next time: CLAUDE.md's
 page-status table, theme port table, routes table, and Still-open/Answered
 lists; PRODUCT.md's Brand Commitments and Operating Context. Both had
