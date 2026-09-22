@@ -297,7 +297,68 @@ theme you're checking.
 
 ---
 
-## 8. If you are picking this up cold
+## 9. Session 2026-09-22 — a copy pass and two content calls, all pushed to live
+
+Three unrelated client instructions, landed and verified live, on top of §1–§8's
+state (17-product catalogue, no git remote — still true, see below):
+
+- **Bandung → Bekasi, everywhere, and the free exchange window 14 days → 7
+  days.** Every stale "Bandung" mention (footer note default, the theme's
+  `brand_description` meta default, the product page's shipping copy, the
+  unplaced `service-band` preset) now says Bekasi, matching the Jatibening
+  address already on `/pages/contact` (Jatibening is a Bekasi neighbourhood —
+  this was already the way §7 of this file leaned). Verified live on
+  `/products/basic-linen-culotte`: "Ships from Bekasi within 1–2 working days.
+  One free size exchange within 7 days." CLAUDE.md's "Still open" table had
+  this as an open question from before this file existed; it's moved to
+  "Answered" now.
+- **The three `custom-services` cards on `/pages/custom` no longer draw
+  placeholders.** They now reuse the same B2B cut-out photography
+  `selected-projects` already carries: `project-hospital.webp` → Uniforms,
+  `project-corporate.webp` (the Salna shirt) → Custom Apparel,
+  `project-merchandise.webp` (the tote) → Merchandise & Special Projects. This
+  was the one open item left in CLAUDE.md's "Still open" table under
+  "B2B photography" — it's answered now too. `custom-services.liquid` gained
+  the same `Shipped asset filename` block field `selected-projects` has, and
+  renders through `media-asset` with `fit: 'contain'` because these are alpha
+  cut-outs, not 4:5 photographs.
+- **The home page's "Ready to Wear" door (in `two-ways.liquid`) is brown, not
+  black.** Client: "yg kiri hitam jd coklat". Added a third tone, `brand`
+  (`bg-brand`/`text-on-brand` — Camel, `#75604F`), rather than repointing the
+  shared `--color-invert` token the footer and voices wall also use, which
+  would have turned both of those brown as a side effect. Verified live: the
+  panel's class list reads `bg-brand`, not `bg-invert`.
+- **The client supplied a colour-palette reference image**, saved to
+  `design/color-palette.jpg` (committed — unlike the gitignored `asset/`
+  drop folder, this is meant to be a durable pointer) and linked from
+  CLAUDE.md's Design sources. Its named colours (Rocky `#A48568`, Camel
+  `#75604F`, Light Orange `#DCCCC0`, Light Creme `#F8F0EA`) are near-identical
+  to primitives `app/tokens.css` already has — it reads as a naming reference
+  for the existing palette, not a request to re-theme. Worth rereading before
+  anyone uses it to justify changing a *shared* token rather than one
+  section's setting.
+
+**One push during this session silently no-opped on a single file.** The
+first `theme push --allow-live` for the custom-services change reported
+success with no errors, but a `theme pull` immediately after showed
+`templates/page.custom.json` unchanged on the remote — every other file in
+that same push (including `sections/custom-services.liquid`) landed
+correctly. A second, targeted `theme push --only "templates/page.custom.json"`
+fixed it and a re-pull confirmed the content matched. **Read this as "verify
+by pulling the specific file back, not just by reading the push JSON's error
+map" for a JSON template specifically** — the existing pipeline step ("read
+the push output") catches a `max_blocks` rejection but would not have caught
+this, since the push reported no error at all.
+
+**Still no git remote — `git push origin main` still fails with "'origin'
+does not appear to be a git repository."** Both of this session's commits
+(`7649cb0`, `8a99421`) exist only on this machine's `main`, same as §1
+already flagged. Get the GitHub URL from the client (or confirm there isn't
+one) before treating this work as backed up anywhere else.
+
+---
+
+## 10. If you are picking this up cold
 
 1. This file.
 2. [`CLAUDE.md`](./CLAUDE.md) — the manual. It has not been updated with this
@@ -305,8 +366,9 @@ theme you're checking.
    history) — read it for everything except the current product list, which is
    §3 above and the live Admin.
 3. [`PRODUCT.md`](./PRODUCT.md) — who this is for and what it claims.
-4. `git log` — one commit right now (`git init` happened this session). Ask
-   about the remote before assuming history is safe anywhere but this machine.
+4. `git log` — three commits right now (`git init` happened 2026-09-21). Ask
+   about the remote before assuming history is safe anywhere but this machine
+   — there still isn't one configured.
 
 Then run `npm run theme:check` and `npm run theme:css` before believing anything
 renders, and get the client's price list before publishing a single one of the
