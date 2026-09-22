@@ -51,16 +51,24 @@
           `fit: 'contain'` because the shipped assets are the same alpha
           cut-outs `selected-projects` uses — a garment trimmed to its own
           proportions, not a 4:5 photograph. `object-cover` would crop into
-          the cut-out itself. The default `bg-tone` plate is kept (no
-          `plate: false`) so the letterboxed edges read as the same toned box
-          this card showed before the photograph existed, rather than bare
-          page behind a floating garment.
+          the cut-out itself.
+
+          `plate: false` ADDED 2026-09-22, on instruction ("jelek banget...
+          ga sesuai theme") — the default `bg-tone` letterbox (taupe-300)
+          behind a `contain`-fit cut-out read as a flat coloured rectangle
+          around the garment rather than a photograph, and it clashed with
+          the page. Dropping it lets the section's own ground show through
+          instead, the same effect `selected-projects` gets from its
+          `plate: false` — the difference is that section wraps its call in
+          its own padded plate div and this one does not, so here the
+          garment sits directly on the page with no surface step at all.
         {%- endcomment -%}
         {% render 'media-asset',
           image: block.settings.image,
           asset: block.settings.asset,
           alt: block.settings.alt,
           fit: 'contain',
+          plate: false,
           ratio: '4 / 5',
           sizes: '(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw',
           asset_width: 1200,
