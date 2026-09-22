@@ -181,6 +181,12 @@
   --color-brand: var(--wl-taupe-600); /* 5.64:1 on cream */
   --color-brand-hover: var(--wl-taupe-700);
   --color-on-brand: var(--wl-cream); /* 5.64:1 on brand */
+  /* Lighter brand tone — taupe-500, near-identical to design/color-palette.jpg's
+     "Rocky" (#A48568). Added for the footer's gradient (2026-09-22); cream text
+     on this is 3.36:1, the same ratio already accepted elsewhere in this file
+     for brand-on-cream, so it is used as the gradient's lighter stop only, never
+     for body text on its own. */
+  --color-brand-light: var(--wl-taupe-500);
 
   /* Lines — inner divider, card border, section rule, control boundary */
   --color-hairline: var(--wl-rule-inner);

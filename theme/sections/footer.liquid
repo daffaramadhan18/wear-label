@@ -24,11 +24,36 @@
   also means no glyph has to be drawn for a marketplace whose mark is a
   trademark. An empty URL renders nothing at all rather than a dead button —
   the same rule the link columns follow.
+
+  THE GROUND IS A GRADIENT NOW, on instruction 2026-09-22 — "footer dikasih
+  warna gradasi sesuai color palette... dari kanan ke kiri". `from-brand-light
+  to-brand` (Rocky to Camel, `design/color-palette.jpg`) with `bg-linear-to-l`
+  so Rocky sits at the right edge and Camel at the left, replacing the flat
+  `bg-invert` espresso.
+
+  THE AURORA CAME OFF, and that is not a style choice — its `invert` veil is
+  hardcoded to `--wl-taupe-900` (`snippets/aurora.liquid`), painted for the
+  flat espresso this used to be. `aurora.liquid`'s own comment is explicit
+  that the veil "HAS to match the surface underneath: a mismatch shows up as
+  a visible rectangle" — exactly the bug that would have shipped here, an
+  espresso-coloured box sitting on top of a brown gradient.
+
+  THE BASE TEXT COLOUR MOVED FROM MUTED TO FULL CREAM for the same reason.
+  `text-ink-invert-muted` (`--wl-taupe-200`) was calibrated against espresso
+  (luminance ~0.01) and reads at best 4.07:1 against this gradient's Camel
+  end and as low as 2.43:1 against its lighter Rocky end — both worse than
+  what shipped before. Full cream (`text-ink-invert`, `--color-ink-invert`)
+  measures 5.63:1 on Camel and 3.36:1 on Rocky — the Rocky-end number is
+  exactly the ratio `app/tokens.css` already accepts for Camel-on-cream
+  elsewhere in this file, so it is a repeat of a trade-off already made here,
+  not a new one. Nothing in the footer sets `-muted` as a resting colour any
+  more; the two spots that used it to correct `base.css`'s default anchor
+  colour (see their own comments below) now correct it to full cream instead,
+  and their hover state is an underline rather than a colour change, because
+  cream has no brighter neighbour to hover toward.
 {%- endcomment -%}
 
-<footer class="relative isolate overflow-hidden bg-invert text-ink-invert-muted">
-  {% render 'aurora', tone: 'invert', origin: 'top-left' %}
-
+<footer class="relative isolate overflow-hidden bg-linear-to-l from-brand-light to-brand text-ink-invert">
   <div class="relative z-10 mx-auto max-w-content px-gutter py-8 lg:py-section">
     {%- comment -%}
       MOBILE. Stacked one-per-row this footer measured 1053px on a 390x844
@@ -104,15 +129,20 @@
                   {%- endcomment -%}
                   {%- if entry_url != blank -%}
                     {%- comment -%}
-                      `text-ink-invert-muted` is not decoration. base.css paints
-                      every `a` `--color-brand` — correct on cream, and on this
-                      espresso ground it measured rgb(114,94,76), which is all
-                      but invisible. The nine entries with no URL are `span`s and
-                      inherit the footer's own light text, so the three real
-                      links were the only ones that looked dead. Restating the
-                      colour is what any link on an inverted surface has to do.
+                      Restating the colour here is not decoration. base.css
+                      paints every `a` `--color-brand` — correct on cream, and
+                      on this footer's Rocky/Camel gradient `--color-brand`
+                      IS one of the two gradient stops, so an unstyled link
+                      would all but vanish into its own background. The nine
+                      entries with no URL are `span`s and inherit the footer's
+                      own `text-ink-invert`, so the three real links were the
+                      only ones that needed it. Cream has no brighter
+                      neighbour to hover toward, so hover is an underline
+                      rather than a colour change (2026-09-22, when this
+                      moved off `text-ink-invert-muted` — see the section
+                      comment above for the contrast numbers).
                     {%- endcomment -%}
-                    <a href="{{ entry_url }}" class="text-caption text-ink-invert-muted transition-colors duration-(--duration-base) hover:text-ink-invert">{{ entry_label }}</a>
+                    <a href="{{ entry_url }}" class="text-caption text-ink-invert underline-offset-4 transition-colors duration-(--duration-base) hover:underline">{{ entry_label }}</a>
                   {%- else -%}
                     <span class="text-caption">{{ entry_label }}</span>
                   {%- endif -%}
@@ -159,15 +189,15 @@
                 <li>
                   {%- comment -%}
                     Off-site, so `rel="noopener"` and a screen-reader suffix, and
-                    `text-ink-invert-muted` restated for the same reason the link
-                    columns restate it: base.css paints every anchor
-                    --color-brand, which is all but invisible on espresso.
+                    the colour restated for the same reason the link columns
+                    restate it: base.css paints every anchor --color-brand,
+                    which is one of this footer's own gradient stops.
                   {%- endcomment -%}
                   <a
                     href="{{ social_url }}"
                     target="_blank"
                     rel="noopener"
-                    class="inline-flex min-h-11 items-center text-micro uppercase tracking-nav text-ink-invert-muted transition-colors duration-(--duration-base) hover:text-ink-invert"
+                    class="inline-flex min-h-11 items-center text-micro uppercase tracking-nav text-ink-invert underline-offset-4 transition-colors duration-(--duration-base) hover:underline"
                   >
                     {{ social_label }}
                     <span class="sr-only">{{ 'general.opens_new_tab' | t }}</span>
