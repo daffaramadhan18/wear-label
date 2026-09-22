@@ -1508,13 +1508,19 @@ Not decided, and not to be filled in by guessing:
 | Social handles | The footer has four label/URL pairs — Instagram, Shopee, TikTok and a spare — and every URL is blank, so no social link renders. Brief §19 names the three |
 | The unbuilt footer destinations (The studio, Journal, FAQ, Order tracking, Wishlist, Contact us, Returns & refunds, Size guide, Terms) | Nine of twelve footer entries have no URL and render as plain text, never as a 404 link. Add the URL in the theme editor when the page exists |
 | A review system | The design's star rating is still deliberately absent — a fabricated score is the one placeholder that cannot be labelled as one. Real quotations are a separate matter and are live in the voices wall; there is no feed behind them, so new reviews mean editing the section's blocks |
-| Whether the studio ships from Bandung or Bekasi | The hero's order-notes card says "Pengiriman dari Kota Bekasi"; the footer note says the studio is in Bandung. Both are live. Nothing picks a side |
 | **The store's NAME** | **It is still Shopify's default, `My Store`.** Found 2026-09-13: `<title>` on the home page reads "My Store", and so does anything else `shop.name` feeds — order emails and the browser tab included. It is one field in Settings → Store details and nothing in the theme can fix it. The hero's screen-reader h1 is pinned to the literal "Wear Label" in `templates/index.json` precisely so the page's one heading did not inherit it; remove that pin once the field is right |
 | The store's own domain | `kbysza-bk.myshopify.com` until a domain is connected |
 | Whether the storefront password comes off | The theme is live; the password is what is still keeping the store private. Taking it off is the actual launch decision now, not publishing |
 
 **Answered, and recorded so it is not reopened:**
 
+- ~~Whether the studio ships from Bandung or Bekasi~~ — **Bekasi, 2026-09-22, on
+  instruction.** Consistent with the Jatibening address on `/pages/contact`
+  (Jatibening is a Bekasi neighbourhood) — see `HANDOVER.md` §7, which had
+  already leaned this way. Every "Bandung" mention was corrected to Bekasi:
+  the footer's studio note, the theme's `brand_description` meta default, and
+  the product page's shipping copy. The same shipping-copy edit also shortened
+  the free size exchange window from 14 days to **7**, the same instruction.
 - ~~Search~~ — **built, 2026-08-31**, because brief §5 asked for it. The header mark
   is a link to `/search` and `sections/main-search.liquid` is a real page rather than
   an overlay: a page has a URL, works with script off, and does not put a second

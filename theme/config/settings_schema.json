@@ -25,7 +25,7 @@
         "id": "brand_description",
         "label": "Brand description",
         "info": "Used for the meta description and Open Graph. Leave blank and no tag is emitted rather than an empty one.",
-        "default": "Handwoven linen and cotton, sewn in small runs in Bandung."
+        "default": "Handwoven linen and cotton, sewn in small runs in Bekasi."
       }
     ]
   },
