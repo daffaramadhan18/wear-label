@@ -10,7 +10,7 @@
           "settings": {
             "title": "Company",
             "link_1_label": "About Wear Label",
-            "link_1_url": "",
+            "link_1_url": "/pages/about",
             "link_2_label": "Custom & Business",
             "link_2_url": "/pages/custom",
             "link_3_label": "Contact",
