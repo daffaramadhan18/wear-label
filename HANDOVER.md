@@ -417,6 +417,21 @@ PRODUCT.md's documented studio responsiveness ("admin ramah", "responsif")
 applied to the custom-apparel close — no new fact was invented, only more
 said about facts already on record. `door-shop.webp` is unreferenced again.
 
+**The footer got a gradient background from the client's colour palette**,
+same session: "warna gradasi sesuai color palette... dari kanan ke kiri".
+`bg-linear-to-l from-brand-light to-brand` (Rocky at the right, Camel at
+the left — `design/color-palette.jpg`) replaced `bg-invert`. New token:
+`--color-brand-light` (taupe-500) in `app/tokens.css`, paired with the
+existing `--color-brand`. Two things had to change to keep it readable:
+the aurora came off (its `invert` veil is hardcoded to espresso and would
+have drawn a visible rectangle over the new gradient — see `aurora.liquid`'s
+own warning about this exact bug), and the footer's base/link text moved
+from `text-ink-invert-muted` (calibrated for espresso, drops to 2.4:1 on
+this lighter ground) to full cream (3.36–5.63:1, the low end matching a
+ratio `tokens.css` already accepts elsewhere). **Tailwind v4 renamed
+`bg-gradient-to-*` to `bg-linear-to-*`** — confirmed by grepping the built
+CSS, not assumed; worth knowing before writing another gradient anywhere else.
+
 **Docs reconciled the same session**, not left for next time: CLAUDE.md's
 page-status table, theme port table, routes table, and Still-open/Answered
 lists; PRODUCT.md's Brand Commitments and Operating Context. Both had
