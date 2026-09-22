@@ -131,9 +131,11 @@ at Rp 159.000–199.000, not on catalogue breadth and not on discount depth.
   up, so the strip runs the catalogue's photographs and carries no links),
   WhatsApp (fit advice — `home.services` states "Fit advice over WhatsApp"), and
   this site.
-- **Where the studio is.** Site copy says Bandung; the hero's order-notes card,
-  which is the studio's own artwork, says dispatch from Kota Bekasi. Both are
-  live on the home page and nothing in the project picks a side. **Open.**
+- **Where the studio is.** Settled 2026-09-22: Kota Bekasi, matching the
+  hero's order-notes card (the studio's own artwork) and the Jatibening
+  address on `/pages/contact`. Every "Bandung" mention on the live theme
+  (footer note, product shipping copy, the `brand_description` meta default)
+  was corrected to match.
 - **Order rituals, reproduced from the studio's own notes card** (transcribed in
   the first hero slide's alt text, `theme/templates/index.json`): payment before
   15.00 WIB dispatches the
@@ -196,10 +198,13 @@ the route; "Save for later" is `localStorage` only). No review feed behind the
 voices wall — new reviews mean editing the content module.
 
 **Explicitly undecided.** Which payment gateway, or whether checkout becomes real
-at all. Whether customer accounts exist or guest checkout is enough. Bandung
-versus Bekasi. Shop-banner photography. Per-product Details and Fabric & care
-copy. About Us, My Account and 404 copy. Social handles. Nine footer destinations
-with no page behind them. Whether there is a limited run, and when it ends.
+at all. Whether customer accounts exist or guest checkout is enough.
+Shop-banner photography. Per-product Details and Fabric & care copy. My
+Account and 404 copy. Social handles. Nine footer destinations with no page
+behind them. Whether there is a limited run, and when it ends.
+
+~~Bandung versus Bekasi~~ and ~~About Us copy~~ are decided now — see Brand
+Commitments below.
 
 ## Brand Commitments
 
@@ -214,9 +219,17 @@ with no page behind them. Whether there is a limited run, and when it ends.
 - **White page, cream bands.** Cream fills what sits on the page, never the shell.
 - **Customer quotations are inviolable.** Never edited, tidied, translated, or
   added to from anything but the store.
-- **Brand voice is not settled yet.** About Us, My Account and 404 hold empty
-  strings on purpose, and render labelled placeholders at final size rather than
-  filler. An empty string is a valid state in this project.
+- **Brand voice is mostly still unsettled — My Account and 404 hold empty
+  strings on purpose**, and render labelled placeholders at final size rather
+  than filler. An empty string is a valid state in this project.
+- **About Us is settled, 2026-09-22** — `theme/sections/about-story.liquid`,
+  built to brief §13's four facts (founded 2020, Indonesian womenswear label,
+  comfortable/versatile/wearable, custom apparel alongside ready-to-wear).
+  Nothing beyond those four is claimed — no founder, team or volume fact, per
+  "Absent, and not to be fabricated" below.
+- **The studio ships from Kota Bekasi, decided 2026-09-22** (not Bandung —
+  every stale mention was corrected to match the Jatibening address already
+  on `/pages/contact`, a Bekasi neighbourhood).
 
 ## Evidence on Hand
 

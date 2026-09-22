@@ -1,11 +1,18 @@
 {%- comment -%}
-  A content page — About Us and anything else the studio writes. Port of
-  app/about/page.tsx and the PageHeading primitive in components/ui/section.tsx.
+  A content page — anything the studio writes that doesn't warrant its own
+  template. Port of app/about/page.tsx and the PageHeading primitive in
+  components/ui/section.tsx.
 
-  The heading and the body come from the Shopify page itself, so the studio writes
-  About Us in the admin rather than in a content module. Where the page has no
-  content yet the labelled placeholder renders at final size — About Us copy is
-  still unwritten, and that is the state it should show.
+  ABOUT US NO LONGER USES THIS. Brief §13 asked for the About page to be
+  "visual", which this plain title-plus-rich-text shape cannot give it, so it
+  got its own `page.about` template and `sections/about-story.liquid`
+  instead (built 2026-09-22) — see that section's own comment. This one
+  stays as the fallback for a page nobody has built a dedicated template for
+  yet (currently none are assigned it; My Account and 404 use their own
+  templates too).
+
+  The heading and the body come from the Shopify page itself. Where the page
+  has no content yet the labelled placeholder renders at final size.
 {%- endcomment -%}
 
 <div class="mx-auto w-full max-w-content px-gutter pb-section pt-block-lg">

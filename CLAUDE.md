@@ -95,7 +95,7 @@ rather than breaking, so the theme is reviewable now:
    | Handle | Title | Template | State |
    |---|---|---|---|
    | `custom` | Custom & Business | `page.custom` | **200 — created 2026-09-13**, `gid://shopify/Page/743343489310`. All five sections render and the B2B route is reachable at last |
-   | `about` | About Us | *(default `page`)* | **404 — create it.** The header nav links to it from every page |
+   | `about` | About Us | `page.about` | **200 — created 2026-09-22**, `gid://shopify/Page/743676870942`. One section (`about-story.liquid`), brief §13's four facts, and the footer's "About Wear Label" link is wired to it now too |
    | `contact` | Contact | `page.contact` | **200, and correct** |
 
    **Creating a page needs an interactive login and the CLI cannot open a
@@ -149,14 +149,16 @@ rather than breaking, so the theme is reviewable now:
    blank values, so each renders a labelled placeholder at final size. They are
    variable facts nobody has supplied and an address is the one string a reader
    acts on. Filling them in is a theme-editor edit.
-7. **B2B photography EXISTS NOW and three slots still do not use it.** Four
-   pieces of real work arrived 2026-09-13 (see [The catalogue](#the-catalogue)
-   and the assets table). `custom-band` has a real photograph and
-   `selected-projects` has four. What still draws labelled placeholders is the
-   **three `custom-services` cards on `/pages/custom`** — filling them means
-   deciding which photograph stands for which service, which is a content call
-   nobody has made. The B2B hero is the exception and needs no photograph — see
-   its own comment.
+7. ~~B2B photography exists and three slots don't use it~~ — **DONE 2026-09-22.**
+   The three `custom-services` cards on `/pages/custom` now render the same
+   B2B cut-out photography `selected-projects` carries — `project-hospital.webp`
+   for Uniforms, `project-corporate.webp` for Custom Apparel,
+   `project-merchandise.webp` for Merchandise & Special Projects — with
+   `plate: false` so the garment sits directly on the page rather than on a
+   toned rectangle (the first pass kept the tone plate and it read as "jelek",
+   fixed the same day). `custom-band`'s photograph and `selected-projects`'
+   four were already live. The B2B hero remains the one exception that needs
+   no photograph — see its own comment.
 8. **Copy.** Brand voice is unsettled. Blank theme settings render a labelled
    placeholder, so filling them in is the whole change. The brief's own strings
    are in as section-setting *defaults*, so the client edits them in the theme
@@ -467,7 +469,7 @@ Shopify route names, and what the React app called them:
 | `/collections/all` | `/shop` | Catalogue — filter rail, sort, 3-up grid, paging |
 | `/products/<handle>` | `/shop/[handle]` | Product — gallery, size + colourway, quantity, add to bag, **one-page detail** (tabs were flattened 2026-09-13), related |
 | `/cart` | `/cart` | Bag — lines, order summary, hand-off to Shopify checkout |
-| `/pages/about` | `/about` | About Us — the Shopify page's own title and content |
+| `/pages/about` | `/about` | About Us. One section (`about-story`): a photograph, a heading, brief §13's four facts. Template suffix `page.about` |
 | `/pages/custom` | — | **Custom & Business (B2B).** Hero, services, how it works, why Wear Label, request a quote. Template suffix `page.custom`. **The Shopify page exists as of 2026-09-13** and the route returns 200 |
 | `/pages/contact` | — | **Contact.** Placeholder detail rows plus Shopify's native contact form. Template suffix `page.contact` |
 | `/collections` | — | **Collections.** The catalogue by category. **Three automated collections are live** — Pants 14, Cardigan 4, Culottes 2 — one per `product_type`. It was fifteen until 2026-09-13; the twelve that went empty with the cull were deleted |
@@ -576,6 +578,7 @@ Nothing is read from the environment any more. The three `SHOPIFY_*` /
 | `sections/contact-details` | nothing — brief §5 put Contact in the nav and specified nothing else |
 | `sections/main-search` | nothing — brief §5 asked for search; the route was `main-stub` |
 | `sections/main-list-collections` | nothing — brief §5 asked for Collections; the route was `main-stub` |
+| `sections/about-story` | nothing — brief §13, the About Us page, built 2026-09-22. `main-page`/`app/about/page.tsx`'s plain-text pattern was not reused: the brief asks for "visual", so this is a dedicated `page.about` template instead of the generic `page` one |
 | `assets/theme.js` | the header disclosure, the reveals, the carousel, the gallery, the tabs, the stepper, the save button, the quote form's WhatsApp composer, the hero film's reduced-motion pause |
 
 Two of those are **generated from the React source, not retyped**, and must stay
@@ -1511,7 +1514,7 @@ Not decided, and not to be filled in by guessing:
 | Which payment gateway | Checkout hands off to Shopify; no gateway is configured yet |
 | Shop-banner photography | The catalogue opens straight on the pieces, as the React route did — no banner to fill |
 | Per-product Details and Fabric & care copy | `description` and `custom.care` → placeholders. The design reused one generic paragraph for all eleven pieces; it would state a wrong inseam and a wrong fabric on most of them |
-| About Us and 404 copy | Blank → placeholders. About Us is the Shopify page's own content |
+| 404 copy | Blank → the `main-404` placeholder. ~~About Us~~ is done, see Answered |
 | Whether there is a limited run, and when it ends | Moot while the band is unplaced. Both the band and the countdown are ported and real |
 | ~~The studio's WhatsApp number~~ | **DONE 2026-09-13 — `+62 878-1654-0159`**, as a schema default, and `/pages/custom` now exists to render it on. Verified on the unpublished theme: `action="https://wa.me/6287816540159"`, submit enabled, no alert. **On the LIVE theme the same form still renders `action="https://wa.me/"` with the submit `disabled`**, because the default ships in `config/settings_schema.json` and that file has not been pushed to live. The B2B route is reachable on live; it cannot convert until the push |
 | **Per-product Shopee URLs** | `custom.shopee_url` is undefined and `shopee_shop_url` is blank, so "Buy on Shopee" does not render at all. The decision taken was per-product URLs with the shop URL as a fallback; start with the eleven design pieces, which are the only ones carrying photography |
@@ -1529,6 +1532,18 @@ Not decided, and not to be filled in by guessing:
 
 **Answered, and recorded so it is not reopened:**
 
+- ~~About Us copy and page~~ — **built, 2026-09-22**, on instruction to develop
+  it following brief §13 and the site's existing copywriting.
+  `sections/about-story.liquid` (one section: a photograph, a heading, a
+  paragraph) plus `templates/page.about.json`, and the Shopify page itself —
+  `gid://shopify/Page/743676870942`, handle `about`, template suffix `about`.
+  The heading reuses brief §6's own hero example line ("Everyday Pieces, Made
+  for You.") and the body sticks to exactly brief §13's four facts (founded
+  2020, Indonesian womenswear label, comfortable/versatile/wearable, custom
+  apparel alongside ready-to-wear) — no founder, team or volume claim was
+  added, per PRODUCT.md's list of what not to fabricate. The photograph
+  reuses the previously-unplaced `door-shop.webp`. The footer's "About Wear
+  Label" link, blank since the footer copy landed, now points at it.
 - ~~Whether the studio ships from Bandung or Bekasi~~ — **Bekasi, 2026-09-22, on
   instruction.** Consistent with the Jatibening address on `/pages/contact`
   (Jatibening is a Bekasi neighbourhood) — see `HANDOVER.md` §7, which had
