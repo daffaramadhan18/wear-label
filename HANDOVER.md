@@ -351,10 +351,66 @@ the push output") catches a `max_blocks` rejection but would not have caught
 this, since the push reported no error at all.
 
 **Still no git remote — `git push origin main` still fails with "'origin'
-does not appear to be a git repository."** Both of this session's commits
-(`7649cb0`, `8a99421`) exist only on this machine's `main`, same as §1
-already flagged. Get the GitHub URL from the client (or confirm there isn't
-one) before treating this work as backed up anywhere else.
+does not appear to be a git repository."** All of this session's commits
+exist only on this machine's `main`, same as §1 already flagged. Get the
+GitHub URL from the client (or confirm there isn't one) before treating this
+work as backed up anywhere else.
+
+## 9b. Later the same session — the announcement bar, a plate fix, "Kota Bekasi", and the About page
+
+Four more instructions after §9, same session:
+
+- **The announcement bar ("Free shipping on orders...") was also black.**
+  Missed in the first colour pass because it wasn't in any screenshot shown
+  at the time. Same fix as `two-ways.liquid`: `bg-brand`/`text-on-brand` in
+  place of `bg-invert`/`text-ink-invert`, scoped to this one section.
+- **The custom-services photos looked bad with the tone plate behind them**
+  ("jelek banget... ga sesuai theme"). Added `plate: false` to their
+  `media-asset` call — `selected-projects` uses the same flag, just wrapped
+  in its own padded plate div, which this section doesn't have. Verified
+  live: the wrapping div's class list no longer includes `bg-tone`.
+- **"Bekasi" → "Kota Bekasi", scoped to the product page's shipping line
+  only** ("jgn bekasi doang"). The footer note and the `brand_description`
+  meta default still say plain "Bekasi" — not touched, because the
+  instruction named the shipping copy specifically. Ask before changing
+  those too if the same precision is wanted everywhere.
+- **The About page was built end to end** — it was the last 404'ing route
+  (§1/CLAUDE.md's page-status table both had it as "create it"). New:
+  `sections/about-story.liquid` (one section — photograph, heading,
+  paragraph, per brief §13's "singkat dan visual") and
+  `templates/page.about.json`. The Shopify Page itself is
+  `gid://shopify/Page/743676870942`, handle `about`, template suffix
+  `about`. Copy sticks to exactly brief §13's four facts (founded 2020,
+  Indonesian womenswear label, comfortable/versatile/wearable, custom
+  apparel alongside ready-to-wear) plus the brief's own hero example line
+  as the heading ("Everyday Pieces, Made for You.") — nothing else, per
+  PRODUCT.md's rule against fabricating founder/team/volume facts. The
+  photograph reuses `door-shop.webp`, unreferenced since `two-ways.liquid`
+  dropped its photography 2026-09-21. The footer's "About Wear Label" link,
+  blank since the footer copy landed, is now wired to it.
+
+**Creating this page needed a full re-authentication.** The stored Shopify
+CLI token in this environment had `read_products` etc. but not
+`read_content`/`write_content` — HANDOVER's earlier claim that "it does now"
+(from the 2026-09-13 session, before this environment's git/auth state was
+rebuilt from scratch per §1) no longer held. Re-ran `shopify store auth`
+with the full scope list from CLAUDE.md's table plus `read_content,write_content`;
+the interactive-browser problem CLAUDE.md documents is still exactly as
+described (PowerShell fallback invoked with an en dash, hangs forever with
+no URL printed) and the hook-and-decode workaround in CLAUDE.md's item 3
+still works verbatim. New token confirmed working via
+`pages(first: 5) { nodes { handle } }` before creating anything.
+`pageCreate` needed **`--variable-file`, not `--variables`**, to pass a JSON
+file on this shell without quoting corruption — `--variables` with an inline
+`Get-Content -Raw` value silently ate the `--allow-mutations` flag that
+followed it.
+
+**Docs reconciled the same session**, not left for next time: CLAUDE.md's
+page-status table, theme port table, routes table, and Still-open/Answered
+lists; PRODUCT.md's Brand Commitments and Operating Context. Both had
+several claims (About Us unwritten, Bandung/Bekasi open, brand voice
+unsettled) that this session's own work made false, so they were fixed
+alongside the code rather than left for the next session to notice were wrong.
 
 ---
 
@@ -364,9 +420,11 @@ one) before treating this work as backed up anywhere else.
 2. [`CLAUDE.md`](./CLAUDE.md) — the manual. It has not been updated with this
    session's catalogue change yet (still describes the old 20/126-product
    history) — read it for everything except the current product list, which is
-   §3 above and the live Admin.
-3. [`PRODUCT.md`](./PRODUCT.md) — who this is for and what it claims.
-4. `git log` — three commits right now (`git init` happened 2026-09-21). Ask
+   §3 above and the live Admin. Everything else in it (routes, page status,
+   Still-open/Answered) is current as of §9b above.
+3. [`PRODUCT.md`](./PRODUCT.md) — who this is for and what it claims. Current
+   as of §9b.
+4. `git log` — several commits right now (`git init` happened 2026-09-21). Ask
    about the remote before assuming history is safe anywhere but this machine
    — there still isn't one configured.
 
