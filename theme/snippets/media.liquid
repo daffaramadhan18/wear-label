@@ -16,7 +16,8 @@
   `priority` marks the one image the page is judged on — the product page's main
   shot — and is the only thing that decides how the browser fetches it.
 
-  Accepts: image (Shopify image or nil), sizes, ratio, fill, priority, class, label
+  Accepts: image (Shopify image or nil), sizes, ratio, fill, priority, preload,
+  class, label
 {%- endcomment -%}
 
 {%- comment -%}
@@ -47,9 +48,27 @@
 {%- liquid
   assign media_label = label | default: 'Product photo'
 
+  comment
+    Three fetch states, not two.
+
+    `priority` is the one image the page is judged on: eager, and high, so it
+    wins the contest for bandwidth.
+
+    `preload` is for an image that is IN the document but hidden and will be
+    wanted shortly — the product gallery's other colourways. Eager, so it is
+    fetched now and sits in the HTTP cache, but LOW, so it queues behind the
+    visible shot instead of starving it. That distinction is the whole reason
+    this is a third state rather than passing `priority` to everything.
+
+    Everything else stays lazy. A grid of cards must not fetch what is below
+    the fold.
+  endcomment
   if priority
     assign loading_mode = 'eager'
     assign priority_mode = 'high'
+  elsif preload
+    assign loading_mode = 'eager'
+    assign priority_mode = 'low'
   else
     assign loading_mode = 'lazy'
     assign priority_mode = 'auto'

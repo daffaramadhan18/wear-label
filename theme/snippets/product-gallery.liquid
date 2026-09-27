@@ -1,20 +1,17 @@
 {%- comment -%}
   Product gallery — port of components/product/product-gallery.tsx.
 
-  A column of thumbnails beside the main crop. Thumbnails are buttons with
-  aria-pressed, not links, because choosing an angle is not a navigation; the main
-  image gets the selected shot rather than the page scrolling to it.
+  ONE frame, no thumbnail rail. The rail was a column of buttons beside the
+  main crop, ported from the React version; it came off on instruction. What
+  decides which shot shows is now the colourway picker alone — which is a
+  better match for the catalogue anyway, because the shots ARE the colourways:
+  a rail of 23 near-identical trousers duplicated the picker directly below it.
 
-  Where a piece has only one shot the remaining slots are the labelled placeholder
-  at the right ratio, so the rail is already its final size and shape. A gallery
-  with one entry hides the rail altogether.
-
-  The rail is a column beside the photograph from `lg` up and a scrolling row
-  beneath it below that: 92px of thumbnails alongside leaves the main crop about
-  260px on a phone, and the main crop is the thing being bought.
-
-  Without JavaScript the first angle shows and the thumbnails are inert — the same
-  as the React version, which was a client component for exactly this state.
+  The consequence to know about: with the rail gone there is no control that
+  reaches a slot the picker cannot select. On a product with a film that means
+  the main photograph is reachable only by choosing a colourway, since the film
+  is what opens. Every slot is still in the document — see the preload note
+  below, which depends on that — they are simply switched by the picker now.
 
   The main crop is 4 / 5, stated on the render call rather than left to
   media.liquid's square source default, so the real photograph and the empty
@@ -23,12 +20,12 @@
   right one; it does take 10% off each side of a square source, so the eleven
   shots want eyeballing for clipped hems once they are imported.
 
-  `priority` is the FIRST shot only, not every shot. It used to be `true` on all
-  of them, which did nothing while media.liquid was dropping the parameter on the
-  floor; now that the parameter is read, `true` on all of them would fetch an
-  eight-angle gallery eagerly at fetchpriority="high" and starve the one image
-  the page is actually judged on. The rest are lazy, and the hidden ones do not
-  fetch until the thumbnails reveal them.
+  `priority` is the OPEN shot only — not the first one, and still not every one.
+  The warning it used to carry holds: `true` on all of them fetches the whole
+  gallery at fetchpriority="high" and starves the image the page is judged on.
+  The others are no longer lazy either, because a lazy hidden shot is exactly
+  what made choosing a colourway wait; they are `preload`, which is eager at
+  low priority. See the note on the shot loop for what that costs.
 
   The first main shot carries `view-transition-name: shot-<handle>`, the other
   half of the pair set on the catalogue card, so a card grows into the product
@@ -71,47 +68,8 @@
   endif
 -%}
 
-<div class="flex flex-col-reverse gap-4 lg:flex-row" data-gallery>
-  {%- if shot_count > 1 -%}
-    <ul
-      aria-label="{{ 'product.gallery' | t }}"
-      class="wl-rail flex gap-3 overflow-x-auto lg:w-23 lg:shrink-0 lg:flex-col lg:gap-4 lg:overflow-visible"
-    >
-      {%- comment -%}
-        The film's thumbnail is its own poster frame, so the rail reads as one
-        strip rather than a video control bolted onto a row of photographs.
-      {%- endcomment -%}
-      {%- for clip in clips -%}
-        <li class="w-20 shrink-0 lg:w-full">
-          <button
-            type="button"
-            data-gallery-thumb="{{ forloop.index0 }}"
-            aria-pressed="{% if forloop.index0 == open_index %}true{% else %}false{% endif %}"
-            class="wl-press-soft block w-full cursor-pointer overflow-hidden rounded-xs border transition-colors duration-(--duration-base) aria-pressed:border-brand border-border hover:border-line"
-          >
-            {% render 'media', image: clip.preview_image, sizes: '(min-width: 1024px) 92px, 80px', ratio: '4 / 5', label: 'Angle', class: 'rounded-none' %}
-            <span class="sr-only">{{ 'product.show_video' | t }}</span>
-          </button>
-        </li>
-      {%- endfor -%}
-      {%- for shot in shots -%}
-        {%- assign slot = clips.size | plus: forloop.index0 -%}
-        <li class="w-20 shrink-0 lg:w-full">
-          <button
-            type="button"
-            data-gallery-thumb="{{ slot }}"
-            aria-pressed="{% if slot == open_index %}true{% else %}false{% endif %}"
-            class="wl-press-soft block w-full cursor-pointer overflow-hidden rounded-xs border transition-colors duration-(--duration-base) aria-pressed:border-brand border-border hover:border-line"
-          >
-            {% render 'media', image: shot, sizes: '(min-width: 1024px) 92px, 80px', ratio: '4 / 5', label: 'Angle', class: 'rounded-none' %}
-            <span class="sr-only">{{ 'product.show_image' | t }} {{ forloop.index }}</span>
-          </button>
-        </li>
-      {%- endfor -%}
-    </ul>
-  {%- endif -%}
-
-  <div class="min-w-0 flex-1">
+<div data-gallery>
+  <div class="min-w-0">
     {%- comment -%}
       The film is muted, looping and inline because it autoplays: a browser
       only autoplays a muted video, and `playsinline` is what stops iOS taking
@@ -135,14 +93,37 @@
       </div>
     {%- endfor -%}
 
+    {%- comment -%}
+      Every colourway is fetched on this page load, not on the click that
+      wants it. Choosing a colourway is a NAVIGATION — the picker is links to
+      `?variant=`, so the next page is a fresh document — and the shot it
+      opens on used to be lazy, which is why picking a colourway showed an
+      empty frame while its photograph came down. Fetching them all now puts
+      every one in the HTTP cache, so the next page paints from cache instead.
+
+      `priority` is the slot that is actually open, not the first one, because
+      that is the image this page is judged on. The rest are `preload`: eager
+      so they arrive, low so they queue behind it. Passing `priority` to all
+      of them would be the starvation this snippet has always warned about.
+
+      The cost is real and it is the point: Yora is 23 colourways, so this
+      page pulls roughly 12 MB where it used to pull one image. Asked for
+      deliberately, to trade first-load bytes for an instant colourway switch.
+    {%- endcomment -%}
     {%- for shot in shots -%}
-      {%- assign slot = clips.size | plus: forloop.index0 -%}
+      {%- liquid
+        assign slot = clips.size | plus: forloop.index0
+        assign is_open = false
+        if slot == open_index
+          assign is_open = true
+        endif
+      -%}
       <div
         data-gallery-main="{{ slot }}"
-        {% unless slot == open_index %}hidden{% endunless %}
+        {% unless is_open %}hidden{% endunless %}
         {% if forloop.first and product.handle != blank %}style="view-transition-name: shot-{{ product.handle }}"{% endif %}
       >
-        {% render 'media', image: shot, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', priority: forloop.first, label: 'Product photo' %}
+        {% render 'media', image: shot, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', priority: is_open, preload: true, label: 'Product photo' %}
       </div>
     {%- endfor -%}
 
