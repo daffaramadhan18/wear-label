@@ -1,18 +1,24 @@
 {%- comment -%}
   The Custom & Business page hero. Brief §9.1.
 
-  An espresso band with the aurora over it, the page's h1, one line of what the
-  service is, and one button into the quote form.
+  A Rocky-to-Camel gradient band, the page's h1, one line of what the service
+  is, and one button into the quote form.
+
+  THE BAND IS THE FOOTER'S GRADIENT, not a second one that looks like it.
+  Asked for 2026-09-28. It is the same utility string,
+  `bg-linear-to-l from-brand-light via-brand to-brand-dark`, so the two read as
+  one decision and retinting either means retinting both. The stops are the
+  client's own palette (Rocky and Camel, see `design/color-palette.jpg`).
 
   NO LABELLED PLACEHOLDER WHEN THERE IS NO PHOTOGRAPH, and that is a deliberate
   exception to this theme's placeholder rule. The rule exists so a missing asset
   does not collapse a layout that depends on it; here the layout does not depend
-  on one. An espresso ground with the aurora and the type set over it is a
-  finished surface — it is what the footer is — so an empty photo slot has a
-  design rather than a hole, and drawing a grey rectangle labelled "photo" over
-  the top would be scaffolding standing in front of something already finished.
-  Set the photograph and it fills the band behind a scrim; leave it and the band
-  is the artwork. Both states are final.
+  on one. The gradient with the type set over it is a finished surface, which is
+  exactly what the footer is, so an empty photo slot has a design rather than a
+  hole, and drawing a grey rectangle labelled "photo" over the top would be
+  scaffolding standing in front of something already finished. Set the
+  photograph and it fills the band behind a scrim; leave it and the band is the
+  artwork. Both states are final.
 
   THE SCRIM IS NOT OPTIONAL when a photograph is set. `text-ink-invert` on an
   unknown photograph is a contrast bet, and the one thing this theme will not do
@@ -20,10 +26,11 @@
   type on cream. `bg-invert/72` is the same weight the category mosaic uses over
   its tiles for the same reason.
 
-  The aurora's `tone` is `invert` because the band is `bg-invert`; the veil layer
-  has to be painted in the colour of the surface underneath or it draws a visible
-  rectangle. `relative isolate overflow-hidden` on the band is what keeps
-  `soft-light` blending against the band and not the page.
+  THE AURORA IS GONE, and it had to go rather than being retoned. Its veil layer
+  must be painted in the colour of the surface underneath or it draws a visible
+  rectangle, and a gradient has no single surface colour to paint it in. The
+  band was espresso when the aurora was here; the gradient is what replaced both.
+  `relative isolate overflow-hidden` stays, for the photograph branch.
 
   NO [data-reveal] ANYWHERE IN THIS SECTION. It is the top of the page, so there
   is nothing to scroll to — and `[data-reveal]` ships at `opacity: 0` with
@@ -32,7 +39,7 @@
   for the same reason.
 {%- endcomment -%}
 
-<section class="relative isolate overflow-hidden bg-invert text-ink-invert">
+<section class="relative isolate overflow-hidden bg-linear-to-l from-brand-light via-brand to-brand-dark text-ink-invert">
   {%- if section.settings.image -%}
     <div class="absolute inset-0">
       {% render 'media',
@@ -44,8 +51,6 @@
         class: 'rounded-none' %}
       <div class="absolute inset-0 bg-invert/72"></div>
     </div>
-  {%- else -%}
-    {% render 'aurora', tone: 'invert', origin: 'top-right' %}
   {%- endif -%}
 
   <div class="relative z-10 mx-auto w-full max-w-content px-gutter py-section lg:py-block-lg">

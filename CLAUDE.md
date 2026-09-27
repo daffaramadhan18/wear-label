@@ -15,6 +15,12 @@
 > nine changes on 2026-09-13 were reversals of something decided hours earlier,
 > and the record of that is there rather than here.
 >
+> **[`SHOPEE-IMPORT.md`](./SHOPEE-IMPORT.md) is the other file you cannot guess
+> at.** Every photograph, film, description, material, colourway and tops size
+> chart on this store came out of the studio's own Shopee listings, and Shopee
+> cannot be scraped the obvious way. Read it before anything touches the
+> catalogue.
+>
 > **Keep it current.** When you finish a session, update HANDOVER.md the way you
 > update this file: what landed, what is now blocked, what the client owes. A
 > handover that describes last week is worse than none.
@@ -59,17 +65,14 @@ What is missing is store *configuration* and a handful of client-supplied facts,
 code — and every one of those gaps renders a labelled placeholder at final size
 rather than breaking, so the theme is reviewable now:
 
-1. **Six of the twenty products have no photograph.** This item has shrunk
-   twice in one day and the numbers matter: it read "115 Shopee pieces" in the
-   morning, then nine after the cull took 106 products off, and it is **six**
-   now that the studio's drop folder was uploaded — 32 photographs across
-   eleven products, so Soso, Pipo and Cerra Loose Pants BIG SIZE went from no
-   image at all to a full gallery. **43 media on the store, all `READY`.**
+1. ~~Products with no photograph~~ — **NONE. This item is closed, 2026-09-27.**
+   Every one of the 17 products carries media and a description. The store now
+   holds **162 media, all `READY`, 10 of them films**, and **317 of 317 variants
+   carry their own colourway photograph**.
 
-   What is still bare: the **four cardigans**, `barrel-pants` and
-   `tara-stripe-pants`. None of them has a folder in `asset/`, so this is not a
-   job waiting to be done — it is six shoots waiting to happen. They draw the
-   placeholder at the real card proportions meanwhile.
+   It all came from the studio's own Shopee listings, and the route is not
+   obvious: see **[`SHOPEE-IMPORT.md`](./SHOPEE-IMPORT.md)**, with the scripts in
+   [`tools/shopee/`](./tools/shopee/). Read it before attempting it again.
 2. **One filter, not none — and the reason it was urgent is gone.** Shopify's
    default **Availability** facet is live (`filter.v.availability=1` / `=0`) and
    every entry point still carries it. It was added because 106 of 126 products
@@ -124,13 +127,19 @@ rather than breaking, so the theme is reviewable now:
 
    Then `shopify store execute` — and note **`--allow-mutations` is required**,
    or every mutation is refused with "Mutations are disabled by default".
-4. **Four product metafield definitions do not exist**, so four slots render
-   placeholders: `custom.care`, `custom.size_chart`, `custom.fit`,
-   `custom.shopee_url`. **`custom.material` is now defined AND populated** —
-   verified 2026-08-31 against the store, which returns exactly one product
-   metafield definition and a real value on all eleven design pieces, so the
-   card's material line and the product page's material row draw data rather
-   than a placeholder.
+4. **Two product metafield definitions do not exist**, so two slots are unfilled:
+   `custom.care` and `custom.shopee_url`. Three DO exist and carry real values:
+
+   | Metafield | State |
+   |---|---|
+   | `custom.material` | defined, populated on all 17, and taken from the studio's own Shopee listings rather than the design project |
+   | `custom.size_chart` | defined 2026-09-28, filled for the four tops. First line headings, every line after it a row, pipe separated |
+   | `custom.size_note` | defined 2026-09-28, the line under a per-product chart |
+   | `custom.care` | **undefined**, but Fabric & care is not empty: `fabric-care.liquid` keys a paragraph off `custom.material` instead |
+   | `custom.shopee_url` | **undefined**, so "Buy on Shopee" does not render at all |
+
+   ~~`custom.fit`~~ is gone. The block that read it was deleted on 2026-09-28
+   along with the material line above the title.
 5. **One theme setting is still blank, and it used to be two.**
    - ~~`whatsapp_number`~~ — **SUPPLIED 2026-09-13: `+62 878-1654-0159`.** The
      quote form's submit is live and its action renders
@@ -505,6 +514,9 @@ theme/                 THE DELIVERABLE
   README.md            port status, deviations, build
 theme-src/theme.css    stylesheet entry; imports app/tokens.css + app/base.css
 
+SHOPEE-IMPORT.md       HOW THE CATALOGUE GOT HERE. Read before touching products
+tools/shopee/          the scripts that did it. Plain Node, no dependencies
+
 app/tokens.css         DESIGN TOKENS — single source of truth, shared
 app/base.css           base layer — shared
 
@@ -711,8 +723,22 @@ block back on a product page.
 
 ## The catalogue
 
-**TWENTY products are on the store**, all `ACTIVE`, all published to the Online
-Store and **all in stock**. It was 126 until 2026-09-13.
+**SEVENTEEN products are on the store**, all `ACTIVE`, all published to the
+Online Store, **all in stock**, and every one of them now carries photography, a
+film where the studio shot one, a description and a full colourway matrix.
+**317 variants, 162 media.** It was 126 until 2026-09-13 and 20 until 2026-09-27.
+
+> **Everything below about where the catalogue's data came from is now secondary
+> to [`SHOPEE-IMPORT.md`](./SHOPEE-IMPORT.md).** The photographs, the films, the
+> descriptions, the materials, the colourways and the tops' size charts were all
+> pulled from the studio's own Shopee storefront on 2026-09-27, and that file is
+> how. The scripts are in [`tools/shopee/`](./tools/shopee/).
+>
+> In particular: **the material values in the table further down this section are
+> the design project's and are NO LONGER what the store carries.** Nine of the
+> eleven disagreed with the studio's own listing, and the listing won. The store
+> now says torino, crepe, semiwool, woven twill and so on. Read the store, not
+> the table.
 
 **THE 106 SOLD-OUT PRODUCTS WERE PERMANENTLY DELETED**, on instruction — "yg out
 of stock hapus semua nya" — and the choice was made with the trade-off stated:
@@ -999,11 +1025,11 @@ Push, then read the output. It is the only validator that sees this class of bug
 
   | Metafield | Type | Read by | Blank renders |
   |---|---|---|---|
-  | `custom.material` | single line text | `product-card`, `main-product` | **defined — renders data** |
-  | `custom.care` | rich text | `product-detail` → Fabric & care | labelled placeholder |
-  | `custom.size_chart` | rich text | `product-detail` → Size & fit | **falls back to the SHARED chart** in Theme settings → Size guide, not to a placeholder. Per-product wins; see below |
-  | `custom.fit` | rich text | `product-detail` → Size & fit | labelled placeholder |
-  | `custom.shopee_url` | URL | `product-purchase` | **nothing at all** — see below |
+  | `custom.material` | single line text | `product-card`, `fabric-care` | **defined, renders data on all 17** |
+  | `custom.size_chart` | multi line text | `product-detail` → Size & fit | **defined**, filled for the four tops. First line headings, rows after it, pipe separated. Blank on a trouser falls back to the store-wide chart; blank on a TOP draws a placeholder, never the trouser chart |
+  | `custom.size_note` | single line text | `product-detail` → Size & fit | **defined**, the line under a per-product chart |
+  | `custom.care` | rich text | `product-detail` → Fabric & care | **not a placeholder**: `fabric-care.liquid` keys a paragraph off `custom.material` instead |
+  | `custom.shopee_url` | URL | `product-purchase` | **nothing at all**, see below |
 
   `.wl-table` in `theme-src/theme.css` styles both size-chart routes — the rich
   text one and the built one — because Shopify emits a bare `<table>` and

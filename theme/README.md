@@ -62,7 +62,24 @@ the artifact the store serves; read `theme-src/theme.css`, `app/tokens.css` and
 
 ## Port status
 
-**Done — the shell, all six ported routes, and four more the brief added.**
+**Done: the shell, all six ported routes, and four more the brief added.**
+
+Three product-page behaviours have since moved past the React original and are
+no longer a port of anything. Recorded here so nobody reads the table below and
+expects them to match `components/product/`:
+
+- **The gallery has no thumbnail rail.** The shots are the colourways, so the
+  rail duplicated the picker beneath it. The film leads instead, and a colourway
+  chosen with `?variant=` opens on its own photograph.
+- **Every colourway is fetched on page load** at low priority, so switching is
+  instant. Yora pulls roughly 12 MB for this, deliberately.
+- **The picker swaps in place.** The chips are still links to `?variant=`, which
+  is what keeps them working with script off; `initVariantSwap` intercepts the
+  click, applies the change and writes the URL with `replaceState`. The link is
+  the fallback for anything the variant matrix cannot answer.
+
+Nothing in `app/` or `components/` was changed to match. See
+[the archive rule](../CLAUDE.md#the-nextjs-app-is-an-archive).
 
 | File | From |
 |---|---|

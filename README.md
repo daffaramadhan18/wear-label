@@ -60,63 +60,82 @@ code change.
 
 ## What is built
 
-All six routes, plus the shell.
+Ten routes, plus the shell.
 
 | Route | What it is |
 |---|---|
-| `/` | Hero carousel, new arrivals, customer voices wall, service band, Instagram strip |
-| `/collections/all` | Catalogue — filter rail, sort, 3-up grid, paging |
-| `/products/<handle>` | Product — gallery, size and colourway, quantity, add to bag, tabs, related |
-| `/cart` | Bag — lines, quantity, removal, order summary, hand-off to Shopify checkout |
-| `/pages/about` | About Us — the Shopify page's own title and content |
-| 404 | Branded, with placeholders until the copy exists |
+| `/` | A looping film, then two views behind a sticky switch: Ready-to-wear and Custom & business |
+| `/collections/all` | Catalogue: filter rail, sort, 3-up grid, paging |
+| `/collections` | The two automated collections, `pants` and `tops` |
+| `/products/<handle>` | Product: gallery with the film leading, colourway picker that swaps in place without reloading, size chart, Fabric & care, shipping |
+| `/cart` | Bag: lines, quantity, removal, order summary, hand-off to Shopify checkout |
+| `/search` | Products only, because the theme has no card for a page or article result |
+| `/pages/about` | About Us |
+| `/pages/custom` | Custom & Business, the B2B route. No checkout: brief §16 sends it to WhatsApp |
+| `/pages/contact` | Native Shopify contact form plus detail rows |
+| `/pages/size-guide`, `/pages/shipping-delivery`, `/pages/returns-exchanges` | Customer care |
+| 404 | Branded |
 
-Three sections are built and deliberately **not placed**: the category mosaic
-(removed on request), the limited-run band (cut from the design's sequence), and
-made-to-order. The first two may go back — and because they have presets, that is
-now a click in the theme editor rather than a code change.
+Four sections are built and deliberately **not placed**: the category mosaic,
+the hero carousel (replaced by the film), the two-panel split (replaced by the
+view switch) and the service band. Each has a preset, so re-placing one is a
+click in the theme editor rather than a code change.
 
-Made-to-order must **not**: the studio does not offer that service, so every line of
-that band is a promise nobody can keep. [`PRODUCT.md`](./PRODUCT.md) records the
-decision and the customer evidence behind it.
+Made-to-order must **not** come back: the studio does not offer that service, so
+every line of that band is a promise nobody can keep.
+[`PRODUCT.md`](./PRODUCT.md) records the decision and the customer evidence
+behind it. The B2B custom-apparel service is a different thing (a bulk run for
+an organisation, not one garment cut for one shopper) and does not reopen it.
 
 ## What is *not* built, and why
 
-Store configuration, not code — and every gap renders a labelled placeholder at
+**The catalogue is no longer on this list.** It is complete: 17 products, 317
+variants, 162 media and 17 descriptions, all live. What is left is store
+configuration rather than code, and every gap renders a labelled placeholder at
 final size rather than breaking:
 
 | Missing | What you see instead |
 |---|---|
-| The eleven products | Placeholder cards at the real card proportions — nine on the catalogue, eight on the home page |
-| Storefront filters | The rail says they are configured in Shopify's Search and Discovery app |
-| The `about` page | `/pages/about` 404s; the section is written and waiting |
-| `custom.material`, `custom.care` metafields | Labelled placeholders on the card's material line and the Fabric & care tab |
-| Brand copy | Blank theme settings render labelled placeholders at final size |
+| A payment gateway | Checkout hands off to Shopify, which cannot take money until one is configured. **This is the launch blocker** |
+| A courier app (RajaOngkir, Biteship) | The bag says "Calculated at checkout", because nothing here can know a rate |
+| Storefront filters beyond Availability | The rail says they are configured in Shopify's Search and Discovery app |
+| Contact details: email, address, hours | Labelled placeholders at final size, by instruction |
+| `custom.shopee_url` | "Buy on Shopee" is absent rather than pointing at a search page |
+| Trouser measurements for XS, S, XXL, 3XL | The shared chart has M, L and XL. The gap is invisible: the table simply has three rows |
 
 ### The rule that shapes all of it
 
-**Never invent commerce data.** No fabricated shipping rates, review counts, stock
-numbers, countdowns or discount depths — not even as placeholder polish. Where a
-number cannot be known, the UI says where it comes from ("Calculated at checkout") or
-the block hides itself. It is why the design's star rating and its "Up to 40% off"
-tile are absent.
+**Never invent commerce data.** No fabricated shipping rates, review counts,
+stock numbers, countdowns or discount depths, not even as placeholder polish.
+Where a number cannot be known, the UI says where it comes from ("Calculated at
+checkout") or the block hides itself. It is why the design's star rating and its
+"Up to 40% off" tile are absent.
 
 **Quoting a customer is not inventing one.** The voices wall carries twenty real
 Shopee reviews, verbatim, in Indonesian. That is why it is allowed where a star
-rating is not: it reproduces what customers wrote instead of synthesising a score.
-They are extracted from the source programmatically and asserted verbatim — never
-edited, tidied or translated.
+rating is not: it reproduces what customers wrote instead of synthesising a
+score. They are extracted from the source programmatically and asserted
+verbatim, never edited, tidied or translated.
 
-## The catalogue is real
+**No em dashes and no en dashes in copy.** House style. Replace one by the
+punctuation doing its job: commas or brackets for a parenthetical, a full stop
+or colon for a trailing clause, a hyphen for a range or a data cell.
 
-Eleven pieces, from the design project's own `CATALOG`. Real names, materials,
-prices, markdowns and photography. Sizes XS–XL and five colourways apply to every
-piece, giving 25 variants each. Stock is not modelled — the sold-out states are
-implemented throughout and light up the moment Shopify reports inventory.
+## The catalogue is real, and it is the studio's own
 
-The full table, and how `productType` was derived, is in
-[`CLAUDE.md`](./CLAUDE.md#the-catalogue). Importing it into Shopify is the next big
-step.
+**17 products, 317 variants, 162 media of which 10 are films, and a description
+on every one.** All of it came from the studio's own Shopee storefront: the
+photographs, the films, the colourway matrix, the listing copy, the materials
+and the tops' size charts.
+
+Shopee cannot be scraped the obvious way, and every obvious way fails
+differently. **[`SHOPEE-IMPORT.md`](./SHOPEE-IMPORT.md) is how it was done** and
+[`tools/shopee/`](./tools/shopee/) holds the scripts. Read the first before
+running the second.
+
+Stock is deliberately not modelled: Shopee states availability but never a
+quantity, so every variant is untracked. The sold-out markup is implemented
+throughout and lights up the moment Shopify reports inventory.
 
 ## Design
 
@@ -220,6 +239,9 @@ theme/                 THE DELIVERABLE
   assets/              theme.css (built), theme.js, artwork
   config/ locales/     settings schema, interface chrome
 theme-src/theme.css    stylesheet entry
+
+SHOPEE-IMPORT.md       how the catalogue was pulled back from Shopee
+tools/shopee/          the scripts that did it, plain Node, no dependencies
 
 app/tokens.css         DESIGN TOKENS — shared, live
 app/base.css           base layer — shared, live
