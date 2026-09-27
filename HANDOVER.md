@@ -824,6 +824,37 @@ choco (semiwool), and `cerra-loose-pants` (39) Black → Milo. In both the marke
 survived, the URL gained `?variant=`, the frame changed to that colourway's
 file, the posted variant id changed and the colour line followed.
 
+**The material line and fit information came off the product page.** Both had
+stopped earning their place: the material line above the title was a one-word
+label duplicating the fabric paragraph every description now opens with, and
+Fit information read `custom.fit`, which was never defined, so it drew a
+heading over two grey placeholder bars on every product page.
+`custom.material` is untouched and the catalogue card still reads it.
+
+**NO EM OR EN DASHES IN ANY STOREFRONT COPY, by instruction.** 63 replacements
+across 30 files plus a re-upload of all 17 product descriptions. A dash is
+punctuation doing a job, so each was replaced by whatever does that job:
+paired dashes became commas, or brackets where the phrase itself contains
+commas; a single trailing dash became a full stop, or a colon where a list
+followed; a dash used as a DATA value became a hyphen, because the tops size
+chart writes one for "does not apply" and an empty cell is a different
+statement; ranges like "1-2 working days" lost their en dash.
+
+**Three sentences needed rewriting rather than repunctuating**, all caught by
+reading the output rather than by any check: "custom apparel. Uniforms,
+merchandise..." is a fragment and takes a colon; the returns page had a dash
+joining a conditional to its imperative, where a full stop leaves the first
+half sentenceless and starts a link in lower case; and one social-band line
+ended on a fragment. **A conversion bug was caught the same way** and is the
+one to remember: a cleanup rule meant to collapse a doubled full stop also
+stripped the stop before every closing `</p>`, quietly eating the last
+sentence's punctuation on two pages.
+
+The product descriptions are normalised AT UPLOAD, not by editing the scrape:
+`asset/shopee/*/_copy.json` stays a faithful record of what Shopee served.
+**Keep this rule going.** Verified on the live storefront: product, About,
+Returns, Shipping and home all render zero em dashes and zero en dashes.
+
 **Also this session: graphify is gone.** Its `PreToolUse` hooks in
 `.claude/settings.json` shelled out to `/home/daffa/.local/bin/graphify`, a WSL
 path, while the tooling runs from Windows — so every Bash, Grep, Read and Glob
