@@ -673,6 +673,97 @@ must pull or rebase first.
 
 ---
 
+## 9e. Same day — the Shopee media harvest, and the catalogue stopped being bare
+
+**The store now carries real photography and real copy on every product.**
+Before this: 9 products with one image each, 8 with none, nothing on any
+variant, and all 17 descriptions empty. After: **162 media, all `READY`, 10 of
+them films, and 317 of 317 variants carry their own colourway photograph.**
+All 17 descriptions are the studio's own Shopee copy, verbatim.
+
+**Where it came from, and why it took a whole session.** The studio asked for
+their Shopee listings to be pulled back. Shopee is not scrapable from here:
+the page is a client-rendered SPA with no `og:` tags and no `ld+json`, the
+`/api/v4/*` endpoints answer **HTTP 403** from outside and **`error:
+90309999`** from inside the page without a signed anti-bot header, and a fresh
+browser is bounced to `/verify/traffic/error`. The route that worked:
+
+1. Chrome on Windows, headed, `--remote-debugging-port` against a **separate**
+   `--user-data-dir` (Chrome 136+ refuses the flag on the default profile),
+   driven over CDP.
+2. The owner logged in **in that window** — password never left their hands —
+   through a WhatsApp link challenge and a slide-puzzle captcha, which is not
+   something to automate and was not.
+3. Everything after that is **DOM only**. Touching the API from the page trips
+   the anti-bot and costs another captcha; it happened once and cost one.
+
+Two things that will save the next person a round trip. **Copying the cookie
+database does not work** — Chrome 127+ App-Bound Encryption means the copy is
+present but undecryptable, so the session reads as logged out. And **the
+verification link must be opened in that same Chrome window**: clicking it on
+the PC opens the default browser (Edge here), the token is single-use, and the
+attempt is burned.
+
+**The masters are on the image CDN and it is wide open.** `down-id.img.
+susercontent.com` needs no session at all — only the file ids, which is what
+the login was for. Strip the `@resize_w48_nl.webp` suffix and the original
+comes back: **185 KB against 916 bytes** on the same file. For video, Shopee
+serves 3–9 renditions of one base id and **`.default` is the SMALLEST** (1.10 MB
+against 2.06 MB on Yora), so every rendition is HEADed and the largest wins.
+
+Everything landed in **`asset/shopee/<product>/`** — 236 photographs, 11 films,
+17 `deskripsi.md`, plus `_source.json`, `_matrix.json`, `_copy.json` and
+`_video.json` per product so none of this needs re-scraping. It is **111 MB and
+gitignored**, like every other master.
+
+**What changed on the store, in order:**
+
+- `casual-culotte-zipper` gained **5 colourways** it was missing — Grey, Black
+  (Lilo), Ivory (Lilo), Grey (Lilo), Blue (Lilo) — taking it from 15 variants to
+  **30**. `Choco new` was also renamed `Choco (New)` to match the listing.
+  The studio confirmed this product is Shopee's "Casual Culotte Linen"; nothing
+  else was matched across that name gap by guesswork.
+- **153 files uploaded** through `stagedUploadsCreate` → multipart POST →
+  `productCreateMedia`, then `productVariantsBulkUpdate` to set each variant's
+  `mediaId`.
+- **17 descriptions** written with `productUpdate`, verbatim, paragraphs only.
+
+**One bug worth knowing about, because it will recur.** The first download
+deduplicated by CDN file id across a whole product, so a colourway photograph
+that *also* appeared in the gallery strip was written under its gallery name
+and never under its colour name — 6 colours silently had no file. Nothing was
+lost (`_source.json` holds every colour's URL) and a repair pass fixed it, but
+**dedupe by id and name by role do not mix.**
+
+**Gallery behaviour is live** — see the commit. The film leads on a product
+page, a colourway chosen with `?variant=` wins over it, and `theme.js` pauses
+and rewinds the film when the reader switches to a still. Verified on the live
+storefront: 25 slots on `yora-loose-pants`, one `<video>`, and with the
+espresso variant selected slot 8 is the only one open.
+
+**Still open out of this session:**
+
+- **The repo has NO git remote.** `git remote -v` is empty, so the working
+  agreement's `git push origin main` cannot run and the gallery commit is
+  local only. Somebody needs to add the remote; guessing the URL was not on.
+- **Three products were scraped and deliberately NOT created**, on instruction:
+  `basic-pants`, `barrel-pants`, `taka-flare-pants`. Their photography, copy
+  and — for `basic-pants` — a film are all sitting in `asset/shopee/`.
+- **Gallery shots were skipped on purpose.** Only the main photograph, the
+  film and one image per colourway were uploaded. The `gallery-*.jpg` files
+  are in the drop folder if that call is ever reversed.
+- **`custom.care` is still undefined.** The fabric and measurement detail is
+  inside each description now, so it reads correctly on the page, but it is
+  prose rather than a metafield.
+- **`asset/` lost its camera masters.** Before this session it held only
+  `_backup/`, 108 KB; CLAUDE.md still describes 81 MB of camera originals and
+  films. The Shopee files do **not** replace them — they are 720x1280
+  re-compressions, no use for the 16:9 hero film. Ask for the masters again.
+- **The backup filename in CLAUDE.md is wrong** — the file is
+  `deleted-products-2026-09-21.json`, not `-2026-09-13.json`.
+
+---
+
 ## 10. What the audit found, and it is mostly not code
 
 Fetched every route on the live storefront with the password, read the rendered
