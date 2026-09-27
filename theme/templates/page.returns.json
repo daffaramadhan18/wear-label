@@ -14,14 +14,14 @@
           "type": "item",
           "settings": {
             "title": "What condition it needs to be in",
-            "body": "<p>Try it on, walk around in it, decide. Then send it back unworn beyond that, unwashed, and with the packaging it came in — the next person to order that size has to be able to receive it as new.</p>"
+            "body": "<p>Try it on, walk around in it, decide. Then send it back unworn beyond that, unwashed, and with the packaging it came in. The next person to order that size has to be able to receive it as new.</p>"
           }
         },
         "how": {
           "type": "item",
           "settings": {
             "title": "How to start one",
-            "body": "<p>Message the studio with your order number and a photo of the piece, and tell us the size you would rather have. We will confirm the replacement is in stock, put it aside for you, and tell you where to send the first one.</p><p>Please message before sending anything back — a parcel that arrives unannounced is a parcel we cannot match to an order.</p>"
+            "body": "<p>Message the studio with your order number and a photo of the piece, and tell us the size you would rather have. We will confirm the replacement is in stock, put it aside for you, and tell you where to send the first one.</p><p>Please message before sending anything back. A parcel that arrives unannounced is a parcel we cannot match to an order.</p>"
           }
         },
         "damaged": {
@@ -35,7 +35,7 @@
           "type": "item",
           "settings": {
             "title": "Refunds and return postage",
-            "body": "<p>Anything beyond the free size exchange — a refund, who covers the return postage, a piece that has been worn properly — is settled with the studio directly rather than against a rule written on this page. Message us and we will work it out with you.</p>"
+            "body": "<p>Anything beyond the free size exchange (a refund, who covers the return postage, a piece that has been worn properly) is settled with the studio directly rather than against a rule written on this page. Message us and we will work it out with you.</p>"
           }
         }
       },
@@ -49,7 +49,7 @@
       "settings": {
         "eyebrow": "Customer Care",
         "heading": "Returns & Exchanges",
-        "body": "What to do when a piece is not right — and the short version is: tell us, and we will sort it out.",
+        "body": "What to do when a piece is not right, and the short version is: tell us, and we will sort it out.",
         "footnote": "<p>Every exchange starts with a message. <a href=\"/pages/contact\">Contact the studio</a> with your order number and we will take it from there.</p>"
       }
     }

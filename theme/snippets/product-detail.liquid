@@ -102,12 +102,14 @@
       {%- endif -%}
     </div>
 
-    <div class="flex flex-col gap-3">
-      <h3 class="text-caption uppercase tracking-nav text-ink-muted">{{ 'product.fit_information' | t }}</h3>
-      <div class="wl-measure text-body leading-body text-ink-body">
-        {% render 'copy', value: product.metafields.custom.fit.value, label: 'fit information', lines: 2 %}
-      </div>
-    </div>
+    {%- comment -%}
+      Fit information is gone, removed on instruction along with the material
+      line. `custom.fit` was never defined on this store, so this block drew a
+      heading over two grey placeholder bars on every product page, and the
+      measurements a shopper actually needs are in the size chart directly
+      above it and in the description. The metafield is still read by nothing
+      now; if it is ever defined, this block is what to put back.
+    {%- endcomment -%}
   </section>
 
   <section class="flex flex-col gap-4 py-8" aria-labelledby="detail-care">

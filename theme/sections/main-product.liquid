@@ -35,10 +35,13 @@
 
     <div class="flex flex-col gap-5.5">
       <div class="flex flex-col gap-2.5">
-        <span class="text-micro uppercase tracking-label text-ink-subtle">
-          {% render 'copy', value: product.metafields.custom.material.value, label: 'material', inline: true %}
-        </span>
-
+        {%- comment -%}
+          The material line that used to sit above the title is gone, removed on
+          instruction. It had become a duplicate: every description now opens
+          with the studio's own fabric paragraph, which says more than one word
+          in a micro label ever did. `custom.material` is still populated and
+          the catalogue card still reads it.
+        {%- endcomment -%}
         <h1 class="text-h1 leading-h1">{{ product.title }}</h1>
 
         {%- comment -%}
@@ -87,10 +90,10 @@
 {
   "name": "Product",
   "settings": [
-    { "type": "paragraph", "content": "Details comes from the product description and Fabric & care from a custom.care metafield — both per product. The size chart is shared across the store and lives in Theme settings → Size guide. The two lines below are store-wide policy, so they live here." },
-    { "type": "text", "id": "note_1", "label": "Note 1", "info": "Blank by instruction 2026-09-13 — the two policy lines under the buy box were removed. The Shipping section below still carries the policy." },
+    { "type": "paragraph", "content": "Details comes from the product description and Fabric & care from a custom.care metafield. Both per product. The size chart is shared across the store and lives in Theme settings → Size guide. The two lines below are store-wide policy, so they live here." },
+    { "type": "text", "id": "note_1", "label": "Note 1", "info": "Blank by instruction 2026-09-13. The two policy lines under the buy box were removed. The Shipping section below still carries the policy." },
     { "type": "text", "id": "note_2", "label": "Note 2" },
-    { "type": "textarea", "id": "shipping", "label": "Shipping copy", "default": "Ships from Kota Bekasi within 1–2 working days. One free size exchange within 7 days." }
+    { "type": "textarea", "id": "shipping", "label": "Shipping copy", "default": "Ships from Kota Bekasi within 1-2 working days. One free size exchange within 7 days." }
   ]
 }
 {% endschema %}

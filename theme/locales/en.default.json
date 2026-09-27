@@ -54,7 +54,6 @@
     "units": "Units",
     "cm": "cm",
     "inch": "inch",
-    "fit_information": "Fit information",
     "buy_now": "Buy now",
     "buy_on_shopee": "Buy on Shopee"
   },
@@ -117,6 +116,6 @@
     "name": "Name",
     "message": "Message",
     "send": "Send message",
-    "sent": "Thank you — your message has been sent. The studio will come back to you."
+    "sent": "Thank you, your message has been sent. The studio will come back to you."
   }
 }

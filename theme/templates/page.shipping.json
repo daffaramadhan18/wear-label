@@ -7,14 +7,14 @@
           "type": "item",
           "settings": {
             "title": "Where it ships from",
-            "body": "<p>Every order is packed and sent from our own studio in Kota Bekasi, Indonesia. There is no third-party warehouse in between — the person who packs your parcel is the person who answers your messages.</p>"
+            "body": "<p>Every order is packed and sent from our own studio in Kota Bekasi, Indonesia. There is no third-party warehouse in between. The person who packs your parcel is the person who answers your messages.</p>"
           }
         },
         "when": {
           "type": "item",
           "settings": {
             "title": "When it goes out",
-            "body": "<p>Orders are dispatched within 1–2 working days of your payment clearing. Working days are Monday to Friday and do not include public holidays, so an order placed over a weekend goes out at the start of the following week.</p>"
+            "body": "<p>Orders are dispatched within 1-2 working days of your payment clearing. Working days are Monday to Friday and do not include public holidays, so an order placed over a weekend goes out at the start of the following week.</p>"
           }
         },
         "cost": {
@@ -28,7 +28,7 @@
           "type": "item",
           "settings": {
             "title": "Following your parcel",
-            "body": "<p>You will get a confirmation the moment your order is placed, and a second one with the tracking details when it leaves the studio. If you need to know where your parcel is before that second message arrives, ask us — we can usually tell you the same day.</p>"
+            "body": "<p>You will get a confirmation the moment your order is placed, and a second one with the tracking details when it leaves the studio. If you need to know where your parcel is before that second message arrives, ask us. We can usually tell you the same day.</p>"
           }
         },
         "international": {
@@ -50,7 +50,7 @@
         "eyebrow": "Customer Care",
         "heading": "Shipping & Delivery",
         "body": "How your order gets from our studio to your door, and what to expect along the way.",
-        "footnote": "<p>Anything here you are not sure about, or a parcel that has not moved when you think it should have — <a href=\"/pages/contact\">message the studio</a>. We answer our own messages.</p>"
+        "footnote": "<p>Anything here you are not sure about, or a parcel that has not moved when you think it should have, <a href=\"/pages/contact\">message the studio</a>. We answer our own messages.</p>"
       }
     }
   },

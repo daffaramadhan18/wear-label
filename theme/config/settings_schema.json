@@ -12,7 +12,7 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "Palette, spacing, radius and motion are NOT theme settings. They live in the design system and resolve through assets/theme.css — exposing them here would let one edit break the whole system. Only copy and the type pairing are editable."
+        "content": "Palette, spacing, radius and motion are NOT theme settings. They live in the design system and resolve through assets/theme.css. Exposing them here would let one edit break the whole system. Only copy and the type pairing are editable."
       },
       {
         "type": "text",
@@ -55,7 +55,7 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "The espresso strip above the header. Nothing in it is interactive — a bar that carries a link competes with the nav directly underneath it. Leave blank and the whole band is not rendered."
+        "content": "The espresso strip above the header. Nothing in it is interactive. A bar that carries a link competes with the nav directly underneath it. Leave blank and the whole band is not rendered."
       },
       {
         "type": "text",
@@ -77,7 +77,7 @@
         "id": "whatsapp_number",
         "label": "WhatsApp number",
         "default": "+62 878-1654-0159",
-        "info": "In international format. The + and any spaces or dashes are stripped before the link is built, so either form works. This is where every quote enquiry goes — there is no inbox behind the form. Supplied by the studio 2026-09-13 and set as the schema default rather than written into config/settings_data.json, which this theme deliberately does not have: a default is a starting value the studio can still change in the theme editor, whereas a committed settings file would silently overwrite their edit on the next push."
+        "info": "In international format. The + and any spaces or dashes are stripped before the link is built, so either form works. This is where every quote enquiry goes. There is no inbox behind the form. Supplied by the studio 2026-09-13 and set as the schema default rather than written into config/settings_data.json, which this theme deliberately does not have: a default is a starting value the studio can still change in the theme editor, whereas a committed settings file would silently overwrite their edit on the next push."
       },
       {
         "type": "url",
@@ -92,11 +92,11 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "Instagram, Shopee and TikTok. These are THEME settings rather than footer settings because the same three links render in three places — the footer, the home page and the About page — and one section's settings cannot be read from another. A link left blank is not rendered anywhere at all, rather than drawn as a dead control. Paste the full address including https://."
+        "content": "Instagram, Shopee and TikTok. These are THEME settings rather than footer settings because the same three links render in three places (the footer, the home page and the About page) and one section's settings cannot be read from another. A link left blank is not rendered anywhere at all, rather than drawn as a dead control. Paste the full address including https://."
       },
       {
         "type": "paragraph",
-        "content": "THESE ARE type:text, NOT type:url, AND THAT IS NOT AN OVERSIGHT. Shopify's url setting rejected the TikTok address as an invalid default — the @ in /@wear.label does not pass its validator — and the push reported it as an error on this whole file while completing anyway, which is the failure mode CLAUDE.md warns about. The three URLs ship as schema defaults because this theme has no settings_data.json, so a default that cannot be saved is the same as no link at all. text takes any address. Do not 'fix' these back to url."
+        "content": "THESE ARE type:text, NOT type:url, AND THAT IS NOT AN OVERSIGHT. Shopify's url setting rejected the TikTok address as an invalid default, the @ in /@wear.label does not pass its validator, and the push reported it as an error on this whole file while completing anyway, which is the failure mode CLAUDE.md warns about. The three URLs ship as schema defaults because this theme has no settings_data.json, so a default that cannot be saved is the same as no link at all. text takes any address. Do not 'fix' these back to url."
       },
       {
         "type": "text",
@@ -109,7 +109,7 @@
         "id": "social_shopee_url",
         "label": "Shopee",
         "default": "https://shopee.co.id/wear.label",
-        "info": "Shopee is the studio's own till, which is why it is here at all — Shopify's built-in social settings have no field for it."
+        "info": "Shopee is the studio's own till, which is why it is here at all. Shopify's built-in social settings have no field for it."
       },
       {
         "type": "text",
@@ -131,14 +131,14 @@
     "settings": [
       {
         "type": "paragraph",
-        "content": "What the Fabric & care section on a product page says. It is keyed by the product's custom.material value, so seventeen products share eight fabrics and eight paragraphs cover the catalogue — the same argument the size chart below is store-wide for. A product with its own custom.care metafield still wins over this."
+        "content": "What the Fabric & care section on a product page says. It is keyed by the product's custom.material value, so seventeen products share eight fabrics and eight paragraphs cover the catalogue. The same argument the size chart below is store-wide for. A product with its own custom.care metafield still wins over this."
       },
       {
         "type": "textarea",
         "id": "fabric_care",
         "label": "Fabric glossary",
         "info": "One fabric per line: material | what it is | how to care for it. The material must match the product's custom.material value exactly, apart from capitals. A material with no line here renders the labelled placeholder rather than another fabric's copy.",
-        "default": "linen | Woven from linen, so it breathes in the heat and softens every time you wash it. It creases — that is the fibre doing what linen does, and most of it drops out as you wear the piece. | Hand wash, or machine wash cold on a gentle cycle. Dry in the shade and press on a medium iron while the fabric is still slightly damp.\nsemiwool | A matte suiting fabric with a clean, heavy drape. It holds the line of a trouser without ever feeling stiff. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\nlight weight semiwool | The same matte suiting handle as our semiwool, woven lighter. It moves more and sits cooler, which is what makes it the one to reach for in the heat. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\nsemiwool stripe | Semiwool with the stripe woven into the cloth rather than printed onto it, so the line runs right through and will not lift or fade in the wash. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\ncrepe stretch | A fine-textured crepe with a little give in every direction. It skims rather than clings, and comes back to shape after a full day of sitting and moving. | Hand wash cold, or machine wash on a gentle cycle. Do not wring. Dry in the shade and press on a low iron if it needs it.\nwoven twill | A firm diagonal weave with real body to it. It gives a wide leg the weight to fall straight instead of billowing, and it wears in rather than out. | Machine wash cold on a gentle cycle. Dry in the shade and press on a medium iron.\nknit | Knitted rather than woven, so it stretches with you and layers without bulk. It relaxes as you wear it and comes back in the wash. | Hand wash cold and never wring. Dry flat in the shade — hanging a wet knit pulls it out of shape — and steam rather than iron.\ntorino premium | A premium suiting cloth with a smooth face and a quiet sheen. It falls heavily and keeps a clean line from the waist to the hem. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric."
+        "default": "linen | Woven from linen, so it breathes in the heat and softens every time you wash it. It creases. That is the fibre doing what linen does, and most of it drops out as you wear the piece. | Hand wash, or machine wash cold on a gentle cycle. Dry in the shade and press on a medium iron while the fabric is still slightly damp.\nsemiwool | A matte suiting fabric with a clean, heavy drape. It holds the line of a trouser without ever feeling stiff. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\nlight weight semiwool | The same matte suiting handle as our semiwool, woven lighter. It moves more and sits cooler, which is what makes it the one to reach for in the heat. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\nsemiwool stripe | Semiwool with the stripe woven into the cloth rather than printed onto it, so the line runs right through and will not lift or fade in the wash. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\ncrepe stretch | A fine-textured crepe with a little give in every direction. It skims rather than clings, and comes back to shape after a full day of sitting and moving. | Hand wash cold, or machine wash on a gentle cycle. Do not wring. Dry in the shade and press on a low iron if it needs it.\nwoven twill | A firm diagonal weave with real body to it. It gives a wide leg the weight to fall straight instead of billowing, and it wears in rather than out. | Machine wash cold on a gentle cycle. Dry in the shade and press on a medium iron.\nknit | Knitted rather than woven, so it stretches with you and layers without bulk. It relaxes as you wear it and comes back in the wash. | Hand wash cold and never wring. Dry flat in the shade (hanging a wet knit pulls it out of shape) and steam rather than iron.\ntorino premium | A premium suiting cloth with a smooth face and a quiet sheen. It falls heavily and keeps a clean line from the waist to the hem. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric."
       }
     ]
   },
@@ -154,13 +154,13 @@
         "id": "size_guide_columns",
         "label": "Column headings",
         "default": "Size, Length, Waist, Hip, Thigh",
-        "info": "Comma separated. The FIRST one names the size column. These are trouser measurements because almost everything in the catalogue is trousers — change them if that changes."
+        "info": "Comma separated. The FIRST one names the size column. These are trouser measurements because almost everything in the catalogue is trousers. Change them if that changes."
       },
       {
         "type": "textarea",
         "id": "size_guide_rows",
         "label": "Rows",
-        "info": "One size per line, values separated by | and in the same order as the headings above. For example: XS | 64 | 90 | 28 | 72 | 26. Type CENTIMETRES only — the inch column is calculated. Leave this blank and the chart renders a labelled placeholder at its final size rather than a wrong table.",
+        "info": "One size per line, values separated by | and in the same order as the headings above. For example: XS | 64 | 90 | 28 | 72 | 26. Type CENTIMETRES only. The inch column is calculated. Leave this blank and the chart renders a labelled placeholder at its final size rather than a wrong table.",
         "default": "M | 98 | 62-90 | 115 | 60\nL | 100 | 66-92 | 125 | 66\nXL | 101 | 72-98 | 130 | 72"
       },
       {
@@ -175,11 +175,11 @@
       },
       {
         "type": "paragraph",
-        "content": "A SECOND chart, for the cardigans and the vest. It is a separate set of fields rather than more rows on the chart above because a top and a trouser are not measured against the same columns — a shopper buying a cardigan measures a chest, not a thigh, and putting both in one table would leave half of every row empty."
+        "content": "A SECOND chart, for the cardigans and the vest. It is a separate set of fields rather than more rows on the chart above because a top and a trouser are not measured against the same columns. A shopper buying a cardigan measures a chest, not a thigh, and putting both in one table would leave half of every row empty."
       },
       {
         "type": "paragraph",
-        "content": "THE ROWS ARE PIECES, NOT SIZES, and that is the one thing to understand before editing this. Every top in this catalogue is ONE SIZE — none of the four carries a Size option in Shopify, only Colour — so there are no size rows to build. What varies is the garment: the studio's own figures put Darla Vest at a 110 chest and Nori at 94-100. The studio suggested averaging the three into a single row; that was not done, because the average is 6-7cm off at the chest for two of the three, which on a top is a whole size, and fit is the decision this catalogue is bought on. A row per piece states three true things instead of one false one."
+        "content": "THE ROWS ARE PIECES, NOT SIZES, and that is the one thing to understand before editing this. Every top in this catalogue is ONE SIZE, none of the four carries a Size option in Shopify, only Colour, so there are no size rows to build. What varies is the garment: the studio's own figures put Darla Vest at a 110 chest and Nori at 94-100. The studio suggested averaging the three into a single row; that was not done, because the average is 6-7cm off at the chest for two of the three, which on a top is a whole size, and fit is the decision this catalogue is bought on. A row per piece states three true things instead of one false one."
       },
       {
         "type": "text",
@@ -192,15 +192,15 @@
         "type": "textarea",
         "id": "size_guide_tops_rows",
         "label": "Rows (tops)",
-        "info": "ONE GARMENT PER LINE, values separated by | in the same order as the headings above. Type CENTIMETRES only — the inch column is calculated, and a range like 94-100 converts correctly. A dash means the measurement does not apply (a vest has no sleeve) or has not been supplied; both are honest and neither is guessed at. MIU CARDIGAN HAS NO FIGURES — the studio sent three of the four tops. Ask for Miu and fill its row in.",
-        "default": "Darla Vest | 62 | 110 | —\nRui Cardigan | 59 | 104 | 53\nNori Cardigan | 57 | 94-100 | 54\nMiu Cardigan | — | — | —"
+        "info": "ONE GARMENT PER LINE, values separated by | in the same order as the headings above. Type CENTIMETRES only, the inch column is calculated, and a range like 94-100 converts correctly. A dash means the measurement does not apply (a vest has no sleeve) or has not been supplied; both are honest and neither is guessed at. MIU CARDIGAN HAS NO FIGURES, the studio sent three of the four tops. Ask for Miu and fill its row in.",
+        "default": "Darla Vest | 62 | 110 | -\nRui Cardigan | 59 | 104 | 53\nNori Cardigan | 57 | 94-100 | 54\nMiu Cardigan | - | - | -"
       },
       {
         "type": "text",
         "id": "size_guide_tops_note",
         "label": "Note under the chart (tops)",
         "default": "Every piece above is one size. Nori Cardigan is cut to fit up to a size L.",
-        "info": "The tops chart has its own note because what needs saying about it is specific to it — that these are one-size pieces, and that Nori fits to L. Both came from the studio's own figures."
+        "info": "The tops chart has its own note because what needs saying about it is specific to it. That these are one-size pieces, and that Nori fits to L. Both came from the studio's own figures."
       }
     ]
   }

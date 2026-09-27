@@ -19,7 +19,7 @@
             "title": "Uniforms",
             "body": "For companies, schools, and organizations.",
             "asset": "project-hospital.webp",
-            "alt": "Eight hospital uniform sets laid out flat in two rows — tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
+            "alt": "Eight hospital uniform sets laid out flat in two rows: tunics and trousers in navy, teal, white and pale blue, each embroidered at the chest."
           }
         },
         "corporate": {
@@ -150,7 +150,7 @@
       "settings": {
         "heading": "Request a quote",
         "body": "Tell us what your organisation needs and we will come back with a price against the specification and the quantity.",
-        "note": "Have a design or a reference? Send it in the chat once WhatsApp opens — the form itself cannot carry a file.",
+        "note": "Have a design or a reference? Send it in the chat once WhatsApp opens. The form itself cannot carry a file.",
         "cta": "Request a quote"
       }
     }
