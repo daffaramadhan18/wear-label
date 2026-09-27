@@ -1,0 +1,60 @@
+{
+  "sections": {
+    "main": {
+      "type": "policy-page",
+      "blocks": {
+        "exchange": {
+          "type": "item",
+          "settings": {
+            "title": "One free size exchange",
+            "body": "<p>If the size is not right, we will exchange it once for another size, free, within 7 days of your parcel arriving. Fit is the thing most worth getting right and the thing hardest to judge from a photograph, so this is the part of the policy we would rather you used than not.</p>"
+          }
+        },
+        "condition": {
+          "type": "item",
+          "settings": {
+            "title": "What condition it needs to be in",
+            "body": "<p>Try it on, walk around in it, decide. Then send it back unworn beyond that, unwashed, and with the packaging it came in — the next person to order that size has to be able to receive it as new.</p>"
+          }
+        },
+        "how": {
+          "type": "item",
+          "settings": {
+            "title": "How to start one",
+            "body": "<p>Message the studio with your order number and a photo of the piece, and tell us the size you would rather have. We will confirm the replacement is in stock, put it aside for you, and tell you where to send the first one.</p><p>Please message before sending anything back — a parcel that arrives unannounced is a parcel we cannot match to an order.</p>"
+          }
+        },
+        "damaged": {
+          "type": "item",
+          "settings": {
+            "title": "If it arrives damaged or it is the wrong piece",
+            "body": "<p>Photograph the parcel before you unpack any further and send us the photos the same day. This one is our mistake rather than a change of mind, and we deal with it as such.</p>"
+          }
+        },
+        "refunds": {
+          "type": "item",
+          "settings": {
+            "title": "Refunds and return postage",
+            "body": "<p>Anything beyond the free size exchange — a refund, who covers the return postage, a piece that has been worn properly — is settled with the studio directly rather than against a rule written on this page. Message us and we will work it out with you.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "exchange",
+        "condition",
+        "how",
+        "damaged",
+        "refunds"
+      ],
+      "settings": {
+        "eyebrow": "Customer Care",
+        "heading": "Returns & Exchanges",
+        "body": "What to do when a piece is not right — and the short version is: tell us, and we will sort it out.",
+        "footnote": "<p>Every exchange starts with a message. <a href=\"/pages/contact\">Contact the studio</a> with your order number and we will take it from there.</p>"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

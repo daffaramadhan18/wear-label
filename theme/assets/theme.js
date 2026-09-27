@@ -683,7 +683,17 @@
    * a note has none, so it survives the switch unchanged.
    * ---------------------------------------------------------------------- */
   function initUnitSwitch(root) {
-    var table = document.querySelector("[data-size-table]");
+    /* SCOPED TO ITS OWN CHART, not to the document. This used to be a bare
+       `document.querySelector("[data-size-table]")`, which returns the FIRST
+       table on the page — fine while the only chart anywhere was the product
+       page's, and silently wrong the moment /pages/size-guide put a trouser
+       chart and a tops chart on one page: both switches would have driven the
+       trouser table and the tops table would never have converted. The wrapper
+       carrying `data-size-guide` is the scope; `closest` is used rather than a
+       parent walk because `data-unit-switch` stays on the fieldset (see
+       size-guide.liquid for why it cannot move up). */
+    var scope = root.closest("[data-size-guide]") || document;
+    var table = scope.querySelector("[data-size-table]");
     if (!table) return;
 
     var cells = Array.prototype.slice.call(table.querySelectorAll("[data-cm]"));
@@ -706,7 +716,12 @@
 
     root.addEventListener("change", function (event) {
       var input = event.target;
-      if (!input || input.name !== "size-unit") return;
+      /* Matched on `data-unit-option`, not on the control's name. The name is
+         per-chart now — `size-unit-<uid>` — because two radio groups sharing a
+         name outside a form are ONE group, so the tops switch would otherwise
+         deselect the trouser switch. Testing the name here would mean this
+         function had to know the uid scheme; the attribute does not. */
+      if (!input || !input.hasAttribute("data-unit-option")) return;
       render(input.value);
     });
   }

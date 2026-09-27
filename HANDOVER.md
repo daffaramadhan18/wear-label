@@ -116,19 +116,16 @@ Broken white+furing, and so on), so none were guessed — every swatch currently
 falls back to the theme's flat `bg-tone` rectangle. Ask for hex codes or reference
 photos per colour if accurate swatches matter before launch.
 
-### 2.4 Footer links that don't have a page to point at yet
+### 2.4 ~~Footer links that don't have a page to point at yet~~ — CLOSED 2026-09-27
 
-The client's footer copy (`Company` / `Shop` / `Customer Care`) is live, but four
-entries render as label-only plain text because nothing exists to link to:
+**Every footer entry now points somewhere, and every destination returns 200.**
+All four have been built across two sessions — About on 2026-09-22 (§9b), and
+Size Guide, Shipping & Delivery and Returns & Exchanges on 2026-09-27 (§9c).
+Verified on the rendered live footer, not on intent.
 
-- **About Wear Label** — `/pages/about` still 404s. Unlike `/pages/custom`
-  earlier this project, nobody has given this page any copy yet.
-- **Size Guide**, **Shipping & Delivery**, **Returns & Exchanges** — none of
-  these are pages on the store.
-
-**Tops** was pointed at `/collections/cardigan` as a best-effort guess (no "Tops"
-type exists in the new catalogue) — confirm this is the right destination or
-correct it.
+**Tops** was pointed at `/collections/cardigan` as a best-effort guess at the
+time this was written; it is `/collections/tops` now and has been since the
+2-collection simplification in §2.1. Nothing outstanding here.
 
 ### 2.5 The "What We Do" section merges two things the client sent separately
 
@@ -144,13 +141,24 @@ bawah video" (directly under the video) at the same time they approved reusing
 transcription — show the client the live result and confirm it reads the way they
 meant.**
 
-### 2.6 Six products still have no photograph
+### 2.6 EIGHT products still have no photograph — not six
 
-Miu, Nori, Rui, Darla, Pipo and Soso — six of the seventeen new products have no
-photo (the docx's 129 embedded images are all colour swatches, not garment
-photography; checked their pixel dimensions to confirm). They draw the theme's
-labelled placeholder at final size. The other 11 reuse existing catalogue photos
-where the new product's name matches an old one (see §3).
+**This said six and it was wrong.** Counted against the live storefront's own
+`/products.json` on 2026-09-27: **eight of the seventeen products have zero
+images.** Miu, Nori, Rui, Darla, Pipo and Soso were the six already listed;
+**Tara Stripe Pants and Cerra Loose Pants BIG SIZE** were missed, and §3's own
+table shows both with a dash in the "photo reused from" column, so the table was
+right and this paragraph was not.
+
+The other nine reuse existing catalogue photos where the new product's name
+matched an old one (see §3). The eight draw the theme's labelled placeholder at
+final size. Nine real photographs is the entire product image library on this
+store; the whole site has nineteen images including the hero film's stills, the
+four B2B cut-outs and two wordmarks.
+
+(The docx's 129 embedded images are all colour swatches, not garment
+photography — checked by pixel dimension. There is no shoot waiting to be
+processed; there are eight shoots waiting to happen.)
 
 ### 2.7 The store's own name is still Shopify's default
 
@@ -226,7 +234,7 @@ some time after that — nobody knows what happened there (see §1). It lives un
 
 ---
 
-## 5. Five traps that cost real time here (four carried over, one new)
+## 5. Six traps that cost real time here
 
 Each of these rendered fine, passed every check, and was wrong.
 
@@ -252,6 +260,17 @@ Each of these rendered fine, passed every check, and was wrong.
    fails with a confusing "path doesn't exist". Fix: `subst Z: '\\wsl.localhost\...'`
    once, then run every `npx shopify` / `npm run theme:*` command from `Z:\`.
    Plain file edits (Read/Edit/Write) don't need this — only the CLI does.
+
+6. **Liquid's `| default:` filter replaces BLANK, not just missing.** Added
+   2026-09-27 after it nearly shipped a wrong size chart. A snippet argument
+   that is legitimately allowed to be empty must never be defaulted this way:
+   the tops size chart has no rows on purpose, `rows | default: settings...`
+   read that emptiness as "not supplied", and the page rendered TROUSER
+   measurements under the headings Length / Chest / Shoulder / Sleeve. The page
+   rendered, theme check passed on 90 files, the push reported no errors, and
+   the numbers looked plausible. Only reading the rendered page found it. Where
+   empty is a meaningful state, branch on it explicitly or have the callee pick
+   its own source — see `snippets/size-guide.liquid`.
 
 **Also new this session:** ~400 Windows `Zone.Identifier` NTFS stub files had
 leaked into the working tree, including inside `theme/assets/` — Shopify's push
@@ -441,7 +460,204 @@ alongside the code rather than left for the next session to notice were wrong.
 
 ---
 
-## 10. If you are picking this up cold
+## 9c. Session 2026-09-27 — a readiness audit, then five client changes
+
+The session opened as an audit — "ada page yg blm jadi ga?" — and the findings
+are in §10 below, because several of them are store configuration nobody has
+looked at and two of them stop the shop working entirely. Then five instructions
+landed on top of it. All five are pushed to live and verified against the
+rendered storefront.
+
+**1. The footer gradient was already there and could not be seen.** The client
+asked for it a second time, which was the tell. `from-brand-light to-brand` ran
+Rocky `#9c8166` to Camel `#725e4c` — twelve points of lightness between two
+browns, which renders as a flat panel. It is `from-brand-light via-brand
+to-brand-dark` now, with a new `--color-brand-dark` (taupe-700) in
+`app/tokens.css`. **It was widened DOWNWARD on purpose**: cream on the Rocky end
+is already at 3.36:1, the lowest ratio the token file accepts anywhere, so a
+lighter stop would have taken the footer's own text below it. Every stop added
+is darker, so every ratio improved.
+
+**2. Instagram, Shopee and TikTok are live, with their real logos, in three
+places.** The URLs the client supplied are schema defaults in
+`config/settings_schema.json` under **Social** — theme settings, not footer
+settings, because three renderers reading one source is the point.
+`snippets/social-links.liquid` renders either a compact row (footer) or a 3-up
+card panel (`sections/social-band.liquid`, on home and About).
+
+- **The marks are the owners' official monochrome glyphs, verbatim from
+  simple-icons v13**, added to `snippets/icon.liquid` with `fill="currentColor"`
+  so they take the palette colour from their parent. The client asked for
+  "png transparant... warna sesuai color palette" and got inline SVG instead,
+  which is transparent by construction, takes any palette colour with no second
+  file, and stays sharp at any size. Say so if they ask why there is no PNG.
+- **`social_*_url` are `type: text`, NOT `type: url`, and that is load-bearing.**
+  Shopify's `url` setting rejected `https://www.tiktok.com/@wear.label` as an
+  invalid default — the `@` does not pass its validator — and the push reported
+  it as an error on the whole settings file **while completing anyway**. That is
+  exactly the failure CLAUDE.md warns about under "theme push reports errors
+  theme check cannot see". Do not change these back to `url`.
+- **`instagram-strip` came off the home page** to make room, and that swap is
+  the argument for the section existing. The strip was headed "Follow us on
+  Instagram", was in fact a marquee of the catalogue's own product photos with
+  no link on any of them, and was drawing eight grey placeholders out of eleven
+  tiles because eight products have no photograph. It promised a destination and
+  went nowhere. It is unplaced, not deleted — one edit to `templates/index.json`
+  plus a key in the `home-tabs` block puts it back.
+
+**3. Fabric & care is written, on all seventeen products.** It was a grey
+placeholder on every one of them. It is now keyed by the product's own
+`custom.material` through a **fabric glossary** in theme settings — eight
+paragraphs covering the whole catalogue, because seventeen products share eight
+fabrics. `snippets/fabric-care.liquid` owns the lookup and the precedence, which
+is the same shape as the size chart's: a product's own `custom.care` metafield
+beats the glossary, the glossary beats a labelled placeholder. A new product
+inherits its fabric's copy for free; a material spelled a new way matches
+nothing and draws the placeholder, which is correct rather than a bug.
+
+⚠ **THE CARE SENTENCES ARE NOT FROM A CARE LABEL.** The descriptions are drawn
+from the material names the studio themselves supplied; the care lines are
+conservative for the fibre — cold, shade, low iron, dry flat for knits — and
+nobody has sent a real care label for any of these. Wrong care copy ruins a
+garment. **Ask the studio to read the eight lines before launch.**
+
+**4. The About page has the statement band.** `sections/statement-band.liquid`
+runs "WORLDWIDE SHIPPING • FROM INDONESIA TO YOU" as a ticker across a Camel
+band, using the `.wl-marquee` CSS the Instagram strip already had, so it cost no
+new CSS and no JavaScript. The phrase is rendered once screen-reader-only and
+six times `aria-hidden`; six because two halves of one phrase is ~1800px and a
+desktop viewport is wider than that, which would park a gap in the band.
+
+⚠ **THE BAND MAKES A CLAIM THE STORE DOES NOT BACK — see §10.1.**
+
+**5. Size Guide, Shipping & Delivery and Returns & Exchanges exist.** Three new
+Shopify pages, three templates, two new sections:
+
+| Handle | Template suffix | Page ID |
+|---|---|---|
+| `size-guide` | `size-guide` | `gid://shopify/Page/743912341790` |
+| `shipping-delivery` | `shipping` | `gid://shopify/Page/743912374558` |
+| `returns-exchanges` | `returns` | `gid://shopify/Page/743912407326` |
+
+`sections/policy-page.liquid` serves the two policy pages — one section, two
+templates, because they are the same shape and would drift apart as two.
+`sections/size-guide-page.liquid` renders `size-guide.liquid` twice.
+
+**The policy copy was generated on instruction and is built only out of facts
+already on record** — dispatch in 1–2 working days from Kota Bekasi, the free
+7-day size exchange, rates calculated at checkout, free over Rp 750.000.
+Everything NOT on record — couriers, transit times, refund terms, who pays
+return postage — is written as "message the studio" rather than as a term,
+because a term nobody has set is an invented commitment. **Two things still want
+the studio's sign-off**: the returns "what condition it needs to be in" block is
+a real policy term written by us, and the refunds block defers a decision that
+should eventually be a decision.
+
+### The bug this session nearly shipped, and how it was caught
+
+`size-guide.liquid` was first given `columns` and `rows` arguments that fell back
+to the theme settings with `| default:`. **Liquid's `default` filter replaces a
+BLANK value, not just a missing one.** The tops rows are deliberately empty — the
+studio has never supplied top measurements — so the tops chart fell back to the
+TROUSER rows and rendered `98 / 62-90 / 115 / 60` underneath the headings
+`Length / Chest / Shoulder / Sleeve`. A waist presented as a chest, on a live
+page, which is precisely the class of content this repo refuses.
+
+**Nothing caught it but looking at the rendered page.** The page rendered, theme
+check passed on 90 files with no offences, the push reported no errors, and the
+numbers looked entirely plausible. The snippet now takes `chart: 'tops'` and
+reads its own settings, so there is no argument that can be blank and no
+fallback to be wrong about. **Add this to the traps in §5** — it generalises:
+`| default:` on anything that is legitimately allowed to be empty is a silent
+wrong answer waiting to happen.
+
+Two other things changed in that snippet and in `assets/theme.js` to let two
+charts share a page: a `uid` for the radio group name (two radio groups sharing
+a name outside a form are ONE group) and a `data-size-guide` scope for
+`initUnitSwitch`, which used to find its table with a document-wide
+`querySelector` and would have driven the trouser table from both switches.
+
+---
+
+## 10. What the audit found, and it is mostly not code
+
+Fetched every route on the live storefront with the password, read the rendered
+HTML, and checked the store's own JSON. `theme check`: 90 files, no offences. No
+Liquid errors on any page. All 19 image assets return 200. Every route returns
+200. **Everything below is content or Shopify configuration.**
+
+### 10.1 The shop cannot take an order — two settings, both in the admin
+
+Verified by adding Lilo Pants to a cart and loading the real checkout:
+
+1. **No payment method is configured.** The checkout renders
+   `PaymentMethods:[]`. A shopper reaches the checkout page and has no way to
+   pay. Shopify Payments is unavailable in Indonesia (see CLAUDE.md, Platform
+   constraints), so this needs a third-party gateway chosen and connected.
+2. **The store does not ship to Indonesia.** `/meta.json`'s
+   `ships_to_countries` lists 28 countries — AE, AT, AU, CA, CH, CZ, DE, DK, ES,
+   FI, FR, GB, HK, IE, IL, IT, JP, KR, MY, NL, NO, NZ, PL, PT, SE, SG, US — and
+   **`ID` is not among them.** The checkout offers Singapore as the only
+   shipping country. The store's own address is Kota Bekasi and its currency is
+   IDR. This is a shipping-zone setting nobody has touched since the store was
+   created.
+
+**Two pieces of live copy depend on fixing the second one**: the announcement
+bar's "Free shipping on orders over Rp 750.000", and the new About page band's
+"WORLDWIDE SHIPPING • FROM INDONESIA TO YOU". Both are the client's own words
+and both are currently false for a reader in Indonesia.
+
+### 10.2 The 404 page is empty
+
+`templates/404.json` has `"settings": {}`, so a mistyped URL renders the word
+"404" and two grey placeholder bars — no heading, no explanation, no link back
+to the shop. It is the worst-looking page on the site and the one nobody
+reviews. Writing three lines of copy into the theme editor fixes it.
+
+### 10.3 Product data that reads as unfinished
+
+- **No product has a description.** `body_html` is empty on all seventeen, so
+  the Details section renders a placeholder on every product page. Fabric & care
+  and Size & fit are now filled (§9c); **Details and Fit information are not**,
+  and `custom.fit` is still an undefined metafield.
+- **Colour swatches are all flat grey.** No hex is set for any of the ~80 colour
+  names (§2.3), so every swatch falls back to `bg-tone`.
+- **Some colour names read as internal notes.** Yora carries `choco (semiwool)`,
+  `Grey (LW semiwool)`, `caramel (new)`; Soso carries `Black (soso)`,
+  `Ivory (Soso)`; Casual Culotte carries `Choco new`. **Milly Stripe Pants
+  carries a colour called `Black (Tara)`** — another product's name, which looks
+  like a leak from the docx parse described in §3. These are all customer-facing
+  on the product page.
+- **Cerra Loose Pants BIG SIZE offers XXL only** and the size chart has M, L and
+  XL — so the one product whose entire premise is a bigger size has no row for
+  the size being bought. The new tops chart has no rows at all (§9c).
+
+### 10.4 Sharing a link shows nothing
+
+There are **no Open Graph or Twitter tags anywhere in the theme** and no meta
+description on any page, so a link pasted into WhatsApp — this studio's main
+channel — renders as a bare URL with no image and no title. There is no favicon
+either. `settings.brand_description` exists and its own `info` text claims it is
+"used for the meta description and Open Graph"; `layout/theme.liquid` never
+reads it. That is a real gap and it is not in scope of anything done this
+session.
+
+### 10.5 Resolved since this file last described them
+
+- **`shop.name` is "Wear Label"**, not "My Store" — §2.7 is closed. The hero's
+  h1 is still pinned to a literal string and could now inherit it instead.
+- **Every footer link points at a live page** — §2.4 is closed.
+- **Fabric & care is written on all 17 products** — §9c.
+
+### 10.6 Still no git remote
+
+`git remote -v` is still empty. Every commit in this repository exists only on
+this machine, which §1 and §9 have both flagged and nobody has answered. **Get
+the GitHub URL from the client, or confirm there isn't one.**
+
+---
+
+## 11. If you are picking this up cold
 
 1. This file.
 2. [`CLAUDE.md`](./CLAUDE.md) — the manual. It has not been updated with this

@@ -187,6 +187,16 @@
      for brand-on-cream, so it is used as the gradient's lighter stop only, never
      for body text on its own. */
   --color-brand-light: var(--wl-taupe-500);
+  /* Darker brand tone — taupe-700, the palette's Camel walked one step down its
+     own shades ramp. Added 2026-09-27 as the footer gradient's dark stop, after
+     the client asked for the gradient a second time: from-brand-light to-brand
+     ran #9c8166 to #725e4c, a 12-point lightness spread between two browns that
+     reads as a flat panel on anything but a calibrated screen. Running the ramp
+     out to taupe-700 widens it enough to be seen. It is only ever used DARKER
+     than --color-brand, so every contrast ratio the footer already accepted for
+     cream text gets better, never worse — which is why this direction was
+     chosen over brightening the light end, where cream is already at 3.36:1. */
+  --color-brand-dark: var(--wl-taupe-700);
 
   /* Lines — inner divider, card border, section rule, control boundary */
   --color-hairline: var(--wl-rule-inner);

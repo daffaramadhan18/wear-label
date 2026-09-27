@@ -25,6 +25,40 @@
   one number is wrong. A theme setting is one field, in the theme editor, where
   every other piece of copy on this site already lives.
 
+  IT TAKES A `chart` ARGUMENT NOW, added 2026-09-27 for the Size Guide page,
+  which shows TWO charts on one page — trousers and tops. The product page's
+  call is unchanged and still passes nothing, which still means trousers.
+
+  IT NAMES A CHART RATHER THAN TAKING THE NUMBERS, and the first version did the
+  opposite — it accepted `columns` and `rows` and fell back to the theme
+  settings with `| default:`. THAT SHIPPED A WRONG TABLE and was caught on the
+  rendered page: `default` replaces a BLANK value, not just a missing one, so
+  the tops chart — whose rows are deliberately empty because the studio has
+  never supplied top measurements — fell back to the TROUSER rows and rendered
+  98 / 62-90 / 115 / 60 underneath the headings Length / Chest / Shoulder /
+  Sleeve. A waist measurement presented as a chest, on a real product page, is
+  exactly the class of content this repo refuses, and Liquid gave no hint: the
+  page rendered, theme check passed, and the numbers looked plausible.
+
+  Naming the chart removes the failure entirely rather than guarding against it.
+  The snippet owns which settings it reads, so there is no argument that can be
+  blank and no fallback to be wrong about.
+
+  TWO CHARTS ON ONE PAGE NEEDED TWO FIXES THAT ARE EASY TO UNDO BY ACCIDENT:
+
+  - **`uid`.** Radio buttons sharing a `name` outside a form are ONE group, so
+    without this the tops chart's cm/inch switch would deselect the trouser
+    chart's and the two would fight. Every caller on a page carrying more than
+    one chart must pass a distinct `uid`.
+  - **`data-size-guide` on the wrapper.** `initUnitSwitch` in assets/theme.js
+    used to find its table with a document-wide `querySelector`, which returns
+    the FIRST match on the page — so both switches would have driven the trouser
+    table and the tops table would never have converted at all. The wrapper is
+    the scope the script now searches inside. `data-unit-switch` deliberately
+    stays on the fieldset rather than moving up to this wrapper, because
+    theme-src/theme.css hides `[data-unit-switch]` under `scripting: none` and
+    moving it would hide the whole chart from a reader with no script.
+
   THE SHAPE IS ONE TEXTAREA, ONE ROW PER LINE, PIPE SEPARATED:
 
       XS | 64 | 90 | 28 | 72 | 26
@@ -48,49 +82,73 @@
   The wrapper is `.wl-table`, the same class the rich-text metafield route uses,
   so a chart from either source is styled once and scrolls sideways on a phone
   rather than forcing horizontal page scroll.
+
+  Accepts:
+    chart - 'tops' for the tops chart; anything else is the trouser chart
+    uid   - unique per chart ON A PAGE CARRYING MORE THAN ONE (default 'main')
 {%- endcomment -%}
 
 {%- comment -%}
   ROWS ARE SPLIT WITH `newline_to_br`, NOT ON A NEWLINE LITERAL, and that is not
-  a style choice. A `{% liquid %}` block is line-based: a quoted string carrying
-  a real line break inside one ends the tag early, and theme check reports it as
-  "expected end of input" pointing at the comment above rather than at the split.
-  It cost a round trip here. `newline_to_br` turns the breaks into markup that
-  can be split on a single line; both spellings are handled because the filter's
-  output has been written each way.
+  a style choice. A percent-brace liquid block is line-based: a quoted string
+  carrying a real line break inside one ends the tag early, and theme check
+  reports it as "expected end of input" pointing at the comment above rather
+  than at the split. It cost a round trip here. `newline_to_br` turns the breaks
+  into markup that can be split on a single line; both spellings are handled
+  because the filter's output has been written each way.
 {%- endcomment -%}
 
 {%- liquid
-  assign columns = settings.size_guide_columns | split: ','
+  # NO `| default:` ON THE ROWS. See the note above: it treats blank and absent
+  # as the same thing, and the tops rows are blank on purpose, so the fallback
+  # silently painted trouser measurements under top headings. The branch below
+  # reads one pair of settings or the other and never mixes them.
+  if chart == 'tops'
+    assign chart_columns = settings.size_guide_tops_columns
+    assign chart_rows = settings.size_guide_tops_rows
+  else
+    assign chart_columns = settings.size_guide_columns
+    assign chart_rows = settings.size_guide_rows
+  endif
 
-  assign row_source = settings.size_guide_rows | strip | newline_to_br
+  # The note is shared on purpose — how a garment is measured, laid flat or
+  # otherwise, is a studio convention rather than a fact about trousers.
+  assign chart_note = settings.size_guide_note
+  assign chart_uid = uid | default: 'main'
+
+  assign columns_list = chart_columns | split: ','
+
+  assign row_source = chart_rows | strip | newline_to_br
   assign row_source = row_source | replace: '<br />', '|~|' | replace: '<br>', '|~|'
-  assign rows = row_source | split: '|~|'
+  assign rows_list = row_source | split: '|~|'
 
   assign has_rows = false
-  if settings.size_guide_rows != blank and rows.size > 0
+  if chart_rows != blank and rows_list.size > 0
     assign has_rows = true
   endif
+
+  assign unit_name = 'size-unit-' | append: chart_uid
 -%}
 
 {%- if has_rows -%}
-  <div class="flex flex-col gap-4">
+  <div data-size-guide class="flex flex-col gap-4">
     {%- comment -%}
       Radios rather than two buttons: the unit is one choice out of two, which is
       what a radio group is, and it arrives keyboard-operable with arrow keys for
       free. `data-unit-switch` is the hook; the fieldset is what `scripting: none`
-      removes.
+      removes. `data-unit-option` is what the script matches on, rather than the
+      control's name, because the name now varies from chart to chart.
     {%- endcomment -%}
     <fieldset data-unit-switch class="flex items-center gap-5">
       <legend class="sr-only">{{ 'product.units' | t }}</legend>
 
       <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 text-caption uppercase tracking-nav text-ink-muted has-checked:text-ink">
-        <input type="radio" name="size-unit" value="cm" checked class="size-4 accent-brand">
+        <input type="radio" data-unit-option name="{{ unit_name }}" value="cm" checked class="size-4 accent-brand">
         {{ 'product.cm' | t }}
       </label>
 
       <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 text-caption uppercase tracking-nav text-ink-muted has-checked:text-ink">
-        <input type="radio" name="size-unit" value="in" class="size-4 accent-brand">
+        <input type="radio" data-unit-option name="{{ unit_name }}" value="in" class="size-4 accent-brand">
         {{ 'product.inch' | t }}
       </label>
     </fieldset>
@@ -99,13 +157,13 @@
       <table data-size-table>
         <thead>
           <tr>
-            {%- for column in columns -%}
+            {%- for column in columns_list -%}
               <th scope="col">{{ column | strip }}</th>
             {%- endfor -%}
           </tr>
         </thead>
         <tbody>
-          {%- for row in rows -%}
+          {%- for row in rows_list -%}
             {%- assign cells = row | split: '|' -%}
             <tr>
               {%- for cell in cells -%}
@@ -142,8 +200,8 @@
       </table>
     </div>
 
-    {%- if settings.size_guide_note != blank -%}
-      <p class="text-caption leading-snug text-ink-muted">{{ settings.size_guide_note }}</p>
+    {%- if chart_note != blank -%}
+      <p class="text-caption leading-snug text-ink-muted">{{ chart_note }}</p>
     {%- endif -%}
   </div>
 {%- else -%}

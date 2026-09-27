@@ -1,0 +1,158 @@
+{%- comment -%}
+  The studio's three off-site destinations — Instagram, Shopee, TikTok.
+
+  WHY THIS IS A SNIPPET AND NOT THREE COPIES. The same three links now render in
+  three places: the footer's bottom row, the home page and the About page. Three
+  renderers reading one source is the whole reason this exists — a studio that
+  changes its TikTok handle must not have to remember there are two other places
+  it is written down.
+
+  THE URLs MOVED TO THEME SETTINGS ON 2026-09-27, and that is the change worth
+  knowing about. They used to be four generic label/URL pairs on the FOOTER
+  section, which made sense while the footer was the only thing rendering them.
+  It is not any more, and one section's settings are not readable from another
+  section. So `settings.social_*_url` in config/settings_schema.json is the one
+  source, and the footer reads it like everything else does.
+
+  WHAT WAS GIVEN UP: the old shape let the studio add a marketplace nobody had
+  anticipated without a code change, because the pairs were generic. These three
+  are named, because each one now draws its own trademarked glyph and a fourth
+  generic entry would have nothing to draw. Adding a fourth platform is now a
+  settings field plus a mark in `icon.liquid` — more work than before, and the
+  price of showing logos at all.
+
+  AN EMPTY URL RENDERS NOTHING AT ALL, per platform. Same rule the footer's link
+  columns follow: no dead buttons. With all three blank this outputs nothing and
+  `social-band.liquid` drops its own section rather than drawing an empty band.
+
+  THE ORDER IS INSTAGRAM, SHOPEE, TIKTOK — brief §19's own order, and it is not
+  alphabetical or arbitrary. Shopee is the studio's actual till and sits in the
+  middle where a three-up group is read first.
+
+  Accepts:
+    variant - 'cards' for the 3-up panel; anything else renders the footer row
+    class   - extra classes on the wrapper
+{%- endcomment -%}
+
+{%- liquid
+  assign ig_url = settings.social_instagram_url
+  assign shopee_url = settings.social_shopee_url
+  assign tiktok_url = settings.social_tiktok_url
+  assign handle = settings.social_handle
+-%}
+
+{%- if ig_url != blank or shopee_url != blank or tiktok_url != blank -%}
+
+  {%- if variant == 'cards' -%}
+    {%- comment -%}
+      THE CARD GRID. `sm:grid-cols-3` rather than a flex row: three cards that
+      each carry a mark, a name and a handle need equal widths to read as one
+      set, and a wrapping flex row gives the last one a different width the
+      moment one platform is missing.
+
+      The mark sits on `bg-surface` — white, the token for a thing ON the page —
+      inside a card on `bg-canvas`. That is the three-deep surface stack the
+      design system describes, used as intended rather than invented here.
+    {%- endcomment -%}
+    <ul class="grid grid-cols-1 gap-4 sm:grid-cols-3 {{ class }}">
+      {%- for entry in (1..3) -%}
+        {%- liquid
+          case forloop.index
+            when 1
+              assign social_url = ig_url
+              assign social_icon = 'instagram'
+              assign social_name = 'Instagram'
+            when 2
+              assign social_url = shopee_url
+              assign social_icon = 'shopee'
+              assign social_name = 'Shopee'
+            when 3
+              assign social_url = tiktok_url
+              assign social_icon = 'tiktok'
+              assign social_name = 'TikTok'
+          endcase
+        -%}
+        {%- if social_url != blank -%}
+          <li>
+            {%- comment -%}
+              Off-site, so `rel="noopener"` and the screen-reader suffix every
+              external link on this site carries. The whole card is the link
+              rather than a button inside it: a card that looks clickable and is
+              not is the most common thing to get wrong here.
+            {%- endcomment -%}
+            <a
+              href="{{ social_url }}"
+              target="_blank"
+              rel="noopener"
+              class="group flex h-full min-h-11 flex-col items-start gap-4 rounded-md border border-border bg-canvas p-5 transition-colors duration-(--duration-base) hover:border-brand hover:bg-surface lg:p-6"
+            >
+              <span class="flex size-12 items-center justify-center rounded-full bg-surface text-brand transition-colors duration-(--duration-base) group-hover:bg-brand group-hover:text-on-brand">
+                {% render 'icon', icon: social_icon, class: 'size-6' %}
+              </span>
+
+              <span class="flex flex-col gap-1">
+                <span class="font-display text-h4 text-ink">{{ social_name }}</span>
+                {%- if handle != blank -%}
+                  <span class="text-caption text-ink-muted">{{ handle }}</span>
+                {%- endif -%}
+              </span>
+
+              <span class="sr-only">{{ 'general.opens_new_tab' | t }}</span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+
+  {%- else -%}
+    {%- comment -%}
+      THE FOOTER ROW. Mark plus word, not mark alone. A bare glyph row would be
+      shorter, and it would also be three unlabelled shapes on a brown gradient
+      — the site's own rule is that colour and shape never carry meaning alone.
+      The word is also what makes Shopee legible to a reader who does not know
+      the mark, which on this store is the link that matters most.
+    {%- endcomment -%}
+    <ul class="flex flex-wrap items-center gap-x-6 gap-y-2 {{ class }}">
+      {%- for entry in (1..3) -%}
+        {%- liquid
+          case forloop.index
+            when 1
+              assign social_url = ig_url
+              assign social_icon = 'instagram'
+              assign social_name = 'Instagram'
+            when 2
+              assign social_url = shopee_url
+              assign social_icon = 'shopee'
+              assign social_name = 'Shopee'
+            when 3
+              assign social_url = tiktok_url
+              assign social_icon = 'tiktok'
+              assign social_name = 'TikTok'
+          endcase
+        -%}
+        {%- if social_url != blank -%}
+          <li>
+            {%- comment -%}
+              The colour is restated for the reason every other footer link
+              restates it: base.css paints every anchor --color-brand, which is
+              one of this footer's own gradient stops, so an unstyled link all
+              but vanishes into its background. Hover is an underline, not a
+              colour change — cream has no brighter neighbour to move toward.
+            {%- endcomment -%}
+            <a
+              href="{{ social_url }}"
+              target="_blank"
+              rel="noopener"
+              class="inline-flex min-h-11 items-center gap-2 text-micro uppercase tracking-nav text-ink-invert underline-offset-4 transition-colors duration-(--duration-base) hover:underline"
+            >
+              {% render 'icon', icon: social_icon, class: 'size-4 shrink-0' %}
+              {{ social_name }}
+              <span class="sr-only">{{ 'general.opens_new_tab' | t }}</span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+{%- endif -%}

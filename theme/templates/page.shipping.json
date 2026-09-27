@@ -1,0 +1,60 @@
+{
+  "sections": {
+    "main": {
+      "type": "policy-page",
+      "blocks": {
+        "from": {
+          "type": "item",
+          "settings": {
+            "title": "Where it ships from",
+            "body": "<p>Every order is packed and sent from our own studio in Kota Bekasi, Indonesia. There is no third-party warehouse in between — the person who packs your parcel is the person who answers your messages.</p>"
+          }
+        },
+        "when": {
+          "type": "item",
+          "settings": {
+            "title": "When it goes out",
+            "body": "<p>Orders are dispatched within 1–2 working days of your payment clearing. Working days are Monday to Friday and do not include public holidays, so an order placed over a weekend goes out at the start of the following week.</p>"
+          }
+        },
+        "cost": {
+          "type": "item",
+          "settings": {
+            "title": "What it costs",
+            "body": "<p>Your shipping cost is calculated at checkout, once you have entered the delivery address. The courier prices each parcel against its weight and where it is going, so there is no single rate we could print here that would be true for everyone.</p><p>Orders over Rp 750.000 ship free.</p>"
+          }
+        },
+        "tracking": {
+          "type": "item",
+          "settings": {
+            "title": "Following your parcel",
+            "body": "<p>You will get a confirmation the moment your order is placed, and a second one with the tracking details when it leaves the studio. If you need to know where your parcel is before that second message arrives, ask us — we can usually tell you the same day.</p>"
+          }
+        },
+        "international": {
+          "type": "item",
+          "settings": {
+            "title": "Ordering from outside Indonesia",
+            "body": "<p>We ship internationally. Enter your address at checkout and you will see straight away whether we currently deliver to your country and what it costs. Any import duty or tax your country charges on the parcel is yours to pay, and it is collected by them rather than by us.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "from",
+        "when",
+        "cost",
+        "tracking",
+        "international"
+      ],
+      "settings": {
+        "eyebrow": "Customer Care",
+        "heading": "Shipping & Delivery",
+        "body": "How your order gets from our studio to your door, and what to expect along the way.",
+        "footnote": "<p>Anything here you are not sure about, or a parcel that has not moved when you think it should have — <a href=\"/pages/contact\">message the studio</a>. We answer our own messages.</p>"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

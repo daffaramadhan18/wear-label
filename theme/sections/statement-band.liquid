@@ -1,0 +1,93 @@
+{%- comment -%}
+  A single line, set large, running across a coloured band.
+
+  Asked for 2026-09-27 for the About page: "tambahin tulisan gede atau bikin
+  satu section gitu trs tulisannya WORLDWIDE SHIPPING • FROM INDONESIA TO YOU".
+  The string arrived with its own bullet in the middle, which is what decided
+  the shape — a phrase punctuated like that is a ticker, so it is set as one.
+
+  ⚠ THE DEFAULT COPY IS A CLAIM THE STORE DOES NOT CURRENTLY BACK, and that is
+  recorded here rather than quietly rendered. Checked against the live store on
+  2026-09-27: `/meta.json`'s `ships_to_countries` lists 28 countries and
+  Indonesia is NOT among them, so "worldwide shipping" is true of 28 places and
+  "from Indonesia to you" is currently false for a reader in Indonesia. That is
+  a Shopify shipping-zone setting, not a theme problem, and it is flagged in
+  HANDOVER.md. The band is built as instructed; the zones need fixing before it
+  is honest.
+
+  IT IS A MARQUEE, USING THE CSS THAT WAS ALREADY HERE. `.wl-marquee` /
+  `.wl-marquee-track` in app/base.css drive the Instagram strip; this is the
+  second caller and it cost no new CSS. The contract is exactly two identical
+  halves, because the keyframe travels -50% — so the track holds the phrase
+  three times, twice. Six on screen is not decoration: two halves of one phrase
+  is ~1800px and a desktop viewport is wider than that, which would park a gap
+  in the middle of the band every lap.
+
+  IT COSTS NO JAVASCRIPT and animates `transform` only, which is the rule for
+  every continuous loop on this site. Do not wrap it in anything that animates
+  opacity — `[data-reveal]` would make it a stacking context. That is why there
+  is no reveal on this section.
+
+  REDUCED MOTION IS HANDLED BY base.css (`animation: none` on the track), and
+  the resting state is readable because what stops is a line of type already in
+  frame, not a rail of content that needs scrolling to reach. Nothing extra is
+  needed here.
+
+  THE WHOLE TRACK IS `aria-hidden` AND THE PHRASE IS ALSO RENDERED ONCE,
+  screen-reader only. Six copies of one sentence is six announcements of it;
+  hiding the lot and stating it once is the same information, once.
+
+  HEADINGS AND TEXT ARE COLOURED EXPLICITLY, because this is a dark band and
+  base.css gives elements their own colour that beats anything inherited. This
+  band is `bg-brand` rather than `bg-invert` for the same reason the two-ways
+  door and the announcement bar are: espresso is the footer's and the voices
+  wall's, and on the About page this sits close enough to the footer that two
+  near-black bands would read as one.
+{%- endcomment -%}
+
+{%- liquid
+  assign phrase = section.settings.text
+-%}
+
+{%- if phrase != blank -%}
+  <section class="bg-brand py-block text-on-brand">
+    <p class="sr-only">{{ phrase }}</p>
+
+    <div aria-hidden="true" class="wl-marquee overflow-hidden">
+      <div class="wl-marquee-track items-center">
+        {%- comment -%} Two runs, so translateX(-50%) lands exactly where it started. {%- endcomment -%}
+        {%- for copy in (0..1) -%}
+          {%- for repeat in (1..3) -%}
+            <span class="shrink-0 font-display text-h2 uppercase tracking-eyebrow">{{ phrase }}</span>
+            {%- comment -%}
+              The separator between repeats is punctuation, not a word, so it
+              lives in the markup rather than in the locale file — the same
+              line theme.js draws for the quote form's composed message.
+            {%- endcomment -%}
+            <span class="shrink-0 font-display text-h2">&bull;</span>
+          {%- endfor -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Statement band",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "One line, set large, scrolling across a Camel band. Leave it blank and the whole band is not rendered. WARNING: the default line promises worldwide shipping from Indonesia, and the store's shipping zones currently exclude Indonesia and cover 28 countries — fix the zones in Settings → Shipping and delivery, or change this line."
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Line",
+      "default": "WORLDWIDE SHIPPING • FROM INDONESIA TO YOU",
+      "info": "Punctuate it however you like — the bullet in the default is part of the line, not something the section adds."
+    }
+  ],
+  "presets": [{ "name": "Statement band" }]
+}
+{% endschema %}

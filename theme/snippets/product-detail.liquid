@@ -35,9 +35,15 @@
 
   Every section renders its own labelled placeholder when its copy is blank, so
   the page keeps its height and its shape before the studio has written a word.
-  `description` and `custom.care` are both blank across this catalogue on
-  purpose: the design reused one generic paragraph for all eleven pieces, which
-  would state a wrong inseam and a wrong fabric on most of them.
+  `description` is still blank across this catalogue on purpose: the design
+  reused one generic paragraph for all eleven pieces, which would state a wrong
+  inseam on most of them.
+
+  FABRIC & CARE NO LONGER FALLS TO THAT PLACEHOLDER, as of 2026-09-27. The same
+  objection applied to it — one paragraph cannot describe eight fabrics — and it
+  was answered by keying the copy to the product's own `custom.material` rather
+  than by writing one. See `fabric-care.liquid`. Details still has no such
+  escape, because a description is per-product by nature.
 
   Accepts: product, shipping (store-wide policy copy)
 {%- endcomment -%}
@@ -88,8 +94,18 @@
     <h2 id="detail-care" class="text-micro uppercase tracking-nav text-ink-subtle">
       {{ 'product.fabric_and_care' | t }}
     </h2>
+    {%- comment -%}
+      THIS WAS A BARE PLACEHOLDER ON ALL SEVENTEEN PRODUCTS UNTIL 2026-09-27.
+      `custom.care` is undefined on this store, so every product page rendered
+      three grey bars under a heading that promised a fabric explanation. The
+      section comment above still describes why the metafield is blank on
+      purpose — one generic paragraph across the whole catalogue would state a
+      wrong fabric on most of it — and that reasoning is intact: what changed is
+      that the copy is now keyed BY FABRIC, so there is no one generic
+      paragraph. `fabric-care.liquid` carries the precedence and the argument.
+    {%- endcomment -%}
     <div class="wl-measure text-body leading-body text-ink-body">
-      {% render 'copy', value: product.metafields.custom.care.value, label: 'fabric and care', lines: 3 %}
+      {% render 'fabric-care', product: product %}
     </div>
   </section>
 

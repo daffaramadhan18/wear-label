@@ -1,0 +1,87 @@
+{%- comment -%}
+  Where to find Wear Label off this site — Instagram, Shopee, TikTok.
+
+  Asked for 2026-09-27 with the three URLs and a question about placement: "ini
+  apply dimana ya? gw kepikiran di home sama di about, or u got better ideas?"
+  The answer this section implements is home AND About AND the footer, which is
+  three places for one reason each rather than the same reason three times:
+
+  - **The footer** is the baseline. It is on every page, it is where a reader
+    who is already looking for a social link looks first, and it costs nothing.
+    It renders the compact row variant.
+  - **The home page** is where the reader who is NOT looking for it is. This
+    section replaced `instagram-strip` in the ready-to-wear view, and that swap
+    is the argument for placing it here at all: the strip was headed "Follow us
+    on Instagram" and was in fact a marquee of the catalogue's own product
+    photos with no link on any of them, eight of eleven tiles drawing grey
+    placeholders because eight products have no photograph. It promised a
+    destination and went nowhere. This does the job the strip was pretending to
+    do. `instagram-strip` is still in the repo and still correct — it is
+    unplaced, like `category-mosaic` and `hero-carousel`, and putting it back
+    is one edit to templates/index.json plus a block in `home-tabs`.
+  - **The About page** is where a reader has just finished reading about the
+    studio and has nowhere to go next. The page deliberately has no CTA (see
+    `about-story.liquid`), and three links out are not a CTA.
+
+  THE LINKS THEMSELVES LIVE IN THEME SETTINGS, not here — see
+  `snippets/social-links.liquid` for why, and note the consequence: this section
+  has no URL fields of its own and adding one here would be the bug that
+  snippet exists to prevent.
+
+  THE SECTION REMOVES ITSELF when every URL is blank. The heading is not
+  rendered either: a heading over nothing is worse than an absent band, and
+  unlike a product photograph there is no layout here that depends on the
+  missing thing, so this is not a placeholder case. `custom-hero` makes the same
+  call for the same reason.
+
+  NO BACKGROUND COLOUR, deliberately. The cards are `bg-canvas` on the page's
+  own `--color-ground`, with the marks on `bg-surface` inside them — the design
+  system's three-deep surface stack used as intended. On the home page this
+  lands directly under the voices wall, which is espresso; on About it lands
+  under the statement band, which is Camel. A third coloured band against
+  either would be two coloured bands touching.
+{%- endcomment -%}
+
+{%- liquid
+  assign has_any = false
+  if settings.social_instagram_url != blank or settings.social_shopee_url != blank or settings.social_tiktok_url != blank
+    assign has_any = true
+  endif
+-%}
+
+{%- if has_any -%}
+  <section aria-labelledby="social-heading" class="mx-auto flex w-full max-w-content flex-col gap-7 px-gutter py-section">
+    <div data-reveal class="flex flex-col gap-3">
+      <h2 id="social-heading" class="font-display text-h2">
+        {% render 'copy', value: section.settings.heading, label: 'heading' %}
+      </h2>
+      <p class="wl-measure text-body leading-body text-ink-muted">
+        {% render 'copy', value: section.settings.body, label: 'body', lines: 2 %}
+      </p>
+    </div>
+
+    {%- comment -%}
+      The card grid is NOT inside the `data-reveal` above. The reveal animates
+      opacity, which makes its element a stacking context — harmless here today,
+      and exactly the trap this repo has hit three times when something with a
+      blend or a transform ended up inside one. Keeping the grid out costs
+      nothing and removes the question.
+    {%- endcomment -%}
+    {% render 'social-links', variant: 'cards' %}
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Elsewhere",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "The three destination links come from Theme settings → Social, not from here, because the footer and two pages all render the same three and must not be three places to edit. With all three blank this whole section is not rendered."
+    },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Find us elsewhere" },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "New pieces, restocks and what the studio is working on — posted as it happens. Shopee is where you can buy from us on the marketplace you already use." }
+  ],
+  "presets": [{ "name": "Elsewhere" }]
+}
+{% endschema %}

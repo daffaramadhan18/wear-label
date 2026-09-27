@@ -1,0 +1,93 @@
+{%- comment -%}
+  Fabric & care, on a product page.
+
+  Asked for 2026-09-27: "tambahin detail fabric per product... di fabric and care
+  nya jelasin linen". The material was already on the page — `product-card` and
+  the buy box print it as a one-word line above the title — but one word above
+  the title is a label, not an explanation, and the section actually headed
+  Fabric & care was rendering a grey placeholder on all seventeen products.
+
+  KEYED BY MATERIAL, NOT WRITTEN PER PRODUCT, and that is the whole design. The
+  catalogue is seventeen products across EIGHT fabrics: three cardigans share
+  one knit, two culottes share one linen, five trousers share one semiwool. A
+  per-product field would be the same paragraph typed three times and three
+  places to correct when a care line turns out to be wrong. This is the same
+  argument `size-guide.liquid` makes for the size chart being store-wide, and it
+  is made here for the same reason.
+
+  A NEW PRODUCT INHERITS ITS FABRIC'S COPY FOR FREE. That is the real payoff:
+  the studio adds Tara Stripe Pants with `custom.material = semiwool stripe` and
+  the page is complete without anyone writing a word. It is also the risk — a
+  material spelled a new way matches nothing and draws the placeholder, which is
+  correct behaviour and will look like a bug. It is not: silently showing the
+  nearest other fabric's care instructions would be the bug.
+
+  PRECEDENCE, AND IT IS THE SAME SHAPE AS THE SIZE CHART'S AND THE SHOPEE
+  LINK'S: the specific beats the general. A product carrying its own
+  `custom.care` metafield renders that and nothing else — for a piece with a
+  lining, a trim or a finish the fabric alone does not describe. The glossary is
+  the fallback, and a labelled placeholder is the fallback to that.
+
+  THE CARE LINE IS THE STUDIO'S TO CONFIRM. The descriptions say what each cloth
+  is, which is drawn from the material names the studio themselves supplied; the
+  care sentences are conservative for the fibre — cold, shade, low iron — rather
+  than measured off a care label nobody has sent. Wrong care copy ruins a
+  garment, so this is flagged in HANDOVER.md as something to confirm before
+  launch rather than treated as settled.
+
+  Accepts: product
+{%- endcomment -%}
+
+{%- liquid
+  assign own_care = product.metafields.custom.care.value
+  assign material = product.metafields.custom.material.value | strip | downcase
+
+  assign fabric_description = ''
+  assign fabric_care = ''
+
+  if own_care == blank and material != blank
+    assign glossary = settings.fabric_care | strip | newline_to_br
+    assign glossary = glossary | replace: '<br />', '|~|' | replace: '<br>', '|~|'
+    assign entries = glossary | split: '|~|'
+
+    for entry in entries
+      assign parts = entry | split: '|'
+      assign key = parts[0] | strip | downcase
+      if key == material
+        assign fabric_description = parts[1] | strip
+        assign fabric_care = parts[2] | strip
+        break
+      endif
+    endfor
+  endif
+-%}
+
+{%- if own_care != blank -%}
+  {%- comment -%}
+    The per-product metafield is rich text, so it arrives as markup and is
+    printed rather than wrapped in a paragraph of our own — Shopify already
+    emitted one.
+  {%- endcomment -%}
+  {{ own_care }}
+
+{%- elsif fabric_description != blank -%}
+  <div class="flex flex-col gap-3">
+    <p>{{ fabric_description }}</p>
+    {%- if fabric_care != blank -%}
+      {%- comment -%}
+        The care sentence is set one step down rather than run into the
+        paragraph above it. They answer different questions — what is this, and
+        what do I do with it — and a shopper checking the second one is
+        scanning, not reading.
+      {%- endcomment -%}
+      <p class="text-caption leading-snug text-ink-muted">{{ fabric_care }}</p>
+    {%- endif -%}
+  </div>
+
+{%- else -%}
+  {%- comment -%}
+    No metafield and no glossary line for this material — the labelled
+    placeholder at final size, like every other empty slot on this site.
+  {%- endcomment -%}
+  {% render 'copy', value: blank, label: 'fabric and care', lines: 3 %}
+{%- endif -%}

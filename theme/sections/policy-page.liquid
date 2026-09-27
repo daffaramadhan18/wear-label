@@ -1,0 +1,117 @@
+{%- comment -%}
+  A customer-care page: a heading, a short intro, and a stack of headed
+  paragraphs.
+
+  ONE SECTION, TWO PAGES, built 2026-09-27 for Shipping & Delivery and Returns &
+  Exchanges — the two footer entries that had been rendering as plain text since
+  the footer copy landed because no page existed to link them to. They are the
+  same shape (a policy, in sections, with a way to ask a human at the end), so
+  they are one section with two templates rather than two sections that would
+  drift apart the first time one got a design tweak.
+
+  ⚠ WHAT IS ON RECORD AND WHAT IS NOT. The defaults in the two templates were
+  generated on instruction — "coba lo generate lah page nya" — and they are
+  deliberately built out of facts this repo already holds rather than out of
+  plausible-sounding policy:
+
+    on record   dispatch in 1–2 working days from Kota Bekasi (the product
+                page's shipping line, live since 2026-09-22)
+    on record   one free size exchange within 7 days (same line)
+    on record   rates are calculated at checkout (the bag's own copy, and a
+                platform constraint — see CLAUDE.md, Indonesian couriers quote
+                during checkout through a RajaOngkir/Biteship app)
+    on record   free shipping over Rp 750.000 (the announcement bar's default)
+    NOT on record   which couriers, transit times, refund terms, who pays
+                return postage, what happens to a damaged parcel
+
+  Everything in the last row is written as "message the studio" rather than as a
+  term, because a term nobody has set is an invented commitment and this repo
+  refuses those. That is not padding — it is also how this studio actually
+  operates: PRODUCT.md's customer evidence is full of shoppers describing the
+  admin answering them directly. THE STUDIO SHOULD STILL SET REAL TERMS, and
+  HANDOVER.md flags it.
+
+  THE BLOCKS ARE `richtext`, NOT `textarea`, so a paragraph can carry a link —
+  "message us on WhatsApp" is worth being a link on a page whose whole job is
+  telling someone how to reach a human. A blank block renders its labelled
+  placeholder at final size like every other empty slot here.
+
+  NO PRICES, NO RATES, NO COURIER NAMES may be typed into these blocks. The bag
+  says "Calculated at checkout" because Shopify is the only thing that knows,
+  and a rate written here would be a second source that goes stale silently.
+{%- endcomment -%}
+
+<div class="mx-auto flex w-full max-w-content flex-col gap-block px-gutter pb-section pt-block-lg">
+  <div data-reveal class="wl-measure flex flex-col gap-4">
+    <span class="text-micro uppercase tracking-eyebrow text-ink-subtle">
+      {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
+    </span>
+
+    <h1 class="text-h1 leading-h1">
+      {% render 'copy', value: section.settings.heading, label: 'heading', lines: 2 %}
+    </h1>
+
+    <p class="text-body leading-body text-ink-muted">
+      {% render 'copy', value: section.settings.body, label: 'intro', lines: 2 %}
+    </p>
+  </div>
+
+  {%- if section.blocks.size > 0 -%}
+    <div class="flex flex-col divide-y divide-rule border-t border-rule">
+      {%- for block in section.blocks -%}
+        {%- comment -%}
+          Each item is a heading and its answer, in a two-column layout above
+          `lg` so the eye can run down the headings alone. Below `lg` it stacks,
+          because a 390px screen cannot hold two columns and a policy read on a
+          phone is read in order anyway.
+        {%- endcomment -%}
+        <section class="grid gap-3 py-7 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-block" {{ block.shopify_attributes }}>
+          <h2 class="font-display text-h4 text-ink">
+            {% render 'copy', value: block.settings.title, label: 'title' %}
+          </h2>
+          <div class="wl-measure text-body leading-body text-ink-body">
+            {% render 'copy', value: block.settings.body, label: 'answer', lines: 3 %}
+          </div>
+        </section>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  {%- comment -%}
+    The closing note is a section setting rather than a fourth block, because it
+    is the one thing on this page that must not be reorderable: "still not sure?
+    ask us" only works last.
+  {%- endcomment -%}
+  {%- if section.settings.footnote != blank -%}
+    <div data-reveal class="rounded-md border border-border bg-canvas p-6 lg:p-8">
+      <div class="wl-measure text-body leading-body text-ink-body">{{ section.settings.footnote }}</div>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Customer care page",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "A policy page: heading, intro, then one block per point. Do NOT type a shipping rate, a courier name or a transit time into any block — Shopify quotes rates at checkout and is the only thing that knows them, so a number written here is a second source that goes stale without anyone noticing."
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "textarea", "id": "heading", "label": "Heading" },
+    { "type": "textarea", "id": "body", "label": "Intro" },
+    { "type": "richtext", "id": "footnote", "label": "Closing note", "info": "Sits in a card at the end of the page. It is a setting and not a block so that it always comes last." }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Point",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Heading" },
+        { "type": "richtext", "id": "body", "label": "Answer" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Customer care page" }]
+}
+{% endschema %}

@@ -1,0 +1,106 @@
+{%- comment -%}
+  The Size Guide page — both charts, side by side down the page.
+
+  Built 2026-09-27 for the footer's "Size Guide" entry, which had been rendering
+  as plain text because no page existed to link it to. The instruction named the
+  split directly: "product nya cuman 2 jenis yak, atasan sm bawahan, nah itu
+  tambahin aja sizing guide nya".
+
+  IT RENDERS `size-guide.liquid` TWICE rather than building its own tables. That
+  snippet already owns the pipe-separated parsing, the cm/inch conversion, the
+  ragged-row rule and the sideways-scrolling `.wl-table` wrapper; a second
+  implementation here would be a second place for a size to be wrong. Two
+  things had to change in it to make a second caller possible on one page —
+  a `uid` for the radio group and a scope for the script — and its own comment
+  carries both.
+
+  ⚠ THE TOPS CHART HAS NO NUMBERS AND RENDERS A PLACEHOLDER. The studio supplied
+  trouser measurements on 2026-09-13 (Size / Length / Waist / Hip / Thigh, in
+  M, L and XL) and has never supplied top measurements. Four real products are
+  tops — three cardigans and the vest — so this half of the page is a labelled
+  placeholder at final size until the numbers arrive, which is the same thing
+  every other unsupplied fact on this site does. Filling it in is Theme settings
+  → Size guide → Rows (tops). DO NOT DERIVE TOP MEASUREMENTS FROM THE TROUSER
+  CHART; a chest is not a hip.
+
+  BOTTOMS COMES FIRST because thirteen of the seventeen products are trousers.
+  The same ratio is why the product page shows the trouser chart and not this
+  page's pair — see `product-detail.liquid`.
+
+  THE HOW-TO-MEASURE NOTE IS A SETTING AND IS BLANK BY DEFAULT. It is the one
+  thing that stops a shopper reading a flat garment measurement as a body
+  measurement, and it is exactly the kind of fact only the studio can state —
+  whether they measure laid flat, and across or around. `size_guide_note` in
+  theme settings already carries the per-chart version of this; this is the
+  page-level one.
+{%- endcomment -%}
+
+<div class="mx-auto flex w-full max-w-content flex-col gap-block px-gutter pb-section pt-block-lg">
+  <div data-reveal class="wl-measure flex flex-col gap-4">
+    <span class="text-micro uppercase tracking-eyebrow text-ink-subtle">
+      {% render 'copy', value: section.settings.eyebrow, label: 'eyebrow', inline: true %}
+    </span>
+
+    <h1 class="text-h1 leading-h1">
+      {% render 'copy', value: section.settings.heading, label: 'heading', lines: 2 %}
+    </h1>
+
+    <p class="text-body leading-body text-ink-muted">
+      {% render 'copy', value: section.settings.body, label: 'intro', lines: 2 %}
+    </p>
+  </div>
+
+  {%- comment -%}
+    Neither chart is wrapped in `data-reveal`. A reveal animates opacity, and
+    these two contain the only horizontally scrolling boxes on the site — a
+    reader who arrives mid-page and starts scrolling a table sideways should not
+    be doing it inside something that is still fading in.
+  {%- endcomment -%}
+  <section class="flex flex-col gap-5" aria-labelledby="size-bottoms">
+    <h2 id="size-bottoms" class="font-display text-h3 text-ink">
+      {% render 'copy', value: section.settings.bottoms_heading, label: 'heading' %}
+    </h2>
+    {% render 'size-guide', uid: 'bottoms' %}
+  </section>
+
+  <section class="flex flex-col gap-5" aria-labelledby="size-tops">
+    <h2 id="size-tops" class="font-display text-h3 text-ink">
+      {% render 'copy', value: section.settings.tops_heading, label: 'heading' %}
+    </h2>
+    {%- comment -%}
+      THE CHART IS NAMED, NOT HANDED ITS NUMBERS. The first version of this
+      passed `columns` and `rows` read from theme settings, and it shipped a
+      wrong table: the tops rows are blank, Liquid's `default` filter treats
+      blank as missing, and the snippet fell back to the TROUSER rows — so this
+      section rendered 98 / 62-90 / 115 / 60 under Length / Chest / Shoulder /
+      Sleeve. Caught on the rendered page, not by theme check. The snippet now
+      reads its own settings; see its comment.
+    {%- endcomment -%}
+    {% render 'size-guide', uid: 'tops', chart: 'tops' %}
+  </section>
+
+  {%- if section.settings.footnote != blank -%}
+    <div data-reveal class="rounded-md border border-border bg-canvas p-6 lg:p-8">
+      <div class="wl-measure text-body leading-body text-ink-body">{{ section.settings.footnote }}</div>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Size guide page",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Both charts on one page. THE NUMBERS ARE NOT HERE — they are in Theme settings → Size guide, one set for bottoms and one for tops, so the product page and this page can never disagree. The tops rows are blank until the studio supplies top measurements; that half renders a labelled placeholder meanwhile."
+    },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Size Guide" },
+    { "type": "textarea", "id": "heading", "label": "Heading", "default": "Find your size." },
+    { "type": "textarea", "id": "body", "label": "Intro", "default": "Every measurement below is of the garment itself, in centimetres — switch to inches with the toggle above either chart. If you are between two sizes, our pieces are cut loose, so the smaller one usually still works." },
+    { "type": "text", "id": "bottoms_heading", "label": "Bottoms heading", "default": "Trousers & culottes" },
+    { "type": "text", "id": "tops_heading", "label": "Tops heading", "default": "Cardigans & tops" },
+    { "type": "richtext", "id": "footnote", "label": "Closing note", "default": "<p>Still not sure? Message the studio with your height and usual size and we will tell you which one to take — we answer our own messages.</p>" }
+  ],
+  "presets": [{ "name": "Size guide page" }]
+}
+{% endschema %}

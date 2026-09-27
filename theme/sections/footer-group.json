@@ -38,11 +38,11 @@
           "settings": {
             "title": "Customer Care",
             "link_1_label": "Size Guide",
-            "link_1_url": "",
+            "link_1_url": "/pages/size-guide",
             "link_2_label": "Shipping & Delivery",
-            "link_2_url": "",
+            "link_2_url": "/pages/shipping-delivery",
             "link_3_label": "Returns & Exchanges",
-            "link_3_url": "",
+            "link_3_url": "/pages/returns-exchanges",
             "link_4_label": "Contact Us",
             "link_4_url": "/pages/contact"
           }

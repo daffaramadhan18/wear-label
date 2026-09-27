@@ -3,9 +3,19 @@
     "story": {
       "type": "about-story",
       "settings": {}
+    },
+    "statement": {
+      "type": "statement-band",
+      "settings": {}
+    },
+    "elsewhere": {
+      "type": "social-band",
+      "settings": {}
     }
   },
   "order": [
-    "story"
+    "story",
+    "statement",
+    "elsewhere"
   ]
 }

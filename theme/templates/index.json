@@ -31,7 +31,10 @@
           }
         }
       },
-      "block_order": ["d1", "d2"],
+      "block_order": [
+        "d1",
+        "d2"
+      ],
       "settings": {
         "heading": "What We Do",
         "body": "We design for everyday wear and beyond. From versatile ready-to-wear collections to custom apparel and merchandise, Wear Label creates thoughtful pieces for individuals, businesses, and communities."
@@ -45,7 +48,7 @@
           "settings": {
             "label": "Ready-to-wear",
             "key": "ready-to-wear",
-            "sections": "arrivals,voices,instagram"
+            "sections": "arrivals,voices,elsewhere"
           }
         },
         "v2": {
@@ -246,14 +249,6 @@
         "heading": "From our customers"
       }
     },
-    "instagram": {
-      "type": "instagram-strip",
-      "settings": {
-        "collection": "all",
-        "heading": "Follow us on Instagram",
-        "count": 11
-      }
-    },
     "projects": {
       "type": "selected-projects",
       "blocks": {
@@ -352,6 +347,10 @@
         "cta_2": "Request a quote",
         "href_2": ""
       }
+    },
+    "elsewhere": {
+      "type": "social-band",
+      "settings": {}
     }
   },
   "order": [
@@ -360,7 +359,7 @@
     "views",
     "arrivals",
     "voices",
-    "instagram",
+    "elsewhere",
     "projects",
     "custom"
   ]

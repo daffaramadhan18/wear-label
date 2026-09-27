@@ -88,6 +88,61 @@
     ]
   },
   {
+    "name": "Social",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Instagram, Shopee and TikTok. These are THEME settings rather than footer settings because the same three links render in three places — the footer, the home page and the About page — and one section's settings cannot be read from another. A link left blank is not rendered anywhere at all, rather than drawn as a dead control. Paste the full address including https://."
+      },
+      {
+        "type": "paragraph",
+        "content": "THESE ARE type:text, NOT type:url, AND THAT IS NOT AN OVERSIGHT. Shopify's url setting rejected the TikTok address as an invalid default — the @ in /@wear.label does not pass its validator — and the push reported it as an error on this whole file while completing anyway, which is the failure mode CLAUDE.md warns about. The three URLs ship as schema defaults because this theme has no settings_data.json, so a default that cannot be saved is the same as no link at all. text takes any address. Do not 'fix' these back to url."
+      },
+      {
+        "type": "text",
+        "id": "social_instagram_url",
+        "label": "Instagram",
+        "default": "https://www.instagram.com/wear.label/"
+      },
+      {
+        "type": "text",
+        "id": "social_shopee_url",
+        "label": "Shopee",
+        "default": "https://shopee.co.id/wear.label",
+        "info": "Shopee is the studio's own till, which is why it is here at all — Shopify's built-in social settings have no field for it."
+      },
+      {
+        "type": "text",
+        "id": "social_tiktok_url",
+        "label": "TikTok",
+        "default": "https://www.tiktok.com/@wear.label"
+      },
+      {
+        "type": "text",
+        "id": "social_handle",
+        "label": "Handle",
+        "default": "@wear.label",
+        "info": "Shown under each platform name on the home and About page panels. One field because the studio uses the same handle on all three; leave it blank and the panels show the platform name alone."
+      }
+    ]
+  },
+  {
+    "name": "Fabric & care",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "What the Fabric & care section on a product page says. It is keyed by the product's custom.material value, so seventeen products share eight fabrics and eight paragraphs cover the catalogue — the same argument the size chart below is store-wide for. A product with its own custom.care metafield still wins over this."
+      },
+      {
+        "type": "textarea",
+        "id": "fabric_care",
+        "label": "Fabric glossary",
+        "info": "One fabric per line: material | what it is | how to care for it. The material must match the product's custom.material value exactly, apart from capitals. A material with no line here renders the labelled placeholder rather than another fabric's copy.",
+        "default": "linen | Woven from linen, so it breathes in the heat and softens every time you wash it. It creases — that is the fibre doing what linen does, and most of it drops out as you wear the piece. | Hand wash, or machine wash cold on a gentle cycle. Dry in the shade and press on a medium iron while the fabric is still slightly damp.\nsemiwool | A matte suiting fabric with a clean, heavy drape. It holds the line of a trouser without ever feeling stiff. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\nlight weight semiwool | The same matte suiting handle as our semiwool, woven lighter. It moves more and sits cooler, which is what makes it the one to reach for in the heat. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\nsemiwool stripe | Semiwool with the stripe woven into the cloth rather than printed onto it, so the line runs right through and will not lift or fade in the wash. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric.\ncrepe stretch | A fine-textured crepe with a little give in every direction. It skims rather than clings, and comes back to shape after a full day of sitting and moving. | Hand wash cold, or machine wash on a gentle cycle. Do not wring. Dry in the shade and press on a low iron if it needs it.\nwoven twill | A firm diagonal weave with real body to it. It gives a wide leg the weight to fall straight instead of billowing, and it wears in rather than out. | Machine wash cold on a gentle cycle. Dry in the shade and press on a medium iron.\nknit | Knitted rather than woven, so it stretches with you and layers without bulk. It relaxes as you wear it and comes back in the wash. | Hand wash cold and never wring. Dry flat in the shade — hanging a wet knit pulls it out of shape — and steam rather than iron.\ntorino premium | A premium suiting cloth with a smooth face and a quiet sheen. It falls heavily and keeps a clean line from the waist to the hem. | Hand wash cold or dry clean. Dry flat in the shade, and press on a low iron with a cloth between the iron and the fabric."
+      }
+    ]
+  },
+  {
     "name": "Size guide",
     "settings": [
       {
@@ -113,6 +168,27 @@
         "id": "size_guide_note",
         "label": "Note under the chart",
         "info": "Optional. How the garment was measured, for example laid flat. It is what stops a shopper reading a flat measurement as a body measurement."
+      },
+      {
+        "type": "header",
+        "content": "Tops"
+      },
+      {
+        "type": "paragraph",
+        "content": "A SECOND chart, for the cardigans and the vest, added 2026-09-27 for the Size Guide page. It is a separate set of fields rather than more rows on the chart above because a top and a trouser are not measured against the same columns — a shopper buying a cardigan measures a shoulder, not a thigh, and putting both in one table would leave half of every row empty. Leave the rows blank and the Size Guide page renders a labelled placeholder for this half while the trouser chart above still renders in full. Product pages are unaffected either way: they show the trouser chart, because that is what the catalogue mostly is."
+      },
+      {
+        "type": "text",
+        "id": "size_guide_tops_columns",
+        "label": "Column headings (tops)",
+        "default": "Size, Length, Chest, Shoulder, Sleeve",
+        "info": "Comma separated, first one names the size column. These are the usual top measurements; change them if the studio measures differently."
+      },
+      {
+        "type": "textarea",
+        "id": "size_guide_tops_rows",
+        "label": "Rows (tops)",
+        "info": "One size per line, values separated by | and in the same order as the headings above. Type CENTIMETRES only — the inch column is calculated. BLANK ON PURPOSE: the studio has supplied trouser measurements but never top measurements, so inventing them here would state a wrong chest on four real products. Fill this in when the numbers arrive."
       }
     ]
   }
