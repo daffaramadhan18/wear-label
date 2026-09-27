@@ -91,8 +91,15 @@
   rather than forcing horizontal page scroll.
 
   Accepts:
-    chart - 'tops' for the tops chart; anything else is the trouser chart
-    uid   - unique per chart ON A PAGE CARRYING MORE THAN ONE (default 'main')
+    columns    - comma separated headings. Given WITH rows_array, this chart is
+                 drawn instead of the store-wide one
+    rows_array - an array of rows, each one pipe separated
+    note       - the line under a passed-in chart
+    uid        - unique per chart ON A PAGE CARRYING MORE THAN ONE (default 'main')
+
+  With no columns it draws the store-wide trouser chart from theme settings.
+  There is no longer a 'tops' variant of that: the four tops are one size each
+  with their own figures, so they carry their own chart per product.
 {%- endcomment -%}
 
 {%- comment -%}
@@ -116,27 +123,37 @@
   # once the tops figures arrived: what the tops chart needs to say is that its
   # pieces are all one size and that Nori fits to L, neither of which is true
   # of a trouser.
-  if chart == 'tops'
-    assign chart_columns = settings.size_guide_tops_columns
-    assign chart_rows = settings.size_guide_tops_rows
-    assign chart_note = settings.size_guide_tops_note
+  # A CHART PASSED IN WINS OVER THE STORE-WIDE ONE, and that is what the tops
+  # use now. Every top in this catalogue is one size with its own measurements,
+  # so a shared table put four products' figures on one product's page. They
+  # come from `custom.size_chart` per product instead; see product-detail.
+  # `rows_array` is an array rather than a string because Liquid cannot rejoin
+  # lines with a newline, and the caller has already had to split them to take
+  # the heading row off the top.
+  assign chart_uid = uid | default: 'main'
+  assign has_rows = false
+
+  if columns != blank and rows_array != blank
+    assign columns_list = columns | split: ','
+    assign rows_list = rows_array
+    assign chart_note = note
+    if rows_list.size > 0
+      assign has_rows = true
+    endif
   else
     assign chart_columns = settings.size_guide_columns
     assign chart_rows = settings.size_guide_rows
     assign chart_note = settings.size_guide_note
-  endif
 
-  assign chart_uid = uid | default: 'main'
+    assign columns_list = chart_columns | split: ','
 
-  assign columns_list = chart_columns | split: ','
+    assign row_source = chart_rows | strip | newline_to_br
+    assign row_source = row_source | replace: '<br />', '|~|' | replace: '<br>', '|~|'
+    assign rows_list = row_source | split: '|~|'
 
-  assign row_source = chart_rows | strip | newline_to_br
-  assign row_source = row_source | replace: '<br />', '|~|' | replace: '<br>', '|~|'
-  assign rows_list = row_source | split: '|~|'
-
-  assign has_rows = false
-  if chart_rows != blank and rows_list.size > 0
-    assign has_rows = true
+    if chart_rows != blank and rows_list.size > 0
+      assign has_rows = true
+    endif
   endif
 
   assign unit_name = 'size-unit-' | append: chart_uid

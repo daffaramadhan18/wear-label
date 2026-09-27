@@ -255,7 +255,6 @@
         "p1": {
           "type": "project",
           "settings": {
-            "client": "",
             "category": "Hospital uniforms",
             "detail": "Eight uniform sets produced as one programme.",
             "asset": "project-hospital.webp",
@@ -265,7 +264,6 @@
         "p2": {
           "type": "project",
           "settings": {
-            "client": "",
             "category": "Institutional uniforms",
             "detail": "Field shirt with an embroidered crest, a sleeve badge and a name plate.",
             "asset": "project-institution.webp",
@@ -275,17 +273,15 @@
         "p3": {
           "type": "project",
           "settings": {
-            "client": "Salna",
             "category": "Corporate uniforms",
             "detail": "Two-tone shirt with the name embroidered on the chest and across the shoulders.",
             "asset": "project-corporate.webp",
-            "alt": "A purple and cream two-tone short-sleeve shirt, front and back, the name Salna embroidered on the chest and across the shoulder yoke."
+            "alt": "A purple and cream two-tone short-sleeve shirt, front and back, a name embroidered on the chest and across the shoulder yoke."
           }
         },
         "p4": {
           "type": "project",
           "settings": {
-            "client": "",
             "category": "Merchandise",
             "detail": "Canvas tote with webbing handles and bound edges.",
             "asset": "project-merchandise.webp",

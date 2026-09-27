@@ -13,14 +13,20 @@
   hundreds of companies", no invented client list, and no project here that the
   studio did not make. Adding a fifth means adding a photograph, not a sentence.
 
-  CLIENT NAMES ARE A SETTING AND THREE OF THEM ARE BLANK ON PURPOSE. The studio
-  authorised naming clients on 2026-09-13. Only one name could actually be read
-  off the photographs with certainty — Salna, embroidered front and back on the
-  corporate shirt. The hospital programme and the institutional shirt carry their
-  clients' names in embroidery a few pixels tall, and a client name guessed from
-  a blurry crop and then published is exactly the class of invention this repo
-  refuses. So those render the labelled placeholder until the studio types them
-  in, which is a theme-editor edit and not a code change.
+  THERE ARE NO CLIENT NAMES ANY MORE, and the setting is gone with them.
+  Removed on instruction 2026-09-28, the one filled entry included.
+
+  The history, because the argument ran both ways and somebody will want it:
+  the studio authorised naming clients on 2026-09-13, but only one name could
+  actually be read off a photograph with certainty. The other three carry their
+  clients' names in embroidery a few pixels tall, and a name guessed from a
+  blurry crop and published is the class of invention this repo refuses, so
+  those three sat blank. The instruction now is that none of them are named at
+  all, which settles it in the safe direction: whose work this was is the
+  studio's to say, not the site's to assume.
+
+  The category is the card's heading instead. Adding names back means adding
+  the setting, the heading swap and the four values together.
 
   THE PHOTOGRAPHS ARE CUT OUT, AND THAT CHANGED THE WHOLE BLOCK ON 2026-09-13.
   They arrived as studio shots on white and light-grey sweeps, and dropped onto
@@ -141,18 +147,23 @@
 
             <div class="flex flex-col gap-1.5">
               {%- comment -%}
-                The client's name is the heading, not the category. A portfolio
-                entry titled "Hospital uniforms" is a service; one titled with
-                the hospital's name is a job somebody actually commissioned, and
-                that difference is the entire reason this section exists.
+                THE CLIENT NAME IS GONE, removed on instruction, the one filled
+                entry included. This block used to argue the opposite: that a
+                card titled with the hospital's name is a job somebody
+                commissioned while one titled "Hospital uniforms" is only a
+                service. That was the right call while three of four cards were
+                waiting on a name; it is no longer the instruction, and naming
+                a client is the studio's to give rather than the site's to
+                assume.
+
+                So the category is the heading now. Each card still carries one,
+                which is what keeps the grid navigable by heading rather than
+                becoming four unlabelled photographs, and it is styled as the
+                h3 the client name used to be so the layout is unchanged.
               {%- endcomment -%}
               <h3 class="text-h3 leading-h3">
-                {% render 'copy', value: block.settings.client, label: 'client', inline: true %}
-              </h3>
-
-              <p class="text-caption uppercase tracking-nav text-ink-subtle">
                 {% render 'copy', value: block.settings.category, label: 'category', inline: true %}
-              </p>
+              </h3>
 
               <p class="text-body leading-body text-ink-muted">
                 {% render 'copy', value: block.settings.detail, label: 'detail', inline: true %}
@@ -197,7 +208,6 @@
       "type": "project",
       "name": "Project",
       "settings": [
-        { "type": "text", "id": "client", "label": "Client", "info": "The organisation the work was made for. Type it only if the studio has their agreement to name them. Leave it blank and a labelled placeholder renders rather than a guess." },
         { "type": "text", "id": "category", "label": "Category" },
         { "type": "text", "id": "detail", "label": "Detail", "info": "One line about what the photograph shows." },
         { "type": "image_picker", "id": "image", "label": "Photograph", "info": "Overrides the shipped asset below." },

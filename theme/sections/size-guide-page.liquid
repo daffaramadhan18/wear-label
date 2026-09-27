@@ -14,29 +14,27 @@
   a `uid` for the radio group and a scope for the script — and its own comment
   carries both.
 
-  THE TWO CHARTS HAVE DIFFERENT ROW AXES, and that is the thing to understand
-  before editing either. The trouser chart's rows are SIZES — M, L, XL against
-  Length / Waist / Hip / Thigh. The tops chart's rows are GARMENTS — Darla Vest,
-  Rui, Nori, Miu against Length / Chest / Sleeve — because every top in this
-  catalogue is one size, and none of the four carries a Size option in Shopify
-  at all. The studio's figures arrived that way (2026-09-27, three tables headed
-  "All Size") and they were kept that way rather than averaged into one row: the
-  average misses Darla's chest by 6.3cm and Nori's by 6.7cm, which on a top is a
-  whole size. `snippets/size-guide.liquid` needed no change for this — its first
-  cell is a row header whatever it names.
+  ONE CHART ON THIS PAGE, AND IT IS THE TROUSERS. Bottoms only, on instruction
+  2026-09-28. Thirteen of the seventeen products are trousers or culottes and
+  they genuinely share a size system: seven sizes cut to the same house
+  measurements, so one table is true for all of them.
 
-  ⚠ MIU CARDIGAN'S ROW IS DASHES. The studio sent three of the four tops. The row
-  is present rather than omitted so the gap is visible to a shopper instead of
-  looking like Miu is not a top. DO NOT DERIVE ITS NUMBERS FROM THE OTHER THREE,
-  for the same reason the three were not averaged in the first place.
+  THE TOPS ARE NOT HERE AND NO LONGER SHARE A CHART ANYWHERE. Every top in this
+  catalogue is one size with its own figures, none of the four carries a Size
+  option in Shopify, and Rui is a two-piece set whose sweater and cardigan
+  measure differently. A single tops table therefore listed four products at
+  once, and worse, every cardigan product page showed all four rows. They carry
+  `custom.size_chart` per product now, taken from the studio's own Shopee
+  listings; see `snippets/product-detail.liquid`.
 
-  BOTTOMS COMES FIRST because thirteen of the seventeen products are trousers.
-  Product pages show ONE of these two rather than the pair, chosen by
-  `product.type` — see `product-detail.liquid`.
+  What was decided here still holds and is worth keeping: the studio suggested
+  averaging the tops into one row and that was refused, because the average
+  misses Darla's chest by 6.3cm and Nori's by 6.7cm, which on a top is a whole
+  size. Per-product charts are that argument taken to its conclusion.
 
   THE HOW-TO-MEASURE NOTE IS A SETTING AND IS BLANK BY DEFAULT. It is the one
   thing that stops a shopper reading a flat garment measurement as a body
-  measurement, and it is exactly the kind of fact only the studio can state —
+  measurement, and it is exactly the kind of fact only the studio can state:
   whether they measure laid flat, and across or around. `size_guide_note` in
   theme settings already carries the per-chart version of this; this is the
   page-level one.
@@ -70,21 +68,20 @@
     {% render 'size-guide', uid: 'bottoms' %}
   </section>
 
-  <section class="flex flex-col gap-5" aria-labelledby="size-tops">
-    <h2 id="size-tops" class="font-display text-h3 text-ink">
-      {% render 'copy', value: section.settings.tops_heading, label: 'heading' %}
-    </h2>
-    {%- comment -%}
-      THE CHART IS NAMED, NOT HANDED ITS NUMBERS. The first version of this
-      passed `columns` and `rows` read from theme settings, and it shipped a
-      wrong table: the tops rows are blank, Liquid's `default` filter treats
-      blank as missing, and the snippet fell back to the TROUSER rows — so this
-      section rendered 98 / 62-90 / 115 / 60 under Length / Chest / Shoulder /
-      Sleeve. Caught on the rendered page, not by theme check. The snippet now
-      reads its own settings; see its comment.
-    {%- endcomment -%}
-    {% render 'size-guide', uid: 'tops', chart: 'tops' %}
-  </section>
+  {%- comment -%}
+    THE TOPS CHART IS NOT ON THIS PAGE, removed on instruction 2026-09-28.
+    This page is trousers and culottes only.
+
+    The reason it can go is that the tops stopped sharing a chart at all. Each
+    of the four is one size with its own figures, and Rui is a two-piece set
+    whose sweater and cardigan measure differently, so one table here listed
+    four products at once and every cardigan page showed all four rows. They
+    carry `custom.size_chart` per product now; see snippets/product-detail.
+
+    Putting it back means putting the store-wide tops settings back too. They
+    were removed from settings_schema.json in the same change, because a
+    setting nothing reads is a setting somebody will fill in and wonder about.
+  {%- endcomment -%}
 
   {%- if section.settings.footnote != blank -%}
     <div data-reveal class="rounded-md border border-border bg-canvas p-6 lg:p-8">
@@ -105,7 +102,6 @@
     { "type": "textarea", "id": "heading", "label": "Heading", "default": "Find your size." },
     { "type": "textarea", "id": "body", "label": "Intro", "default": "Every measurement below is of the garment itself, in centimetres. Switch to inches with the toggle above either chart. If you are between two sizes, our pieces are cut loose, so the smaller one usually still works." },
     { "type": "text", "id": "bottoms_heading", "label": "Bottoms heading", "default": "Trousers & culottes" },
-    { "type": "text", "id": "tops_heading", "label": "Tops heading", "default": "Cardigans & tops" },
     { "type": "richtext", "id": "footnote", "label": "Closing note", "default": "<p>Still not sure? Message the studio with your height and usual size and we will tell you which one to take. We answer our own messages.</p>" }
   ],
   "presets": [{ "name": "Size guide page" }]

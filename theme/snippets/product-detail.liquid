@@ -54,34 +54,54 @@
 {%- endcomment -%}
 
 {%- liquid
-  assign size_chart = product.metafields.custom.size_chart.value
-
-  # WHICH SHARED CHART THIS PRODUCT GETS. Until 2026-09-27 there was only one,
-  # so every product page showed the trouser chart — including the four tops,
-  # which meant a cardigan page offered Waist / Hip / Thigh against sizes M, L
-  # and XL that the product does not even sell. It rendered, it passed every
-  # check, and it was wrong on four of seventeen products.
+  # A PRODUCT'S OWN CHART, AND WHY THE TOPS NEED ONE.
   #
+  # `custom.size_chart` holds the whole table: the first line is the headings,
+  # every line after it is a row, all of them pipe separated. It is parsed here
+  # rather than in size-guide because the heading row has to come off the top
+  # before the rest can be handed over as an array, and Liquid cannot rejoin
+  # lines with a newline once they are split.
+  #
+  # The four tops each carry one. They are one size apiece with their own
+  # figures, and Rui is a two-piece set whose sweater and cardigan measure
+  # differently, so a single store-wide tops table put four products' rows on
+  # every one of their pages. That is what this replaces.
+  #
+  # The trousers still share a chart, because they share a size system: seven
+  # sizes cut to the same house measurements across thirteen products.
+  assign chart_raw = product.metafields.custom.size_chart.value
+  assign chart_note = product.metafields.custom.size_note.value
+  assign own_columns = ''
+  assign own_rows = ''
+  if chart_raw != blank
+    assign chart_lines = chart_raw | strip | newline_to_br
+    assign chart_lines = chart_lines | replace: '<br />', '|~|' | replace: '<br>', '|~|'
+    assign chart_lines = chart_lines | split: '|~|'
+    assign own_columns = chart_lines.first | replace: '|', ','
+    assign own_rows = chart_lines | slice: 1, 30
+  endif
+
   # The literal 'Tops' is a coupling to a product_type value in the Shopify
-  # admin, and it is the only one in the theme. Rename that type and this
-  # silently falls back to the trouser chart rather than erroring — so if the
-  # taxonomy ever changes, this line changes with it.
-  assign shared_chart = ''
+  # admin and it is the only one in the theme. It exists so a top with no chart
+  # of its own draws a placeholder rather than the TROUSER chart, which would
+  # offer Waist / Hip / Thigh against sizes the product does not sell. Rename
+  # that type and a chartless top silently gets the trouser table back, so if
+  # the taxonomy ever changes, this line changes with it.
+  assign is_tops = false
   if product.type == 'Tops'
-    assign shared_chart = 'tops'
+    assign is_tops = true
   endif
 -%}
 
+{%- comment -%}
+  DETAILS IS GONE, deleted on instruction, and the page now opens on Size & fit.
+  It rendered `product.description`, which since the Shopee import is the
+  studio's full listing copy: fabric, size run and care all in one block. That
+  made it a long preamble in front of the section a shopper actually scrolls
+  for, and it repeated what Fabric & care says underneath. The description is
+  still on the product in Shopify and still the source of everything below.
+{%- endcomment -%}
 <div class="flex flex-col divide-y divide-rule border-t border-rule">
-  <section class="flex flex-col gap-4 py-8" aria-labelledby="detail-details">
-    <h2 id="detail-details" class="text-micro uppercase tracking-nav text-ink-subtle">
-      {{ 'product.details' | t }}
-    </h2>
-    <div class="wl-measure text-body leading-body text-ink-body">
-      {% render 'copy', value: product.description, label: 'product details', lines: 3 %}
-    </div>
-  </section>
-
   <section class="flex flex-col gap-7 py-8" aria-labelledby="detail-fit">
     <h2 id="detail-fit" class="text-micro uppercase tracking-nav text-ink-subtle">
       {{ 'product.size_and_fit' | t }}
@@ -95,10 +115,17 @@
     {%- endcomment -%}
     <div class="flex flex-col gap-3">
       <h3 class="text-caption uppercase tracking-nav text-ink-muted">{{ 'product.size_chart' | t }}</h3>
-      {%- if size_chart != blank -%}
-        <div class="wl-table">{{ size_chart }}</div>
+      {%- if own_columns != blank -%}
+        {% render 'size-guide', columns: own_columns, rows_array: own_rows, note: chart_note %}
+      {%- elsif is_tops -%}
+        {%- comment -%}
+          A top with no chart of its own gets the placeholder, never the
+          trouser chart. A wrong table is worse than a missing one: it reads as
+          a measurement the shopper can act on.
+        {%- endcomment -%}
+        {% render 'copy', value: '', label: 'size chart', lines: 2 %}
       {%- else -%}
-        {% render 'size-guide', chart: shared_chart %}
+        {% render 'size-guide' %}
       {%- endif -%}
     </div>
 
