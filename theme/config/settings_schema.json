@@ -175,20 +175,32 @@
       },
       {
         "type": "paragraph",
-        "content": "A SECOND chart, for the cardigans and the vest, added 2026-09-27 for the Size Guide page. It is a separate set of fields rather than more rows on the chart above because a top and a trouser are not measured against the same columns — a shopper buying a cardigan measures a shoulder, not a thigh, and putting both in one table would leave half of every row empty. Leave the rows blank and the Size Guide page renders a labelled placeholder for this half while the trouser chart above still renders in full. Product pages are unaffected either way: they show the trouser chart, because that is what the catalogue mostly is."
+        "content": "A SECOND chart, for the cardigans and the vest. It is a separate set of fields rather than more rows on the chart above because a top and a trouser are not measured against the same columns — a shopper buying a cardigan measures a chest, not a thigh, and putting both in one table would leave half of every row empty."
+      },
+      {
+        "type": "paragraph",
+        "content": "THE ROWS ARE PIECES, NOT SIZES, and that is the one thing to understand before editing this. Every top in this catalogue is ONE SIZE — none of the four carries a Size option in Shopify, only Colour — so there are no size rows to build. What varies is the garment: the studio's own figures put Darla Vest at a 110 chest and Nori at 94-100. The studio suggested averaging the three into a single row; that was not done, because the average is 6-7cm off at the chest for two of the three, which on a top is a whole size, and fit is the decision this catalogue is bought on. A row per piece states three true things instead of one false one."
       },
       {
         "type": "text",
         "id": "size_guide_tops_columns",
         "label": "Column headings (tops)",
-        "default": "Size, Length, Chest, Shoulder, Sleeve",
-        "info": "Comma separated, first one names the size column. These are the usual top measurements; change them if the studio measures differently."
+        "default": "Piece, Length, Chest, Sleeve",
+        "info": "Comma separated. The FIRST one names the row-header column, which for this chart is the garment rather than a size. The studio's own headings were Panjang Atasan / Lingkar Dada / Panjang Lengan Baju; the site is English, so they are translated here."
       },
       {
         "type": "textarea",
         "id": "size_guide_tops_rows",
         "label": "Rows (tops)",
-        "info": "One size per line, values separated by | and in the same order as the headings above. Type CENTIMETRES only — the inch column is calculated. BLANK ON PURPOSE: the studio has supplied trouser measurements but never top measurements, so inventing them here would state a wrong chest on four real products. Fill this in when the numbers arrive."
+        "info": "ONE GARMENT PER LINE, values separated by | in the same order as the headings above. Type CENTIMETRES only — the inch column is calculated, and a range like 94-100 converts correctly. A dash means the measurement does not apply (a vest has no sleeve) or has not been supplied; both are honest and neither is guessed at. MIU CARDIGAN HAS NO FIGURES — the studio sent three of the four tops. Ask for Miu and fill its row in.",
+        "default": "Darla Vest | 62 | 110 | —\nRui Cardigan | 59 | 104 | 53\nNori Cardigan | 57 | 94-100 | 54\nMiu Cardigan | — | — | —"
+      },
+      {
+        "type": "text",
+        "id": "size_guide_tops_note",
+        "label": "Note under the chart (tops)",
+        "default": "Every piece above is one size. Nori Cardigan is cut to fit up to a size L.",
+        "info": "The tops chart has its own note because what needs saying about it is specific to it — that these are one-size pieces, and that Nori fits to L. Both came from the studio's own figures."
       }
     ]
   }

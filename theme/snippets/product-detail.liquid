@@ -33,6 +33,11 @@
   the specific beats the general, and the general is a courtesy rather than the
   intended state.
 
+  THERE ARE NOW TWO SHARED CHARTS, trousers and tops, and this snippet picks
+  between them by `product.type` — see the liquid block below. Before
+  2026-09-27 there was one, so the four tops were being shown trouser
+  measurements against sizes they do not sell.
+
   Every section renders its own labelled placeholder when its copy is blank, so
   the page keeps its height and its shape before the studio has written a word.
   `description` is still blank across this catalogue on purpose: the design
@@ -50,6 +55,21 @@
 
 {%- liquid
   assign size_chart = product.metafields.custom.size_chart.value
+
+  # WHICH SHARED CHART THIS PRODUCT GETS. Until 2026-09-27 there was only one,
+  # so every product page showed the trouser chart — including the four tops,
+  # which meant a cardigan page offered Waist / Hip / Thigh against sizes M, L
+  # and XL that the product does not even sell. It rendered, it passed every
+  # check, and it was wrong on four of seventeen products.
+  #
+  # The literal 'Tops' is a coupling to a product_type value in the Shopify
+  # admin, and it is the only one in the theme. Rename that type and this
+  # silently falls back to the trouser chart rather than erroring — so if the
+  # taxonomy ever changes, this line changes with it.
+  assign shared_chart = ''
+  if product.type == 'Tops'
+    assign shared_chart = 'tops'
+  endif
 -%}
 
 <div class="flex flex-col divide-y divide-rule border-t border-rule">
@@ -78,7 +98,7 @@
       {%- if size_chart != blank -%}
         <div class="wl-table">{{ size_chart }}</div>
       {%- else -%}
-        {% render 'size-guide' %}
+        {% render 'size-guide', chart: shared_chart %}
       {%- endif -%}
     </div>
 

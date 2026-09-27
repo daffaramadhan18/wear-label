@@ -14,18 +14,25 @@
   a `uid` for the radio group and a scope for the script — and its own comment
   carries both.
 
-  ⚠ THE TOPS CHART HAS NO NUMBERS AND RENDERS A PLACEHOLDER. The studio supplied
-  trouser measurements on 2026-09-13 (Size / Length / Waist / Hip / Thigh, in
-  M, L and XL) and has never supplied top measurements. Four real products are
-  tops — three cardigans and the vest — so this half of the page is a labelled
-  placeholder at final size until the numbers arrive, which is the same thing
-  every other unsupplied fact on this site does. Filling it in is Theme settings
-  → Size guide → Rows (tops). DO NOT DERIVE TOP MEASUREMENTS FROM THE TROUSER
-  CHART; a chest is not a hip.
+  THE TWO CHARTS HAVE DIFFERENT ROW AXES, and that is the thing to understand
+  before editing either. The trouser chart's rows are SIZES — M, L, XL against
+  Length / Waist / Hip / Thigh. The tops chart's rows are GARMENTS — Darla Vest,
+  Rui, Nori, Miu against Length / Chest / Sleeve — because every top in this
+  catalogue is one size, and none of the four carries a Size option in Shopify
+  at all. The studio's figures arrived that way (2026-09-27, three tables headed
+  "All Size") and they were kept that way rather than averaged into one row: the
+  average misses Darla's chest by 6.3cm and Nori's by 6.7cm, which on a top is a
+  whole size. `snippets/size-guide.liquid` needed no change for this — its first
+  cell is a row header whatever it names.
+
+  ⚠ MIU CARDIGAN'S ROW IS DASHES. The studio sent three of the four tops. The row
+  is present rather than omitted so the gap is visible to a shopper instead of
+  looking like Miu is not a top. DO NOT DERIVE ITS NUMBERS FROM THE OTHER THREE,
+  for the same reason the three were not averaged in the first place.
 
   BOTTOMS COMES FIRST because thirteen of the seventeen products are trousers.
-  The same ratio is why the product page shows the trouser chart and not this
-  page's pair — see `product-detail.liquid`.
+  Product pages show ONE of these two rather than the pair, chosen by
+  `product.type` — see `product-detail.liquid`.
 
   THE HOW-TO-MEASURE NOTE IS A SETTING AND IS BLANK BY DEFAULT. It is the one
   thing that stops a shopper reading a flat garment measurement as a body

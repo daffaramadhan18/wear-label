@@ -13,6 +13,13 @@
     would have been a wrong measurement stated confidently, which is the one
     class of content this repo refuses. The studio chose the format over the
     numbers; the numbers are theirs to send.
+
+    **The top's numbers arrived on 2026-09-27**, and they did not fit the shape
+    this paragraph assumed either. They came per GARMENT rather than per size —
+    every top in the catalogue is one size, and none of the four carries a Size
+    option in Shopify — so the tops chart's rows are pieces and its first column
+    is headed Piece rather than Size. Nothing in the parsing below cares: the
+    first cell is a row header whatever it names. See the Tops settings.
   - **It is inline, not a modal.** The same instruction that asked for this chart
     asked for the product page's four tabs to become one page. A dialog would
     have put a second thing to open back on a page that just had one taken off.
@@ -103,17 +110,22 @@
   # as the same thing, and the tops rows are blank on purpose, so the fallback
   # silently painted trouser measurements under top headings. The branch below
   # reads one pair of settings or the other and never mixes them.
+  # The note is per chart, not shared. That was the other way round for one
+  # revision, on the reasoning that how a garment is measured is a studio
+  # convention rather than a fact about trousers — true, and beside the point
+  # once the tops figures arrived: what the tops chart needs to say is that its
+  # pieces are all one size and that Nori fits to L, neither of which is true
+  # of a trouser.
   if chart == 'tops'
     assign chart_columns = settings.size_guide_tops_columns
     assign chart_rows = settings.size_guide_tops_rows
+    assign chart_note = settings.size_guide_tops_note
   else
     assign chart_columns = settings.size_guide_columns
     assign chart_rows = settings.size_guide_rows
+    assign chart_note = settings.size_guide_note
   endif
 
-  # The note is shared on purpose — how a garment is measured, laid flat or
-  # otherwise, is a studio convention rather than a fact about trousers.
-  assign chart_note = settings.size_guide_note
   assign chart_uid = uid | default: 'main'
 
   assign columns_list = chart_columns | split: ','

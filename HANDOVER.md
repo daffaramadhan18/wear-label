@@ -264,13 +264,14 @@ Each of these rendered fine, passed every check, and was wrong.
 6. **Liquid's `| default:` filter replaces BLANK, not just missing.** Added
    2026-09-27 after it nearly shipped a wrong size chart. A snippet argument
    that is legitimately allowed to be empty must never be defaulted this way:
-   the tops size chart has no rows on purpose, `rows | default: settings...`
-   read that emptiness as "not supplied", and the page rendered TROUSER
-   measurements under the headings Length / Chest / Shoulder / Sleeve. The page
-   rendered, theme check passed on 90 files, the push reported no errors, and
-   the numbers looked plausible. Only reading the rendered page found it. Where
-   empty is a meaningful state, branch on it explicitly or have the callee pick
-   its own source — see `snippets/size-guide.liquid`.
+   the tops size chart had no rows at the time and that was deliberate, so
+   `rows | default: settings...` read that emptiness as "not supplied" and the
+   page rendered TROUSER measurements under the headings Length / Chest /
+   Shoulder / Sleeve. The page rendered, theme check passed on 90 files, the
+   push reported no errors, and the numbers looked plausible. Only reading
+   the rendered page found it. Where empty is a meaningful state, branch on
+   it explicitly or have the callee pick its own source — see
+   `snippets/size-guide.liquid`.
 
 **Also new this session:** ~400 Windows `Zone.Identifier` NTFS stub files had
 leaked into the working tree, including inside `theme/assets/` — Shopify's push
@@ -579,6 +580,99 @@ a name outside a form are ONE group) and a `data-size-guide` scope for
 
 ---
 
+## 9d. Same day — the tops measurements arrived, and they were not the shape anyone expected
+
+The studio sent figures for three tops, each as a small table of its own, and
+suggested averaging them into one row: "skrg kan ada 3 product tops kan, tp tuh
+size nya beda2, maybe lo ambil dari average disiniii ya".
+
+| Piece | Panjang Atasan | Lingkar Dada | Panjang Lengan | Size given as |
+|---|---|---|---|---|
+| Darla Vest | 62 | 110 | — | All Size |
+| Rui Cardigan | 59 | 104 | 53 | All Size |
+| Nori Cardigan | 57 | 94-100 | 54 | All Size Fit to L |
+
+**THE AVERAGE WAS NOT TAKEN, and this is the entry to read before anyone takes
+it later.** Averaged, the row would be Length 59.3 / Chest 103.7 / Sleeve 53.5 —
+which is **6.3cm too small at the chest for Darla Vest and 6.7cm too big for
+Nori**. On a top that is a whole size, and fit is the decision this catalogue is
+actually bought on: PRODUCT.md records it, and nearly every one of the twenty
+customer reviews on the site names a height and a weight before it names a size.
+One averaged row would have been a number true of none of the three garments,
+stated confidently on four product pages.
+
+**The rows are PIECES instead**, which is not a workaround — it is the shape the
+data actually has. All three came back "All Size", and the store agrees: none of
+the four tops carries a Size option in Shopify at all, only Colour. So there are
+no size rows to build. The chart's first column is headed **Piece**, and the
+parsing needed no change, because `size-guide.liquid` treats the first cell as a
+row header whatever it names.
+
+The Indonesian headings were translated (Panjang Atasan → Length, Lingkar Dada →
+Chest, Panjang Lengan Baju → Sleeve) because the site is English. Darla Vest's
+sleeve is a dash because a vest has no sleeve — not because a number is missing.
+
+**MIU CARDIGAN HAS NO FIGURES.** The studio said "3 product tops"; there are
+**four** — Miu, Nori, Rui and Darla. Miu renders a row of dashes rather than
+being left out, so the gap is visible to a shopper instead of looking like Miu
+is not a top. **Ask for Miu's three numbers.**
+
+### The bug this turned up: four product pages were showing the wrong chart
+
+Until this change `product-detail.liquid` rendered the one shared chart for
+every product, so **the four tops were showing trouser measurements** — Waist,
+Hip and Thigh against sizes M, L and XL that those products do not sell. It had
+been that way since the chart landed on 2026-09-13 and nothing reported it. The
+snippet now picks by `product.type`:
+
+```liquid
+assign shared_chart = ''
+if product.type == 'Tops'
+  assign shared_chart = 'tops'
+endif
+```
+
+**That literal `'Tops'` is the only coupling in the theme to a `product_type`
+value in the Shopify admin.** Rename the type and this falls back silently to
+the trouser chart rather than erroring, so the two have to move together. It is
+commented as such in the file.
+
+The tops chart also got its own note setting (`size_guide_tops_note`), which
+reversed a decision made an hour earlier that the note should be shared. Shared
+was right while the note was about how a garment is measured; it stopped being
+right once the tops chart needed to say that its pieces are one size and that
+Nori fits to L, neither of which is true of a trouser.
+
+**Verified live on all six relevant product pages** plus `/pages/size-guide`:
+the four tops render Piece / Length / Chest / Sleeve, the trousers still render
+Size / Length / Waist / Hip / Thigh, the two charts on the Size Guide page carry
+independent radio groups, and no placeholder remains on that page.
+
+### Collision check, because a second session is working on media and the catalogue
+
+Run before touching anything, at the studio's request. All three came back
+clean:
+
+- **Live theme vs local: no drift.** Pulled theme `205197312286` to a scratch
+  directory and compared. Every `.liquid`, `.js` and `.css` file identical;
+  every `.json` identical once Shopify's auto-generated comment header is
+  stripped (that header is why a plain `diff -rq` lights up every template —
+  it is not drift, and it will mislead the next person who checks this way).
+- **Catalogue unchanged** — still 17 products, 9 images, same prices, same
+  variants, same types as earlier the same day.
+- **No scratch themes on the store.** Only `Wear Label` (live) and `Horizon`.
+
+**The surfaces do not overlap**: this session touches theme files and theme
+settings only, and never products, media or metafields.
+
+⚠ **THE RISK THAT REMAINS IS ONE-WAY AND CANNOT BE FIXED FROM HERE.** If the
+other session pushes the theme from a checkout that predates commit `fdfbb56`,
+it will overwrite everything from 2026-09-27 without warning — `theme push`
+replaces, it does not merge. Anyone pushing the theme from another checkout
+must pull or rebase first.
+
+---
+
 ## 10. What the audit found, and it is mostly not code
 
 Fetched every route on the live storefront with the password, read the rendered
@@ -628,9 +722,10 @@ reviews. Writing three lines of copy into the theme editor fixes it.
   carries a colour called `Black (Tara)`** — another product's name, which looks
   like a leak from the docx parse described in §3. These are all customer-facing
   on the product page.
-- **Cerra Loose Pants BIG SIZE offers XXL only** and the size chart has M, L and
-  XL — so the one product whose entire premise is a bigger size has no row for
-  the size being bought. The new tops chart has no rows at all (§9c).
+- **Cerra Loose Pants BIG SIZE offers XXL only** and the trouser chart has M, L
+  and XL — so the one product whose entire premise is a bigger size has no row
+  for the size being bought. Still open; ask for XXL. (The tops chart, which
+  this bullet used to say was empty, was filled on 2026-09-27 — see §9d.)
 
 ### 10.4 Sharing a link shows nothing
 
