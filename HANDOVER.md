@@ -764,6 +764,85 @@ espresso variant selected slot 8 is the only one open.
 
 ---
 
+## 9f. Same day — the product page stopped reloading to change colour
+
+Three changes, in the order they were asked for, all live and all verified on
+the live storefront.
+
+**The thumbnail rail came off.** On this catalogue it had become a duplicate
+control: the shots ARE the colourways, so a rail of 23 near-identical trousers
+sat directly above a picker that selected the same thing. The consequence to
+know: there is no longer any control reaching a slot the picker cannot select,
+so on a product with a film the main photograph is reachable only by choosing a
+colourway, the film being what opens.
+
+**Every colourway is fetched on page load.** This needed a third fetch state in
+`media.liquid`, not a wider `priority`:
+
+| state | `loading` | `fetchpriority` | for |
+|---|---|---|---|
+| `priority` | eager | high | the slot actually open |
+| `preload` | eager | low | hidden slots — fetched now, queued behind it |
+| neither | lazy | auto | everything else, so card grids stay lazy |
+
+`priority` also moved from the FIRST shot to the OPEN one; with a variant
+selected those are not the same slot. **The cost is real and deliberate** —
+Yora is 23 colourways, so its page pulls roughly 12 MB where it pulled one
+image. The `sizes` attribute is identical on hidden and open slots ON PURPOSE:
+differ and the browser picks a different srcset candidate, the URL differs, the
+cache misses and the preload buys nothing.
+
+**Choosing a colourway no longer reloads the page.** The chips are still links
+to `?variant=` — that is what keeps the picker working with script off and the
+choice shareable — and `initVariantSwap` in `theme.js` intercepts the click and
+applies the change in the document, writing the URL with `replaceState`.
+
+`product-purchase.liquid` emits the variant matrix as a JSON script tag. **The
+price in it is formatted by the `money` filter before it reaches the page**, and
+that is not incidental: formatting an amount in JavaScript is computing it, and
+this repo does not compute money. The gallery slot is matched on media id
+(`data-gallery-image`), never on position.
+
+**The fallback is the link.** A combination missing from the matrix, a sold-out
+target, a modified click or a missing slot is left alone and the browser
+navigates to a server-rendered page. All 317 variants are available and none are
+inventory-tracked, so the sold-out path is dormant rather than exercised.
+
+**Two traps this turned up, both worth the next person's time:**
+
+- **`theme.js` is EIGHT separate IIFEs, each with its own `init()`.** A function
+  added beside the wrong one is a `ReferenceError` at runtime that `node --check`
+  passes cleanly and `eslint` does not flag. It happened here and was caught
+  before it shipped.
+- **Verify a no-reload claim with a marker, not by watching.** `window.__wlMarker`
+  is planted before the click; if it survives, no document was replaced. Nothing
+  else proves it — the page looks identical either way. Driven through the CDP
+  Chrome already open for the Shopee work; the script is in the scratchpad.
+
+Verified on the LIVE theme, twice: `yora-loose-pants` (69 variants) black →
+choco (semiwool), and `cerra-loose-pants` (39) Black → Milo. In both the marker
+survived, the URL gained `?variant=`, the frame changed to that colourway's
+file, the posted variant id changed and the colour line followed.
+
+**Also this session: graphify is gone.** Its `PreToolUse` hooks in
+`.claude/settings.json` shelled out to `/home/daffa/.local/bin/graphify`, a WSL
+path, while the tooling runs from Windows — so every Bash, Grep, Read and Glob
+call printed "No such file or directory" first. Non-blocking, but constant. The
+hooks, the `## graphify` section of CLAUDE.md and the `graphify update .` step
+of the working agreement are all removed. `graphify-out/` is left on disk,
+gitignored.
+
+**And the repo has a remote again.** It is
+`https://github.com/daffaramadhan18/wear-label`. The two histories shared **no
+common ancestor** — `git merge-base` exited 1 — because this checkout was
+`git init`-ed on 2026-09-21 rather than cloned, while GitHub held 59 commits
+ending 2026-09-19. Force-pushed onto `main` on the owner's explicit instruction,
+with the trade-off stated first. **The old lineage survives only as the local
+tag `github-main-2026-09-19` (`cf3b6cc`), which has NOT been pushed** — if this
+clone is lost, those 59 commits are lost.
+
+---
+
 ## 10. What the audit found, and it is mostly not code
 
 Fetched every route on the live storefront with the password, read the rendered
