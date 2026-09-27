@@ -1,10 +1,40 @@
 {%- comment -%}
-  Not found — port of app/not-found.tsx.
+  Not found. Port of app/not-found.tsx.
 
-  The copy is unwritten, so every slot renders its labelled placeholder. That is
-  deliberate: a 404 is where a reader is already lost, and filler prose would be
-  worse than a block that admits nothing has been written yet.
+  THE COPY IS WRITTEN NOW, 2026-09-28. It was deliberately blank until then, on
+  the reasoning that filler prose is worse than an honest placeholder on a page
+  where the reader is already lost. That held while nothing else on the page
+  could help them; it stopped holding once the catalogue was complete, because
+  now there is somewhere specific to send them.
+
+  WHAT A 404 HERE IS ACTUALLY FOR, and it shapes every line of the copy: the
+  most likely reason a reader is on this page is a link to a piece that has been
+  taken off the shop. 106 products were deleted in one go on 2026-09-13 and 20
+  more went with the catalogue replacement, so old links to this store are real
+  and there are a lot of them. The body says that plainly instead of blaming the
+  reader's typing.
+
+  TWO WAYS OUT, NOT ONE. The button is the catalogue, because this is a shop and
+  the catalogue is where everything currently made is. The second is search,
+  because a reader who arrived on a dead product link usually knows the name of
+  the piece they wanted, and the catalogue makes them hunt for it. It is a plain
+  link rather than a second button: two buttons of equal weight is a choice, and
+  the shop is the answer for almost everyone.
+
+  The copy is section settings rather than hardcoded, like everything else the
+  brand says, so the studio can change it in the theme editor. Both routes are
+  drawn only when their label is set, so blanking a label removes the control
+  rather than leaving a dead one.
+
+  THE BUTTON IS `snippets/button.liquid`. This section used to retype the
+  primary button's class string, which is exactly what that snippet was
+  extracted to stop.
 {%- endcomment -%}
+
+{%- liquid
+  assign shop_href = routes.all_products_collection_url
+  assign search_href = routes.search_url
+-%}
 
 <div class="mx-auto w-full max-w-content px-gutter">
   <div class="flex flex-col items-center gap-5 py-section text-center">
@@ -19,10 +49,16 @@
     </p>
 
     {%- if section.settings.cta != blank -%}
+      <div class="mt-2">
+        {% render 'button', label: section.settings.cta, href: shop_href, variant: 'primary' %}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.search_label != blank -%}
       <a
-        href="{{ routes.all_products_collection_url }}"
-        class="mt-2 inline-flex min-h-13 cursor-pointer items-center justify-center gap-2 rounded-sm border border-brand bg-brand px-11 text-caption uppercase tracking-[0.22em] text-on-brand transition-[background-color,color,border-color,transform] duration-(--duration-base) ease-out hover:border-brand-hover hover:bg-brand-hover active:translate-y-px"
-      >{{ section.settings.cta }}</a>
+        href="{{ search_href }}"
+        class="text-caption text-ink-muted underline underline-offset-4 transition-colors duration-(--duration-base) hover:text-brand"
+      >{{ section.settings.search_label }}</a>
     {%- endif -%}
   </div>
 </div>
@@ -31,10 +67,11 @@
 {
   "name": "404",
   "settings": [
-    { "type": "paragraph", "content": "Leave these blank until the copy is written. A labelled placeholder is more honest on a 404 than filler prose." },
-    { "type": "text", "id": "heading", "label": "Heading" },
-    { "type": "textarea", "id": "body", "label": "Body" },
-    { "type": "text", "id": "cta", "label": "Button" }
+    { "type": "paragraph", "content": "The page a reader lands on when a link is dead. The most likely cause is a link to a piece that is no longer in the shop, so the body says so rather than suggesting the reader mistyped. Blank a label and that control is not drawn at all." },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "We cannot find that page" },
+    { "type": "textarea", "id": "body", "label": "Body", "default": "The link may be out of date, or the piece it pointed to may no longer be in the shop. Everything we currently make is one tap away." },
+    { "type": "text", "id": "cta", "label": "Button", "default": "Browse the shop" },
+    { "type": "text", "id": "search_label", "label": "Secondary link", "default": "Or search for a piece by name", "info": "Goes to the search page. A reader who arrived on a dead product link usually knows the name of the piece they wanted." }
   ]
 }
 {% endschema %}
