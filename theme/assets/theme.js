@@ -140,6 +140,7 @@
     });
   }
 
+
   function init() {
     document.querySelectorAll("[data-disclosure-toggle]").forEach(initDisclosure);
     initReveals();
@@ -651,26 +652,31 @@
    * not a navigation, and the main image gets the selected shot rather than the
    * page scrolling to it.
    * ---------------------------------------------------------------------- */
+  /* A <video> in a hidden slot still autoplays and still decodes, so the films
+     are squared with the slots rather than left to the markup. Rewinding on the
+     way out means a film always opens on its first frame instead of wherever it
+     had got to. play() rejects on some browsers when called without a gesture;
+     these are muted so it normally will not, and a rejection is a film that does
+     not start, not a broken page.
+
+     Module scope rather than inside initGallery, because the in-place variant
+     swap below moves between slots too and must leave the films in the same
+     state the thumbnails would have. */
+  function syncClip(main, shown) {
+    var clip = main.querySelector("video");
+    if (!clip) return;
+    if (shown) {
+      var p = clip.play();
+      if (p && p.catch) p.catch(function () {});
+    } else {
+      clip.pause();
+      clip.currentTime = 0;
+    }
+  }
+
   function initGallery(root) {
     var thumbs = Array.prototype.slice.call(root.querySelectorAll("[data-gallery-thumb]"));
     var mains = Array.prototype.slice.call(root.querySelectorAll("[data-gallery-main]"));
-    /* A <video> in a hidden slot still autoplays and still decodes, so the films
-       are squared with the slots rather than left to the markup. Rewinding on
-       the way out means a film always opens on its first frame instead of
-       wherever it had got to. play() rejects on some browsers when called
-       without a gesture; these are muted so it normally will not, and a
-       rejection is a film that does not start, not a broken page. */
-    function syncClip(main, shown) {
-      var clip = main.querySelector("video");
-      if (!clip) return;
-      if (shown) {
-        var p = clip.play();
-        if (p && p.catch) p.catch(function () {});
-      } else {
-        clip.pause();
-        clip.currentTime = 0;
-      }
-    }
 
     /* BEFORE the thumbnail guard, deliberately. The product page lost its
        thumbnail rail, so on most products there are no thumbs at all and an
@@ -799,6 +805,160 @@
    * fallback for the same anchors, so a picker rendered before those attributes
    * landed still acknowledges a tap rather than silently doing nothing.
    * ---------------------------------------------------------------------- */
+  /* ---- Variant swap, in place ------------------------------------------- *
+   * The picker's chips stay real links to ?variant=, because that is what makes
+   * them work with script off and what makes a colourway shareable. This
+   * intercepts the click and does the same thing without the navigation.
+   *
+   * WHY IT EXISTS: every choice used to be a fresh document, and the shot that
+   * document opened on was fetched only once it was already being looked at, so
+   * picking a colourway showed an empty frame while its photograph came down.
+   * The shots are all preloaded now (see product-gallery.liquid), which leaves
+   * the page load itself as the remaining cost. This removes it: nothing is
+   * fetched, nothing is parsed, the frame swaps in the same tick.
+   *
+   * WHAT IT IS NOT: it does not compute anything about commerce. Price arrives
+   * pre-formatted in the matrix, availability is read from it, and a chip's
+   * destination is a lookup in it. The rule this theme works to is that Shopify
+   * states those facts and the theme renders them.
+   *
+   * THE FALLBACK IS THE LINK. Anything the matrix cannot answer for -- a
+   * combination that is not in it, a sold-out target, a modified click, no
+   * matching gallery slot -- is left alone and the browser navigates, which
+   * lands on a server-rendered page that is correct by construction. Swapping
+   * in place is the fast path, never the only path.
+   *
+   * The URL is still the state: it is written with replaceState instead of
+   * being navigated to, so reloading or sharing lands on the same colourway.
+   * ---------------------------------------------------------------------- */
+  function initVariantSwap() {
+    var box = document.querySelector("[data-variant-matrix]");
+    var idInput = document.querySelector('input[name="id"]');
+    if (!box || !idInput) return;
+
+    var variants;
+    try {
+      variants = JSON.parse(box.textContent);
+    } catch (e) {
+      return;
+    }
+    if (!variants || !variants.length) return;
+
+    /* Written out longhand. Tailwind scans this file as text, so a class it
+       cannot see here is a class that does not get generated -- the same trap
+       documented in CLAUDE.md for assembled Liquid class strings. */
+    var SELECTED = ["border-brand", "bg-brand", "text-on-brand"];
+    var UNSELECTED = ["border-line", "bg-canvas", "text-ink-body", "hover:border-brand", "hover:text-brand"];
+
+    var chips = Array.prototype.slice.call(document.querySelectorAll("a[data-variant-link][data-variant-axis]"));
+    if (!chips.length) return;
+    var gallery = document.querySelector("[data-gallery]");
+    var priceBox = document.querySelector("[data-variant-price]");
+    var names = Array.prototype.slice.call(document.querySelectorAll("[data-variant-name]"));
+    var base = window.location.pathname;
+
+    function byId(id) {
+      for (var i = 0; i < variants.length; i++) if (variants[i].id === id) return variants[i];
+      return null;
+    }
+
+    function byOptions(opts) {
+      for (var i = 0; i < variants.length; i++) {
+        var v = variants[i];
+        var ok = true;
+        for (var j = 0; j < opts.length; j++) {
+          if (v.options[j] !== opts[j]) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) return v;
+      }
+      return null;
+    }
+
+    function chosen() {
+      return byId(Number(idInput.value)) || variants[0];
+    }
+
+    function mark(chip, on) {
+      var add = on ? SELECTED : UNSELECTED;
+      var drop = on ? UNSELECTED : SELECTED;
+      drop.forEach(function (c) {
+        chip.classList.remove(c);
+      });
+      add.forEach(function (c) {
+        chip.classList.add(c);
+      });
+    }
+
+    function apply(v) {
+      idInput.value = String(v.id);
+
+      if (priceBox) {
+        var amounts = priceBox.querySelectorAll("[data-numeric]");
+        if (amounts[0]) amounts[0].textContent = v.price;
+      }
+
+      /* The slot is found by media id, never by position: the media order is
+         the studio's and the nth image is not the nth colourway. */
+      if (gallery && v.image !== null && v.image !== undefined) {
+        var want = gallery.querySelector('[data-gallery-image="' + v.image + '"]');
+        if (want) {
+          Array.prototype.forEach.call(gallery.querySelectorAll("[data-gallery-main]"), function (main) {
+            var shown = main === want;
+            main.toggleAttribute("hidden", !shown);
+            syncClip(main, shown);
+          });
+        }
+      }
+
+      /* Each chip's destination is the current selection with its own axis
+         swapped -- the same rule product-purchase.liquid applies on the server,
+         and it has to be reapplied here or a chip on the other axis would still
+         point at a combination built from the colourway just left behind. */
+      chips.forEach(function (chip) {
+        var axis = Number(chip.getAttribute("data-variant-axis"));
+        var value = chip.getAttribute("data-variant-value");
+        var want = v.options.slice();
+        want[axis] = value;
+        var target = byOptions(want);
+        if (target) chip.setAttribute("href", base + "?variant=" + target.id);
+        var on = v.options[axis] === value;
+        if (on) chip.setAttribute("aria-current", "true");
+        else chip.removeAttribute("aria-current");
+        mark(chip, on);
+      });
+
+      names.forEach(function (el) {
+        var axis = Number(el.getAttribute("data-variant-name"));
+        if (v.options[axis] !== undefined) el.textContent = v.options[axis];
+      });
+
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, "", base + "?variant=" + v.id);
+      }
+    }
+
+    document.addEventListener("click", function (event) {
+      if (event.defaultPrevented) return;
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (!event.target.closest) return;
+      var chip = event.target.closest("a[data-variant-link][data-variant-axis]");
+      if (!chip) return;
+
+      var axis = Number(chip.getAttribute("data-variant-axis"));
+      var value = chip.getAttribute("data-variant-value");
+      var want = chosen().options.slice();
+      want[axis] = value;
+      var target = byOptions(want);
+      if (!target || !target.available) return;
+
+      event.preventDefault();
+      apply(target);
+    });
+  }
+
   function initVariantPicker() {
     /* Same guard the save button uses: no picker on the page, no listeners. */
     if (!document.querySelector('[data-variant-link], a[href*="variant="]')) return;
@@ -837,6 +997,7 @@
     document.querySelectorAll("[data-gallery]").forEach(initGallery);
     document.querySelectorAll("[data-unit-switch]").forEach(initUnitSwitch);
     document.querySelectorAll("[data-stepper]").forEach(initStepper);
+    initVariantSwap();
     initVariantPicker();
   }
 

@@ -41,7 +41,13 @@
 
         <h1 class="text-h1 leading-h1">{{ product.title }}</h1>
 
-        <div class="mt-1.5 flex flex-wrap items-baseline gap-3.5">
+        {%- comment -%}
+          `data-variant-price` is the hook the in-place picker writes the new
+          amount into. It wraps the render rather than living inside price.liquid
+          because that snippet is shared with the catalogue card, and a card's
+          price is never swapped.
+        {%- endcomment -%}
+        <div data-variant-price class="mt-1.5 flex flex-wrap items-baseline gap-3.5">
           {% render 'price', price: current.price, compare_at: current.compare_at_price, size: 'display' %}
 
           {%- if discount > 0 -%}

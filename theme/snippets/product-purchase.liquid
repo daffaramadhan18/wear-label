@@ -86,6 +86,7 @@
   {%- for option in product.options_with_values -%}
     {%- liquid
       assign option_index = forloop.index
+      assign axis_index = forloop.index0
       assign lowered = option.name | downcase
       assign is_colour = false
       if lowered contains 'colour' or lowered contains 'color'
@@ -108,7 +109,7 @@
         {%- endcomment -%}
         <div class="flex flex-col gap-1">
           <legend class="text-micro uppercase tracking-nav text-ink-subtle">{{ option.name }}</legend>
-          <span class="min-h-7 text-h3 leading-h3 text-ink">{{ selected_value }}</span>
+          <span data-variant-name="{{ axis_index }}" class="min-h-7 text-h3 leading-h3 text-ink">{{ selected_value }}</span>
         </div>
       {%- else -%}
         <legend class="text-micro uppercase tracking-nav text-ink-subtle">{{ option.name }}</legend>
@@ -169,12 +170,16 @@
               <a
                 href="{{ product.url }}?variant={{ target.id }}"
                 data-variant-link
+                data-variant-axis="{{ axis_index }}"
+                data-variant-value="{{ value }}"
                 {% if is_selected %}aria-current="true"{% endif %}
                 class="wl-press-soft inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border px-3 text-caption tracking-wide transition-colors duration-(--duration-base) {% if is_selected %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
               >{{ value }}</a>
             {%- else -%}
               <span
                 aria-disabled="true"
+                data-variant-axis="{{ axis_index }}"
+                data-variant-value="{{ value }}"
                 class="inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border border-inert-border bg-inert px-3 text-caption tracking-wide text-on-inert line-through"
               >{{ value }}<span class="sr-only"> — {{ 'product.sold_out' | t }}</span></span>
             {%- endif -%}
@@ -184,12 +189,16 @@
               <a
                 href="{{ product.url }}?variant={{ target.id }}"
                 data-variant-link
+                data-variant-axis="{{ axis_index }}"
+                data-variant-value="{{ value }}"
                 {% if is_selected %}aria-current="true"{% endif %}
                 class="wl-press-soft inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border px-3 text-caption tracking-wide transition-colors duration-(--duration-base) {% if is_selected %}border-brand bg-brand text-on-brand{% else %}border-line bg-canvas text-ink-body hover:border-brand hover:text-brand{% endif %}"
               >{{ value }}</a>
             {%- else -%}
               <span
                 aria-disabled="true"
+                data-variant-axis="{{ axis_index }}"
+                data-variant-value="{{ value }}"
                 class="inline-flex h-11.5 min-w-13.5 items-center justify-center rounded-xs border border-inert-border bg-inert px-3 text-caption tracking-wide text-on-inert line-through"
               >{{ value }}<span class="sr-only"> — {{ 'product.sold_out' | t }}</span></span>
             {%- endif -%}
@@ -306,4 +315,40 @@
       <span class="sr-only">{{ 'general.opens_new_tab' | t }}</span>
     </a>
   {%- endif -%}
+
+  {%- comment -%}
+    THE VARIANT MATRIX, so the picker can swap in place instead of navigating.
+
+    Every combination, with the values that identify it and the facts the page
+    shows for it. Price arrives ALREADY FORMATTED by the `money` filter: this
+    repo does not compute a price anywhere, and formatting one in JavaScript —
+    thousands separators, the Rp prefix, the locale — would be computing it.
+    Same for the struck-through compare-at, which no product carries today.
+
+    `image` is the media id of the variant's photograph, matched against
+    `data-gallery-image` on the gallery's slots. An id rather than a position,
+    because the media order is the studio's and the nth image is not the nth
+    colourway.
+
+    This is emitted whatever `scripting` reports. A JSON script tag renders
+    nothing and costs nothing to a reader who never runs it, and the whole
+    no-script path — links to ?variant=, resolved on the server — is untouched
+    underneath it. The largest of these is Yora at 69 combinations.
+  {%- endcomment -%}
+  <script type="application/json" data-variant-matrix>
+    [
+      {%- for v in product.variants -%}
+        {%- unless forloop.first %},{% endunless -%}
+        {
+          "id": {{ v.id }},
+          "options": {{ v.options | json }},
+          "available": {{ v.available }},
+          "price": {{ v.price | money | json }},
+          "compare_at": {% if v.compare_at_price and v.compare_at_price > v.price %}{{ v.compare_at_price | money | json }}{% else %}null{% endif %},
+          "image": {% if v.featured_image %}{{ v.featured_image.id }}{% else %}null{% endif %}
+        }
+      {%- endfor -%}
+    ]
+  </script>
+
 </form>

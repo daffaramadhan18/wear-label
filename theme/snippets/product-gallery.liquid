@@ -120,6 +120,7 @@
       -%}
       <div
         data-gallery-main="{{ slot }}"
+        data-gallery-image="{{ shot.id }}"
         {% unless is_open %}hidden{% endunless %}
         {% if forloop.first and product.handle != blank %}style="view-transition-name: shot-{{ product.handle }}"{% endif %}
       >
