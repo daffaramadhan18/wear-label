@@ -748,6 +748,27 @@
 }
 
 /*
+ * The product film inside the gallery.
+ *
+ * `media_tag` writes its own `<video>` and takes no class argument, so the fit
+ * is declared here rather than passed in — an argument the filter does not know
+ * is dropped silently, and the video would then size itself to its intrinsic
+ * 720x1280 and burst the 4/5 box the photographs use.
+ *
+ * `object-cover` is deliberate and it does crop: the studio's clips are 9:16
+ * and the gallery is 4:5, so roughly a sixth of the height goes. Letterboxing
+ * it instead would put two grey bands inside a frame whose whole job is to be
+ * the same shape as every photograph beside it.
+ */
+[data-gallery] video {
+  position: absolute;
+  inset: 0;
+  block-size: 100%;
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+/*
  * No-script fallbacks.
  *
  * base.css carries the one for the reveals. These two are the theme's own: a tab

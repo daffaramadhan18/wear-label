@@ -661,7 +661,24 @@
         thumb.setAttribute("aria-pressed", String(i === index));
       });
       mains.forEach(function (main, i) {
-        main.toggleAttribute("hidden", i !== index);
+        var shown = i === index;
+        main.toggleAttribute("hidden", !shown);
+        /* A hidden <video> keeps decoding unless it is told to stop, so the
+           film is paused the moment the reader picks a photograph and started
+           again when they come back to it. Rewinding on the way out means the
+           clip always opens from its first frame rather than from wherever it
+           happened to be. play() rejects on some browsers when it is called
+           without a gesture; the video is muted so it normally will not, and a
+           rejection is a video that does not play, not a broken page. */
+        var clip = main.querySelector("video");
+        if (!clip) return;
+        if (shown) {
+          var p = clip.play();
+          if (p && p.catch) p.catch(function () {});
+        } else {
+          clip.pause();
+          clip.currentTime = 0;
+        }
       });
     }
 

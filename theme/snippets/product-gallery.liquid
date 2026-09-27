@@ -40,8 +40,35 @@
 {%- endcomment -%}
 
 {%- liquid
+  assign clips = product.media | where: 'media_type', 'video'
   assign shots = product.images
-  assign shot_count = shots.size
+  assign shot_count = clips.size | plus: shots.size
+
+  comment
+    Which slot opens, and why the film leads.
+
+    A colourway chosen in the URL wins outright: `selected_variant` is nil
+    unless `?variant=` is present, so this fires only when the reader actually
+    picked one, and showing them anything but that colourway would be ignoring
+    the choice they just made. Its photograph is found by id rather than by
+    position, because the media order is the studio's and nothing guarantees
+    the nth image belongs to the nth colourway.
+
+    Otherwise the film opens if there is one. That is the instruction —
+    the catalogue card is the main photograph, and opening the product plays
+    the film. Where there is no film this falls through to image 0, which is
+    that same main photograph, so the no-video product is unchanged.
+  endcomment
+  assign open_index = 0
+  assign chosen = product.selected_variant.featured_image
+  if chosen != blank
+    for shot in shots
+      if shot.id == chosen.id
+        assign open_index = clips.size | plus: forloop.index0
+        break
+      endif
+    endfor
+  endif
 -%}
 
 <div class="flex flex-col-reverse gap-4 lg:flex-row" data-gallery>
@@ -50,12 +77,30 @@
       aria-label="{{ 'product.gallery' | t }}"
       class="wl-rail flex gap-3 overflow-x-auto lg:w-23 lg:shrink-0 lg:flex-col lg:gap-4 lg:overflow-visible"
     >
-      {%- for shot in shots -%}
+      {%- comment -%}
+        The film's thumbnail is its own poster frame, so the rail reads as one
+        strip rather than a video control bolted onto a row of photographs.
+      {%- endcomment -%}
+      {%- for clip in clips -%}
         <li class="w-20 shrink-0 lg:w-full">
           <button
             type="button"
             data-gallery-thumb="{{ forloop.index0 }}"
-            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-pressed="{% if forloop.index0 == open_index %}true{% else %}false{% endif %}"
+            class="wl-press-soft block w-full cursor-pointer overflow-hidden rounded-xs border transition-colors duration-(--duration-base) aria-pressed:border-brand border-border hover:border-line"
+          >
+            {% render 'media', image: clip.preview_image, sizes: '(min-width: 1024px) 92px, 80px', ratio: '4 / 5', label: 'Angle', class: 'rounded-none' %}
+            <span class="sr-only">{{ 'product.show_video' | t }}</span>
+          </button>
+        </li>
+      {%- endfor -%}
+      {%- for shot in shots -%}
+        {%- assign slot = clips.size | plus: forloop.index0 -%}
+        <li class="w-20 shrink-0 lg:w-full">
+          <button
+            type="button"
+            data-gallery-thumb="{{ slot }}"
+            aria-pressed="{% if slot == open_index %}true{% else %}false{% endif %}"
             class="wl-press-soft block w-full cursor-pointer overflow-hidden rounded-xs border transition-colors duration-(--duration-base) aria-pressed:border-brand border-border hover:border-line"
           >
             {% render 'media', image: shot, sizes: '(min-width: 1024px) 92px, 80px', ratio: '4 / 5', label: 'Angle', class: 'rounded-none' %}
@@ -67,10 +112,34 @@
   {%- endif -%}
 
   <div class="min-w-0 flex-1">
+    {%- comment -%}
+      The film is muted, looping and inline because it autoplays: a browser
+      only autoplays a muted video, and `playsinline` is what stops iOS taking
+      it fullscreen the moment it starts. Controls stay on — this is a garment
+      being shown, not a hero band, so a reader who wants to stop it should be
+      able to. theme.js pauses it by reaching for the slot's own `video`
+      element when the reader switches to a photograph; an off-screen video
+      that keeps decoding is frame budget spent on something nobody is
+      looking at.
+
+      `media_tag` is given only the parameters it documents. Sizing is a CSS
+      rule on `[data-gallery] video` in theme-src/theme.css rather than a
+      `class:` argument, because an argument the filter does not know is
+      dropped silently and the video would then size itself.
+    {%- endcomment -%}
+    {%- for clip in clips -%}
+      <div data-gallery-main="{{ forloop.index0 }}" {% unless forloop.index0 == open_index %}hidden{% endunless %}>
+        <div style="aspect-ratio:4 / 5" class="relative overflow-hidden rounded-sm bg-tone">
+          {{ clip | media_tag: image_size: '1200x', autoplay: true, loop: true, muted: true, controls: true }}
+        </div>
+      </div>
+    {%- endfor -%}
+
     {%- for shot in shots -%}
+      {%- assign slot = clips.size | plus: forloop.index0 -%}
       <div
-        data-gallery-main="{{ forloop.index0 }}"
-        {% unless forloop.first %}hidden{% endunless %}
+        data-gallery-main="{{ slot }}"
+        {% unless slot == open_index %}hidden{% endunless %}
         {% if forloop.first and product.handle != blank %}style="view-transition-name: shot-{{ product.handle }}"{% endif %}
       >
         {% render 'media', image: shot, sizes: '(min-width: 1024px) 45vw, 100vw', ratio: '4 / 5', priority: forloop.first, label: 'Product photo' %}
